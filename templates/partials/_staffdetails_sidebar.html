@@ -1,0 +1,34 @@
+<div class="card bg-info-light pt-4">
+        <div class="card-header text-center mb-2">
+          <a href="{% url 'staff-details' staff.staffno %}">
+            <img src="{{ staff.staff_pix.url }}" height="180" width="150" />
+          </a>
+          <br />
+          <strong>
+            {{ staff.lname }}, {{ staff.title }} {{ staff.fname }} {% if staff.middlenames %} {{ staff.middlenames }} {% endif %} {% if staff.suffix %} {{ staff.suffix }} {% endif %}
+          </strong>
+        </div>
+        <div class="card-body">
+          <a href="{% url 'staff-education' staff.staffno %}"> Education</a> <br />
+          <a href="{% url 'prev-work' staff.staffno %}"> Prev. Employment</a> <br />
+          <a href="{% url 'dependants' staff.staffno %}"> Dependants</a> <br />
+          <a href="{% url 'res-address' staff.staffno %}"> Res. Address</a> <br />
+          <a href="{% url 'post-address' staff.staffno %}"> Postal Address</a> <br />
+          <a href="{% url 'staffbank' staff.staffno %}"> Bank Details</a> <br />
+          <a href="{% url 'promotion' staff.staffno %}"> Job Description</a> <br />
+          <a href="{% url 'transfer' staff.staffno %}"> Job Location</a> <br />
+          <a href="{% url 'vehicle' staff.staffno %}"> Vehicle</a> <br />
+          <a href="{% url 'bereavement' staff.staffno %}">Bereavement</a><br />
+          <a href="{% url 'marriage' staff.staffno %}">Marriage</a><br />
+          <a href="{% url 'christening' staff.staffno %}">Christening</a><br />
+          <a href="{% url 'celebration' staff.staffno %}">Celebration</a><br />
+          <!-- <a href="{% url 'bereavement' staff.staffno %}">Medical Expenses</a> -->
+          
+          <!-- <hr> -->
+          <button>
+          <a href="{% url 'edit-staff' staff.staffno %}">Back</a>
+        </button>
+        </div>
+        <!--End of Card-body -->
+      </div>
+      <!--End of Card-->

@@ -1,0 +1,31 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} {% load static %} {% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} {% comment %} 
+{% block content %} {% endcomment %}
+
+<div class="row">
+      <div class="row col-2 pt-5">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+      </div>
+      <div class="row col-10">
+        <div class="card pt-5 mt-5">
+          <table class="table table-sm table-hover">
+                <tr><th>Gender</th><td>{{ staff.gender }}</td></tr>
+                <tr><th>Home Town</th><td>{{ staff.home_town }}</td></tr>
+                <tr><th>Region</th><td>{{ staff.region }}</td></tr>
+                <tr><th>Date of Birth</th><td>{{ staff.dob }}</td></tr>
+                <tr><th>Date Employed</th><td>{{ staff.doe }}</td></tr>
+                <tr><th>Highest Educational Qualification</th><td>{{ staff.heq }}</td></tr>
+                <tr><th>Highest Professional Qualification</th><td>{{ staff.hpq }}</td></tr>
+                <tr><th>Rank</th><td>{{ staff.staff_rank }}</td></tr>
+                <tr><th>Job Title</th><td>{{ staff.job_title }}</td></tr>
+                <tr><th>Telephone</th><td>{{ staff.active_phone }}</td></tr>
+                <tr><th>Email</th><td>{{ staff.email_address }}</td></tr>
+                <tr><th>SSNIT No.</th><td>{{ staff.ssnitno }}</td></tr>
+                <tr><th>Ghana Card No.</th><td>{{ staff.gcardno }}</td></tr>
+                
+          </table>
+              
+        </div>
+      </div>
+</div>
+{% include "partials/_footer.html" %}

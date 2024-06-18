@@ -1,0 +1,168 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:90%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Employee's Transfers</legend>
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+              <div class="form-group">
+                <label for="prev_office">Current Office</label>
+                <select name="prev_office"  class="form-select" required>
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in OFFICE.items %}
+                        <option value="{{ value }}"
+                        {% if value == transfer.prev_office %}
+                            selected
+                        {% endif %} 
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>               
+            </div>
+              
+            <div class="form-group">
+                <label for="new_office">New Office</label>
+                <select name="new_office"  class="form-select" required>
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in OFFICE.items %}
+                        <option value="{{ value }}"
+                        {% if value == transfer.new_office %}
+                            selected
+                        {% endif %} 
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>               
+            </div>
+
+            <div class="form-group">
+                <label for="prev_dept">Current Department</label>
+                <select name="prev_dept"  class="form-select" required>
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in DEPARTMENT.items %}
+                        <option value="{{ value }}"
+                        {% if value == transfer.prev_dept %}
+                            selected
+                        {% endif %} 
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>                
+            </div>
+            <div class="form-group">
+                <label for="new_dept">New Department</label>
+                <select name="new_dept"  class="form-select" required>
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in DEPARTMENT.items %}
+                        <option value="{{ value }}"
+                        {% if value == transfer.new_dept %}
+                            selected
+                        {% endif %} 
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>                
+            </div>
+      
+            <div class="form-group">
+                <label for="prev_branch">Current Branch</label>
+                <select name="prev_branch"  class="form-select" required>
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in BRANCH.items %}
+                        <option value="{{ value }}"
+                        {% if value == transfer.prev_branch %}
+                            selected
+                        {% endif %} 
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>                
+            </div>
+            <div class="form-group">
+                <label for="new_branch">New Branch</label>
+                <select name="new_branch"  class="form-select" required>
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in BRANCH.items %}
+                        <option value="{{ value }}"
+                        {% if value == transfer.new_branch %}
+                            selected
+                        {% endif %} 
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>                
+            </div>
+
+              <div class="form-group">
+                <label for="approved_by" class="col-form-label"> Approved By</label>
+                <input type="text" name="approved_by" class="form-control" {% if transfer %} value="{{ transfer.approved_by }}" {% else %} value="" {% endif %} required>
+              </div> <!--- Later change this to a Select Option when Approvers have been set up-->
+
+              <div class="form-group">
+                <label for="effective_date" class="col-form-label">Effective Date</label>
+                <input type="date" name="effective_date" class="form-control" {% if transfer %} value="{{ transfer.effective_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+              </div>
+
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+            <a class="btn btn-sm btn-primary" href="{% url 'transfer' staff.staffno %}">Cancel</a>
+          </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee's Transfers</strong></h5></div>
+                <div class="card-body">
+                {% if transfers %}
+                
+                <table class="table table-sm table-hover table-responsive" style="font-size:80%">
+				<tr>
+					<th>Prev. Office</th>
+					<th>New Office</th>
+                    <th>New Dept</th>
+                    <th>New Branch</th>
+                    <th>Effective Date</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for sb in transfers %} 
+                
+                    <tr>
+                        <td>{{ sb.prev_office }}</td>
+                        <td>{{ sb.new_office }}</td>
+                        <td>{{ sb.new_dept }}</td>
+                        <td>{{ sb.new_branch }}</td>
+                        <td>{{ sb.effective_date }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-transfer' sb.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-transfer' sb.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h3>ADD TRANSFERS</h3>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

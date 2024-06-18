@@ -1,0 +1,49 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} {% load static %} 
+{% include "partials/_topnav.html" %} {% comment %} {% load humanize %}{% block
+title %} | {{ listing.title }} {% endblock %} {% endcomment %} {% comment %} {%
+block content %} {% endcomment %}
+<div class="container-fluid pt-5">
+  <div class="row">
+    <div class="row col-2 pt-2">
+      <div class="card bg-info-light pt-4">
+        <div class="card-header text-center mb-2">
+          <a href="{% url 'edit-staff' staff.staffno %}">
+            <img src="{{ staff.staff_pix.url }}" height="180" width="150" />
+          </a>
+          <br />
+          <strong>
+            {{ staff.lname }}, {{ staff.title }} {{ staff.fname }} {% if
+            staff.middlenames %} {{ staff.middlenames }} {% endif %} {% if
+            staff.suffix %} {{ staff.suffix }} {% endif %}
+          </strong>
+        </div>
+        <div class="card-body">
+          qwerty<br />
+          aefaaefea<br />
+          more
+        </div>
+        <!--End of Card-body -->
+      </div>
+      <!--End of Card-->
+    </div>
+    <!--End of row col-2 pt-2-->
+
+    <div class="row col-10 p-1">
+      <div class="row">
+        <div class="row col-5 p-1 m-2">
+          <div class="card pt-4">ROW 5</div>
+        </div>
+        <!--End of row col-5 p-1-->
+        <div class="row col-7 p-1 mt-2">
+          <div class="card pt-4">ROW 7</div>
+        </div>
+        <!--End of row col-7 p-1-->
+      </div>
+      <!--End of Row-->
+    </div>
+    <!--End of col-10 p--->
+  </div>
+  <!--End of Row-->
+</div>
+<!--End of container-->
+{% include "partials/_footer.html" %}

@@ -1,0 +1,122 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend><Marriage></legend>
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+            
+                        <div class="form-group"> 
+                            <label for="staffno" class="col-form-label">Staff Number </label>
+                            <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+                        </div>
+            
+                        <div class="form-group">
+                         <label for="celebrant" class="col-form-label">Name of Celebrant</label>
+                          <input type="text" name="celebrant" class="form-control" {% if marriage %} value="{{ marriage.celebrant }}" {% else %} value="" {% endif %} required>
+                        </div>
+            
+                        <div class="form-group">
+                            <label for="relationship" class="col-form-label">Relationship to Staff</label>
+                            <select name="relationship" class="form-select" required> <option value="">--- Select Relationship ---</option>
+                                {% for key,value in DEPENDANTS.items %}
+                                    <option value="{{ key }}" 
+                                    {% if key == marriage.relationship %}
+                                      selected
+                                    {% endif %}
+                                    >{{ value }}</option>
+                                  {% endfor %}
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label for="marriage_date" class="col-form-label">Marriage Date</label>
+                             <input type="date" name="marriage_date" class="form-control" {% if marriage %} value="{{ marriage.marriage_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                           </div>
+            
+                        <div class="form-group">
+                         <label for="marriage_time" class="col-form-label">Time </label>
+                          <input type="text" name="marriage_time" class="form-control" {% if marriage %} value="{{ marriage.marriage_time }}" {% else %} value="" {% endif %} required>
+                        </div>
+            
+                        <div class="form-group">
+                            <label for="marriage_location" class="col-form-label">Location </label>
+                             <input type="text" name="marriage_location" class="form-control" {% if marriage %} value="{{ marriage.marriage_location }}" {% else %} value="" {% endif %} required>
+                        </div>
+            
+                        <div class="form-group">
+                            <label for="marriage_dress_code" class="col-form-label">Dress Code </label>
+                             <input type="text" name="marriage_dress_code" class="form-control" {% if marriage %} value="{{ marriage.marriage_dress_code }}" {% else %} value="" {% endif %}>
+                        </div>       
+                        <div class="form-group">
+                            <label for="marriage_pix">Photo</label>
+                            <input type="file" class="form-control" name="marriage_pix"  aria-label="marriage_pix">
+                            
+                        </div>
+
+                        <div class="form-group">
+                          <label for="marriage_notes" class="col-form-label">Notes</label>
+                          <textarea name="marriage_notes" class="form-control">{% if marriage %} {{ marriage.marriage_notes }}  {% endif %}</textarea>
+                        </div>
+                        
+                        <hr>
+                        <input type="submit" value="Add" class="btn btn-block btn-secondary">
+                                    <a class="btn btn-sm btn-primary" href="{% url 'marriage' staff.staffno %}">Cancel</a>
+                      </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Marriage Announcements</strong></h5></div>
+                <div class="card-body">
+                {% if marriage_list %}
+                
+                <table class="table table-sm table-hover table-responsive" style="font-size:80%">
+				<tr>
+					<th>Celebrant</th>
+					<th>Marriage Date</th>
+                    <th>Time</th>
+                    <th>Location</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for veh in marriage_list %} 
+                
+                    <tr>
+                        <td>{{ veh.celebrant }}</td>
+                        <td>{{ veh.marriage_date }}</td>
+                        <td>{{ veh.marriage_time }}</td>
+                        <td>{{ veh.marriage_location }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-marriage' veh.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-marriage' veh.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>Add New Marriage Announcements</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

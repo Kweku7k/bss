@@ -1,0 +1,127 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+                {% comment %} <div class="card-header text-center"><h5><strong>Add New Bank</strong></h5></div> {% endcomment %}
+                <div class="card-body">
+                <form action="" method="POST">
+            {% csrf_token %}
+            <div class="form-group"> 
+              <label for="staffno" class="col-form-label">Staff Number </label>
+              <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+            </div> 
+            <div class="form-group">
+              <label for="school_code" class="col-form-label">Name of School</label>
+              <select name="school_code" class="form-select" required> <option value="">--- Select School ---</option
+              {% if school_list %} 
+                  {% for school in school_list %}
+                    <option value="{{ school.id }}"
+                    {% if school.id == pkno %} selected {% endif %}
+                    
+                    > {{ school.school_name }} </option>
+                  {% endfor %}
+              {% endif %}>
+              
+              </select>
+             
+            </div>
+            
+            <div class="form-group">
+              <label for="prog_studied" class="col-form-label">Program of Study</label>
+              <input type="text" name="prog_studied" class="form-control" {% if school %} value="{{ school.prog_studied }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="form-group">
+              <label for="start_date" class="col-form-label">Start Date</label>
+              <input type="date" name="start_date" class="form-control" {% if school %} value="{{ school.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="form-group">
+              <label for="finish_date" class="col-form-label">Finish Date</label>
+              <input type="date" name="finish_date" class="form-control" {% if school %} value="{{ school.finish_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="form-group">
+              <label for="any_post" class="col-form-label">Any Post Held</label>
+              <input type="text" name="any_post" class="form-control" {% if school %} value="{{ school.any_post }}" {% else %} value="" {% endif %}>
+            </div>
+            
+            <div class="form-group">
+              <label for="certification" class="col-form-label">Certification</label>
+              <select name="certification" class="form-select" required> <option value="">--- Select Certification ---</option>           
+                  {% for key,value in HEQ.items %}
+                      <option value="{{ key }}" 
+                      {% if key == school.certification %}
+                        selected
+                      {% endif %}
+                      >{{ value }}</option>
+                    {% endfor %}
+          
+              
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="notes" class="col-form-label">Notes</label>
+              <textarea name="notes" class="form-control">{% if school %} {{ school.notes }}  {% endif %}</textarea>
+            </div>
+
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+                        <a class="btn btn-sm btn-primary" href="{% url 'staff-education' staff.staffno %}">Cancel</a>
+          </form>
+
+            </div> </div></div>
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee Schools Attended</strong></h5></div>
+                <div class="card-body">
+                {% if schools %}
+                
+                <table class="table table-sm table-hover" style="font-size:70%">
+				<tr>
+					<th>School Name</th>
+					<th>Program</th>
+					<th>Start Date</th>
+          <th>Finish Date</th>
+          <th>Certification</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for sch in schools %} 
+                
+                    <tr>
+                        <td>{{ sch.school_code }}</td>
+                        <td>{{ sch.prog_studied }}</td>
+                        <td>{{ sch.start_date }}</td>
+                        <td>{{ sch.finish_date }}</td>
+                        <td>{{ sch.certification }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staff-education' sch.id staff.staffno %}"></a>
+                            {% comment %} <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-staff-education' sch.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ sch.school_code }}?');"></a> {% endcomment %}
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-staff-education' sch.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+{% comment %} <a href="{% url 'delete-message' message.id %}">Delete</a> {% endcomment %}
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>NO SCHOOLS AVAILABLE</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

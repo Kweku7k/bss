@@ -1,0 +1,255 @@
+ {% extends "base.html" %} {% load static %}
+  {% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
+{% block content %} 
+        <div class="row">
+            <div class="row col-7 pt-1">
+                <form action="" method="POST"  enctype="multipart/form-data"> 
+                    {% csrf_token %}
+                <div class="card bg-info pt-2">
+                    <div class="card-header text-center mx-1 rounded"><h5><strong>Staff Data</strong></h5>
+                        {% if staff.staff_pix %} <img src="{{ staff.staff_pix.url }}" height="180" width="150"><br> {% endif %} 
+                    </div>
+                        <div class="row">
+                            <div class="row col-6 pt-1">
+                                <div class="card-body">
+
+                
+                  <div class="form-floating mt-1">
+                    <input type="text" class="form-control" id="staffno" name="staffno" required
+                    {% if staff %} value="{{ staff.staffno }}" readonly="true" {% else %} value="" {% endif %}>
+                    <label for="staffno">Staff Number</label>
+                  </div>
+                
+                                        <div class="form-floating mt-1">
+                                            <select name="title" class="form-select" required> 
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in TITLE.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.title %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                             <label for="title"> Title</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="lname" required aria-label="lname" aria-describedby="lname" {% if staff %} value="{{ staff.lname }}" {% else %} value="" {% endif %}>
+                                            <label for="lname">Employee Surname</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="fname" required aria-label="fname" aria-describedby="fname" {% if staff %} value="{{ staff.fname }}" {% else %} value="" {% endif %}>
+                                            <label for="fname">First Name</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="middlenames"  aria-label="middlenames" aria-describedby="middlenames" {% if staff %} value="{% if staff.middlenames %} {{ staff.middlenames }} {% endif %}" {% else %} value="" {% endif %}>
+                                            <label for="middlenames">Middle Names</label>
+                                        </div>
+                                        {% comment %} {% if staff.middlenames %} {{ staff.middlenames }} {% endif %} {% endcomment %}
+                                        <div class="form-floating mt-1">
+                                            <select name="suffix"  class="form-select">
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in SUFFIX.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.suffix %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                            <label for="suffix">Suffix</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <select name="gender"  class="form-select" required>
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in GENDER.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.gender %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                     <label for="gender">Gender</label>
+
+
+                                        <div class="form-floating mt-1">
+                                            <input type="date" class="form-control" name="dob" required aria-label="dob" aria-describedby="dob" {% if staff %} value="{{ staff.dob|date:"Y-m-d" }}" readonly="true" {% else %} value="" {% endif %}>
+                                            <label for="dob">Date of Birth</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="ssnitno"  aria-label="ssnitno" aria-describedby="ssnitno" {% if staff %} value="{{ staff.ssnitno }}" {% else %} value="" {% endif %}>
+                                            <label for="ssnitno">SSNIT No.</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="gcardno"  aria-label="gcardno" aria-describedby="gcardno" {% if staff %} value="{{ staff.gcardno }}" {% else %} value="" {% endif %}>
+                                            <label for="gcardno">Ghana Card No.</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <select name="heq"  class="form-select" required>
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in HEQ.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.heq %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                            <label for="heq">Highest Educational Qualification</label>
+                                        </div>
+                                </div> 
+                            </div></div>
+
+
+                            <div class="row col-6 pt-1">
+                                <div class="card-body">                                       
+                                        
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="hpq" aria-label="hpq" aria-describedby="hpq" {% if staff %} value="{{ staff.hpq }}" {% else %} value="" {% endif %}>
+                                            <label for="hpq">Highest Professional Qualification</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="active_phone"  aria-label="active_phone" aria-describedby="active_phone" {% if staff %} value="{{ staff.active_phone }}" {% else %} value="" {% endif %}>
+                                            <label for="active_phone">Telephone No.</label>
+                                        </div>
+
+                                        <div class="form-floating mt-1">
+                                            <select name="active_status"  class="form-select">
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in STAFFSTATUS.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.active_status %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                            <label for="active_status">Employee Status</label>
+                                        </div>
+
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="home_town" aria-label="home_town" aria-describedby="home_town" {% if staff %} value="{{ staff.home_town }}" {% else %} value="" {% endif %}>
+                                            <label for="home_town">Home Town</label>
+                                        </div>
+
+                                        <div class="form-floating mt-1">
+                                            <select name="region"  class="form-select">
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in REGION.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.region %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                            <label for="region">Region</label>
+                                        </div>
+
+                                        <div class="form-floating mt-1">
+                                            <select name="rba"  class="form-select">
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in RBA.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.rba %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                            <label for="rba">Role Access</label>
+                                        </div>
+
+                                        <div class="form-floating mt-1">
+                                            <input type="date" class="form-control" name="doe" required aria-label="doe" aria-describedby="doe" {% if staff %} value="{{ staff.doe|date:"Y-m-d" }}" readonly="true" {% else %} value="" {% endif %}>
+                                            <label for="doe">Date Employed</label>
+                                        </div>
+
+                                        <div class="form-floating mt-1">
+                                            <select name="staff_rank"  class="form-select">
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in STAFFRANK.items %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.staff_rank %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                            <label for="staff_rank">Rank</label>
+                                        </div>
+
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" name="job_title" required aria-label="job_title" aria-describedby="job_title" {% if staff %} value="{{ staff.job_title }}" {% else %} value="" {% endif %}>
+                                            <label for="job_title">Job Title</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="email" class="form-control" name="email_address"  aria-label="email_address" aria-describedby="email_address" {% if staff %} value="{{ staff.email_address }}" {% else %} value="" {% endif %}>
+                                            <label for="email">Employee Email</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="file" class="form-control" name="staff_pix"  aria-label="staff_pix" aria-describedby="staff_pix" {% if staff %} value="{{ staff.staff_pix }}" {% else %} value="" {% endif %}>
+                                            <label for="staff_pix">Employee Photo</label>
+                                        </div>
+                                        <hr>
+                                        <input type="submit" value="Add" class="btn btn-block btn-secondary">
+                                        <a class="btn btn-sm btn-primary" href="{% url 'newstaff' %}">Cancel</a>
+                                    
+                                </div> 
+                                {% comment %} <img src="{{ venue.venue_image.url }}" width="400"> {% endcomment %}
+                                {% comment %} {% if staff.staff_pix %} <img src="{{ staff.staff_pix.url }}" class="mb-4"> {% endif %} <br><br> {% endcomment %}
+                            </div>
+
+                        </div>
+                </div>
+                
+                </form>
+            </div>
+
+
+
+        <div class="row col-5 p-1">
+              <div class="card pt-1 mx-3">
+                <div class="card-header text-center"><h5><strong>Number of Staff: {{ staff_count }}</strong></h5></div>
+                <div class="card-body">
+                {% if staffs %}
+                
+                <table class="table table-sm table-hover">
+				<tr>
+					<th>Name of Staff</th>
+					{% comment %} <th>Short Name</th> {% endcomment %}
+                    {% comment %} <th>Notes</th> {% endcomment %}
+                    <th>Action</th>
+				</tr>
+
+                {% for staff in staffs %} 
+                
+                    <tr>
+                        <td>
+                            <a href="{% url 'staff-details' staff.staffno %}">
+                                {{ staff.lname }}, {{ staff.title }} {{ staff.fname }} {% if staff.middlenames %} {{ staff.middlenames }} {% endif %}  {% if staff.suffix %} {{ staff.suffix }} {% endif %}
+                            </a>
+                        </td>
+                        {% comment %} <td>{{ dept.dept_short_name }}</td> 
+                        {% url 'staff-details' 1 %}
+                        {% endcomment %}
+                        {% comment %} <td>{{ dept.dept_notes }}</td> {% endcomment %}
+                        <td>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staff' staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-staff' staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>ADD MORE STAFF</h1>
+            {% endif %}
+            </div>
+        </div></div></div>    
+             
+    {% endblock %}
+
+  

@@ -1,0 +1,87 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Employee's Postal Address</legend>
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+            <div class="form-group">
+                <label for="box_no" class="col-form-label">P.O.Box Number</label>
+                <input type="text" name="box_no" class="form-control" {% if postaddress %} value="{{ postaddress.box_no }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="town" class="col-form-label">Town/City</label>
+                <input type="text" name="town" class="form-control" {% if postaddress %} value="{{ postaddress.town }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="care_of" class="col-form-label">Care Of (C/O)</label>
+                <input type="text" name="care_of" class="form-control" {% if postaddress %} value="{{ postaddress.care_of }}" {% else %} value="" {% endif %}>
+              </div>
+
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+            <a class="btn btn-sm btn-primary" href="{% url 'post-address' staff.staffno %}">Cancel</a>
+          </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee's Postal <Address></Address></strong></h5></div>
+                <div class="card-body">
+                {% if postaddresses %}
+                
+                <table class="table table-sm table-hover" style="font-size:80%">
+				<tr>
+					<th>Postal Box</th>
+					<th>Town</th>
+                    <th>C/O</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for post in postaddresses %} 
+                
+                    <tr>
+                        <td>{{ post.box_no }}</td>
+                        <td>{{ post.town }}</td>
+                        <td>{{ post.care_of }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-post-address' post.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-post-address' post.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>ADD POSTAL ADDRESS</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

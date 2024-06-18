@@ -1,0 +1,128 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Employee's Dependants</legend>
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+            <div class="form-group">
+              <label for="kith_lname" class="col-form-label">Dependant's Surname</label>
+              <input type="text" name="kith_lname" class="form-control" {% if dependant %} value="{{ dependant.kith_lname }}" {% else %} value="" {% endif %} required>
+            </div>
+            <div class="form-group">
+                <label for="kith_fname" class="col-form-label">Dependant's First Name</label>
+                <input type="text" name="kith_fname" class="form-control" {% if dependant %} value="{{ dependant.kith_fname }}" {% else %} value="" {% endif %} required>
+              </div>
+              <div class="form-group">
+                <label for="kith_middlenames" class="col-form-label">Dependant's Middle Name</label>
+                <input type="text" name="kith_middlenames" class="form-control" {% if dependant.kith_middlenames %} value="{{ dependant.kith_middlenames }}" {% else %} value="" {% endif %}>
+              </div>
+              <!-- <div class="form-group">
+                <label for="kith_relationship" class="col-form-label">Relationship</label>
+                <input type="text" name="kith_relationship" class="form-control" {% if dependant %} value="{{ dependant.kith_relationship }}" {% else %} value="" {% endif %} required>
+              </div> -->
+
+              <div class="form-group">
+                <label for="kith_relationship" class="col-form-label">Relationship</label>
+                <select name="kith_relationship" class="form-select" required> <option value="">--- Select Relationship ---</option>
+                    {% for key,value in DEPENDANTS.items %}
+                        <option value="{{ key }}" 
+                        {% if key == dependant.kith_relationship %}
+                          selected
+                        {% endif %}
+                        >{{ value }}</option>
+                      {% endfor %}
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="kith_gender" class="col-form-label">Gender</label>
+                <select name="kith_gender" class="form-select" required> <option value="">--- Select Gender ---</option>
+                    {% for key,value in GENDER.items %}
+                        <option value="{{ key }}" 
+                        {% if key == dependant.kith_gender %}
+                          selected
+                        {% endif %}
+                        >{{ value }}</option>
+                      {% endfor %}
+                </select>
+              </div>
+              
+            <div class="form-group">
+              <label for="kith_dob" class="col-form-label">Date of Birth</label>
+              <input type="date" name="kith_dob" class="form-control" {% if dependant %} value="{{ dependant.kith_dob|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div>
+<!-- 
+              <div class="form-group">
+                <label for="contact_phone" class="col-form-label">Contact Phone</label>
+                <input type="text" name="contact_phone" class="form-control" {% if dependant %} value="{{ dependant.contact_phone }}" {% else %} value="" {% endif %}>
+              </div> -->
+
+            
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+            <a class="btn btn-sm btn-primary" href="{% url 'dependants' staff.staffno %}">Cancel</a>
+          </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee's Dependants</strong></h5></div>
+                <div class="card-body">
+                {% if dependants %}
+                
+                <table class="table table-sm table-hover" style="font-size:80%">
+				<tr>
+					<th>Name</th>
+					<th>Relationship</th>
+                    <th>Date of Birth</th>
+                    <th>Gender</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for dep in dependants %} 
+                
+                    <tr>
+                        <td>{{ dep }}</td>
+                        <td>{{ dep.kith_relationship }}</td>
+                        <td>{{ dep.kith_dob }}</td>
+                        <td>{{ dep.kith_gender }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-dependants' dep.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-dependants' dep.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>ADD DEPENDANTS</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

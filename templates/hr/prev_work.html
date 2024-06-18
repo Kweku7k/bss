@@ -1,0 +1,116 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+            <div class="form-group">
+              <label for="coy_name" class="col-form-label">Name of Company</label>
+              <input type="text" name="coy_name" class="form-control" {% if company %} value="{{ company.coy_name }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="form-group">
+              <label for="start_date" class="col-form-label">Start Date</label>
+              <input type="date" name="start_date" class="form-control" {% if company %} value="{{ company.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="form-group">
+              <label for="end_date" class="col-form-label">End Date</label>
+              <input type="date" name="end_date" class="form-control" {% if company %} value="{{ company.end_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="form-group">
+              <label for="termination_reason" class="col-form-label">Reason for Leaving</label>
+              <input type="text" name="termination_reason" class="form-control" {% if company %} value="{{ company.termination_reason }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="form-group">
+                <label for="highest_position" class="col-form-label">Highest Position</label>
+                <input type="text" name="highest_position" class="form-control" {% if company %} value="{{ company.highest_position }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="highest_salary" class="col-form-label">Highest Annual Salary</label>
+                <input type="text" name="highest_salary" class="form-control" {% if company %} value="{{ company.highest_salary }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="contact_name" class="col-form-label">Contact Name</label>
+                <input type="text" name="contact_name" class="form-control" {% if company %} value="{{ company.contact_name }}" {% else %} value="" {% endif %}>
+              </div>
+
+              <div class="form-group">
+                <label for="contact_phone" class="col-form-label">Contact Phone</label>
+                <input type="text" name="contact_phone" class="form-control" {% if company %} value="{{ company.contact_phone }}" {% else %} value="" {% endif %}>
+              </div>
+
+            <div class="form-group">
+              <label for="notes" class="col-form-label">Notes</label>
+              <textarea name="notes" class="form-control">{% if company %} {{ company.notes }}  {% endif %}</textarea>
+            </div>
+            
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+                        <a class="btn btn-sm btn-primary" href="{% url 'staff-education' staff.staffno %}">Cancel</a>
+          </form>
+
+            </div> </div></div>
+
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee Work History</strong></h5></div>
+                <div class="card-body">
+                {% if companys %}
+                
+                <table class="table table-sm table-hover" style="font-size:80%">
+				<tr>
+					<th>Company Name</th>
+					<th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Position</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for coy in companys %} 
+                
+                    <tr>
+                        <td>{{ coy.coy_name }}</td>
+                        <td>{{ coy.start_date }}</td>
+                        <td>{{ coy.end_date }}</td>
+                        <td>{{ coy.highest_position }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-prev-work' coy.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-prev-work' coy.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>ADD MORE COMPANIES</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

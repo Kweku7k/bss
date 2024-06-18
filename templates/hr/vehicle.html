@@ -1,0 +1,87 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Employee's Vehicle</legend>
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+            <div class="form-group">
+                <label for="car_no" class="col-form-label">Vehicle Registration Number</label>
+                <input type="text" name="car_no" class="form-control" {% if vehicle %} value="{{ vehicle.car_no }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="record_date" class="col-form-label">Record Date</label>
+                <input type="date" name="record_date" class="form-control" {% if vehicle %} value="{{ vehicle.record_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="car_model" class="col-form-label">Car Model</label>
+                <input type="text" name="car_model" class="form-control" {% if vehicle %} value="{{ vehicle.car_model }}" {% else %} value="" {% endif %}>
+              </div>
+
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+            <a class="btn btn-sm btn-primary" href="{% url 'vehicle' staff.staffno %}">Cancel</a>
+          </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee's Vehicle</strong></h5></div>
+                <div class="card-body">
+                {% if vehicles %}
+                
+                <table class="table table-sm table-hover table-responsive" style="font-size:80%">
+				<tr>
+					<th>Car Reg. Number</th>
+					<th>Record Date</th>
+                    <th>Car Model</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for veh in vehicles %} 
+                
+                    <tr>
+                        <td>{{ veh.car_no }}</td>
+                        <td>{{ veh.record_date }}</td>
+                        <td>{{ veh.car_model }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-vehicle' veh.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-vehicle' veh.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>ADD VEHICLE</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

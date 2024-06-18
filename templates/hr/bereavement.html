@@ -1,0 +1,122 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Bereavement</legend>
+                    <form action="" method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+            
+                        <div class="form-group"> 
+                            <label for="staffno" class="col-form-label">Staff Number </label>
+                            <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+                        </div>
+            
+                        <div class="form-group">
+                         <label for="deceased" class="col-form-label">Name of Deceased</label>
+                          <input type="text" name="deceased" class="form-control" {% if bereavement %} value="{{ bereavement.deceased }}" {% else %} value="" {% endif %} required>
+                        </div>
+            
+                        <div class="form-group">
+                            <label for="deceased_relationship" class="col-form-label">Relationship to Staff</label>
+                            <select name="deceased_relationship" class="form-select" required> <option value="">--- Select Relationship ---</option>
+                                {% for key,value in DEPENDANTS.items %}
+                                    <option value="{{ key }}" 
+                                    {% if key == bereavement.deceased_relationship %}
+                                      selected
+                                    {% endif %}
+                                    >{{ value }}</option>
+                                  {% endfor %}
+                            </select>
+                          </div>
+                          <div class="form-group">
+                            <label for="funeral_date" class="col-form-label">Funeral Date</label>
+                             <input type="date" name="funeral_date" class="form-control" {% if bereavement %} value="{{ bereavement.funeral_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                           </div>
+            
+                        <div class="form-group">
+                         <label for="funeral_time" class="col-form-label">Time </label>
+                          <input type="text" name="funeral_time" class="form-control" {% if bereavement %} value="{{ bereavement.funeral_time }}" {% else %} value="" {% endif %} required>
+                        </div>
+            
+                        <div class="form-group">
+                            <label for="funeral_location" class="col-form-label">Location </label>
+                             <input type="text" name="funeral_location" class="form-control" {% if bereavement %} value="{{ bereavement.funeral_location }}" {% else %} value="" {% endif %} required>
+                        </div>
+            
+                        <div class="form-group">
+                            <label for="funeral_dress_code" class="col-form-label">Dress Code </label>
+                             <input type="text" name="funeral_dress_code" class="form-control" {% if bereavement %} value="{{ bereavement.funeral_dress_code }}" {% else %} value="" {% endif %}>
+                        </div>       
+                        <div class="form-group">
+                            <label for="deceased_pix">Deceased Photo</label>
+                            <input type="file" class="form-control" name="deceased_pix"  aria-label="deceased_pix">
+                            
+                        </div>
+
+                        <div class="form-group">
+                          <label for="funeral_notes" class="col-form-label">Notes</label>
+                          <textarea name="funeral_notes" class="form-control">{% if bereavement %} {{ bereavement.funeral_notes }}  {% endif %}</textarea>
+                        </div>
+                        
+                        <hr>
+                        <input type="submit" value="Add" class="btn btn-block btn-secondary">
+                                    <a class="btn btn-sm btn-primary" href="{% url 'bereavement' staff.staffno %}">Cancel</a>
+                      </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Funeral Announcements</strong></h5></div>
+                <div class="card-body">
+                {% if bereavement_list %}
+                
+                <table class="table table-sm table-hover table-responsive" style="font-size:80%">
+				<tr>
+					<th>Deceased</th>
+					<th>Funeral Date</th>
+                    <th>Time</th>
+                    <th>Location</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for veh in bereavement_list %} 
+                
+                    <tr>
+                        <td>{{ veh.deceased }}</td>
+                        <td>{{ veh.funeral_date }}</td>
+                        <td>{{ veh.funeral_time }}</td>
+                        <td>{{ veh.funeral_location }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-bereavement' veh.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-bereavement' veh.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>Add New Funeral Announcements</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

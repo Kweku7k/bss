@@ -1,0 +1,141 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:90%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Employee's Promotions/(Job Description)</legend>
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+              <div class="form-group">
+                <label for="prev_jobtitle">Current Job Title</label>
+                <select name="prev_jobtitle"  class="form-select">
+                    <option selected="true" disabled="disabled"></option>
+                    {% for bk in jobtitle_list %}
+                        <option value="{{ bk.job_title }}"
+                        {% if bk.job_title == promotion.prev_jobtitle %}
+                            selected
+                        {% endif %}
+                        >{{ bk.job_title }}</option>
+                        {% endfor %}
+                </select>               
+            </div>
+              
+            <div class="form-group">
+                <label for="new_jobtitle">New Job Title</label>
+                <select name="new_jobtitle"  class="form-select">
+                    <option selected="true" disabled="disabled"></option>
+                    {% for bk in jobtitle_list %}
+                        <option value="{{ bk.job_title }}"
+                        {% if bk.job_title == promotion.new_jobtitle %}
+                            selected
+                        {% endif %}
+                        >{{ bk.job_title }}</option>
+                        {% endfor %}
+                </select>               
+            </div>
+
+            <div class="form-group">
+                <label for="prev_rank">Current Staff Level</label>
+                <select name="prev_rank"  class="form-select">
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in STAFFRANK.items %}
+                        <option value="{{ value }}"
+                        {% if value == promotion.prev_rank %}
+                            selected
+                        {% endif %}
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>
+                
+            </div>
+            <div class="form-group">
+                <label for="new_rank">New Staff Level</label>
+                <select name="new_rank"  class="form-select">
+                    <option selected="true" disabled="disabled"></option>
+                    {% for key,value in STAFFRANK.items %}
+                        <option value="{{ value }}"
+                        {% if value == promotion.new_rank %}
+                            selected
+                        {% endif %}
+                        >{{ value }}</option>
+                        {% endfor %}
+                </select>
+                
+            </div>
+
+              <div class="form-group">
+                <label for="approved_by" class="col-form-label"> Approved By</label>
+                <input type="text" name="approved_by" class="form-control" {% if promotion %} value="{{ promotion.approved_by }}" {% else %} value="" {% endif %} required>
+              </div> <!--- Later change this to a Select Option when Approvers have been set up-->
+
+              <div class="form-group">
+                <label for="effective_date" class="col-form-label">Effective Date</label>
+                <input type="date" name="effective_date" class="form-control" {% if promotion %} value="{{ promotion.effective_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+              </div>
+
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+            <a class="btn btn-sm btn-primary" href="{% url 'promotion' staff.staffno %}">Cancel</a>
+          </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee's Promotions/(Job Description)</strong></h5></div>
+                <div class="card-body">
+                {% if promotions %}
+                
+                <table class="table table-sm table-hover table-responsive" style="font-size:80%">
+				<tr>
+					<th>Prev. Job Title</th>
+					<th>New Job Title</th>
+                    <th>New Rank</th>
+                    <th>Effective Date</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for sb in promotions %} 
+                
+                    <tr>
+                        <td>{{ sb.prev_jobtitle }}</td>
+                        <td>{{ sb.new_jobtitle }}</td>
+                        <td>{{ sb.new_rank }}</td>
+                        <td>{{ sb.effective_date }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-promotion' sb.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-promotion' sb.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h3>ADD PROMOTIONS/(JOB DESCRIPTION)</h3>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

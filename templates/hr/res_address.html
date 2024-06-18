@@ -1,0 +1,129 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Employee's Residential Address</legend>
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+            <div class="form-group">
+                <label for="house_no" class="col-form-label">House Number</label>
+                <input type="text" name="house_no" class="form-control" {% if resaddress %} value="{{ resaddress.house_no }}" {% else %} value="" {% endif %} required>
+              </div>
+              <div class="form-group">
+                <label for="street_name" class="col-form-label">Street Name</label>
+                <input type="text" name="street_name" class="form-control" {% if resaddress.street_name %} value="{{ resaddress.street_name }}" {% else %} value="" {% endif %} required>
+              </div>
+              <div class="form-group">
+                <label for="town" class="col-form-label">Town/City</label>
+                <input type="text" name="town" class="form-control" {% if resaddress %} value="{{ resaddress.town }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <!-- <div class="form-group">
+                <label for="kith_relationship" class="col-form-label">Relationship</label>
+                <select name="kith_relationship" class="form-select" required> <option value="">--- Select Relationship ---</option>
+                    {% for key,value in DEPENDANTS.items %}
+                        <option value="{{ key }}" 
+                        {% if key == dependant.kith_relationship %}
+                          selected
+                        {% endif %}
+                        >{{ value }}</option>
+                      {% endfor %}
+                </select>
+              </div> -->
+
+              <!-- <div class="form-group">
+                <label for="kith_gender" class="col-form-label">Gender</label>
+                <select name="kith_gender" class="form-select" required> <option value="">--- Select Gender ---</option>
+                    {% for key,value in GENDER.items %}
+                        <option value="{{ key }}" 
+                        {% if key == dependant.kith_gender %}
+                          selected
+                        {% endif %}
+                        >{{ value }}</option>
+                      {% endfor %}
+                </select>
+              </div> -->
+              
+            <!-- <div class="form-group">
+              <label for="kith_dob" class="col-form-label">Date of Birth</label>
+              <input type="date" name="kith_dob" class="form-control" {% if dependant %} value="{{ dependant.kith_dob|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div> -->
+
+              <div class="form-group">
+                <label for="landmark" class="col-form-label">Nearest Landmark</label>
+                <input type="text" name="landmark" class="form-control" {% if resaddress %} value="{{ resaddress.landmark }}" {% else %} value="" {% endif %}>
+              </div>
+
+              <div class="form-group">
+                <label for="gps_address" class="col-form-label">GPS Digital Address</label>
+                <input type="text" name="gps_address" class="form-control" {% if resaddress %} value="{{ resaddress.gps_address }}" {% else %} value="" {% endif %}>
+              </div>
+
+            
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+            <a class="btn btn-sm btn-primary" href="{% url 'res-address' staff.staffno %}">Cancel</a>
+          </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee's Residential <Address></Address></strong></h5></div>
+                <div class="card-body">
+                {% if resaddresses %}
+                
+                <table class="table table-sm table-hover" style="font-size:80%">
+				<tr>
+					<th>Address</th>
+					<th>Landmark</th>
+                    <th>GPS Digital Address</th>
+                    <!-- <th>Gender</th> -->
+					<th>Action</th>
+					
+				</tr>
+
+                {% for res in resaddresses %} 
+                
+                    <tr>
+                        <td>{{ res }}</td>
+                        <td>{{ res.landmark }}</td>
+                        <td>{{ res.gps_address }}</td>
+                        <!-- <td>{{ res.kith_gender }}</td> -->
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-res-address' res.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-res-address' res.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>ADD RESIDENTIAL ADDRESS</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

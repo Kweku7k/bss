@@ -1,0 +1,123 @@
+{% comment %} {% extends "base2.html" %} {% endcomment %} 
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
+{% comment %} {% block content %} {% endcomment %}
+
+<div class="row">
+  <div class="row col-2 pt-5">
+    {% include "partials/_staffdetails_sidebar.html" %} 
+  </div>
+  <div class="row col-10">
+        <div class="row mt-5">
+          
+            <div class="row col-4 pt-2" style="font-size:80%">
+                <div class="card bg-info pt-1 m-3">
+               
+                <div class="card-body">
+                  <fieldset>
+                    <legend>Employee's Bank Details</legend>
+                <form action="" method="POST">
+            {% csrf_token %}        
+            <div class="form-group"> 
+                <label for="staffno" class="col-form-label">Staff Number </label>
+                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
+              </div>
+
+              
+            <div class="form-group">
+                <label for="bank">Bank</label>
+                <select name="bank"  class="form-select">
+                    <option selected="true" disabled="disabled"></option>
+                    {% for bk in bank_list %}
+                        <option value="{{ bk.id }}"
+                        {% if bk.id == pkno %}
+                            selected
+                        {% endif %}
+                        >{{ bk }}</option>
+                        {% endfor %}
+                </select>               
+            </div>
+            <div class="form-group">
+                <label for="branch">Bank Branch</label>
+                <select name="branch"  class="form-select">
+                    <option selected="true" disabled="disabled"></option>
+                    {% for bb in bank_branches %}
+                        <option value="{{ bb.id }}"
+                        {% if bb.id == pkno %}
+                            selected
+                        {% endif %}
+                        >{{ bb }}</option>
+                        {% endfor %}
+                </select>               
+            </div>
+              <!-- <div class="form-group">
+                <label for="branch" class="col-form-label">Bank Branch</label>
+                <input type="text" name="branch" class="form-control" {% if staffbank %} value="{{ staffbank.branch }}" {% else %} value="" {% endif %} required>
+              </div> -->
+
+              <div class="form-group">
+                <label for="account_no" class="col-form-label">Account Number</label>
+                <input type="text" name="account_no" class="form-control" {% if staffbank %} value="{{ staffbank.account_no }}" {% else %} value="" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="account_type" class="col-form-label">Account Type</label>
+                <input type="text" name="account_type" class="form-control" {% if staffbank %} value="{{ staffbank.account_type }}" {% else %} value="Current" {% endif %} required>
+              </div>
+
+              <div class="form-group">
+                <label for="account_status" class="col-form-label">Account Status</label>
+                <input type="text" name="account_status" class="form-control" {% if staffbank %} value="{{ staffbank.account_status }}" {% else %} value="Active" {% endif %} required>
+              </div>
+              <div class="form-group">
+                <label for="account_date" class="col-form-label">Account Date</label>
+                <input type="date" name="account_date" class="form-control" {% if staffbank %} value="{{ staffbank.account_date|date:"Y-m-d" }}" {% else %} value="" {% endif %}>
+              </div>
+
+            <hr>
+            <input type="submit" value="Add" class="btn btn-block btn-secondary">
+            <a class="btn btn-sm btn-primary" href="{% url 'staffbank' staff.staffno %}">Cancel</a>
+          </form>
+        </fieldset>
+            </div> </div></div>
+          
+            
+            <div class="row col-8 pt-2 mt-3">
+              <div class="card pt-1 mx-4">
+                <div class="card-header text-center"><h5><strong>Employee's Bank Details</strong></h5></div>
+                <div class="card-body">
+                {% if staffbanks %}
+                
+                <table class="table table-sm table-hover table-responsive" style="font-size:80%">
+				<tr>
+					<th>Bank</th>
+					<th>Branch</th>
+                    <th>Account Type</th>
+					<th>Action</th>
+					
+				</tr>
+
+                {% for sb in staffbanks %} 
+                
+                    <tr>
+                        <td>{{ sb.bank }}</td>
+                        <td>{{ sb.branch }}</td>
+                        <td>{{ sb.account_type }}</td>
+                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staffbank' sb.id staff.staffno %}"></a>
+                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-staffbank' sb.id staff.staffno %}"></a>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+                   
+			</table>
+            {% else %}
+            <h1>ADD BANK DETAILS</h1>
+            {% endif %}
+            </div>
+
+        </div></div></div>
+</div>
+</div>
+{% include "partials/_footer.html" %}

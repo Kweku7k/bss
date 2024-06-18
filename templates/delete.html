@@ -1,0 +1,39 @@
+{% comment %} {% extends 'base.html' %} {% endcomment %}
+ {% load static %}
+<main id="main" class="main">
+{% block content %}
+<link href="{% static 'css/style.css' %}" rel="stylesheet">
+<style>
+    .room-container {
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr;
+    }
+</style>
+
+<div class="room-container">
+    <div></div>
+    <div class="bg-primary mt-5 pt-5">
+
+    <div class="card">
+        <div class="card-header">
+    <form method="POST" action="">
+        {% csrf_token %}
+        <p>Are you sure you want to delete the data for  </p>
+    </div>
+        <div class="card-body"><strong>{{obj}}</strong>?
+        </div>
+        <div class="card-footer">
+            <button class="confirm_no">
+        <a href="{{request.META.HTTP_REFERER}}">No</a>
+    </button>
+        <input class="confirm_yes" type="submit" value="Yes" />
+  
+    </div>
+    </form>
+    </div>
+    
+
+</div>
+    <div></div>
+</div>
+{% endblock content %}
