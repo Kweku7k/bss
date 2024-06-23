@@ -8,7 +8,7 @@ class School(models.Model):
     school_code = models.CharField('Short Name',max_length=50,blank=True,null=True)
     school_location = models.CharField('Short Location',max_length=200,blank=True,null=True)
     school_notes = models.TextField('Notes',blank=True,null=True)
-    school_type = models.CharField(default='BS',choices=(('BS','Basic School'),('SS','Secondary School'),('TC','Post Secondary School'),('UN','University')))
+    school_type = models.CharField(default='SS', max_length=120 ,choices=[('BS','Basic School'),('SS','Secondary School'),('TC','Post Secondary School'),('UN','University')])
 
 
     def __str__(self):
