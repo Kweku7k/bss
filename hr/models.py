@@ -42,12 +42,52 @@ class Employee(models.Model):
         return staffname
         #self.title + ' ' + self.fname + ' ' + self.middlenames + ' ' + self.lname + ' ' + self.suffix
 
+class Rank(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+
+    def __str__(self):
+        return self.name
+    
+class ChoicesHPQ(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    
+class ChoicesRegion(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    
+class ChoicesDependants(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesHEQ(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesTitle(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesSuffix(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesRBA(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesStaffLevel(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesStaffRank(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    
+class ChoicesGender(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesStaffStatus(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
 class ProfessionalBody(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
     assoc_code = models.CharField(ProfBody,max_length=50,blank=False,null=False) #Link this to the Prof. Body
     membershipno = models.CharField('Membership Number',max_length=20,blank=False,null=False)
     date_joined = models.DateField('Date Joined')
-    hra = models.CharField('Highest Rank Attained',max_length=50,blank=False,default='Member',null=False)
+    hra = models.ForeignKey(Rank, on_delete=models.SET_DEFAULT, default=1)  # Use ForeignKey to Rank model
+    # hra = models.CharField('Highest Rank Attained',max_length=50,blank=False,default='Member',null=False)
     notes = models.TextField('Notes',blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)

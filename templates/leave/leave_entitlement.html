@@ -13,7 +13,7 @@
             <div class="form-control">
                 <select name="staff_rank"  class="form-select" required>
                     <option value="" ></option>
-                    {% for key,value in STAFFRANK.items %}
+                    {% for key,value in STAFFRANK %}
                         <option value="{{ key }}"
                         {% if key == staff.staff_rank %}
                             selected

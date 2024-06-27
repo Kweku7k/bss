@@ -16,6 +16,8 @@ def add_school(request):
     if request.method == 'POST':
         form = SchoolForm(request.POST)
         if form.is_valid(): 
+            print("---form----")
+
             form.save()
             return HttpResponseRedirect('school')
     else:
@@ -214,7 +216,7 @@ def add_bankbranch(request):
         form = BankBranchForm(request.POST)
         if form.is_valid(): 
             form.save()
-            return redirect('bankbranch')
+            return HttpResponseRedirect('bankbranch')
     else:
         form = BankBranchForm
         if 'submitted' in request.GET:

@@ -9,6 +9,7 @@ class School(models.Model):
     school_location = models.CharField('Short Location',max_length=200,blank=True,null=True)
     school_notes = models.TextField('Notes',blank=True,null=True)
     school_type = models.CharField(default='SS', max_length=120 ,choices=[('BS','Basic School'),('SS','Secondary School'),('TC','Post Secondary School'),('UN','University')])
+    updated = models.DateTimeField(auto_now=True)
 
 
     def __str__(self):

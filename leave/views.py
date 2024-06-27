@@ -2,7 +2,7 @@ from datetime import date
 from django.shortcuts import render # type: ignore
 from .models import Leave
 from hr.choices import STAFFRANK
-from hr.models import Employee
+from hr.models import ChoicesStaffRank, Employee
 from .forms import *
 
 # Create your views here.
@@ -46,7 +46,7 @@ def leave_entitlement(request):
                 form_data = {
                     "staffno":staff.staffno,
                     "leave_entitlement":num_days,
-                    "staff_rank":staffRank,
+                    "staff_rank":[{q.name:q.name} for q in ChoicesStaffRank.query.all()],
                     "fin_year":fisc_yr,
                     "leave_description":"Annual Leave Entitlement",
                     "leave_approved_by":staff.staffno,
@@ -62,7 +62,7 @@ def leave_entitlement(request):
             leaves = Leave.objects.filter(fin_year__exact=fisc_yr,staff_rank__exact=staffRank) 
             leaves = leaves.order_by('staffno')
                     
-        context = {'name':'JASKAMWAY','STAFFRANK':STAFFRANK,'staff':staffRank, 'num_days':num_days,'yr':fisc_yr,'arr':add_arrears,
+        context = {'name':'JASKAMWAY','STAFFRANK':[(q.name,q.name) for q in ChoicesStaffRank.objects.all()],'staff':staffRank, 'num_days':num_days,'yr':fisc_yr,'arr':add_arrears,
                    'employee':employees,
                    'leaves':leaves,
                    'msg':msg,
@@ -70,4 +70,4 @@ def leave_entitlement(request):
                 #    'arrears':qwe
                    }
         return render(request,'leave/leave_entitlement.html',context)
-    return render(request,'leave/leave_entitlement.html',{'STAFFRANK':STAFFRANK})
+    return render(request,'leave/leave_entitlement.html',{'STAFFRANK':[(q.name,q.name) for q in ChoicesStaffRank.objects.all()]})

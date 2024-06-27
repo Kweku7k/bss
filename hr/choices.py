@@ -1,6 +1,12 @@
+
 DEPENDANTS=[('None','None')]
 
-HEQ=[('None','None')]
+HEQ = [('None','None')]
+HPQ=[
+    ('ONE','ONW'),
+    ('Two','Two')
+    ]
+
 
 STAFFSTATUS =[('None','None')]
 

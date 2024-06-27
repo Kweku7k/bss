@@ -23,7 +23,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="title" class="form-select" required> 
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in TITLE.items %}
+                                                {% for key,value in TITLE %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.title %}
                                                         selected
@@ -49,7 +49,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="suffix"  class="form-select">
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in SUFFIX.items %}
+                                                {% for key,value in SUFFIX %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.suffix %}
                                                         selected
@@ -62,7 +62,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="gender"  class="form-select" required>
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in GENDER.items %}
+                                                {% for key,value in GENDER %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.gender %}
                                                         selected
@@ -88,7 +88,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="heq"  class="form-select" required>
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in HEQ.items %}
+                                                {% for key,value in HEQ %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.heq %}
                                                         selected
@@ -110,6 +110,19 @@
                                             <label for="hpq">Highest Professional Qualification</label>
                                         </div>
                                         <div class="form-floating mt-1">
+                                            <select name="hpq"  class="form-select" required>
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for key,value in HPQ %}
+                                                    <option value="{{ key }}"
+                                                    {% if key == staff.hpq %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ value }}</option>
+                                                    {% endfor %}
+                                            </select>
+                                            <label for="heq">Highest Professional Qualification</label>
+                                        </div>
+                                        <div class="form-floating mt-1">
                                             <input type="text" class="form-control" name="active_phone"  aria-label="active_phone" aria-describedby="active_phone" {% if staff %} value="{{ staff.active_phone }}" {% else %} value="" {% endif %}>
                                             <label for="active_phone">Telephone No.</label>
                                         </div>
@@ -117,7 +130,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="active_status"  class="form-select">
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in STAFFSTATUS.items %}
+                                                {% for key,value in STAFFSTATUS %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.active_status %}
                                                         selected
@@ -136,7 +149,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="region"  class="form-select">
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in REGION.items %}
+                                                {% for key,value in REGION %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.region %}
                                                         selected
@@ -150,7 +163,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="rba"  class="form-select">
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in RBA.items %}
+                                                {% for key,value in RBA %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.rba %}
                                                         selected
@@ -169,7 +182,7 @@
                                         <div class="form-floating mt-1">
                                             <select name="staff_rank"  class="form-select">
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in STAFFRANK.items %}
+                                                {% for key,value in STAFFRANK %}
                                                     <option value="{{ key }}"
                                                     {% if key == staff.staff_rank %}
                                                         selected

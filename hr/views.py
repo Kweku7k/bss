@@ -10,6 +10,12 @@ def index(request):
     return render(request,'authentication/login.html',{})
 
 def register(request):
+    # Create accounts
+    if request.method == 'POST':
+        print("REGISTER")
+        return redirect('index')
+    # else:
+    #     return redirect('register')
     return render(request,'authentication/register.html',{})
 
 def landing(request):
@@ -78,6 +84,8 @@ def edit_staff(request,staffno):
 def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
+    # hpq_choices = ProfessionalBody.HPQ_CHOICES
+
     staff_count = staffs.count()
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
@@ -93,18 +101,18 @@ def newstaff(request):
                'submitted':submitted,
                'staffs':staffs,
                'staff_count':staff_count,
-               'RBA':RBA,
-               'STAFFLEVEL':STAFFLEVEL,
-               'STAFFSTATUS':STAFFSTATUS,
-               'STAFFRANK':STAFFRANK,
-               'GENDER':GENDER,
-               'DEPENDANTS':DEPENDANTS,
-               'HEQ':HEQ,
-               'REGION':REGION,
-               'TITLE':TITLE,
-               'SUFFIX':SUFFIX,
-               
-               }
+               'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
+               'STAFFLEVEL':[(q.name, q.name)  for q in ChoicesStaffLevel.objects.all()],
+               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
+               'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
+               'GENDER':[(q.name, q.name)  for q in ChoicesGender.objects.all()],
+               'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
+               'HEQ':[(q.name, q.name)  for q in ChoicesHEQ.objects.all()],
+               'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
+               'REGION':[(q.name, q.name)  for q in ChoicesRegion.objects.all()],
+               'TITLE':[(q.name, q.name)  for q in ChoicesTitle.objects.all()],
+               'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
+            }
     return render(request,'hr/new_staff.html',context)
 
 
