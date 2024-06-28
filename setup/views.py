@@ -260,14 +260,17 @@ def edit_bankbranch(request, bankbranch_id,bankid):
 ########### STAFF RANK VIEWS ################
 def add_jobtitle(request):
     submitted = False
-    jobtitles = JobTitle.objects.order_by('-id') 
+    jobtitles = JobTitle.objects.order_by('-id') .valu
     jobtitle_count = jobtitles.count()
     if request.method == 'POST':
         form = JobTitleForm(request.POST)
+        print(form)
         if form.is_valid(): 
             form.save()
-            # return HttpResponseRedirect('add-jobtitle')
-            return redirect('add-jobtitle')
+            print("Form validated successfully")
+            print("Form validated successfully")
+            return HttpResponseRedirect('add-jobtitle')
+            # return redirect('add-jobtitle')
     else:
         form = JobTitleForm
         if 'submitted' in request.GET:

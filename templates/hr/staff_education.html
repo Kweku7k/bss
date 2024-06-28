@@ -59,7 +59,7 @@
             <div class="form-group">
               <label for="certification" class="col-form-label">Certification</label>
               <select name="certification" class="form-select" required> <option value="">--- Select Certification ---</option>           
-                  {% for key,value in HEQ.items %}
+                  {% for key,value in HEQ %}
                       <option value="{{ key }}" 
                       {% if key == school.certification %}
                         selected

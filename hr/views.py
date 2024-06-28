@@ -1,3 +1,4 @@
+from math import e
 from django.http import HttpResponseRedirect # type: ignore
 from django.shortcuts import redirect, render # type: ignore
 from .forms import *
@@ -89,9 +90,15 @@ def newstaff(request):
     staff_count = staffs.count()
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
+        print(form)
+        print("form has been recieved")
         if form.is_valid(): 
+            print("form was submitted successfully")
             form.save()
             return HttpResponseRedirect('newstaff')
+        else:
+            print("form.errors")
+            print(form.errors)
     else:
         form = EmployeeForm
         if 'submitted' in request.GET:
@@ -134,7 +141,7 @@ def staff_education(request,staffno):
         form = StaffSchoolForm
         if 'submitted' in request.GET:
             submitted = True
-    context = {'HEQ':HEQ,'form':form,'schools':schools,'staff':staff,'school_list':school_list,'submitted':submitted}
+    context = {'HEQ':ChoicesHEQ.objects.all().values_list("name","name"),'form':form,'schools':schools,'staff':staff,'school_list':school_list,'submitted':submitted}
     return render(request,'hr/staff_education.html',context)
 
 def edit_staff_education(request,sch_id,staffno):

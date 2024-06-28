@@ -11,7 +11,7 @@
             <label for="job_rank" class="col-form-label"> Staff Level </label> 
             <select name="job_rank" class="form-control" required>
                   <option value"">---Select Staff Level---</option>
-                        {% for key,value in STAFFLEVEL.items %}
+                        {% for key,value in STAFFLEVEL %}
                             <option value="{{ key }}" 
                             {% if key == jobtitle.job_rank %} selected {% endif %}>
                           
