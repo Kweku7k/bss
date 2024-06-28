@@ -56,7 +56,7 @@
                 <label for="prev_rank">Current Staff Level</label>
                 <select name="prev_rank"  class="form-select">
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in STAFFRANK.items %}
+                    {% for key,value in STAFFRANK %}
                         <option value="{{ value }}"
                         {% if value == promotion.prev_rank %}
                             selected
@@ -70,7 +70,7 @@
                 <label for="new_rank">New Staff Level</label>
                 <select name="new_rank"  class="form-select">
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in STAFFRANK.items %}
+                    {% for key,value in STAFFRANK %}
                         <option value="{{ value }}"
                         {% if value == promotion.new_rank %}
                             selected

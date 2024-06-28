@@ -44,7 +44,7 @@
               <div class="form-group">
                 <label for="kith_relationship" class="col-form-label">Relationship</label>
                 <select name="kith_relationship" class="form-select" required> <option value="">--- Select Relationship ---</option>
-                    {% for key,value in DEPENDANTS.items %}
+                    {% for key,value in DEPENDANTS %}
                         <option value="{{ key }}" 
                         {% if key == dependant.kith_relationship %}
                           selected
@@ -57,7 +57,7 @@
               <div class="form-group">
                 <label for="kith_gender" class="col-form-label">Gender</label>
                 <select name="kith_gender" class="form-select" required> <option value="">--- Select Gender ---</option>
-                    {% for key,value in GENDER.items %}
+                    {% for key,value in GENDER %}
                         <option value="{{ key }}" 
                         {% if key == dependant.kith_gender %}
                           selected

@@ -1,14 +1,17 @@
 from math import e
 from django.http import HttpResponseRedirect # type: ignore
 from django.shortcuts import redirect, render # type: ignore
-from .forms import *
-from .choices import *
 from .models import *
 from setup.models import *
+from .forms import *
 from django.db import connection # type: ignore
+
+DEPENDANTS = ChoicesDependants.objects.all().values_list("name","name")
 # Create your views here.
 def index(request):
-    return render(request,'authentication/login.html',{})
+    return render(request,'hr/landing_page.html',{})
+
+    # return render(request,'authentication/login.html',{})
 
 def register(request):
     # Create accounts
@@ -184,6 +187,8 @@ def prev_work(request,staffno):
         if form.is_valid(): 
             form.save()
             return redirect('prev-work', staffno)
+        else:
+            print(form.errors)
     else:
         form = StaffCompanyForm
         if 'submitted' in request.GET:
@@ -235,11 +240,13 @@ def dependants(request,staffno):
         if form.is_valid(): 
             form.save()
             return redirect('dependants', staffno)
+        else:
+            print(form.errors)
     else:
         form = KithForm
         if 'submitted' in request.GET:
             submitted = True
-    context = {'form':form,'dependants':dependants,'staff':staff,'dependant_list':dependant_list,'submitted':submitted,'GENDER':GENDER,'DEPENDANTS':DEPENDANTS}
+    context = {'form':form,'dependants':dependants,'staff':staff,'dependant_list':dependant_list,'submitted':submitted,'GENDER':ChoicesGender.objects.all().values_list("name","name"),'DEPENDANTS':ChoicesDependants.objects.all().values_list("name","name")}
     return render(request,'hr/dependants.html',context)
 
 def edit_dependants(request,dep_id,staffno):
@@ -499,7 +506,7 @@ def promotion(request,staffno):
         form = PromotionForm
         if 'submitted' in request.GET:
             submitted = True
-    context = {'current_rank':current_rank,'form':form,'promotions':promotions,'staff':staff,'jobtitle_list':jobtitle_list,'submitted':submitted,'STAFFRANK':STAFFRANK}
+    context = {'current_rank':current_rank,'form':form,'promotions':promotions,'staff':staff,'jobtitle_list':jobtitle_list,'submitted':submitted,'STAFFRANK':ChoicesStaffRank.objects.all().values_list("name","name")}
     return render(request,'hr/promotion.html',context)
 
 def edit_promotion(request,bk_id,staffno):
@@ -611,7 +618,7 @@ def bereavement(request,staffno):
         form = BereavementForm
         if 'submitted' in request.GET:
             submitted = True
-    context = {'form':form,'bereavement_list':bereavement_list,'submitted':submitted,'staff':staff,'DEPENDANTS':DEPENDANTS}
+    context = {'form':form,'bereavement_list':bereavement_list,'submitted':submitted,'staff':staff,'DEPENDANTS':ChoicesDependants.objects.all().values_list("name","name")}
     return render(request,'hr/bereavement.html',context)
 
 def edit_bereavement(request,bno,staffno):
@@ -660,7 +667,7 @@ def marriage(request,staffno):
         form = MarriageForm
         if 'submitted' in request.GET:
             submitted = True
-    context = {'form':form,'marriage_list':marriage_list,'submitted':submitted,'staff':staff,'DEPENDANTS':DEPENDANTS}
+    context = {'form':form,'marriage_list':marriage_list,'submitted':submitted,'staff':staff,'DEPENDANTS':ChoicesDependants.objects.all().values_list("name","name")}
     return render(request,'hr/marriage.html',context)
 
 def edit_marriage(request,bno,staffno):

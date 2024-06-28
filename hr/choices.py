@@ -1,4 +1,3 @@
-
 DEPENDANTS=[('None','None')]
 
 HEQ = [('None','None')]
@@ -6,7 +5,6 @@ HPQ=[
     ('ONE','ONW'),
     ('Two','Two')
     ]
-
 
 STAFFSTATUS =[('None','None')]
 
@@ -17,6 +15,9 @@ TITLE =[('None','None')]
 SUFFIX =[('None','None')] 
 
 STAFFRANK=[('None','None')]
+
+
+
 
 RBA=[('None','None')]
 

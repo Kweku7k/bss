@@ -28,7 +28,7 @@
                 <label for="prev_office">Current Office</label>
                 <select name="prev_office"  class="form-select" required>
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in OFFICE.items %}
+                    {% for key,value in OFFICE %}
                         <option value="{{ value }}"
                         {% if value == transfer.prev_office %}
                             selected
@@ -42,7 +42,7 @@
                 <label for="new_office">New Office</label>
                 <select name="new_office"  class="form-select" required>
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in OFFICE.items %}
+                    {% for key,value in OFFICE %}
                         <option value="{{ value }}"
                         {% if value == transfer.new_office %}
                             selected
@@ -56,7 +56,7 @@
                 <label for="prev_dept">Current Department</label>
                 <select name="prev_dept"  class="form-select" required>
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in DEPARTMENT.items %}
+                    {% for key,value in DEPARTMENT %}
                         <option value="{{ value }}"
                         {% if value == transfer.prev_dept %}
                             selected
@@ -69,7 +69,7 @@
                 <label for="new_dept">New Department</label>
                 <select name="new_dept"  class="form-select" required>
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in DEPARTMENT.items %}
+                    {% for key,value in DEPARTMENT %}
                         <option value="{{ value }}"
                         {% if value == transfer.new_dept %}
                             selected
@@ -83,7 +83,7 @@
                 <label for="prev_branch">Current Branch</label>
                 <select name="prev_branch"  class="form-select" required>
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in BRANCH.items %}
+                    {% for key,value in BRANCH %}
                         <option value="{{ value }}"
                         {% if value == transfer.prev_branch %}
                             selected
@@ -96,7 +96,7 @@
                 <label for="new_branch">New Branch</label>
                 <select name="new_branch"  class="form-select" required>
                     <option selected="true" disabled="disabled"></option>
-                    {% for key,value in BRANCH.items %}
+                    {% for key,value in BRANC %}
                         <option value="{{ value }}"
                         {% if value == transfer.new_branch %}
                             selected

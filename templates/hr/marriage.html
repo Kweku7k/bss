@@ -33,7 +33,7 @@
                         <div class="form-group">
                             <label for="relationship" class="col-form-label">Relationship to Staff</label>
                             <select name="relationship" class="form-select" required> <option value="">--- Select Relationship ---</option>
-                                {% for key,value in DEPENDANTS.items %}
+                                {% for key,value in DEPENDANTS %}
                                     <option value="{{ key }}" 
                                     {% if key == marriage.relationship %}
                                       selected
