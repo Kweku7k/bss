@@ -1,0 +1,9 @@
+{% extends "base.html" %} {% load static %}
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
+{% block content %}
+
+ {% for staff in staffs%}
+
+    {{ staff.fname }}{{ staff.lname }}
+    {% endfor %}
+{% endblock %}

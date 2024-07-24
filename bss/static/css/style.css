@@ -767,6 +767,37 @@ h6 {
   top: 15px;
 }
 
+.main-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 10px 0;
+}
+
+.main-cards a {
+  text-decoration: none;
+}
+
+.dashboard-item {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  color: #000;
+  margin: 0;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+  margin-bottom: 2vh;
+}
+
+.dashboard-item-text {
+  margin-top: 0;
+  color: #992621;
+  font-size: 16px;
+}
+
+.dashboard-item-smalltext {
+  font-size: 12px;
+}
+
 .dashboard .filter .icon {
   color: #aab7cf;
   padding-right: 20px;

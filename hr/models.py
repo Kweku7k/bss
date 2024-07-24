@@ -21,7 +21,7 @@ class Employee(models.Model):
     active_status = models.CharField('Staff Status',max_length=25,blank=False,default='Active',null=False)
     home_town = models.CharField('Home Town',max_length=100,blank=True,null=True)
     region  = models.CharField('Region',max_length=50,blank=True,null=True)
-    rba = models.CharField('Role-Based Access',max_length=10,blank=False,default='REG',null=False)
+    rba = models.CharField('Role-Based Access',max_length=100,blank=False,default='REG',null=False)
     doe = models.DateField('Date Employed')
     staff_rank = models.CharField('Staff Rank',max_length=50,blank=True,null=True)
     job_title = models.CharField('Job Title',max_length=50,blank=True,null=True)

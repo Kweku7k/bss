@@ -1,8 +1,10 @@
 from math import e
 from django.http import HttpResponseRedirect # type: ignore
-from django.shortcuts import redirect, render # type: ignore
+from django.shortcuts import redirect, render
+from django.urls import reverse # type: ignore
 from .models import *
 from setup.models import *
+from django.db.models import Q
 from .forms import *
 from django.db import connection # type: ignore
 
@@ -23,7 +25,34 @@ def register(request):
     return render(request,'authentication/register.html',{})
 
 def landing(request):
-    return render(request,'hr/landing_page.html',{})
+    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
+    staff_count = staffs.count()
+
+    context = {
+        'staffs':staffs,
+        'staff_count':staff_count,
+    }
+    
+    return render(request,'hr/landing_page.html', context)
+
+def search(request):
+    staffs = Employee.objects.order_by('lname')
+    staff_count = staffs.count()
+    if 'search' in request.POST:
+        search_query = request.POST.get('search')
+        if search_query:
+            staffs = staffs.filter(
+                Q(lname__icontains=search_query) | 
+                Q(fname__icontains=search_query) | 
+                Q(job_title__icontains=search_query) |
+                Q(staff_rank__icontains=search_query)
+            )
+            context = {
+                'staffs':staffs,
+                'staff_count':staff_count,
+            }
+    
+            return render(request,'hr/search.html', context)
 
 def deletestaff(request,staffno):  
     staffpix = ""
@@ -85,6 +114,38 @@ def edit_staff(request,staffno):
     # context = {'form':form,'staffs':staffs,'staff_count':staff_count,'staff':staff}
     return render(request, 'hr/new_staff.html', context)
 
+
+def allstaff(request):
+    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
+    staff_count = staffs.count()
+    
+    if request.method == 'POST':
+        filter = request.POST.get('filter')
+        staffs = Employee.objects.order_by('lname').filter(staff_rank=filter)
+        staff_count = staffs.count()
+        
+        context = {
+        'staffs':staffs,
+        'filter':filter,
+        'staff_count':staff_count,
+        'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
+        
+        
+    }
+        return render(request, 'hr/allstaff.html', context)
+        
+        
+
+    context = {
+        'staffs':staffs,
+        'staff_count':staff_count,
+        'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
+        
+    }
+    return render(request, 'hr/allstaff.html', context)
+    
+    
+
 def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
@@ -93,12 +154,16 @@ def newstaff(request):
     staff_count = staffs.count()
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
-        print(form)
+        # print(form)
         print("form has been recieved")
         if form.is_valid(): 
             print("form was submitted successfully")
             form.save()
-            return HttpResponseRedirect('newstaff')
+            staff_number = form.cleaned_data['staffno']
+            url = reverse('staff-details', kwargs={'staffno': str(staff_number)})
+            print(url)
+            return HttpResponseRedirect(url)
+                        # return HttpResponseRedirect('newstaff')
         else:
             print("form.errors")
             print(form.errors)

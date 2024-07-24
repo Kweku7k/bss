@@ -25,9 +25,8 @@
           <!-- <a href="{% url 'bereavement' staff.staffno %}">Medical Expenses</a> -->
           
           <!-- <hr> -->
-          <button>
-          <a href="{% url 'edit-staff' staff.staffno %}">Back</a>
-        </button>
+          <a href="{% url 'allstaff' %}" class="btn btn-success">Finish</a>
+          {% comment %} <a href="{% url 'edit-staff' staff.staffno %}">Finish</a> {% endcomment %}
         </div>
         <!--End of Card-body -->
       </div>

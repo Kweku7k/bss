@@ -4,6 +4,7 @@ from .forms import *
 from .choices import STAFFLEVEL
 from setup.models import *
 
+
 # Create your views here.
 def home(request):
     pass
@@ -12,7 +13,7 @@ def home(request):
 def add_school(request):
     submitted = False
     schools = School.objects.order_by('-id') 
-    sch_count = schools.count()
+    sch_count = schools.count() 
     if request.method == 'POST':
         form = SchoolForm(request.POST)
         if form.is_valid(): 
@@ -260,7 +261,7 @@ def edit_bankbranch(request, bankbranch_id,bankid):
 ########### STAFF RANK VIEWS ################
 def add_jobtitle(request):
     submitted = False
-    jobtitles = JobTitle.objects.order_by('-id') .valu
+    jobtitles = JobTitle.objects.order_by('-id') 
     jobtitle_count = jobtitles.count()
     if request.method == 'POST':
         form = JobTitleForm(request.POST)
@@ -269,7 +270,7 @@ def add_jobtitle(request):
             form.save()
             print("Form validated successfully")
             print("Form validated successfully")
-            return HttpResponseRedirect('add-jobtitle')
+            return HttpResponseRedirect('jobtitle')
             # return redirect('add-jobtitle')
     else:
         form = JobTitleForm

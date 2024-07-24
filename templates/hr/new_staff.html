@@ -2,7 +2,7 @@
   {% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
 {% block content %} 
         <div class="row">
-            <div class="row col-7 pt-1">
+            <div class="row col-12 pt-1">
                 <form action="" method="POST"  enctype="multipart/form-data"> 
                     {% csrf_token %}
                 <div class="card bg-info pt-2">
@@ -10,15 +10,15 @@
                         {% if staff.staff_pix %} <img src="{{ staff.staff_pix.url }}" height="180" width="150"><br> {% endif %} 
                     </div>
                         <div class="row">
-                            <div class="row col-6 pt-1">
+                            <div class="col-6 pt-1">
                                 <div class="card-body">
 
                 
-                  <div class="form-floating mt-1">
-                    <input type="text" class="form-control" id="staffno" name="staffno" required
-                    {% if staff %} value="{{ staff.staffno }}" readonly="true" {% else %} value="" {% endif %}>
-                    <label for="staffno">Staff Number</label>
-                  </div>
+                                        <div class="form-floating mt-1">
+                                            <input type="text" class="form-control" id="staffno" name="staffno" required
+                                            {% if staff %} value="{{ staff.staffno }}" readonly="true" {% else %} value="" {% endif %}>
+                                            <label for="staffno">Staff Number</label>
+                                        </div>
                 
                                         <div class="form-floating mt-1">
                                             <select name="title" class="form-select" required> 
@@ -102,7 +102,7 @@
                             </div></div>
 
 
-                            <div class="row col-6 pt-1">
+                            <div class="col-6 pt-1">
                                 <div class="card-body">                                       
                                         
 
@@ -202,6 +202,7 @@
                                             <input type="file" class="form-control" name="staff_pix"  aria-label="staff_pix" aria-describedby="staff_pix" {% if staff %} value="{{ staff.staff_pix }}" {% else %} value="" {% endif %}>
                                             <label for="staff_pix">Employee Photo</label>
                                         </div>
+
                                         <hr>
                                         <input type="submit" value="Add" class="btn btn-block btn-secondary">
                                         <a class="btn btn-sm btn-primary" href="{% url 'newstaff' %}">Cancel</a>
@@ -219,46 +220,7 @@
 
 
 
-        <div class="row col-5 p-1">
-              <div class="card pt-1 mx-3">
-                <div class="card-header text-center"><h5><strong>Number of Staff: {{ staff_count }}</strong></h5></div>
-                <div class="card-body">
-                {% if staffs %}
-                
-                <table class="table table-sm table-hover">
-				<tr>
-					<th>Name of Staff</th>
-					{% comment %} <th>Short Name</th> {% endcomment %}
-                    {% comment %} <th>Notes</th> {% endcomment %}
-                    <th>Action</th>
-				</tr>
-
-                {% for staff in staffs %} 
-                
-                    <tr>
-                        <td>
-                            <a href="{% url 'staff-details' staff.staffno %}">
-                                {{ staff.lname }}, {{ staff.title }} {{ staff.fname }} {% if staff.middlenames %} {{ staff.middlenames }} {% endif %}  {% if staff.suffix %} {{ staff.suffix }} {% endif %}
-                            </a>
-                        </td>
-                        {% comment %} <td>{{ dept.dept_short_name }}</td> 
-                        {% url 'staff-details' 1 %}
-                        {% endcomment %}
-                        {% comment %} <td>{{ dept.dept_notes }}</td> {% endcomment %}
-                        <td>
-                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staff' staff.staffno %}"></a>
-                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-staff' staff.staffno %}"></a>
-                        </td>
-                    </tr>
-
-                {% endfor %}
-                   
-			</table>
-            {% else %}
-            <h1>ADD MORE STAFF</h1>
-            {% endif %}
-            </div>
-        </div></div></div>    
+           
              
     {% endblock %}
 

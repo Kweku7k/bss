@@ -8,7 +8,7 @@
                 <div class="card-body">
                 <form action="" method="POST">
             {% csrf_token %}
-            <label for="job_rank" class="col-form-label"> Staff Level </label> 
+            <!-- <label for="job_rank" class="col-form-label"> Staff Level </label> 
             <select name="job_rank" class="form-control" required>
                   <option value"">---Select Staff Level---</option>
                         {% for key,value in STAFFLEVEL %}
@@ -18,7 +18,7 @@
                             {{ value }}</option>
                         {% endfor %}
                    
-            </select>
+            </select> -->
 
             <div class="form-group">
               <label for="job_title" class="col-form-label">Job Title</label>
