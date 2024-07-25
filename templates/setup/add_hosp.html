@@ -1,77 +1,68 @@
- {% extends "base.html" %} {% load static %}
-  {% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
-{% block content %} 
-        <div class="row">
-            <div class="row col-4 pt-2">
-                <div class="card bg-info pt-4">
-                <div class="card-header text-center"><h5><strong>Add New Hospital</strong></h5></div>
-                <div class="card-body">
-                <form action="" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-              <label for="hospital_name" class="col-form-label">Name of Hospital</label>
-              <input type="text" name="hospital_name" class="form-control" {% if hosp %} value="{{ hosp.hospital_name }}" {% else %} value="" {% endif %} required>
-            </div>
-            <div class="form-group">
-              <label for="hospital_location" class="col-form-label">Location of Hospital</label>
-              <input type="text" name="hospital_location" class="form-control" {% if hosp %} value="{{ hosp.hospital_location }}" {% else %} value="" {% endif %} required>
-            </div>
-            <div class="form-group">
-              <label for="hospital_contact_name" class="col-form-label">Hospital Contact Name</label>
-              <input type="text" name="hospital_contact_name" class="form-control" {% if hosp %} value="{{ hosp.hospital_contact_name }}" {% else %} value="" {% endif %}>
-            </div>
-            <div class="form-group">
-              <label for="hospital_contact_phone" class="col-form-label">Hospital Contact Phone</label>
-              <input type="text" name="hospital_contact_phone" class="form-control" {% if hosp %} value="{{ hosp.hospital_contact_phone }}" {% else %} value="" {% endif %}>
-            </div>
-            <hr>
-            <input type="submit" value="Add" class="btn btn-block btn-secondary">
-                        <a class="btn btn-sm btn-primary" href="{% url 'add-hosp' %}">Cancel</a>
-          </form>
-            </div> </div></div>
-            <div class="row col-8 p-1">
-              <div class="card pt-1 mx-4">
-                <div class="card-header text-center"><h5><strong>Number of Hospitals: {{ hosp_count }}</strong></h5></div>
-                <div class="card-body">
-                {% if hosps %}
-                
-                <table class="table table-sm table-hover">
-				<tr>
-					<th>Name of Hospital</th>
-					<th>Location</th>
-                    {% comment %} <th>Contact Name</th>
-                    <th>Contact Phone</th> {% endcomment %}
-                    <th>Action</th>
-				</tr>
+{% extends "base.html" %}
+{% load static %}
 
-                {% for hosp in hosps %} 
-                
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Hospital</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="hospital_name" class="col-form-label">Name of Hospital</label>
+                        <input type="text" name="hospital_name" class="form-control" {% if hosp %} value="{{ hosp.hospital_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hospital_location" class="col-form-label">Location of Hospital</label>
+                        <input type="text" name="hospital_location" class="form-control" {% if hosp %} value="{{ hosp.hospital_location }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hospital_contact_name" class="col-form-label">Hospital Contact Name</label>
+                        <input type="text" name="hospital_contact_name" class="form-control" {% if hosp %} value="{{ hosp.hospital_contact_name }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label for="hospital_contact_phone" class="col-form-label">Hospital Contact Phone</label>
+                        <input type="text" name="hospital_contact_phone" class="form-control" {% if hosp %} value="{{ hosp.hospital_contact_phone }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-hosp' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-lg">
+            <div class="card-header text-center">
+                <h5><strong>Number of Hospitals: {{ hosp_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if hosps %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Name of Hospital</th>
+                        <th>Location</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for hosp in hosps %}
                     <tr>
                         <td>{{ hosp.hospital_name }}</td>
                         <td>{{ hosp.hospital_location }}</td>
-                        {% comment %} <td>{{ hosp.hospital_contact_name }}</td>
-                        <td>{{ hosp.hospital_contact_phone }}</td> {% endcomment %}
-                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-hosp' hosp.id %}"></a>
-                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-hosp' hosp.id %}" onclick="return confirm('Do you really want to delete the data for {{ hosp.hospital_name }}?');"></a>
+                        <td>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-hosp' hosp.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-hosp' hosp.id %}" onclick="return confirm('Do you really want to delete the data for {{ hosp.hospital_name }}?');"></a>
                         </td>
                     </tr>
-
-                {% endfor %}
-                   
-			</table>
-            {% else %}
-            <h1>ADD MORE HOSPITALS</h1>
-            {% endif %}
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add More Hospitals</h5>
+                {% endif %}
             </div>
-        </div></div></div>
-
-
-              
-
-               
-    {% endblock %}
-
-  
-
-
- 
+        </div>
+    </div>
+</div>
+{% endblock %}

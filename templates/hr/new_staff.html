@@ -23,13 +23,13 @@
                                         <div class="form-floating mt-1">
                                             <select name="title" class="form-select" required> 
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in TITLE %}
-                                                    <option value="{{ key }}"
-                                                    {% if key == staff.title %}
+                                                {% for ts in title %}
+                                                    <option value="{{ ts.id }}"
+                                                    {% if ts.id == pkno %}
                                                         selected
                                                     {% endif %}
-                                                    >{{ value }}</option>
-                                                    {% endfor %}
+                                                    >{{ ts }}</option>
+                                                {% endfor %}
                                             </select>
                                              <label for="title"> Title</label>
                                         </div>

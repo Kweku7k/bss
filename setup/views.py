@@ -51,6 +51,163 @@ def edit_school(request, sch_id):
     return render(request, 'setup/add_school.html', context)
 ########### END OF SCHOOL VIEWS ################
 
+
+########### TITLE ################
+def add_title(request):
+    submitted = False
+    titles = Title.objects.order_by('-id') 
+    title_count = titles.count()
+    if request.method == 'POST':
+        form = TitleForm(request.POST)
+        if form.is_valid(): 
+            form.save()
+            return HttpResponseRedirect('title')
+    else:
+        form = TitleForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    return render(request,'setup/add_title.html',{'form':form,'submitted':submitted,'titles':titles,'title_count':title_count})
+
+def delete_title(request,title_id):
+    title = Title.objects.get(pk=title_id)
+    if request.method == 'GET':
+       title.delete()
+    return redirect('add-title')
+
+def edit_title(request, title_id):
+    titles = Title.objects.order_by('-id') 
+    title_count = titles.count()
+    title = Title.objects.get(pk=title_id)
+    form = TitleForm(instance=title)
+
+    if request.method == 'POST':
+        form = TitleForm(request.POST, instance=title)
+        if form.is_valid():
+            form.save()
+            return redirect('add-title')
+
+    context = {'form':form,'titles':titles,'title_count':title_count,'title':title}
+    return render(request, 'setup/add_title.html', context)
+########### END OF TITLE ################
+
+########### QUALIFICATIONS ################
+def add_qualification(request):
+    submitted = False
+    quals = Qualification.objects.order_by('-id') 
+    qual_count = quals.count()
+    if request.method == 'POST':
+        form = QualificationForm(request.POST)
+        if form.is_valid(): 
+            form.save()
+            return HttpResponseRedirect('qualification')
+    else:
+        form = QualificationForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    return render(request,'setup/add_qualification.html',{'form':form,'submitted':submitted,'quals':quals,'qual_count':qual_count})
+
+def delete_qualification(request,qual_id):
+    qual = Qualification.objects.get(pk=qual_id)
+    if request.method == 'GET':
+       qual.delete()
+    return redirect('add-qualification')
+
+def edit_qualification(request, qual_id):
+    quals = Qualification.objects.order_by('-id') 
+    qual_count = quals.count()
+    qual = Qualification.objects.get(pk=qual_id)
+    form = QualificationForm(instance=qual)
+
+    if request.method == 'POST':
+        form = QualificationForm(request.POST, instance=qual)
+        if form.is_valid():
+            form.save()
+            return redirect('add-qualification')
+
+    context = {'form':form,'quals':quals,'qual_count':qual_count,'qual':qual}
+    return render(request, 'setup/add_qualification.html', context)
+########### END OF QUALIFICATIONS ################
+
+########### STAFF CATEGORY ################
+def add_staffcategory(request):
+    submitted = False
+    staffcategorys = StaffCategory.objects.order_by('-id') 
+    staffcategory_count = staffcategorys.count()
+    if request.method == 'POST':
+        form = StaffCategoryForm(request.POST)
+        if form.is_valid(): 
+            form.save()
+            return HttpResponseRedirect('staffcategory')
+    else:
+        form = StaffCategoryForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    return render(request,'setup/add_staffcategory.html',{'form':form,'submitted':submitted,'staffcategorys':staffcategorys,'staffcategory_count':staffcategory_count})
+
+def delete_staffcategory(request,sc_id):
+    staffcategory = StaffCategory.objects.get(pk=sc_id)
+    if request.method == 'GET':
+       staffcategory.delete()
+    return redirect('add-staffcategory')
+
+def edit_staffcategory(request, sc_id):
+    staffcategorys = StaffCategory.objects.order_by('-id') 
+    staffcategory_count = staffcategorys.count()
+    staffcategory = StaffCategory.objects.get(pk=sc_id)
+    form = StaffCategoryForm(instance=staffcategory)
+
+    if request.method == 'POST':
+        form = StaffCategoryForm(request.POST, instance=staffcategory)
+        if form.is_valid():
+            form.save()
+            return redirect('add-staffcategory')
+
+    context = {'form':form,'staffcategorys':staffcategorys,'staffcategory_count':staffcategory_count,'staffcategory':staffcategory}
+    return render(request, 'setup/add_staffcategory.html', context)
+########### END OF STAFF CATEGORY ################
+
+########### CONTRACT ################
+def add_contract(request):
+    submitted = False
+    contracts = Contract.objects.order_by('-id') 
+    contract_count = contracts.count()
+    if request.method == 'POST':
+        form = ContractForm(request.POST)
+        if form.is_valid(): 
+            form.save()
+            return HttpResponseRedirect('contract')
+    else:
+        form = ContractForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    return render(request,'setup/add_contract.html',{'form':form,'submitted':submitted,'contracts':contracts,'contract_count':contract_count})
+
+def delete_contract(request,ct_id):
+    contract = Contract.objects.get(pk=ct_id)
+    if request.method == 'GET':
+       contract.delete()
+    return redirect('add-contract')
+
+def edit_contract(request, ct_id):
+    contracts = Contract.objects.order_by('-id') 
+    contract_count = contracts.count()
+    contract = Contract.objects.get(pk=ct_id)
+    form = ContractForm(instance=contract)
+
+    if request.method == 'POST':
+        form = ContractForm(request.POST, instance=contract)
+        if form.is_valid():
+            form.save()
+            return redirect('add-contract')
+
+    context = {'form':form,'contracts':contracts,'contract_count':contract_count,'contract':contract}
+    return render(request, 'setup/add_contract.html', context)
+########### CONTRACT ################
+
 ########### PROFESSIONAL BODIES VIEWS ################
 def add_profbody(request):
     submitted = False
@@ -256,11 +413,12 @@ def edit_bankbranch(request, bankbranch_id,bankid):
             #    'bank_pk':bank_pk
                }
     return render(request, 'setup/add_bankbranch.html', context)
-########### END OF BANK VIEWS staffrank ################
+########### END OF BANK VIEWS ################
 
 ########### STAFF RANK VIEWS ################
 def add_jobtitle(request):
     submitted = False
+    staffcategorys = StaffCategory.objects.order_by('category_abbr') 
     jobtitles = JobTitle.objects.order_by('-id') 
     jobtitle_count = jobtitles.count()
     if request.method == 'POST':
@@ -277,7 +435,7 @@ def add_jobtitle(request):
         if 'submitted' in request.GET:
             submitted = True
 
-    return render(request,'setup/add_jobtitle.html',{'form':form,'submitted':submitted,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'STAFFLEVEL':STAFFLEVEL})
+    return render(request,'setup/add_jobtitle.html',{'form':form,'submitted':submitted,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'staffcategorys':staffcategorys})
 
 def delete_jobtitle(request,jobtitle_id):
     jobtitle = JobTitle.objects.get(pk=jobtitle_id)

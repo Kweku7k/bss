@@ -11,7 +11,23 @@ urlpatterns = [
     path('profbody', views.add_profbody,name="add-profbody"),
     path('edit_profbody/<int:pb_id>', views.edit_profbody,name="edit-profbody"),
     path('delete_profbody/<int:pb_id>', views.delete_profbody,name="delete-profbody"),
+    
+    path('title', views.add_title,name="add-title"),
+    path('edit_title/<int:title_id>', views.edit_title,name="edit-title"),
+    path('delete_title/<int:title_id>', views.delete_title,name="delete-title"),
+    
+    path('qualification', views.add_qualification,name="add-qualification"),
+    path('edit_qualification/<int:qual_id>', views.edit_qualification,name="edit-qualification"),
+    path('delete_qualification/<int:qual_id>', views.delete_qualification,name="delete-qualification"),
 
+    path('staffcategory', views.add_staffcategory,name="add-staffcategory"),
+    path('edit_staffcategory/<int:sc_id>', views.edit_staffcategory,name="edit-staffcategory"),
+    path('delete_staffcategory/<int:sc_id>', views.delete_staffcategory,name="delete-staffcategory"),
+    
+    path('contract', views.add_contract,name="add-contract"),
+    path('edit_contract/<int:ct_id>', views.edit_contract,name="edit-contract"),
+    path('delete_contract/<int:ct_id>', views.delete_contract,name="delete-contract"),
+    
     path('dept', views.add_dept,name="add-dept"),
     path('edit_dept/<int:dept_id>', views.edit_dept,name="edit-dept"),
     path('delete_dept/<int:dept_id>', views.delete_dept,name="delete-dept"),

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Title</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="title_name" class="col-form-label">Title</label>
+                        <input type="text" name="title_name" class="form-control" {% if title %} value="{{ title.title_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="title_abbr" class="col-form-label">Abbreviation</label>
+                        <input type="text" name="title_abbr" class="form-control" {% if title %} value="{{ title.title_abbr }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-title' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4">
+            <div class="card-header text-center">
+                <h5><strong>Title Count: {{ title_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if titles %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Title</th>
+                        <th>Abbreviation</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for title in titles %}
+                    <tr>
+                        <td>{{ title.title_name }}</td>
+                        <td>{{ title.title_abbr }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-title' title.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-title' title.id %}" onclick="return confirm('Do you really want to delete the data for {{ title.title_name }}?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add More Title</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

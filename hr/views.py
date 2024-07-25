@@ -150,7 +150,7 @@ def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
     # hpq_choices = ProfessionalBody.HPQ_CHOICES
-
+    title = Title.objects.all()
     staff_count = staffs.count()
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
@@ -187,7 +187,8 @@ def newstaff(request):
                'HEQ':[(q.name, q.name)  for q in ChoicesHEQ.objects.all()],
                'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
                'REGION':[(q.name, q.name)  for q in ChoicesRegion.objects.all()],
-               'TITLE':[(q.name, q.name)  for q in ChoicesTitle.objects.all()],
+               'title':title,
+            #    'TITLE':[(q.name, q.name)  for q in Title.objects.all()],
                'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
             }
     return render(request,'hr/new_staff.html',context)

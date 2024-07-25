@@ -1,92 +1,73 @@
- {% extends "base.html" %} {% load static %}
-  {% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
-{% block content %} 
-        <div class="row">
-            <div class="row col-4 pt-2">
-                <div class="card bg-info pt-4">
-                <div class="card-header text-center"><h5><strong>Add New Bank Branch</strong></h5></div>
-                <div class="card-body">
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Bank Branch</strong></h5>
+            </div>
+            <div class="card-body">
                 <form action="" method="POST">
-            {% csrf_token %}
-       {% comment %}      <div class="form-group">
-              <label for="bank_code" class="col-form-label"> Bank </label>
-              <input type="text" name="bank_code" class="form-control" {% if bankbranch %} value="{{ bankbranch.bank_code }}" {% else %} value="" {% endif %} required>
-            </div> 
-            {% if school %} value="{{ school.school_location }}" {% else %} value="" {% endif %}
-            {% endcomment %}
-            <label for="bank_code" class="col-form-label"> Bank </label>
-            
-            <select name="bank_code" class="form-control">
-            
-            {% comment %} {% if banks.id %} value="{{ bank.bank_long_name }}" {% else %} value="" {% endif %} {% endcomment %}
-                  <option "">---Select Bank---</option>
-                      {% if banks %}
-                        {% for bank in banks %}
-                            <option value="{{ bank.id }}" {% if bankbranch.bank_code_id == bank.id %} selected {% endif %}>{{ bank.bank_long_name }}</option>
-                        {% endfor %}
-                    {% endif %}
-            </select>
-            
-            <div class="form-group">
-              <label for="branch_name" class="col-form-label">Name of Branch</label>
-              <input type="text" name="branch_name" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_name }}" {% else %} value="" {% endif %} required>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="bank_code" class="col-form-label">Bank</label>
+                        <select name="bank_code" class="form-control">
+                            <option value="">---Select Bank---</option>
+                            {% if banks %}
+                                {% for bank in banks %}
+                                    <option value="{{ bank.id }}" {% if bankbranch.bank_code_id == bank.id %} selected {% endif %}>{{ bank.bank_long_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="branch_name" class="col-form-label">Name of Branch</label>
+                        <input type="text" name="branch_name" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="branch_location" class="col-form-label">Location</label>
+                        <input type="text" name="branch_location" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_location }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-bankbranch' %}">Cancel</a>
+                </form>
             </div>
-
-            
-
-            
-             <div class="form-group">
-              <label for="branch_location" class="col-form-label">Location</label>
-              <input type="text" name="branch_location" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_location }}" {% else %} value="" {% endif %} required>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-lg">
+            <div class="card-header text-center">
+                <h5><strong>Number of Bank Branches: {{ bankbranch_count }}</strong></h5>
             </div>
-            <hr>
-            <input type="submit" value="Add" class="btn btn-block btn-secondary">
-            <a class="btn btn-sm btn-primary" href="{% url 'add-bankbranch' %}">Cancel</a>
-          </form>
-            </div> </div></div>
-            <div class="row col-8 p-1">
-              <div class="card pt-1 mx-4 shadow-lg">
-                <div class="card-header text-center"><h5><strong>Number of Bank Branches: {{ bankbranch_count }}</strong></h5></div>
-                <div class="card-body">
+            <div class="card-body">
                 {% if bankbranchs %}
-                
                 <table class="table table-sm table-hover">
-				<tr>
-					<th>Bank</th>
-					<th>Name of Branch</th>
-                    <th>Location</th>
-                    <th>Action</th>
-				</tr>
-
-                {% for bankbranch in bankbranchs %} 
-                
                     <tr>
-                        
+                        <th>Bank</th>
+                        <th>Name of Branch</th>
+                        <th>Location</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for bankbranch in bankbranchs %}
+                    <tr>
                         <td>{{ bankbranch.bank_code }}</td>
                         <td>{{ bankbranch.branch_name }}</td>
                         <td>{{ bankbranch.branch_location }}</td>
-                        
-                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-bankbranch' bankbranch.id bankbranch.bank_code_id %}"></a>
-                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-bankbranch' bankbranch.id %}" onclick="return confirm('Do you really want to delete the data for {{ bankbranch.bank_code }}: {{ bankbranch.branch_name }}?');"></a>
+                        <td>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-bankbranch' bankbranch.id bankbranch.bank_code_id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-bankbranch' bankbranch.id %}" onclick="return confirm('Do you really want to delete the data for {{ bankbranch.bank_code }}: {{ bankbranch.branch_name }}?');"></a>
                         </td>
                     </tr>
-
-                {% endfor %}
-                   
-			</table>
-            {% else %}
-            <h1>ADD MORE BANK BRANCHES</h1>
-            {% endif %}
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add Bank Branches</h5>
+                {% endif %}
             </div>
-        </div></div></div>
-
-
-              
-
-               
-    {% endblock %}
-
-  
-
-
- 
+        </div>
+    </div>
+</div>
+{% endblock %}

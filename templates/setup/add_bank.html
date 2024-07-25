@@ -1,71 +1,64 @@
- {% extends "base.html" %} {% load static %}
+{% extends "base.html" %}
+{% load static %}
 
-{% block content %} 
-        <div class="row">
-            <div class="row col-4 pt-2">
-                <div class="card bg-info pt-4">
-                <div class="card-header text-center"><h5><strong>Add New Bank</strong></h5></div>
-                <div class="card-body">
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Bank</strong></h5>
+            </div>
+            <div class="card-body">
                 <form action="" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-              <label for="bank_long_name" class="col-form-label">Name of Bank</label>
-              <input type="text" name="bank_long_name" class="form-control" {% if bank %} value="{{ bank.bank_long_name }}" {% else %} value="" {% endif %} required>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="bank_long_name" class="col-form-label">Name of Bank</label>
+                        <input type="text" name="bank_long_name" class="form-control" {% if bank %} value="{{ bank.bank_long_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bank_short_name" class="col-form-label">Short Name of Bank</label>
+                        <input type="text" name="bank_short_name" class="form-control" {% if bank %} value="{{ bank.bank_short_name }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label for="bank_notes" class="col-form-label">Notes</label>
+                        <textarea name="bank_notes" class="form-control">{% if bank %} {{ bank.bank_notes }} {% endif %}</textarea>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-bank' %}">Cancel</a>
+                </form>
             </div>
-            <div class="form-group">
-              <label for="bank_short_name" class="col-form-label">Short Name of Bank</label>
-              <input type="text" name="bank_short_name" class="form-control" {% if bank %} value="{{ bank.bank_short_name }}" {% else %} value="" {% endif %}>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4">
+            <div class="card-header text-center">
+                <h5><strong>Number of Banks: {{ bank_count }}</strong></h5>
             </div>
-            <div class="form-group">
-              <label for="bank_notes" class="col-form-label">Notes</label>
-              <textarea name="bank_notes" class="form-control">{% if bank %} {{ bank.bank_notes }}  {% endif %}</textarea>
-            </div>
-            <hr>
-            <input type="submit" value="Add" class="btn btn-block btn-secondary">
-                        <a class="btn btn-sm btn-primary" href="{% url 'add-bank' %}">Cancel</a>
-          </form>
-            </div> </div></div>
-            <div class="row col-8 p-1">
-              <div class="card pt-1 mx-4">
-                <div class="card-header text-center"><h5><strong>Number of Banks: {{ bank_count }}</strong></h5></div>
-                <div class="card-body">
+            <div class="card-body">
                 {% if banks %}
-                
                 <table class="table table-sm table-hover">
-				<tr>
-					<th>Name of Bank</th>
-					<th>Short Name</th>
-                    {% comment %} <th>Notes</th> {% endcomment %}
-                    <th>Action</th>
-				</tr>
-
-                {% for bank in banks %} 
-                
+                    <tr>
+                        <th>Name of Bank</th>
+                        <th>Short Name</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for bank in banks %}
                     <tr>
                         <td>{{ bank.bank_long_name }}</td>
                         <td>{{ bank.bank_short_name }}</td>
-                        {% comment %} <td>{{ bank.bank_notes }}</td> {% endcomment %}
-                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-bank' bank.id %}"></a>
-                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-bank' bank.id %}" onclick="return confirm('Do you really want to delete the data for {{ bank.bank_name }}?');"></a>
+                        <td>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-bank' bank.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-bank' bank.id %}" onclick="return confirm('Do you really want to delete the data for {{ bank.bank_long_name }}?');"></a>
                         </td>
                     </tr>
-
-                {% endfor %}
-                   
-			</table>
-            {% else %}
-            <h1>ADD MORE BANKS</h1>
-            {% endif %}
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add More Banks</h5>
+                {% endif %}
             </div>
-        </div></div></div>
-
-
-              
-
-               
-    {% endblock %}
-
-  
-
-
- 
+        </div>
+    </div>
+</div>
+{% endblock %}

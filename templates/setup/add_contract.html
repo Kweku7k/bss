@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Contract Type</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="contract_type" class="col-form-label">Contract Type</label>
+                        <input type="text" name="contract_type" class="form-control" {% if contract %} value="{{ contract.contract_type }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-primary" href="{% url 'add-contract' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4">
+            <div class="card-header text-center">
+                <h5><strong>Contract Type Count: {{ contract_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if contracts %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Contract Type</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for contract in contracts %}
+                    <tr>
+                        <td>{{ contract.contract_type }}</td>
+                        <td>
+                            <a class="btn btn-sm btn-primary bi-pencil-square" href="{% url 'edit-contract' contract.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-contract' contract.id %}" onclick="return confirm('Do you really want to delete the data for {{ contract.contract_type }}?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h3>Add Contract Type</h3>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

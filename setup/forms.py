@@ -11,6 +11,41 @@ class ProfBodyForm(ModelForm):
     class Meta:
         model = ProfBody
         fields = '__all__'
+        
+class TitleForm(ModelForm):
+    class Meta:
+        model = Title
+        fields = '__all__'
+        
+class QualificationForm(ModelForm):
+    class Meta:
+        model = Qualification
+        fields = '__all__'
+        
+class StaffCategoryForm(ModelForm):
+    class Meta:
+        model = StaffCategory
+        fields = '__all__'
+        
+class ContractForm(ModelForm):
+    class Meta:
+        model = Contract
+        fields = '__all__'
+        
+class CampusForm(ModelForm):
+    class Meta:
+        model = Campus
+        fields = '__all__'
+        
+class DirectorateForm(ModelForm):
+    class Meta:
+        model = Directorate
+        fields = '__all__'
+        
+class School_FacultyForm(ModelForm):
+    class Meta:
+        model = School_Faculty
+        fields = '__all__'
 
 class DepartmentForm(ModelForm):
     class Meta:

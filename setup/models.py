@@ -35,6 +35,44 @@ class Bank(models.Model):
     bank_notes = models.TextField('Notes',blank=True,null=True)
     def __str__(self):
         return self.bank_short_name
+    
+class Title(models.Model):
+    title_name = models.CharField('Title',max_length=250,blank=False,null=False)
+    title_abbr = models.CharField('Abbreviation',max_length=50,blank=True,null=True)
+    def __str__(self):
+        return self.title_abbr
+    
+class Qualification(models.Model):
+    qual_name = models.CharField('Qualification Title',max_length=250,blank=False,null=False)
+    qual_abbr = models.CharField('Abbreviation',max_length=50,blank=True,null=True)
+    def __str__(self):
+        return self.qual_abbr
+    
+class StaffCategory(models.Model):
+    category_name = models.CharField('Staff Category',max_length=250,blank=False,null=False)
+    category_abbr = models.CharField('Abbreviation',max_length=50,blank=True,null=True)
+    def __str__(self):
+        return self.category_abbr
+    
+class Contract(models.Model):
+    contract_type = models.CharField('Contract Type',max_length=250,blank=False,null=False)
+    def __str__(self):
+        return self.contract_type
+    
+class Campus(models.Model):
+    campus_name = models.CharField('Campus',max_length=250,blank=False,null=False)
+    def __str__(self):
+        return self.campus_name
+    
+class Directorate(models.Model):
+    direct_name = models.CharField('Directorate',max_length=250,blank=False,null=False)
+    def __str__(self):
+        return self.direct_name
+
+class School_Faculty(models.Model):
+    sch_fac_name = models.CharField('School/Faculty',max_length=250,blank=False,null=False)
+    def __str__(self):
+        return self.sch_fac_name
 
 class BankBranch(models.Model):
     branch_name = models.CharField('Name of Branch',max_length=250,blank=False,null=False)
