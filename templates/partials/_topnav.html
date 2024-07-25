@@ -51,7 +51,7 @@
      <form class="search-form d-flex align-items-center" method="POST" action="{% url "search" %}">
         {% csrf_token %}
 
-        <input type="text" name="search" placeholder="Search" title="Enter search keyword">
+        <input type="text" name="search" placeholder="Search" title="Enter search keyword" class="form-control">
         <button type="submit" title="Search"><i class="bi bi-search"></i></button>
       </form>
 	  	  <!-- <h5>CENTRAL UNIVERSITY HR PORTAL</h5> -->

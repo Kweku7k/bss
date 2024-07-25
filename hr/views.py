@@ -37,22 +37,25 @@ def landing(request):
 
 def search(request):
     staffs = Employee.objects.order_by('lname')
-    staff_count = staffs.count()
-    if 'search' in request.POST:
+    
+    if request.method == 'POST' and 'search' in request.POST:
         search_query = request.POST.get('search')
         if search_query:
             staffs = staffs.filter(
-                Q(lname__icontains=search_query) | 
-                Q(fname__icontains=search_query) | 
+                Q(lname__icontains=search_query) |
+                Q(fname__icontains=search_query) |
                 Q(job_title__icontains=search_query) |
                 Q(staff_rank__icontains=search_query)
             )
-            context = {
-                'staffs':staffs,
-                'staff_count':staff_count,
-            }
     
-            return render(request,'hr/search.html', context)
+    staff_count = staffs.count()
+    
+    context = {
+        'staffs': staffs,
+        'staff_count': staff_count,
+    }
+    
+    return render(request, 'hr/search.html', context)
 
 def deletestaff(request,staffno):  
     staffpix = ""
