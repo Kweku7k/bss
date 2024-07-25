@@ -2,59 +2,66 @@
 {% load static %}
 
 {% block content %}
-    <div class="row">
-        <div class="row col-4 pt-2">
-            <div class="card bg-info pt-4">
-                <div class="card-header text-center">
-                    <h5><strong>Add New Qualifications</strong></h5>
-                </div>
-                <div class="card-body">
-                    <form action="" method="POST">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="qual_name" class="col-form-label">Qualification Title</label>
-                            <input type="text" name="qual_name" class="form-control" {% if qual %} value="{{ qual.qual_name }}" {% else %} value="" {% endif %} required>
-                        </div>
-                        <div class="form-group">
-                            <label for="qual_abbr" class="col-form-label">Abbreviation</label>
-                            <input type="text" name="qual_abbr" class="form-control" {% if qual %} value="{{ qual.qual_abbr }}" {% else %} value="" {% endif %}>
-                        </div>
-                        <hr>
-                        <input type="submit" value="Add" class="btn btn-block btn-secondary">
-                        <a class="btn btn-sm btn-primary" href="{% url 'add-qualification' %}">Cancel</a>
-                    </form>
-                </div>
+<div class="row">
+    <!-- Add Qualification Form -->
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Qualification</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="qual_name" class="col-form-label">Qualification</label>
+                        <input type="text" name="qual_name" class="form-control" {% if qual %} value="{{ qual.qual_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="qual_abbr" class="col-form-label">Abbreviation</label>
+                        <input type="text" name="qual_abbr" class="form-control" {% if qual %} value="{{ qual.qual_abbr }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-qualification' %}">Cancel</a>
+                </form>
             </div>
         </div>
-        <div class="col-8 p-1">
-            <div class="card pt-1 mx-4">
-                <div class="card-header text-center">
-                    <h5><strong>Qualifications Count: {{ qual_count }}</strong></h5>
-                </div>
-                <div class="card-body">
-                    {% if quals %}
-                        <table class="table table-sm table-hover">
+    </div>
+
+    <!-- Qualifications List -->
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-sm">
+            <div class="card-header text-center">
+                <h5><strong>Qualifications Count: {{ qual_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if quals %}
+                    <table class="table table-sm table-hover">
+                        <thead>
                             <tr>
-                                <th>Qualification Title</th>
+                                <th>Qualification</th>
                                 <th>Abbreviation</th>
                                 <th>Action</th>
                             </tr>
+                        </thead>
+                        <tbody>
                             {% for qual in quals %}
                                 <tr>
                                     <td>{{ qual.qual_name }}</td>
                                     <td>{{ qual.qual_abbr }}</td>
                                     <td>
                                         <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-qualification' qual.id %}"></a>
-                                        <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-qualification' qual.id %}" onclick="return confirm('Do you really want to delete the data for {{ qual.qual_name }}?');"></a>
+                                        <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-qualification' qual.id %}" onclick="return confirm('Do you really want to delete the data for {{ qual.qual_name }}?');"></a>
                                     </td>
                                 </tr>
                             {% endfor %}
-                        </table>
-                    {% else %}
-                        <h3>Add  Qualification</h3>
-                    {% endif %}
-                </div>
+                        </tbody>
+                    </table>
+                {% else %}
+                    <h5 class="pt-2">No Qualifications Available.</h5>
+                {% endif %}
             </div>
         </div>
     </div>
+</div>
 {% endblock %}

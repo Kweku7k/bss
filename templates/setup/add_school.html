@@ -1,93 +1,87 @@
- {% extends "base.html" %} {% load static %}
-  {% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
-{% block content %} 
-        <div class="row">
-            <div class="row col-4 pt-2">
-                <div class="card bg-info pt-4">
-                <div class="card-header text-center"><h4><strong>Add New School</strong></h4></div>
-                <div class="card-body">
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <!-- Add School Form -->
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h4><strong>Add New School</strong></h4>
+            </div>
+            <div class="card-body">
                 <form action="" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-              <label for="school_name" class="col-form-label">Name of School</label>
-              <input type="text" name="school_name" class="form-control" {% if school %} value="{{ school.school_name }}" {% else %} value="" {% endif %} required>
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="school_name" class="col-form-label">Name of School</label>
+                        <input type="text" name="school_name" class="form-control" {% if school %} value="{{ school.school_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="school_code" class="col-form-label">Short Name of School</label>
+                        <input type="text" name="school_code" class="form-control" {% if school %} value="{{ school.school_code }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label for="school_location" class="col-form-label">Location</label>
+                        <input type="text" name="school_location" class="form-control" {% if school %} value="{{ school.school_location }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="school_type" class="col-form-label">Level of School</label>
+                        <select name="school_type" class="form-control" {% if school %} value="{{ school.school_type }}" {% else %} value="" {% endif %} required>
+                            <option value="">---Select---</option>
+                            <option value="BS" {% if school.school_type == 'BS' %} selected {% endif %}>Basic School</option>
+                            <option value="SS" {% if school.school_type == 'SS' %} selected {% endif %}>Secondary School</option>
+                            <option value="TC" {% if school.school_type == 'TC' %} selected {% endif %}>Post Secondary School</option>
+                            <option value="UN" {% if school.school_type == 'UN' %} selected {% endif %}>University</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="school_notes" class="col-form-label">Notes</label>
+                        <textarea name="school_notes" class="form-control">{% if school %} {{ school.school_notes }} {% endif %}</textarea>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-school' %}">Cancel</a>
+                </form>
             </div>
-            <div class="form-group">
-              <label for="school_code" class="col-form-label">Short Name of School</label>
-              <input type="text" name="school_code" class="form-control" {% if school %} value="{{ school.school_code }}" {% else %} value="" {% endif %}>
-            </div>
-            <div class="form-group">
-              <label for="school_location" class="col-form-label">Location</label>
-              <input type="text" name="school_location" class="form-control" {% if school %} value="{{ school.school_location }}" {% else %} value="" {% endif %} required>
-            </div>
+        </div>
+    </div>
 
-<div class="form-group">
-  <label for="school_type" class="col-form-label">Level of School</label>
-                <select name="school_type" class="form-control" {% if school %} value="{{ school.school_type }}" {% else %} value="" {% endif %} required>
-                  
-                      <option value="">---Select---</option>
-                      <option value="BS" {% if school.school_type == 'BS' %} selected {% endif %}>Basic School</option>
-                      <option value="SS" {% if school.school_type == 'SS' %} selected {% endif %}>Secondary School</option>
-                      <option value="TC" {% if school.school_type == 'TC' %} selected {% endif %}>Post Secondary School</option>
-                      <option value="UN" {% if school.school_type == 'UN' %} selected {% endif %}>University</option>
-                   
-                </select>
-</div>
-
-
-            <div class="form-group">
-              <label for="school_notes" class="col-form-label">Notes</label>
-              <textarea name="school_notes" class="form-control">{% if school %} {{ school.school_notes }}  {% endif %}</textarea>
+    <!-- Schools List -->
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-sm">
+            <div class="card-header text-center">
+                <h4><strong>Number of Schools: {{ sch_count }}</strong></h4>
             </div>
-            <hr>
-            <input type="submit" value="Add" class="btn btn-block btn-secondary">
-                        <a class="btn btn-sm btn-primary" href="{% url 'add-school' %}">Cancel</a>
-                        
-          </form>
-            </div> </div></div>
-            <div class="row col-8 p-1">
-              <div class="card pt-1 mx-4">
-                <div class="card-header text-center"><h4><strong>Number of Schools: {{ sch_count }}</strong></h4></div>
-                <div class="card-body">
+            <div class="card-body">
                 {% if schools %}
-                
-                <table class="table table-sm table-hover">
-				<tr>
-					<th>School Name</th>
-					{% comment %} <th>Short Name</th> {% endcomment %}
-					<th>Location</th>
-          <th>Level</th>
-					<th>Action</th>
-					
-				</tr>
-
-                {% for sch in schools %} 
-                
-                    <tr>
-                        <td>{{ sch.school_name }}</td>
-                        <td>{{ sch.school_location }}</td>
-                        <td>{{ sch.school_type }}</td>
-                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-school' sch.id %}"></a>
-                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-school' sch.id %}" onclick="return confirm('Do you really want to delete the data for {{ sch.school_name }}?');"></a>
-                        </td>
-                    </tr>
-
-                {% endfor %}
-                   
-			</table>
-            {% else %}
-            <h1>ADD MORE SCHOOLS</h1>
-            {% endif %}
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>School Name</th>
+                                <th>Location</th>
+                                <th>Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sch in schools %}
+                                <tr>
+                                    <td>{{ sch.school_name }}</td>
+                                    <td>{{ sch.school_location }}</td>
+                                    <td>{{ sch.school_type }}</td>
+                                    <td>
+                                        <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-school' sch.id %}"></a>
+                                        <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-school' sch.id %}" onclick="return confirm('Do you really want to delete the data for {{ sch.school_name }}?');"></a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <h5 class="pt-2">No Schools Available.</h5>
+                {% endif %}
             </div>
-        </div></div></div>
-
-
-              
-
-               
-    {% endblock %}
-
-  
-
-
- 
+        </div>
+    </div>
+</div>
+{% endblock %}

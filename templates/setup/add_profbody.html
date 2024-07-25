@@ -1,71 +1,64 @@
- {% extends "base.html" %} {% load static %}
-  {% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
-{% block content %} 
-        <div class="row">
-            <div class="row col-4 pt-2">
-                <div class="card bg-info pt-4">
-                <div class="card-header text-center"><h5><strong>Add New Professional Body/Association</strong></h5></div>
-                <div class="card-body">
-                <form action="" method="POST">
-            {% csrf_token %}
-            <div class="form-group">
-              <label for="assoc_long_name" class="col-form-label">Name of Association/Body</label>
-              <input type="text" name="assoc_long_name" class="form-control" {% if profbody %} value="{{ profbody.assoc_long_name }}" {% else %} value="" {% endif %} required>
-            </div>
-            <div class="form-group">
-              <label for="assoc_short_name" class="col-form-label">Short Name of Association/Body</label>
-              <input type="text" name="assoc_short_name" class="form-control" {% if profbody %} value="{{ profbody.assoc_short_name }}" {% else %} value="" {% endif %}>
-            </div>
-            <div class="form-group">
-              <label for="assoc_notes" class="col-form-label">Notes</label>
-              <textarea name="assoc_notes" class="form-control">{% if profbody %} {{ profbody.assoc_notes }}  {% endif %}</textarea>
-            </div>
-            <hr>
-            <input type="submit" value="Add" class="btn btn-block btn-secondary">
-                        <a class="btn btn-sm btn-primary" href="{% url 'add-profbody' %}">Cancel</a>
-          </form>
-            </div> </div></div>
-            <div class="row col-8 p-1">
-              <div class="card pt-1 mx-4">
-                <div class="card-header text-center"><h5><strong>Number of Associations/Bodies: {{ pb_count }}</strong></h5></div>
-                <div class="card-body">
-                {% if profbodys %}
-                
-                <table class="table table-sm table-hover">
-				<tr>
-					<th>Name of Association/Body</th>
-					<th>Short Name</th>
-                    {% comment %} <th>Notes</th> {% endcomment %}
-                    <th>Action</th>
-				</tr>
+{% extends "base.html" %}
+{% load static %}
 
-                {% for pb in profbodys %} 
-                
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-light pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Professional Body/Association</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="assoc_long_name" class="col-form-label">Name of Association/Body</label>
+                        <input type="text" name="assoc_long_name" class="form-control" {% if profbody %} value="{{ profbody.assoc_long_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="assoc_short_name" class="col-form-label">Short Name of Association/Body</label>
+                        <input type="text" name="assoc_short_name" class="form-control" {% if profbody %} value="{{ profbody.assoc_short_name }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <div class="form-group">
+                        <label for="assoc_notes" class="col-form-label">Notes</label>
+                        <textarea name="assoc_notes" class="form-control">{% if profbody %} {{ profbody.assoc_notes }} {% endif %}</textarea>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-block btn-primary">
+                    <a class="btn btn-sm btn-secondary" href="{% url 'add-profbody' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-sm">
+            <div class="card-header text-center">
+                <h5><strong>Number of Associations/Bodies: {{ pb_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if profbodys %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Name of Association/Body</th>
+                        <th>Short Name</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for pb in profbodys %}
                     <tr>
                         <td>{{ pb.assoc_long_name }}</td>
                         <td>{{ pb.assoc_short_name }}</td>
-                        {% comment %} <td>{{ pb.assoc_notes }}</td> {% endcomment %}
-                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-profbody' pb.id %}"></a>
-                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-profbody' pb.id %}" onclick="return confirm('Do you really want to delete the data for {{ pb.profbody_name }}?');"></a>
+                        <td>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-profbody' pb.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-profbody' pb.id %}" onclick="return confirm('Do you really want to delete the data for {{ pb.assoc_long_name }}?');"></a>
                         </td>
                     </tr>
-
-                {% endfor %}
-                   
-			</table>
-            {% else %}
-            <h1>ADD MORE ASSOCIATIONS/BODIES</h1>
-            {% endif %}
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5 class="text-center">ADD MORE ASSOCIATIONS/BODIES</h5>
+                {% endif %}
             </div>
-        </div></div></div>
-
-
-              
-
-               
-    {% endblock %}
-
-  
-
-
- 
+        </div>
+    </div>
+</div>
+{% endblock %}
