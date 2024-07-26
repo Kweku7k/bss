@@ -88,6 +88,9 @@ def edit_staff(request,staffno):
     # q = q.exclude(body_text__icontains="food")
     staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active') 
     staff_count = staffs.count()
+    title = Title.objects.all()
+    staffcategory = StaffCategory.objects.all()
+    qualification = Qualification.objects.all()
     staff = Employee.objects.get(pk=staffno)
     form = EmployeeForm(request.POST or None,request.FILES or None,instance=staff)
     if request.method == 'POST':
@@ -103,13 +106,15 @@ def edit_staff(request,staffno):
                'staff_count':staff_count,
                'RBA':RBA,
                'STAFFLEVEL':STAFFLEVEL,
-               'STAFFSTATUS':STAFFSTATUS,
+               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
                'STAFFRANK':STAFFRANK,
                'GENDER':GENDER,
                'DEPENDANTS':DEPENDANTS,
-               'HEQ':HEQ,
+               'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
                'REGION':REGION,
-               'TITLE':TITLE,
+               'title':title,
+               'qualification':qualification,
+               'staffcategory':staffcategory,
                'SUFFIX':SUFFIX,
                'staff':staff,
                }
@@ -154,6 +159,8 @@ def newstaff(request):
     staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
     # hpq_choices = ProfessionalBody.HPQ_CHOICES
     title = Title.objects.all()
+    qualification = Qualification.objects.all()
+    staffcategory = StaffCategory.objects.all()
     staff_count = staffs.count()
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
@@ -183,14 +190,16 @@ def newstaff(request):
             #    'STAFFLEVEL':[(q.name, q.name)  for q in ChoicesStaffLevel.objects.all()],
                'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
-               'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
+            #    'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
             #    'GENDER':[(q.name, q.name)  for q in ChoicesGender.objects.all()],
                'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
                'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
-               'HEQ':[(q.name, q.name)  for q in ChoicesHEQ.objects.all()],
+            #    'HEQ':[(q.name, q.name)  for q in ChoicesHEQ.objects.all()],
+                'qualification':qualification,
                'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
                'REGION':[(q.name, q.name)  for q in ChoicesRegion.objects.all()],
                'title':title,
+               'staffcategory':staffcategory,
             #    'TITLE':[(q.name, q.name)  for q in Title.objects.all()],
                'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
             }

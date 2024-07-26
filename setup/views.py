@@ -208,6 +208,88 @@ def edit_contract(request, ct_id):
     return render(request, 'setup/add_contract.html', context)
 ########### CONTRACT ################
 
+########### CAMPUS VIEW ################
+def add_campus(request):
+    submitted = False
+    campus = Campus.objects.order_by('-id')
+    campus_count = campus.count()
+    if request.method == 'POST':
+        form = CampusForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('campus')
+    else:
+        form = CampusForm
+        if 'submitted' in request.GET:
+            submitted = True
+                
+    return render(request,'setup/add_campus.html',{'form':form,'submitted':submitted,'campus':campus,'campus_count':campus_count })
+
+
+def delete_campus(request,camp_id):
+    campus = Campus.objects.get(pk=camp_id)
+    if request.method == 'GET':
+       campus.delete()
+    return redirect('add-campus')
+
+def edit_campus(request, camp_id):
+    campus = Campus.objects.order_by('-id') 
+    campus_count = campus.count()
+    camp = Campus.objects.get(pk=camp_id)
+    form = CampusForm(instance=camp)
+
+    if request.method == 'POST':
+        form = CampusForm(request.POST, instance=camp)
+        if form.is_valid():
+            form.save()
+            return redirect('add-campus')
+
+    context = {'form':form,'campus':campus,'campus_count':campus_count,'camp':camp}
+    return render(request, 'setup/add_campus.html', context)
+        
+########### END OF CAMPUS VIEW ################
+
+########### DIRECTORATE VIEW ################
+def add_directorate(request):
+    submitted = False
+    directorate = Directorate.objects.order_by('-id')
+    dict_count = directorate.count()
+    if request.method == 'POST':
+        form = DirectorateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('directorate')
+    else:
+        form = DirectorateForm
+        if 'submitted' in request.GET:
+            submitted = True
+                
+    return render(request,'setup/add_directorate.html',{'form':form,'submitted':submitted,'directorate':directorate,'dict_count':dict_count })
+
+
+def delete_directorate(request,dict_id):
+    directorate = Directorate.objects.get(pk=dict_id)
+    if request.method == 'GET':
+       directorate.delete()
+    return redirect('add-directorate')
+
+def edit_directorate(request, dict_id):
+    directorate = Directorate.objects.order_by('-id') 
+    dict_count = directorate.count()
+    dict = Directorate.objects.get(pk=dict_id)
+    form = DirectorateForm(instance=dict)
+
+    if request.method == 'POST':
+        form = DirectorateForm(request.POST, instance=dict)
+        if form.is_valid():
+            form.save()
+            return redirect('add-directorate')
+
+    context = {'form':form,'directorate':directorate,'dict_count':dict_count,'dict':dict}
+    return render(request, 'setup/add_directorate.html', context)
+        
+########### END OF DIRECTORATE VIEW ################
+
 ########### PROFESSIONAL BODIES VIEWS ################
 def add_profbody(request):
     submitted = False

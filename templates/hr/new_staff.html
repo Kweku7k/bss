@@ -86,17 +86,18 @@
                                             <label for="gcardno">Ghana Card No.</label>
                                         </div>
                                         <div class="form-floating mt-1">
-                                            <select name="heq"  class="form-select" required>
+                                            <select name="qual"  class="form-select" required>
                                                 <option selected="true" disabled="disabled"></option>
-                                                {% for key,value in HEQ %}
-                                                    <option value="{{ key }}"
-                                                    {% if key == staff.heq %}
+                                                {% for qual in qualification %}
+                                                    <option value="{{ qual.id }}"
+                                                    {% if qual.id == pkno %}
                                                         selected
                                                     {% endif %}
-                                                    >{{ value }}</option>
-                                                    {% endfor %}
+                                                    >{{ qual }}</option>
+                                                {% endfor %}
+        
                                             </select>
-                                            <label for="heq">Highest Educational Qualification</label>
+                                            <label for="qual">Highest Educational Qualification</label>
                                         </div>
                                 </div> 
                             </div></div>
@@ -176,7 +177,7 @@
                                             <label for="doe">Date Employed</label>
                                         </div>
 
-                                        <div class="form-floating mt-1">
+                                        {% comment %} <div class="form-floating mt-1">
                                             <select name="staff_rank"  class="form-select">
                                                 <option selected="true" disabled="disabled"></option>
                                                 {% for key,value in STAFFRANK %}
@@ -188,6 +189,20 @@
                                                     {% endfor %}
                                             </select>
                                             <label for="staff_rank">Rank</label>
+                                        </div> {% endcomment %}
+
+                                        <div class="form-floating mt-1">
+                                            <select name="category_abbr"  class="form-select">
+                                                <option selected="true" disabled="disabled"></option>
+                                                {% for sc in staffcategory %}
+                                                    <option value="{{ sc.id }}"
+                                                    {% if sc.id == pkno %}
+                                                        selected
+                                                    {% endif %}
+                                                    >{{ sc }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            <label for="category_abbr">Staff Category</label>
                                         </div>
 
                                         <div class="form-floating mt-1">

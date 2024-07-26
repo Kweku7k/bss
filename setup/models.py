@@ -52,7 +52,7 @@ class StaffCategory(models.Model):
     category_name = models.CharField('Staff Category',max_length=250,blank=False,null=False)
     category_abbr = models.CharField('Abbreviation',max_length=50,blank=True,null=True)
     def __str__(self):
-        return self.category_abbr
+        return self.category_name
     
 class Contract(models.Model):
     contract_type = models.CharField('Contract Type',max_length=250,blank=False,null=False)
