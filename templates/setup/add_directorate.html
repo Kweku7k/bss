@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Directorate</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="direct_name" class="col-form-label">Directorate</label>
+                        <input type="text" name="direct_name" class="form-control" {% if dict %} value="{{ dict.direct_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-directorate' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4">
+            <div class="card-header text-center">
+                <h5><strong>Directorate Count: {{ dict_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if directorate %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Directorate</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for dict in directorate %}
+                    <tr>
+                        <td>{{ dict.direct_name }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-directorate' dict.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-directorate' dict.id %}" onclick="return confirm('Do you really want to delete the data for {{ dict.direct_name }}?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5 class="pt-2">No Directorate Available.</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
