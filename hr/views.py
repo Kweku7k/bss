@@ -11,7 +11,14 @@ from django.db import connection # type: ignore
 DEPENDANTS = ChoicesDependants.objects.all().values_list("name","name")
 # Create your views here.
 def index(request):
-    return render(request,'hr/landing_page.html',{})
+    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
+    staff_count = staffs.count()
+
+    context = {
+        'staffs':staffs,
+        'staff_count':staff_count,
+    }
+    return render(request,'hr/landing_page.html', context)
 
     # return render(request,'authentication/login.html',{})
 
@@ -124,7 +131,7 @@ def edit_staff(request,staffno):
 
 
 def allstaff(request):
-    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
+    staffs = Employee.objects.order_by('lname')
     staff_count = staffs.count()
     
     if request.method == 'POST':
@@ -156,8 +163,8 @@ def allstaff(request):
 
 def newstaff(request):
     submitted = False
-    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
-    # hpq_choices = ProfessionalBody.HPQ_CHOICES
+    staffs = Employee.objects.order_by('lname').filter()
+    # hpq_choices = ProfessionalBody.HPQ_CHOICES active_status__exact='Active'
     title = Title.objects.all()
     qualification = Qualification.objects.all()
     staffcategory = StaffCategory.objects.all()
@@ -200,6 +207,7 @@ def newstaff(request):
                'REGION':[(q.name, q.name)  for q in ChoicesRegion.objects.all()],
                'title':title,
                'staffcategory':staffcategory,
+               'qualification':qualification,
             #    'TITLE':[(q.name, q.name)  for q in Title.objects.all()],
                'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
             }

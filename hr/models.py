@@ -6,29 +6,49 @@ from setup.models import *
 
 class Employee(models.Model):
     staffno = models.CharField('Staff Number',max_length=12,blank=False,null=False,primary_key=True,unique=True)
-    title = models.CharField('Title of Courtesy',max_length=20,blank=False,null=False)
+    title = models.CharField('Title',max_length=20,blank=False,null=False)
     lname = models.CharField('Surname',max_length=120,blank=False,null=False)
     fname = models.CharField('First Name',max_length=120,blank=False,null=False)
     middlenames = models.CharField('Middle Names',max_length=120,blank=True,null=True)
     suffix = models.CharField('Name Suffixe',max_length=20,blank=True,null=True)
     gender = models.CharField(max_length=20)
     dob = models.DateField('Date of Birth')
-    ssnitno = models.CharField('SSNIT No.',max_length=50,blank=True,null=True)
-    gcardno = models.CharField('Ghana Card No.',max_length=50,blank=True,null=True)
-    heq = models.CharField('Highest Academic Qualification',max_length=100,blank=True,null=True)
-    hpq = models.CharField('Highest Professional Qualification',max_length=100,blank=True,null=True)
-    active_phone = models.CharField('Active Phone No.',max_length=15,blank=True,null=True)
-    active_status = models.CharField('Staff Status',max_length=25,blank=False,default='Active',null=False)
+    m_status = models.CharField('Marital Status',max_length=50,blank=True,null=True)
+    nationality = models.CharField('Nationality',max_length=50,blank=True,null=True)
+    ethnic = models.CharField('Ethnic Group',max_length=50,blank=True,null=True)
     home_town = models.CharField('Home Town',max_length=100,blank=True,null=True)
     region  = models.CharField('Region',max_length=50,blank=True,null=True)
-    rba = models.CharField('Role-Based Access',max_length=100,blank=False,default='REG',null=False)
-    doe = models.DateField('Date Employed')
-    staff_rank = models.CharField('Staff Rank',max_length=50,blank=True,null=True)
-    job_title = models.CharField('Job Title',max_length=50,blank=True,null=True)
+    pob  = models.CharField('Place of Birth',max_length=50,blank=True,null=True)
+    religion  = models.CharField('Religion',max_length=50,blank=True,null=True)
+    denomination  = models.CharField('Denomination',max_length=50,blank=True,null=True)
+    email_address= models.EmailField('Persoanl Email',max_length=50,blank=True,null=True)
+    active_phone = models.CharField('Active Phone No.',max_length=15,blank=True,null=True)
+    ssnitno = models.CharField('SSNIT No.',max_length=50,blank=True,null=True)
+    idtype = models.CharField('ID Type',max_length=50,blank=True,null=True)
+    gcardno = models.CharField('ID Card No.',max_length=50,blank=True,null=True)
+    digital = models.CharField('Digital Address',max_length=100,blank=True,null=True)
+    residential = models.CharField('Residential Address',max_length=100,blank=True,null=True)
+    postal = models.CharField('Postal Address',max_length=100,blank=True,null=True)
+    blood = models.CharField('Blood Group',max_length=50,blank=True,null=True)
+    car = models.CharField('Car Number',max_length=50,blank=True,null=True)
+    chassis = models.CharField('Chassis Number',max_length=50,blank=True,null=True)
+    vech_type = models.CharField('Vechicle Type',max_length=50,blank=True,null=True)
+    study_area = models.CharField('Area of Study',max_length=50,blank=True,null=True)
+    heq = models.CharField('Highest Academic Qualification',max_length=100,blank=True,null=True)
+    completion_year = models.CharField('Year of Completion',max_length=100,blank=True,null=True)
+    institution = models.CharField('Institution of Study',max_length=100,blank=True,null=True)
+    other_heq = models.CharField('Other Qualification',max_length=100,blank=True,null=True)
+    hpq = models.CharField('Highest Professional Qualification',max_length=100,blank=True,null=True)
     staff_pix = models.ImageField(upload_to='images/', blank=True,null=True)
-    email_address= models.EmailField(blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    
+
+    # active_status = models.CharField('Staff Status',max_length=25,blank=False,default='Active',null=False)
+    # rba = models.CharField('Role-Based Access',max_length=100,blank=False,default='REG',null=False)
+    # doe = models.DateField('Date Employed')
+    # staff_rank = models.CharField('Staff Rank',max_length=50,blank=True,null=True)
+    # job_title = models.CharField('Job Title',max_length=50,blank=True,null=True)
     def __str__(self):
         staffname = self.title + ' '
         if self.fname:
@@ -41,6 +61,36 @@ class Employee(models.Model):
             staffname += self.suffix 
         return staffname
         #self.title + ' ' + self.fname + ' ' + self.middlenames + ' ' + self.lname + ' ' + self.suffix
+
+class CompanyInformation(models.Model):
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
+    job_title = models.CharField('Job Title',max_length=50,blank=True,null=True)
+    job_description = models.TextField('Job Description',max_length=200,blank=True,null=True)
+    staff_cat = models.CharField('Staff Category',max_length=50,blank=True,null=True)
+    contract = models.CharField('Contract Type',max_length=100,blank=True,null=True) 
+    active_status = models.CharField('Staff Status',max_length=50,blank=True,null=True)
+    doa = models.DateField('Date of Appointment')
+    doe = models.DateField('Date of Expiration')
+    renewal = models.CharField('Renewal',max_length=50,blank=True,null=True)
+    rank = models.CharField('Designation/Rank',max_length=50,blank=True,null=True)
+    campus = models.CharField('Campus',max_length=50,blank=True,null=True)
+    city = models.CharField('City',max_length=50,blank=True,null=True)
+    email = models.CharField('Official Email',max_length=50,blank=True,null=True)
+    sch_fac_dir = models.CharField('School/Faculty/Directorate',max_length=50,blank=True,null=True)
+    dept = models.CharField('Department',max_length=50,blank=True,null=True)
+    salary = models.CharField('Salary',max_length=50,blank=True,null=True)
+    cost_center = models.CharField('Cost Center',max_length=50,blank=True,null=True)
+    bank_name = models.CharField('Bank Name',max_length=50,blank=True,null=True)
+    accno = models.CharField('Account Number',max_length=50,blank=True,null=True)
+    bank_branch = models.CharField('Bank Branch',max_length=100,blank=True,null=True)
+    ssn_con = models.CharField('SSN Contributor',max_length=10,blank=True,null=True)
+    pf_con = models.CharField('PF Contributor',max_length=10,blank=True,null=True)
+    
+    def __str__(self):
+        return self.staffno
+
+    
+
 
 class Rank(models.Model):
     name = models.CharField(max_length=50, unique=True)

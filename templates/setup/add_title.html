@@ -37,13 +37,13 @@
                     <tr>
                         <th>Title</th>
                         <th>Abbreviation</th>
-                        <th>Action</th>
+                        <th class="text-end">Action</th>
                     </tr>
                     {% for title in titles %}
                     <tr>
                         <td>{{ title.title_name }}</td>
                         <td>{{ title.title_abbr }}</td>
-                        <td>
+                        <td class="text-end">
                             <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-title' title.id %}"></a>
                             <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-title' title.id %}" onclick="return confirm('Do you really want to delete the data for {{ title.title_name }}?');"></a>
                         </td>
