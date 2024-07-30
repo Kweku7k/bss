@@ -27,7 +27,7 @@ class Department(models.Model):
     dept_short_name = models.CharField('Short Name',max_length=50,blank=True,null=True)
     dept_notes = models.TextField('Notes',blank=True,null=True)
     def __str__(self):
-        return self.dept_long_name
+        return self.dept_short_name
 
 class Bank(models.Model):
     bank_long_name = models.CharField('Name of Bank',max_length=250,blank=False,null=False)

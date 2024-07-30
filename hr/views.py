@@ -11,7 +11,8 @@ from django.db import connection # type: ignore
 DEPENDANTS = ChoicesDependants.objects.all().values_list("name","name")
 # Create your views here.
 def index(request):
-    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
+    staffs = Employee.objects.order_by('lname').filter()
+    # active_status__exact='Active'
     staff_count = staffs.count()
 
     context = {
@@ -32,7 +33,7 @@ def register(request):
     return render(request,'authentication/register.html',{})
 
 def landing(request):
-    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active')
+    staffs = Employee.objects.order_by('lname').filter()
     staff_count = staffs.count()
 
     context = {
@@ -44,15 +45,19 @@ def landing(request):
 
 def search(request):
     staffs = Employee.objects.order_by('lname')
+    company_info = CompanyInformation.objects.all()
+    
     
     if request.method == 'POST' and 'search' in request.POST:
         search_query = request.POST.get('search')
         if search_query:
             staffs = staffs.filter(
                 Q(lname__icontains=search_query) |
-                Q(fname__icontains=search_query) |
+                Q(fname__icontains=search_query)
+            )
+            company_info = company_info.filter(
                 Q(job_title__icontains=search_query) |
-                Q(staff_rank__icontains=search_query)
+                Q(staff_cat__icontains=search_query)
             )
     
     staff_count = staffs.count()
@@ -60,6 +65,7 @@ def search(request):
     context = {
         'staffs': staffs,
         'staff_count': staff_count,
+        'company_info':company_info,
     }
     
     return render(request, 'hr/search.html', context)
@@ -89,11 +95,11 @@ def deletestaff(request,staffno):
 def staff_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     schools = School.objects.order_by('school_name')
-    return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools})
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
 def edit_staff(request,staffno):
-    # q = q.exclude(body_text__icontains="food")
-    staffs = Employee.objects.order_by('lname').filter(active_status__exact='Active') 
+    staffs = Employee.objects.order_by('lname').filter() 
     staff_count = staffs.count()
     title = Title.objects.all()
     staffcategory = StaffCategory.objects.all()
@@ -104,7 +110,7 @@ def edit_staff(request,staffno):
         # form = EmployeeForm(request.POST, instance=staff)
         if form.is_valid():
             form.save()
-            return redirect('newstaff')
+            return redirect('staff-details', staffno)
         
     context = {
                 'form':form,
@@ -115,14 +121,14 @@ def edit_staff(request,staffno):
                'STAFFLEVEL':STAFFLEVEL,
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
                'STAFFRANK':STAFFRANK,
-               'GENDER':GENDER,
+               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+               'SUFFIX': ChoicesSuffix.objects.all().values_list("name", "name"),
+               'REGION': ChoicesRegion.objects.all().values_list("name", "name"),
                'DEPENDANTS':DEPENDANTS,
                'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
-               'REGION':REGION,
                'title':title,
                'qualification':qualification,
                'staffcategory':staffcategory,
-               'SUFFIX':SUFFIX,
                'staff':staff,
                }
 
@@ -130,30 +136,36 @@ def edit_staff(request,staffno):
     return render(request, 'hr/new_staff.html', context)
 
 
-def allstaff(request):
+def allstaff(request): 
     staffs = Employee.objects.order_by('lname')
     staff_count = staffs.count()
+    staffcategory = StaffCategory.objects.all()
+    company_info_dict = {info.staffno.staffno: info for info in CompanyInformation.objects.all()}
+
     
     if request.method == 'POST':
         filter = request.POST.get('filter')
-        staffs = Employee.objects.order_by('lname').filter(staff_rank=filter)
+        staffs = Employee.objects.order_by('lname')
+        company_info = CompanyInformation.objects.filter(staff_cat=filter)
+        staffcategory = StaffCategory.objects.filter(category_name=filter)
         staff_count = staffs.count()
         
         context = {
         'staffs':staffs,
         'filter':filter,
+        'company_info':company_info,
         'staff_count':staff_count,
-        'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
-        
+        'staffcategory':staffcategory,        
         
     }
         return render(request, 'hr/allstaff.html', context)
-        
         
 
     context = {
         'staffs':staffs,
         'staff_count':staff_count,
+        'staffcategory':staffcategory,
+        'company_info_dict': company_info_dict,
         'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
         
     }
@@ -164,7 +176,6 @@ def allstaff(request):
 def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter()
-    # hpq_choices = ProfessionalBody.HPQ_CHOICES active_status__exact='Active'
     title = Title.objects.all()
     qualification = Qualification.objects.all()
     staffcategory = StaffCategory.objects.all()
@@ -177,10 +188,9 @@ def newstaff(request):
             print("form was submitted successfully")
             form.save()
             staff_number = form.cleaned_data['staffno']
-            url = reverse('staff-details', kwargs={'staffno': str(staff_number)})
+            url = reverse('company-info', kwargs={'staffno': str(staff_number)})
             print(url)
             return HttpResponseRedirect(url)
-                        # return HttpResponseRedirect('newstaff')
         else:
             print("form.errors")
             print(form.errors)
@@ -212,6 +222,112 @@ def newstaff(request):
                'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
             }
     return render(request,'hr/new_staff.html',context)
+
+
+
+def company_info(request,staffno):
+    submitted = False
+    company_infos = CompanyInformation.objects.filter(staffno__exact=staffno)    
+    staff = Employee.objects.get(pk=staffno)
+    staffcategory = StaffCategory.objects.all()
+    contract = Contract.objects.all()
+    # company_info_count = company_infos.count()
+    campus = Campus.objects.all()
+    department = Department.objects.all()
+    bank_list = Bank.objects.all()
+    bank_branches = BankBranch.objects.all()
+    
+    if request.method == 'POST':
+        form = CompanyInformationForm(request.POST, request.FILES)
+        # print(form)
+        print("form has been recieved")
+        if form.is_valid(): 
+            print("form was submitted successfully")
+            company_info = form.save(commit=False)
+            company_info.staffno = staff 
+            company_info.save()
+            staff_number = staff.pk  
+            url = reverse('staff-details', kwargs={'staffno': str(staff_number)})
+            print(url)
+            return HttpResponseRedirect(url)
+        else:
+            print("form.errors")
+            print(form.errors)
+    else:
+        form = CompanyInformationForm
+        if 'submitted' in request.GET:
+            submitted = True
+    context = {
+               'form':form,
+               'submitted':submitted,
+               'company_infos':company_infos,
+               'staff':staff,
+            #    'company_info_count':company_info_count,
+               'staffcategory':staffcategory,
+               'contract':contract,
+               'campus':campus,
+               'department':department,
+               'bank_list':bank_list,
+               'bank_branches':bank_branches,
+               'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
+            #    'STAFFLEVEL':[(q.name, q.name)  for q in ChoicesStaffLevel.objects.all()],
+               'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
+               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
+            #    'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
+               'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
+            #    'HEQ':[(q.name, q.name)  for q in ChoicesHEQ.objects.all()],
+            }
+    return render(request,'hr/company_info.html',context)
+
+
+def edit_company_info(request,staffno):
+    company_infos = CompanyInformation.objects.all()  
+    company_info = CompanyInformation.objects.get(staffno__exact=staffno)
+    staff = Employee.objects.get(pk=staffno)
+    staffcategory = StaffCategory.objects.all()
+    contract = Contract.objects.all()
+    company_info_count = company_infos.count()
+    campus = Campus.objects.all()
+    department = Department.objects.all()
+    bank_list = Bank.objects.all()
+    bank_branches = BankBranch.objects.all()
+    
+    if request.method == 'POST':
+        form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
+        if form.is_valid():
+            form.save()
+            return redirect('staff-details', staffno=staffno)
+        else:
+            print("form.errors")
+            print(form.errors)
+    else:
+        form = CompanyInformationForm(instance=company_info)
+        
+    context = {
+                'form':form,
+            #    'submitted':submitted,
+               'RBA':RBA,
+               'STAFFLEVEL':STAFFLEVEL,
+               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
+               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+               'SUFFIX': ChoicesSuffix.objects.all().values_list("name", "name"),
+               'REGION': ChoicesRegion.objects.all().values_list("name", "name"),
+               'DEPENDANTS':DEPENDANTS,
+               'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],               
+               'staffcategory':staffcategory,
+               'company_info':company_info,
+               'company_infos':company_infos,
+               'staff':staff,
+               'contract':contract,
+               'company_info_count':company_info_count,
+               'campus':campus,
+               'department':department,
+               'bank_list':bank_list,
+               'bank_branches':bank_branches,
+               }
+
+    return render(request, 'hr/company_info.html', context)
+
 
 
 

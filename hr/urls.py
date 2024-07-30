@@ -13,6 +13,11 @@ urlpatterns = [
     path('delete_staff/<str:staffno>', views.deletestaff,name="delete-staff"),
     path('staff_details/<str:staffno>', views.staff_details,name="staff-details"),
 
+    path('company_info/<str:staffno>', views.company_info,name="company-info"),
+    path('edit_company_info/<str:staffno>', views.edit_company_info,name="edit-company-info"),
+    # path('delete_company_info/<str:staffno>', views.delete_company_info,name="delete-company-info"),
+
+    
     path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),
     path('delete_staff_education/<str:sch_id>/<str:staffno>', views.delete_staff_education,name="delete-staff-education"),

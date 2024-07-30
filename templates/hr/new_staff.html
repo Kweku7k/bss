@@ -206,14 +206,31 @@
                                      
                                     <br/>
 
+                                    <h5>Health Record</h5>
+
+                                    <div class="form-floating mt-1">
+                                        <input type="text" class="form-control" name="blood"  aria-label="blood" aria-describedby="blood" {% if staff %} value="{{ staff.blood }}" {% else %} value="" {% endif %}>
+                                        <label for="blood">Blood Group </label>
+                                    </div>
+
                                     <h5>Vehicle</h5>
 
                                     <div class="form-floating mt-1">
-                                        <input type="text" class="form-control" name="active_phone"  aria-label="active_phone" aria-describedby="active_phone" {% if staff %} value="{{ staff.active_phone }}" {% else %} value="" {% endif %}>
-                                        <label for="active_phone">Telephone No.</label>
+                                        <input type="text" class="form-control" name="car"  aria-label="car" aria-describedby="car" {% if staff %} value="{{ staff.car }}" {% else %} value="" {% endif %}>
+                                        <label for="car">Car Number </label>
+                                    </div>
+                                    <div class="form-floating mt-1">
+                                        <input type="text" class="form-control" name="chassis"  aria-label="chassis" aria-describedby="chassis" {% if staff %} value="{{ staff.chassis }}" {% else %} value="" {% endif %}>
+                                        <label for="chassis">Chassis Number </label>
+                                    </div>
+                                    <div class="form-floating mt-1">
+                                        <input type="text" class="form-control" name="vech_type"  aria-label="vech_type" aria-describedby="vech_type" {% if staff %} value="{{ staff.vech_type }}" {% else %} value="" {% endif %}>
+                                        <label for="vech_type">Vehicle Type </label>
                                     </div>
 
-                                    <div class="form-floating mt-1">
+                
+
+                                    {% comment %} <div class="form-floating mt-1">
                                         <select name="active_status"  class="form-select">
                                             <option selected="true" disabled="disabled"></option>
                                             {% for key,value in STAFFSTATUS %}
@@ -225,13 +242,13 @@
                                                 {% endfor %}
                                         </select>
                                         <label for="active_status">Employee Status</label>
-                                    </div>
+                                    </div> {% endcomment %}
 
                                     
 
                                     
 
-                                    <div class="form-floating mt-1">
+                                    {% comment %} <div class="form-floating mt-1">
                                         <select name="rba"  class="form-select">
                                             <option selected="true" disabled="disabled"></option>
                                             {% for key,value in RBA %}
@@ -243,12 +260,7 @@
                                                 {% endfor %}
                                         </select>
                                         <label for="rba">Role Access</label>
-                                    </div>
-
-                                    <div class="form-floating mt-1">
-                                        <input type="date" class="form-control" name="doe" required aria-label="doe" aria-describedby="doe" {% if staff %} value="{{ staff.doe|date:"Y-m-d" }}" readonly="true" {% else %} value="" {% endif %}>
-                                        <label for="doe">Date Employed</label>
-                                    </div>
+                                    </div> {% endcomment %}
 
                                     {% comment %} <div class="form-floating mt-1">
                                         <select name="staff_rank"  class="form-select">
@@ -264,7 +276,7 @@
                                         <label for="staff_rank">Rank</label>
                                     </div>  {% endcomment %}
 
-                                    <div class="form-floating mt-1">
+                                    {% comment %} <div class="form-floating mt-1">
                                         <select name="staff_rank" class="form-select">
                                             <option selected="true" disabled="disabled"></option>
                                             {% for sc in staffcategory %}
@@ -276,16 +288,9 @@
                                             {% endfor %}
                                         </select>
                                         <label for="staff_rank">Staff Category </label>
-                                    </div>
+                                    </div> {% endcomment %}
 
-                                    <div class="form-floating mt-1">
-                                        <input type="text" class="form-control" name="job_title" required aria-label="job_title" aria-describedby="job_title" {% if staff %} value="{{ staff.job_title }}" {% else %} value="" {% endif %}>
-                                        <label for="job_title">Job Title</label>
-                                    </div>
-                                    <div class="form-floating mt-1">
-                                        <input type="email" class="form-control" name="email_address"  aria-label="email_address" aria-describedby="email_address" {% if staff %} value="{{ staff.email_address }}" {% else %} value="" {% endif %}>
-                                        <label for="email">Employee Email</label>
-                                    </div>
+                                    
                                     <div class="form-floating mt-1">
                                         <input type="file" class="form-control" name="staff_pix"  aria-label="staff_pix" aria-describedby="staff_pix" {% if staff %} value="{{ staff.staff_pix }}" {% else %} value="" {% endif %}>
                                         <label for="staff_pix">Employee Photo</label>

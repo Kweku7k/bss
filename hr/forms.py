@@ -7,6 +7,12 @@ class EmployeeForm(ModelForm):
         model = Employee
         fields = '__all__'
         exclude = ['updated','created']
+        
+class CompanyInformationForm(ModelForm):
+    class Meta:
+        model = CompanyInformation
+        fields = '__all__'
+        exclude = ['updated','created']
 
 class StaffSchoolForm(ModelForm):
     class Meta:

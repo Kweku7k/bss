@@ -71,7 +71,7 @@ class CompanyInformation(models.Model):
     active_status = models.CharField('Staff Status',max_length=50,blank=True,null=True)
     doa = models.DateField('Date of Appointment')
     doe = models.DateField('Date of Expiration')
-    renewal = models.CharField('Renewal',max_length=50,blank=True,null=True)
+    renewal = models.DateField('Renewal')
     rank = models.CharField('Designation/Rank',max_length=50,blank=True,null=True)
     campus = models.CharField('Campus',max_length=50,blank=True,null=True)
     city = models.CharField('City',max_length=50,blank=True,null=True)
