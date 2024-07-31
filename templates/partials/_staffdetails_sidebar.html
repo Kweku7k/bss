@@ -28,8 +28,7 @@
           </li> 
 
           
-          <a href="{% url 'company-info' staff.staffno %}"> Company Information</a> <br />
-
+          {% comment %} <a href="{% url 'company-info' staff.staffno %}"> Company Information</a> <br />
           <a href="{% url 'staff-education' staff.staffno %}"> Education</a> <br />
           <a href="{% url 'prev-work' staff.staffno %}"> Prev. Employment</a> <br />
           <a href="{% url 'dependants' staff.staffno %}"> Dependants</a> <br />
@@ -43,10 +42,12 @@
           <a href="{% url 'marriage' staff.staffno %}">Marriage</a><br />
           <a href="{% url 'christening' staff.staffno %}">Christening</a><br />
           <a href="{% url 'celebration' staff.staffno %}">Celebration</a><br />
-          <!-- <a href="{% url 'bereavement' staff.staffno %}">Medical Expenses</a> -->
+          <a href="{% url 'bereavement' staff.staffno %}">Medical Expenses</a> {% endcomment %}
           
           <!-- <hr> -->
-          <a href="{% url 'allstaff' %}" class="btn btn-success">Finish</a>
+           <div class="justify-content--end">
+            <a href="{% url 'allstaff' %}" class="btn btn-success">Done</a>
+           </div>
           {% comment %} <a href="{% url 'edit-staff' staff.staffno %}">Finish</a> {% endcomment %}
         </ul>
         <!--End of Card-body -->

@@ -31,7 +31,7 @@
   }
   
   .dashboard-item-smalltext {
-    font-size: 12px;
+    font-size: 14px;
   }
 </style>
 
@@ -41,10 +41,9 @@
             <div class="main-cards">
               <a href="{% url 'allstaff'%}">
                 <div class="dashboard-item">
-                  
                     <h6 class="text-muted dashboard-item-smalltext">Total Employees</h6>
                     <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                        <div class="card-icon rounded-circle">
                             <i class="bi bi-person"></i>
                         </div>
                         <div class="ps-3">
@@ -57,11 +56,10 @@
                     <h6 class="text-muted dashboard-item-smalltext">Active Employees</h6>
                     <div class="d-flex align-items-center">
                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <!-- Replace BiUser with the corresponding icon or image -->
                             <i class="bi bi-person"></i>
                         </div>
                         <div class="ps-3">
-                            <h4 class="dashboard-item-text">227</h4>
+                            <h4 class="dashboard-item-text">0</h4>
                         </div>
                     </div>
                 </div>
@@ -70,11 +68,10 @@
                     <h6 class="text-muted dashboard-item-smalltext">Active Employees</h6>
                     <div class="d-flex align-items-center">
                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <!-- Replace BiUser with the corresponding icon or image -->
                             <i class="bi bi-person"></i>
                         </div>
                         <div class="ps-3">
-                            <h4 class="dashboard-item-text">17</h4>
+                            <h4 class="dashboard-item-text">0</h4>
                         </div>
                     </div>
                 </div>
@@ -83,13 +80,13 @@
         </div>
     </div>
       <div class="row">
-        <div class="col-lg-7">
+        <div class="col-lg-12">
 			        
 
+          {% comment %} {% include "partials/_socials.html" %} {% endcomment %}
         </div>
 
          
-   {% include "partials/_socials.html" %}
       </div>
     </section>
 
