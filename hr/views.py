@@ -7,6 +7,7 @@ from setup.models import *
 from django.db.models import Q
 from .forms import *
 from django.db import connection # type: ignore
+from django.contrib.auth.decorators import user_passes_test
 
 DEPENDANTS = ChoicesDependants.objects.all().values_list("name","name")
 # Create your views here.
@@ -44,31 +45,30 @@ def landing(request):
     return render(request,'hr/landing_page.html', context)
 
 def search(request):
-    staffs = Employee.objects.order_by('lname')
-    company_info = CompanyInformation.objects.all()
     
-    
+   
     if request.method == 'POST' and 'search' in request.POST:
+        staffs = Employee.objects.all()
+        company_info = CompanyInformation.objects.all()
         search_query = request.POST.get('search')
         if search_query:
             staffs = staffs.filter(
+                Q(staffno__icontains=search_query) |
                 Q(lname__icontains=search_query) |
                 Q(fname__icontains=search_query)
             )
-            company_info = company_info.filter(
-                Q(job_title__icontains=search_query) |
-                Q(staff_cat__icontains=search_query)
-            )
+
+        staff_count = staffs.count()
     
-    staff_count = staffs.count()
+        context = {
+            'staffs': staffs,
+            'staff_count': staff_count,
+            'company_info':company_info,
+        }
     
-    context = {
-        'staffs': staffs,
-        'staff_count': staff_count,
-        'company_info':company_info,
-    }
+        return render(request, 'hr/search.html', context)
     
-    return render(request, 'hr/search.html', context)
+    return render(request, 'hr/search.html',{})
 
 def deletestaff(request,staffno):  
     staffpix = ""
@@ -90,6 +90,14 @@ def deletestaff(request,staffno):
             return render(request,'hr/new_staff.html',{'staff':staff,'staffs':staffs,'staff_count':staff_count})
     return render(request, 'delete.html',{'obj':staff1,'staff':staff})
 
+
+# def user_is_employee(staffno=request.path.split('/staff_details/')[1].strip('/')):
+#     if Employee.objects.get(pk=staffno):
+      
+#         return True
+#     return False
+
+# @user_passes_test(lambda user: Employee.objects.get(pk=request.path.split('/staff_details/')[1].strip('/')), login_url='')
 
 
 def staff_details(request, staffno):
@@ -140,21 +148,27 @@ def allstaff(request):
     staffs = Employee.objects.order_by('lname')
     staff_count = staffs.count()
     staffcategory = StaffCategory.objects.all()
-    company_info_dict = {info.staffno.staffno: info for info in CompanyInformation.objects.all()}
+    company_info = CompanyInformation.objects.all()
 
     
     if request.method == 'POST':
         filter = request.POST.get('filter')
-        staffs = Employee.objects.order_by('lname')
+        staffs = Employee.objects.all()
         company_info = CompanyInformation.objects.filter(staff_cat=filter)
-        staffcategory = StaffCategory.objects.filter(category_name=filter)
-        staff_count = staffs.count()
+        staffcategory = StaffCategory.objects.all()
+        result = []
+        company_staffno = {company.staffno_id for company in company_info}
+
+        for staff in staffs:
+            if staff.staffno in company_staffno:
+                result.append(staff)
+                    
         
         context = {
-        'staffs':staffs,
+        'staffs':result,
         'filter':filter,
         'company_info':company_info,
-        'staff_count':staff_count,
+        'staff_count': len(result),
         'staffcategory':staffcategory,        
         
     }
@@ -165,7 +179,7 @@ def allstaff(request):
         'staffs':staffs,
         'staff_count':staff_count,
         'staffcategory':staffcategory,
-        'company_info_dict': company_info_dict,
+        'company_info': company_info,
         'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
         
     }

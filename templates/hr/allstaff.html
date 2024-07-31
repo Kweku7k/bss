@@ -1,71 +1,67 @@
 {% extends "base.html" %} {% load static %}
-{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
 {% block content %} 
 
 <div class="row col-12 p-1">
     <div class="card pt-1 mx-3">
-      <div class="card-header d-flex justify-content-between align-center">
-        <h5><strong>Number of Staff: {{ staff_count }}</strong></h5>
+        <div class="card-header d-flex justify-content-between align-center">
+            <h5><strong>Number of Staff: {{ staff_count }}</strong></h5>
 
-        <form method="POST" class="filter-form">
-            {% csrf_token %}
-            <label for="filter">Filter by Staff Category:</label>
+            <form method="POST" class="filter-form">
+                {% csrf_token %}
+                <label for="filter">Filter by Staff Category:</label>
 
-            <select name="filter" id="filter" >
-                <option selected="true" disabled="disabled"> {% if filter %} {{ filter }} {% else %} Select {% endif%}
-                </option>
+                <select name="filter" id="filter" >
+                    <option selected="true" disabled="disabled">
+                        {% if filter %} {{ filter }} {% else %} Select {% endif %}
+                    </option>
                     {% for sc in staffcategory %}
                         <option value="{{ sc }}"
-                        {% if sc.category_name == staff.staff_cat %}
+                        {% if sc.category_name == filter %}
                             selected
                         {% endif %}
                         >{{ sc }}</option>
                     {% endfor %}
-                    
-                {% comment %} {% for key,value in STAFFRANK %}
-                    <option value="{{ key }}"
-                    {% if key == staff.staff_rank %}
-                        selected
-                    {% endif %}
-                    >{{ value }}</option>
-                    {% endfor %} {% endcomment %}
-            </select>
-            <button type="submit" class="btn btn-success btn-sm" >Apply </button>
-        </form>
-        
+                </select>
+                <button type="submit" class="btn btn-success btn-sm">Apply</button>
+            </form>
         </div>
-      <div class="card-body">
-      {% if staffs %}
+        <div class="card-body">
+            {% if staffs %}
+                <table class="table table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Staff No</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Staff Rank</th>
+                            <th>Job Title</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staffs %}
+                            <tr class="clickable-row" onclick="window.location='{% url 'staff-details' staff.staffno %}'">
+                                <td>{{ staff.staffno }}</td>
+                                <td>{{ staff.fname }}</td>
+                                <td>{{ staff.lname }}</td>
+                                {% for company_data in company_info %}
+                                    {% if staff.staffno == company_data.staffno_id %}
+                                        <td>{{ company_data.staff_cat }}</td>
+                                        <td>{{ company_data.job_title }}</td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No staff found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-center">No staff found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
 
-      <table class="table table-hover">
-        <thead>
-            <tr>
-                <th>Staff No</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Staff Rank</th>
-                <th>Job Title</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for staff in staffs %}
-                <tr class="clickable-row"  onclick="window.location='{% url 'staff-details' staff.staffno %}'" >
-                    <td>{{ staff.staffno }}</td>
-                    <td>{{ staff.fname }}</td>
-                    <td>{{ staff.lname }}</td>
-                    <td>{{ company_info_dict.staff.staffno.staff_cat }}</td>
-                    <td>{{ company_info_dict.staff.staffno.job_title }}</td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No staff found.</td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-      
-  {% endif %}
-  </div>
-</div></div></div>    
-   
 {% endblock %}

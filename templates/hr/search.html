@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header ">
                     <h4 class="mb-0">Search Results ({{ staff_count }})</h4>
                 </div>
                 <div class="card-body">
@@ -23,13 +23,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for staff in staffs %}
+                                {% for staff in staffs  %}
                                     <tr class="clickable-row"  onclick="window.location='{% url 'staff-details' staff.staffno %}'" >
                                         <td>{{ staff.staffno }}</td>
                                         <td>{{ staff.fname }}</td>
                                         <td>{{ staff.lname }}</td>
-                                        <td>{{ company_info.job_title }}</td>
-                                        <td>{{ company_info.staff_cat }}</td>
+                                        {% for company_data in company_info %}
+                                            {% if staff.staffno == company_data.staffno_id %}
+                                                <td>{{ company_data.staff_cat }}</td>
+                                                <td>{{ company_data.job_title }}</td>
+                                            {% endif %}
+                                        {% endfor %}
                                     </tr>
                                 {% empty %}
                                     <tr>
