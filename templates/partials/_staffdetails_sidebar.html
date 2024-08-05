@@ -4,10 +4,9 @@
             <img src="{{ staff.staff_pix.url }}" height="180" width="150"  />
           </a>
           <br />
-          <strong>
-            {% comment %} {{ staff.lname }}, {{ staff.title }} {{ staff.fname }} {% if staff.middlenames %} {{ staff.middlenames }} {% endif %} {% if staff.suffix %} {{ staff.suffix }} {% endif %} {% endcomment %}
-            {{ staff.title }} {{ staff.fname }}  {{ staff.lname }} 
-          </strong>
+            <strong>
+              {{ staff.title }} {{ staff.fname }}  {{ staff.lname }} 
+            </strong>
         </div>
         <ul class="sidebar-nav">
 
@@ -45,11 +44,11 @@
           <a href="{% url 'bereavement' staff.staffno %}">Medical Expenses</a> {% endcomment %}
           
           <!-- <hr> -->
-           <div class="justify-content--end">
-            <a href="{% url 'allstaff' %}" class="btn btn-success">Done</a>
-           </div>
           {% comment %} <a href="{% url 'edit-staff' staff.staffno %}">Finish</a> {% endcomment %}
         </ul>
+        <div class="">
+         <a href="{% url 'allstaff' %}" class="btn btn-success">Done</a>
+        </div>
         <!--End of Card-body -->
       </div>
       <!--End of Card-->

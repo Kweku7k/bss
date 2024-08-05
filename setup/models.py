@@ -96,7 +96,8 @@ class StaffRank(models.Model):
 
 class JobTitle(models.Model):
     job_title = models.CharField("Job Title",max_length=150,blank=False,null=False)
-    job_rank = models.CharField("Job Title Rank",max_length=150,blank=True,null=True,choices=STAFFLEVEL)   #(Snr Staff, Jnr Staff, Exec., Mgt, etc)
+    # staff_cat = models.ForeignKey(StaffCategory,on_delete=models.CASCADE,blank=False,null=False)
+    job_rank = models.CharField("Job Title Rank",max_length=150,blank=True,null=True,choices=STAFFLEVEL) 
     salary_level = models.CharField("Salary Level",max_length=150,blank=True,null=True)
     jobtitle_notes = models.TextField("Notes",blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)

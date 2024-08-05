@@ -8,25 +8,25 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-3 text-primary"><strong>Company Information</strong></h5>
                 {% if staff.staff_pix %}
-                <img src="{{ staff.staff_pix.url }}" class="img-fluid" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
                 {% endif %}
             </div>
             <form action="" method="POST" enctype="multipart/form-data"> 
                 {% csrf_token %}
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="staffno" class="form-label">Staff Number</label>
                         <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="job_title" class="form-label">Job Title</label>
                         <input type="text" class="form-control" id="job_title" name="job_title" value="{{ company_info.job_title }}" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="job_description" class="form-label">Job Description</label>
                         <input type="text" class="form-control" id="job_description" name="job_description" value="{{ company_info.job_description }}" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="staff_cat" class="form-label">Staff Category</label>
                         <select id="staff_cat" name="staff_cat" class="form-select" required>
                             <option value="" disabled selected>Select Staff Category</option>
@@ -35,7 +35,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="contract" class="form-label">Contract Type</label>
                         <select id="contract" name="contract" class="form-select" required>
                             <option value="" disabled selected>Select Contract Type</option>
@@ -44,7 +44,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="active_status" class="form-label">Employee Status</label>
                         <select id="active_status" name="active_status" class="form-select" required>
                             <option value="" disabled selected>Select Employee Status</option>
@@ -53,23 +53,23 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="doa" class="form-label">Date of Appointment</label>
                         <input type="date" class="form-control" id="doa" name="doa" value="{{ company_info.doa|date:'Y-m-d' }}" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="doe" class="form-label">Date of Expiration</label>
                         <input type="date" class="form-control" id="doe" name="doe" value="{{ company_info.doe|date:'Y-m-d' }}" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="renewal" class="form-label">Renewal</label>
-                        <input type="date" class="form-control" id="renewal" name="renewal" value="{{ company_info.renewal }}" required>
+                        <input type="date" class="form-control" id="renewal" name="renewal" value="{{ company_info.renewal|date:'Y-m-d' }}" required>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="rank" class="form-label">Designation/Rank</label>
                         <input type="text" class="form-control" id="rank" name="rank" value="{{ company_info.rank }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="campus" class="form-label">Campus</label>
                         <select id="campus" name="campus" class="form-select" required>
                             <option value="" disabled selected>Select Campus</option>
@@ -78,19 +78,19 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="city" class="form-label">City</label>
                         <input type="text" class="form-control" id="city" name="city" value="{{ company_info.city }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="email" class="form-label">Official Email</label>
                         <input type="email" class="form-control" id="email" name="email" value="{{ company_info.email }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="salary" class="form-label">Salary</label>
                         <input type="text" class="form-control" id="salary" name="salary" value="{{ company_info.salary }}">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="cost_center" class="form-label">Cost Center</label>
                         <select id="cost_center" name="cost_center" class="form-select" required>
                             <option value="" disabled selected>Select Cost Center</option>
@@ -102,6 +102,7 @@
                 </div>
                 <h5 class="mb-3 text-primary"><strong>Bank Information</strong></h5>
                 <div class="row g-3">
+
                     <div class="col-md-4">
                         <label for="bank_name" class="form-label">Bank Name</label>
                         <select id="bank_name" name="bank_name" class="form-select" required>
@@ -119,12 +120,15 @@
                         <label for="bank_branch" class="form-label">Bank Branch</label>
                         <select id="bank_branch" name="bank_branch" class="form-select" required>
                             <option value="" disabled selected>Select Bank Branch</option>
-                            {% for bb in bank_branches %}
+                            {% for bb in bankbranches %}
                             <option value="{{ bb }}" {% if bb.branch_name == company_info.bank_branch %} selected {% endif %}>{{ bb }}</option>
                             {% endfor %}
                         </select>
                     </div>
+
+    
                 </div>
+
                 <div class="d-flex justify-content-end mt-4">
                     <button type="submit" value="Add" class="btn btn-success me-2">Add</button>
                     <a href="{% url 'company-info' staff.staffno %}" class="btn btn-info">Cancel</a>

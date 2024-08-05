@@ -15,14 +15,14 @@
                 {% csrf_token %}
                 <div class="row g-3 mb-4">
                     
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="staffno">Staff Number</label>
                             <input type="text" class="form-control" id="staffno" name="staffno" required
                                 {% if staff %} value="{{ staff.staffno }}" readonly="true" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="title">Title</label>
                             <select name="title" class="form-select" required> 
@@ -37,28 +37,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="lname">Surname</label>
-                            <input type="text" class="form-control" id="lname" name="lname" required
-                                {% if staff %} value="{{ staff.lname }}" {% else %} value="" {% endif %}>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="fname">First Name</label>
-                            <input type="text" class="form-control" id="fname" name="fname" required
-                                {% if staff %} value="{{ staff.fname }}" {% else %} value="" {% endif %}>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label for="middlenames">Middle Names</label>
-                            <input type="text" class="form-control" id="middlenames" name="middlenames"
-                                {% if staff %} value="{% if staff.middlenames %}{{ staff.middlenames }}{% endif %}" {% else %} value="" {% endif %}>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="suffix">Suffix</label>
                             <select name="suffix" id="suffix" class="form-select">
@@ -73,7 +52,29 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="lname">Surname</label>
+                            <input type="text" class="form-control" id="lname" name="lname" required
+                                {% if staff %} value="{{ staff.lname }}" {% else %} value="" {% endif %}>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="fname">First Name</label>
+                            <input type="text" class="form-control" id="fname" name="fname" required
+                                {% if staff %} value="{{ staff.fname }}" {% else %} value="" {% endif %}>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="middlenames">Middle Names</label>
+                            <input type="text" class="form-control" id="middlenames" name="middlenames"
+                                {% if staff %} value="{% if staff.middlenames %}{{ staff.middlenames }}{% endif %}" {% else %} value="" {% endif %}>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="gender">Gender</label>
                             <select name="gender" id="gender" class="form-select" required>
@@ -88,35 +89,50 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="dob">Date of Birth</label>
                             <input type="date" class="form-control" id="dob" name="dob" required
                                 {% if staff %} value="{{ staff.dob|date:"Y-m-d" }}" readonly="true" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="m_status">Marital Status</label>
+                            <select name="m_status" id="m_status" class="form-select" required>
+                                <option selected="true" disabled="disabled"></option>
+                                {% for key,value in MARITALSTATUS %}
+                                    <option value="{{ key }}"
+                                    {% if key == staff.m_status %}
+                                        selected
+                                    {% endif %}
+                                    >{{ value }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="nationality">Nationality</label>
                             <input type="text" class="form-control" id="nationality" name="nationality"
                                 {% if staff %} value="{{ staff.nationality }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="ethnic">Ethnic Group</label>
                             <input type="text" class="form-control" id="ethnic" name="ethnic"
                                 {% if staff %} value="{{ staff.ethnic }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="home_town">Home Town</label>
                             <input type="text" class="form-control" id="home_town" name="home_town"
                                 {% if staff %} value="{{ staff.home_town }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="region">Region</label>
                             <select name="region" id="region" class="form-select">
@@ -131,55 +147,71 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="pob">Place of Birth</label>
                             <input type="text" class="form-control" id="pob" name="pob"
                                 {% if staff %} value="{{ staff.pob }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="religion">Religion</label>
                             <input type="text" class="form-control" id="religion" name="religion"
                                 {% if staff %} value="{{ staff.religion }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="denomination">Denomination</label>
-                            <input type="text" class="form-control" id="denomination" name="denomination"
-                                {% if staff %} value="{{ staff.denomination }}" {% else %} value="" {% endif %}>
+                            <select name="denomination" id="denomination" class="form-select">
+                                <option selected="true" disabled="disabled"></option>
+                                {% for key,value in DENOMINATION %}
+                                    <option value="{{ key }}"
+                                    {% if key == staff.denomination %}
+                                        selected
+                                    {% endif %}
+                                    >{{ value }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="email_address">Personal Email</label>
                             <input type="email" class="form-control" id="email_address" name="email_address"
                                 {% if staff %} value="{{ staff.email_address }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="active_phone">Active Phone</label>
                             <input type="text" class="form-control" id="active_phone" name="active_phone"
                                 {% if staff %} value="{{ staff.active_phone }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="ssnitno">SSNIT No.</label>
                             <input type="text" class="form-control" id="ssnitno" name="ssnitno" {% if staff %} value="{{ staff.ssnitno }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="idtype">ID Type</label>
-                            <input type="text" class="form-control" id="idtype" name="idtype"
-                                {% if staff %} value="{{ staff.idtype }}" {% else %} value="" {% endif %}>
+                            <select name="idtype" id="idtype" class="form-select" required>
+                                <option selected="true" disabled="disabled"></option>
+                                {% for key,value in IDTYPE %}
+                                    <option value="{{ key }}"
+                                    {% if key == staff.idtype %}
+                                        selected
+                                    {% endif %}
+                                    >{{ value }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="gcardno">Identification No.</label>
                             <input type="text" class="form-control" id="gcardno" name="gcardno"
@@ -216,14 +248,14 @@
 
                 <h5 class="mb-3 text-primary"><strong>Educational Background</strong></h5>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="study_area">Area of Study</label>
                             <input type="text" class="form-control" id="study_area" name="study_area" 
                                 {% if staff %} value="{{ staff.study_area }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="heq">Highest Educational Qualification</label>
                             <select name="heq" id="heq" class="form-select" required>
@@ -238,28 +270,36 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="completion_year">Completion Year</label>
                             <input type="text" class="form-control" id="completion_year" name="completion_year" 
                                 {% if staff %} value="{{ staff.completion_year }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="institution">Institution of Study</label>
                             <input type="text" class="form-control" id="institution" name="institution" 
                                 {% if staff %} value="{{ staff.institution }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
-                            <label for="other_heq">Other Qualification</label>
-                            <input type="text" class="form-control" id="other_heq" name="other_heq" 
-                                {% if staff %} value="{{ staff.other_heq }}" {% else %} value="" {% endif %}>
+                            <label for="other_heq">Other Educational Qualification</label>
+                            <select name="other_heq" id="other_heq" class="form-select" required>
+                                <option selected="true" disabled="disabled"></option>
+                                {% for qual in qualification %}
+                                    <option value="{{ qual }}"
+                                    {% if qual.qual_abbr == staff.other_heq %}
+                                        selected
+                                    {% endif %}
+                                    >{{ qual }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="hpq">Highest Professional Qualification</label>
                             <select name="hpq" id="hpq" class="form-select" required>
@@ -278,7 +318,7 @@
                                      
                 <h5 class="mb-3 text-primary"><strong>Health Record</strong></h5>
                 <div class="row g-3 mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="blood">Blood Group</label>
                             <input type="text" class="form-control" id="blood" name="blood" {% if staff %} value="{{ staff.blood }}" {% else %} value="" {% endif %}>
@@ -309,7 +349,7 @@
                 </div>
 
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="staff_pix">Employee Photo</label>
                         <input type="file" class="form-control" id="staff_pix" name="staff_pix" aria-label="staff_pix" aria-describedby="staff_pix" {% if staff %} value="{{ staff.staff_pix }}" {% else %} {% endif %}>

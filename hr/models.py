@@ -2,6 +2,9 @@ from django.db import models # type: ignore
 from datetime import datetime, timezone
 from hr.choices import *
 from setup.models import *
+from django.contrib.auth.models import User as BaseUser
+
+
 # Create your models here.
 
 class Employee(models.Model):
@@ -37,18 +40,12 @@ class Employee(models.Model):
     heq = models.CharField('Highest Academic Qualification',max_length=100,blank=True,null=True)
     completion_year = models.CharField('Year of Completion',max_length=100,blank=True,null=True)
     institution = models.CharField('Institution of Study',max_length=100,blank=True,null=True)
-    other_heq = models.CharField('Other Qualification',max_length=100,blank=True,null=True)
+    other_heq = models.CharField('Other Educational Qualification',max_length=100,blank=True,null=True)
     hpq = models.CharField('Highest Professional Qualification',max_length=100,blank=True,null=True)
     staff_pix = models.ImageField(upload_to='images/', blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
-
-    # active_status = models.CharField('Staff Status',max_length=25,blank=False,default='Active',null=False)
-    # rba = models.CharField('Role-Based Access',max_length=100,blank=False,default='REG',null=False)
-    # doe = models.DateField('Date Employed')
-    # staff_rank = models.CharField('Staff Rank',max_length=50,blank=True,null=True)
-    # job_title = models.CharField('Job Title',max_length=50,blank=True,null=True)
     def __str__(self):
         staffname = self.title + ' '
         if self.fname:
@@ -69,9 +66,9 @@ class CompanyInformation(models.Model):
     staff_cat = models.CharField('Staff Category',max_length=50,blank=True,null=True)
     contract = models.CharField('Contract Type',max_length=100,blank=True,null=True) 
     active_status = models.CharField('Staff Status',max_length=50,blank=True,null=True)
-    doa = models.DateField('Date of Appointment')
-    doe = models.DateField('Date of Expiration')
-    renewal = models.DateField('Renewal')
+    doa = models.DateField('Date of Appointment', blank=True,null=True)
+    doe = models.DateField('Date of Expiration', blank=True,null=True)
+    renewal = models.DateField('Renewal', blank=True,null=True)
     rank = models.CharField('Designation/Rank',max_length=50,blank=True,null=True)
     campus = models.CharField('Campus',max_length=50,blank=True,null=True)
     city = models.CharField('City',max_length=50,blank=True,null=True)
@@ -89,9 +86,14 @@ class CompanyInformation(models.Model):
     def __str__(self):
         return self.staffno
 
+
+class User(BaseUser):
+    staffno = models.CharField(max_length=50, blank=True)
+    approval = models.BooleanField(default=False)
     
-
-
+    def __str__(self):
+        return self.username
+    
 class Rank(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -129,6 +131,18 @@ class ChoicesGender(models.Model):
     name = models.CharField(max_length=120, unique=True)
 
 class ChoicesStaffStatus(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    
+class ChoicesReligion(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesDenomination(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    
+class ChoicesIdType(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+
+class ChoicesMaritalStatus(models.Model):
     name = models.CharField(max_length=120, unique=True)
 
 class ProfessionalBody(models.Model):

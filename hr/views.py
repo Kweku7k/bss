@@ -7,32 +7,59 @@ from setup.models import *
 from django.db.models import Q
 from .forms import *
 from django.db import connection # type: ignore
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
 
-DEPENDANTS = ChoicesDependants.objects.all().values_list("name","name")
-# Create your views here.
+
+
 def index(request):
-    staffs = Employee.objects.order_by('lname').filter()
-    # active_status__exact='Active'
-    staff_count = staffs.count()
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            # if user.approval:
+            login(request, user)
+            return redirect('landing')
+            # else:
+            #     messages.error(request, 'Account not approved yet.', extra_tags='alert alert-warning')
+            #     return redirect('login')
+        else:
+            messages.error(request, 'Invalid login credentials.', extra_tags='alert alert-warning')
+            return redirect('login')
+    
+    return render(request, 'authentication/login.html',{})
 
-    context = {
-        'staffs':staffs,
-        'staff_count':staff_count,
-    }
-    return render(request,'hr/landing_page.html', context)
-
-    # return render(request,'authentication/login.html',{})
 
 def register(request):
-    # Create accounts
+    form = RegistrationForm()
+    
     if request.method == 'POST':
-        print("REGISTER")
-        return redirect('index')
-    # else:
-    #     return redirect('register')
-    return render(request,'authentication/register.html',{})
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.save()
+            # form.save(commit=False)
+            # user = form.cleaned_data.get('username')
+            # user = form.cleaned_data.get('username')
+            messages.success(request, f'Registration successful for {user}', extra_tags='alert alert-success')  
+            return redirect('login')
+        else:
+            messages.error(request, 'Error in creating account.', extra_tags='alert alert-warning')
+    else:
+        form = RegistrationForm()
+    context = {'form':form}
 
+    return render(request, 'authentication/register.html', context)
+
+def logoutUser(request):
+    logout(request)
+    return redirect('login')
+    
+
+@login_required(login_url='login')
 def landing(request):
     staffs = Employee.objects.order_by('lname').filter()
     staff_count = staffs.count()
@@ -45,8 +72,6 @@ def landing(request):
     return render(request,'hr/landing_page.html', context)
 
 def search(request):
-    
-   
     if request.method == 'POST' and 'search' in request.POST:
         staffs = Employee.objects.all()
         company_info = CompanyInformation.objects.all()
@@ -132,8 +157,11 @@ def edit_staff(request,staffno):
                'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
                'SUFFIX': ChoicesSuffix.objects.all().values_list("name", "name"),
                'REGION': ChoicesRegion.objects.all().values_list("name", "name"),
+               'MARITALSTATUS': ChoicesMaritalStatus.objects.all().values_list("name", "name"),
+               'IDTYPE': ChoicesIdType.objects.all().values_list("name", "name"),
+               'DENOMINATION': ChoicesDenomination.objects.all().values_list("name", "name"),
                'DEPENDANTS':DEPENDANTS,
-               'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
+               'HPQ': ChoicesHPQ.objects.all().values_list("name", "name"),
                'title':title,
                'qualification':qualification,
                'staffcategory':staffcategory,
@@ -218,21 +246,19 @@ def newstaff(request):
                'staffs':staffs,
                'staff_count':staff_count,
                'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
-            #    'STAFFLEVEL':[(q.name, q.name)  for q in ChoicesStaffLevel.objects.all()],
                'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
-            #    'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
-            #    'GENDER':[(q.name, q.name)  for q in ChoicesGender.objects.all()],
                'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
                'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
-            #    'HEQ':[(q.name, q.name)  for q in ChoicesHEQ.objects.all()],
-                'qualification':qualification,
+               'qualification':qualification,
                'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
                'REGION':[(q.name, q.name)  for q in ChoicesRegion.objects.all()],
                'title':title,
                'staffcategory':staffcategory,
                'qualification':qualification,
-            #    'TITLE':[(q.name, q.name)  for q in Title.objects.all()],
+               'MARITALSTATUS': ChoicesMaritalStatus.objects.all().values_list("name", "name"),
+               'IDTYPE': ChoicesIdType.objects.all().values_list("name", "name"),
+               'DENOMINATION': ChoicesDenomination.objects.all().values_list("name", "name"),
                'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
             }
     return render(request,'hr/new_staff.html',context)
@@ -249,7 +275,7 @@ def company_info(request,staffno):
     campus = Campus.objects.all()
     department = Department.objects.all()
     bank_list = Bank.objects.all()
-    bank_branches = BankBranch.objects.all()
+    bankbranches = BankBranch.objects.all()
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES)
@@ -276,20 +302,16 @@ def company_info(request,staffno):
                'submitted':submitted,
                'company_infos':company_infos,
                'staff':staff,
-            #    'company_info_count':company_info_count,
                'staffcategory':staffcategory,
                'contract':contract,
                'campus':campus,
                'department':department,
                'bank_list':bank_list,
-               'bank_branches':bank_branches,
+               'bankbranches':bankbranches,
                'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
-            #    'STAFFLEVEL':[(q.name, q.name)  for q in ChoicesStaffLevel.objects.all()],
                'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
-            #    'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
                'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
-            #    'HEQ':[(q.name, q.name)  for q in ChoicesHEQ.objects.all()],
             }
     return render(request,'hr/company_info.html',context)
 
@@ -304,7 +326,7 @@ def edit_company_info(request,staffno):
     campus = Campus.objects.all()
     department = Department.objects.all()
     bank_list = Bank.objects.all()
-    bank_branches = BankBranch.objects.all()
+    bankbranches = BankBranch.objects.all()
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
@@ -337,7 +359,7 @@ def edit_company_info(request,staffno):
                'campus':campus,
                'department':department,
                'bank_list':bank_list,
-               'bank_branches':bank_branches,
+               'bankbranches':bankbranches
                }
 
     return render(request, 'hr/company_info.html', context)
