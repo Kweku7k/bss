@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-3 text-primary"><strong>Employee Relations/Beneficiaries</strong></h5>
+                {% if staff.staff_pix %}
+                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                {% endif %}
+            </div>
+            <form action="" method="POST" enctype="multipart/form-data"> 
+                {% csrf_token %}
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="staffno" class="form-label">Staff Number</label>
+                        <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="kith_lname" class="form-label">Surname</label>
+                        <input type="text" class="form-control" id="kith_lname" name="kith_lname" value="{{ emp_relation.kith_lname }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="kith_fname" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="kith_fname" name="kith_fname" value="{{ emp_relation.kith_fname }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="kith_middlenames" class="form-label">Middle Name</label>
+                        <input type="text" class="form-control" id="kith_middlenames" name="kith_middlenames" value="{{ emp_relation.kith_middlenames }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="kith_relationship" class="form-label">Relationship</label>
+                        <select id="kith_relationship" name="kith_relationship" class="form-select" required>
+                            <option value="" disabled selected>Select Relationship Type</option>
+                            {% for key, value in RELATIONSHIP %}
+                            <option value="{{ key }}" {% if key == emp_relation.kith_relationship %} selected {% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="kith_gender" class="form-label">Gender</label>
+                        <select id="kith_gender" name="kith_gender" class="form-select" required>
+                            <option value="" disabled selected>Select Gender</option>
+                            {% for key, value in GENDER %}
+                            <option value="{{ key }}" {% if key == emp_relation.kith_gender %} selected {% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="kith_dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="kith_dob" name="kith_dob" value="{{ emp_relation.kith_dob|date:'Y-m-d' }}" required>
+                    </div>
+                    
+                    
+                </div>
+                
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" value="Add" class="btn btn-success me-2">Add</button>
+                    <a href="{% url 'company-info' staff.staffno %}" class="btn btn-info">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

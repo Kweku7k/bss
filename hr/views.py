@@ -39,11 +39,9 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.save()
-            # form.save(commit=False)
-            # user = form.cleaned_data.get('username')
-            # user = form.cleaned_data.get('username')
+            form.save(commit=False)
+            user = form.cleaned_data.get('username')
+            user = form.cleaned_data.get('staffno')
             messages.success(request, f'Registration successful for {user}', extra_tags='alert alert-success')  
             return redirect('login')
         else:
@@ -114,15 +112,6 @@ def deletestaff(request,staffno):
             cursor.execute("UPDATE hr_employee SET active_status = 'Inactive' WHERE staffno = %s", [staffno])
             return render(request,'hr/new_staff.html',{'staff':staff,'staffs':staffs,'staff_count':staff_count})
     return render(request, 'delete.html',{'obj':staff1,'staff':staff})
-
-
-# def user_is_employee(staffno=request.path.split('/staff_details/')[1].strip('/')):
-#     if Employee.objects.get(pk=staffno):
-      
-#         return True
-#     return False
-
-# @user_passes_test(lambda user: Employee.objects.get(pk=request.path.split('/staff_details/')[1].strip('/')), login_url='')
 
 
 def staff_details(request, staffno):
@@ -365,6 +354,67 @@ def edit_company_info(request,staffno):
     return render(request, 'hr/company_info.html', context)
 
 
+def emp_relation(request,staffno):
+    submitted = False
+    emp_relations = Kith.objects.filter(staffno__exact=staffno)
+    staff = Employee.objects.get(pk=staffno)
+    
+    if request.method == 'POST':
+        form = KithForm(request.POST, request.FILES)
+        print("form has been recieved")
+        if form.is_valid(): 
+            print("form was submitted successfully")
+            emp_relation = form.save(commit=False)
+            emp_relation.staffno = staff 
+            emp_relation.save()
+            staff_number = staff.pk  
+            url = reverse('staff-details', kwargs={'staffno': str(staff_number)})
+            print(url)
+            return HttpResponseRedirect(url)
+        else:
+            print("form.errors")
+            print(form.errors)
+    else:
+        form = KithForm
+        if 'submitted' in request.GET:
+            submitted = True
+    context = {
+               'form':form,
+               'submitted':submitted,
+               'emp_relations':emp_relations,
+               'staff':staff,
+               'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+            }
+    return render(request,'hr/emp_relation.html',context)
+
+
+def edit_emp_relation(request,staffno):
+    emp_relations = Kith.objects.all()  
+    emp_relation = Kith.objects.get(staffno__exact=staffno)
+    staff = Employee.objects.get(pk=staffno)
+    
+    if request.method == 'POST':
+        form = KithForm(request.POST, request.FILES, instance=emp_relation)
+        if form.is_valid():
+            form.save()
+            return redirect('staff-details', staffno=staffno)
+        else:
+            print("form.errors")
+            print(form.errors)
+    else:
+        form = KithForm(instance=emp_relation)
+        
+    context = {
+                'form':form,
+                'emp_relations':emp_relations,
+                'emp_relation':emp_relation,
+                'staff':staff,
+                'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+                'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+               }
+
+    return render(request, 'hr/emp_relation.html', context)
 
 
 def staff_education(request,staffno):
