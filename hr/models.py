@@ -85,6 +85,29 @@ class CompanyInformation(models.Model):
     
     def __str__(self):
         return self.staffno
+    
+class Kith(models.Model):
+     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) 
+     kith_lname = models.CharField('Surname',max_length=120,blank=True,null=True)
+     kith_fname = models.CharField('First Name',max_length=120,blank=True,null=True)
+     kith_middlenames = models.CharField('Middle Names',max_length=120,blank=True,null=True)
+     kith_relationship = models.CharField(max_length=50,blank=True,null=True)
+     kith_gender = models.CharField(max_length=50,blank=True,null=True)
+     kith_dob = models.DateField('Date of Birth')
+    #  phone = models.CharField('Phone No.',max_length=15,blank=True,null=True)
+    #  residential = models.CharField('Residential Address',max_length=100,blank=True,null=True)
+    #  status = models.CharField('Dead or Alive',max_length=100,blank=True,null=True)
+    #  kin = models.CharField('Next of Kin',max_length=100,blank=True,null=True)
+    #  beneficiary = models.CharField('Beneficiary',max_length=100,blank=True,null=True)
+     updated = models.DateTimeField(auto_now=True)
+     created = models.DateTimeField(auto_now_add=True)
+     def __str__(self):
+        f_name = self.kith_fname
+        if self.kith_middlenames:
+            f_name +=  ' ' +  self.kith_middlenames
+        f_name +=  ' ' +  self.kith_lname
+        return f_name #self.kith_fname + ' ' +  self.kith_middlenames + ' ' +  self.kith_lname
+     
 
 
 class User(BaseUser):
@@ -210,23 +233,7 @@ class Medical(models.Model):
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
-class Kith(models.Model):
-     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) 
-     kith_lname = models.CharField('Surname',max_length=120,blank=False,null=False)
-     kith_fname = models.CharField('First Name',max_length=120,blank=False,null=False)
-     kith_middlenames = models.CharField('Middle Names',max_length=120,blank=True,null=True)
-     kith_relationship = models.CharField(max_length=120)
-     kith_gender = models.CharField(max_length=120)
-     kith_dob = models.DateField('Date of Birth')
-     updated = models.DateTimeField(auto_now=True)
-     created = models.DateTimeField(auto_now_add=True)
-     def __str__(self):
-        f_name = self.kith_fname
-        if self.kith_middlenames:
-            f_name +=  ' ' +  self.kith_middlenames
-        f_name +=  ' ' +  self.kith_lname
-        return f_name #self.kith_fname + ' ' +  self.kith_middlenames + ' ' +  self.kith_lname
-     
+
 class StaffBank(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) 
     bank = models.ForeignKey(Bank,blank=False,null=False,on_delete=models.CASCADE)

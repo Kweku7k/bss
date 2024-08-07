@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 
+
 {% block content %}
-<div class="container mt-4">
+<div class=" mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
@@ -11,6 +12,35 @@
                 <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
                 {% endif %}
             </div>
+            
+            <h6><b> Existing Beneficiaries</b></h6>
+            <div class="mb-4">
+                {% if emp_relations %}
+                <div class="row">
+                    {% for emp in emp_relations %}
+                    <div class="col-6 col-md-3 mb-2">
+                        <div class="card p-3">
+                            <div class="w-100 d-flex justify-content-between align-items-start mb-1">
+                                <div class="flex-grow-1 me-2">
+                                    <h6 class="mb-0 text-truncate" style="max-width: 100px;"><b>{{ emp.kith_lname }} {{ emp.kith_fname }}</b></h6>
+                                    <p class="mb-0">{{ emp.kith_relationship }}</p>
+                                    <p class="mb-0">{{ emp.kith_gender }}</p>
+                                </div>
+                                <div class="d-flex">
+                                    <a class="btn btn-sm btn-info bi-pencil-square me-2" href="{% url 'edit-emp-relation' emp.id staff.staffno %}"></a>
+                                    <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-emp-relation' emp.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ emp.kith_fname }}?');"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No beneficiaries added yet.</p>
+                {% endif %}
+            </div>
+            <br/>
+            <h6><b>Add New Beneficiary</b></h6>
             <form action="" method="POST" enctype="multipart/form-data"> 
                 {% csrf_token %}
                 <div class="row g-3 mb-4">
@@ -20,19 +50,19 @@
                     </div>
                     <div class="col-md-4">
                         <label for="kith_lname" class="form-label">Surname</label>
-                        <input type="text" class="form-control" id="kith_lname" name="kith_lname" value="{{ emp_relation.kith_lname }}" required>
+                        <input type="text" name="kith_lname" class="form-control" {% if emp_relation %} value="{{ emp_relation.kith_lname }}" {% else %} value="" {% endif %} required>
                     </div>
                     <div class="col-md-4">
                         <label for="kith_fname" class="form-label">First Name</label>
-                        <input type="text" class="form-control" id="kith_fname" name="kith_fname" value="{{ emp_relation.kith_fname }}" required>
+                        <input type="text" class="form-control" name="kith_fname" {% if emp_relation %} value="{{ emp_relation.kith_fname }}" {% else %} value="" {% endif %} required>
                     </div>
                     <div class="col-md-4">
                         <label for="kith_middlenames" class="form-label">Middle Name</label>
-                        <input type="text" class="form-control" id="kith_middlenames" name="kith_middlenames" value="{{ emp_relation.kith_middlenames }}" required>
+                        <input type="text" class="form-control" name="kith_middlenames" {% if emp_relation %} value="{{ emp_relation.kith_middlenames }}" {% else %} value="" {% endif %} required>
                     </div>
                     <div class="col-md-4">
                         <label for="kith_relationship" class="form-label">Relationship</label>
-                        <select id="kith_relationship" name="kith_relationship" class="form-select" required>
+                        <select name="kith_relationship" class="form-select" required>
                             <option value="" disabled selected>Select Relationship Type</option>
                             {% for key, value in RELATIONSHIP %}
                             <option value="{{ key }}" {% if key == emp_relation.kith_relationship %} selected {% endif %}>{{ value }}</option>
@@ -41,7 +71,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="kith_gender" class="form-label">Gender</label>
-                        <select id="kith_gender" name="kith_gender" class="form-select" required>
+                        <select name="kith_gender" class="form-select" required>
                             <option value="" disabled selected>Select Gender</option>
                             {% for key, value in GENDER %}
                             <option value="{{ key }}" {% if key == emp_relation.kith_gender %} selected {% endif %}>{{ value }}</option>
@@ -50,21 +80,17 @@
                     </div>
                     <div class="col-md-4">
                         <label for="kith_dob" class="form-label">Date of Birth</label>
-                        <input type="date" class="form-control" id="kith_dob" name="kith_dob" value="{{ emp_relation.kith_dob|date:'Y-m-d' }}" required>
+                        <input type="date" class="form-control" name="kith_dob" {% if emp_relation %} value="{{ emp_relation.kith_dob|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
                     </div>
-                    
-                    
+                    <!-- Add other fields as needed -->
                 </div>
-                
 
                 <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" value="Add" class="btn btn-success me-2">Add</button>
-                    <a href="{% url 'company-info' staff.staffno %}" class="btn btn-info">Cancel</a>
+                    <button type="submit" class="btn btn-info me-2">Add</button>
+                    <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-
 {% endblock %}

@@ -276,7 +276,7 @@ def company_info(request,staffno):
             company_info.staffno = staff 
             company_info.save()
             staff_number = staff.pk  
-            url = reverse('staff-details', kwargs={'staffno': str(staff_number)})
+            url = reverse('emp_relation', kwargs={'staffno': str(staff_number)})
             print(url)
             return HttpResponseRedirect(url)
         else:
@@ -353,6 +353,7 @@ def edit_company_info(request,staffno):
 
     return render(request, 'hr/company_info.html', context)
 
+# EMPLOYEE RELATIONSHIP 
 
 def emp_relation(request,staffno):
     submitted = False
@@ -360,20 +361,11 @@ def emp_relation(request,staffno):
     staff = Employee.objects.get(pk=staffno)
     
     if request.method == 'POST':
-        form = KithForm(request.POST, request.FILES)
+        form = KithForm(request.POST)
         print("form has been recieved")
         if form.is_valid(): 
-            print("form was submitted successfully")
-            emp_relation = form.save(commit=False)
-            emp_relation.staffno = staff 
-            emp_relation.save()
-            staff_number = staff.pk  
-            url = reverse('staff-details', kwargs={'staffno': str(staff_number)})
-            print(url)
-            return HttpResponseRedirect(url)
-        else:
-            print("form.errors")
-            print(form.errors)
+            form.save()
+            return redirect('emp-relation', staffno)
     else:
         form = KithForm
         if 'submitted' in request.GET:
@@ -389,32 +381,40 @@ def emp_relation(request,staffno):
     return render(request,'hr/emp_relation.html',context)
 
 
-def edit_emp_relation(request,staffno):
-    emp_relations = Kith.objects.all()  
-    emp_relation = Kith.objects.get(staffno__exact=staffno)
+def edit_emp_relation(request,staffno,emp_id):
+    emp_relations = Kith.objects.filter(staffno__exact=staffno)  
+    emp_relation = Kith.objects.get(pk=emp_id)
     staff = Employee.objects.get(pk=staffno)
-    
+    emp_count = emp_relations.count()
+    form = KithForm(request.POST or None,instance=emp_relation)
+
     if request.method == 'POST':
-        form = KithForm(request.POST, request.FILES, instance=emp_relation)
+        form = KithForm(request.POST, instance=emp_relation)
         if form.is_valid():
             form.save()
-            return redirect('staff-details', staffno=staffno)
-        else:
-            print("form.errors")
-            print(form.errors)
-    else:
-        form = KithForm(instance=emp_relation)
+            return redirect('emp-relation', staffno=staffno)
         
     context = {
                 'form':form,
                 'emp_relations':emp_relations,
                 'emp_relation':emp_relation,
                 'staff':staff,
+                'emp_count':emp_count,
                 'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
                 'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
                }
 
     return render(request, 'hr/emp_relation.html', context)
+
+def delete_emp_relation(request,emp_id,staffno):
+    emp_relation = Kith.objects.get(pk=emp_id)
+    if request.method == 'POST':
+       emp_relation.delete()
+       return redirect('emp-relation', staffno)
+    return render(request, 'delete.html',{'obj':emp_relation})
+
+
+# END OF EMPLOYEE RELATIONSHIP 
 
 
 def staff_education(request,staffno):

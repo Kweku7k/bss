@@ -18,8 +18,10 @@ urlpatterns = [
     path('edit_company_info/<str:staffno>', views.edit_company_info,name="edit-company-info"),
     # path('delete_company_info/<str:staffno>', views.delete_company_info,name="delete-company-info"),
 
-    path('emp_relation/<str:staffno>', views.emp_relation,name="emp_relation"),
-    path('edit_emp_relation/<str:staffno>', views.edit_emp_relation,name="edit-emp-relation"),
+    path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),
+    path('edit_emp_relation/<str:emp_id>/<str:staffno>', views.edit_emp_relation,name="edit-emp-relation"),
+    path('delete_emp_relation/<str:emp_id>/<str:staffno>', views.delete_emp_relation,name="delete-emp-relation"),
+
     
     path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),
