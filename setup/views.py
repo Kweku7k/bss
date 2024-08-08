@@ -424,7 +424,8 @@ def add_bank(request):
         if 'submitted' in request.GET:
             submitted = True
 
-    return render(request,'setup/add_bank.html',{'form':form,'submitted':submitted,'banks':banks,'bank_count':bank_count})
+    context = {'form':form,'submitted':submitted,'banks':banks,'bank_count':bank_count}
+    return render(request,'setup/add_bank.html',context)
 
 def delete_bank(request,bank_id):
     bank = Bank.objects.get(pk=bank_id)

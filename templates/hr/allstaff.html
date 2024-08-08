@@ -3,32 +3,108 @@
 
 <div class="row col-12 p-1">
     <div class="card pt-1 mx-3">
-        <div class="card-header d-flex justify-content-between align-center">
+        <div class="card-header ">
             <h5><strong>Number of Staff: {{ staff_count }}</strong></h5>
 
+            
+        </div>
+
+        <div class="card-body mb-3">
             <form method="POST" class="filter-form">
                 {% csrf_token %}
-                <label for="filter">Filter by Staff Category:</label>
-
-                <select name="filter" id="filter" >
-                    <option selected="true" disabled="disabled">
-                        {% if filter %} {{ filter }} {% else %} Select {% endif %}
-                    </option>
-                    {% for sc in staffcategory %}
-                        <option value="{{ sc }}"
-                        {% if sc.category_name == filter %}
-                            selected
-                        {% endif %}
-                        >{{ sc }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit" class="btn btn-success btn-sm">Apply</button>
+                <div class="mb-1">
+                    <label class="form-label" style="font-weight:bold;">Filter by:</label>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-2">
+                        <label for="filter_staffcategory" class="form-label">Staff Category</label>
+                        <select name="filter_staffcategory" id="filter_staffcategory" class="form-select">
+                            <option selected="true" disabled="disabled">
+                                {% if filter_staffcategory %} {{ filter_staffcategory }} {% else %} Select {% endif %}
+                            </option>
+                            {% for sc in staffcategory %}
+                                <option value="{{ sc }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
+                                    {{ sc }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <label for="filter_qualification" class="form-label">Qualification</label>
+                        <select name="filter_qualification" id="filter_qualification" class="form-select">
+                            <option selected="true" disabled="disabled">
+                                {% if filter_qualification %} {{ filter_qualification }} {% else %} Select {% endif %}
+                            </option>
+                            {% for qual in qualification %}
+                                <option value="{{ qual }}" {% if qual.qual_name == filter_qualification %} selected {% endif %}>
+                                    {{ qual }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <label for="filter_title" class="form-label">Title</label>
+                        <select name="filter_title" id="filter_title" class="form-select">
+                            <option selected="true" disabled="disabled">
+                                {% if filter_title %} {{ filter_title }} {% else %} Select {% endif %}
+                            </option>
+                            {% for ts in title %}
+                                <option value="{{ ts }}" {% if ts.title_name == filter_title %} selected {% endif %}>
+                                    {{ ts }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <label for="filter_contract" class="form-label">Contract Type</label>
+                        <select name="filter_contract" id="filter_contract" class="form-select">
+                            <option selected="true" disabled="disabled">
+                                {% if filter_contract %} {{ filter_contract }} {% else %} Select {% endif %}
+                            </option>
+                            {% for ct in contract %}
+                                <option value="{{ ct }}" {% if ct.contract_type == filter_contract %} selected {% endif %}>
+                                    {{ ct }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <label for="filter_status" class="form-label">Status</label>
+                        <select name="filter_status" id="filter_status" class="form-select">
+                            <option selected="true" disabled="disabled">
+                                {% if filter_status %} {{ filter_status }} {% else %} Select {% endif %}
+                            </option>
+                            {% for key, value in STAFFSTATUS %}
+                                <option value="{{ key }}" {% if key == filter_status %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-2">
+                        <label for="filter_gender" class="form-label">Gender</label>
+                        <select name="filter_gender" id="filter_gender" class="form-select">
+                            <option selected="true" disabled="disabled">
+                                {% if filter_gender %} {{ filter_gender }} {% else %} Select {% endif %}
+                            </option>
+                            {% for key, value in GENDER %}
+                                <option value="{{ key }}" {% if key == filter_gender %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-success btn-sm">Apply</button>
+                </div>
             </form>
         </div>
+
         <div class="card-body">
             {% if staffs %}
                 <table class="table table-hover">
-                    <thead class="table-primary">
+                    <thead class="">
                         <tr>
                             <th>Staff No</th>
                             <th>First Name</th>

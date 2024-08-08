@@ -166,42 +166,80 @@ def allstaff(request):
     staff_count = staffs.count()
     staffcategory = StaffCategory.objects.all()
     company_info = CompanyInformation.objects.all()
+    qualification = Qualification.objects.all()
+    title = Title.objects.all()
+    contract = Contract.objects.all()
 
-    
     if request.method == 'POST':
-        filter = request.POST.get('filter')
+        filter_staffcategory = request.POST.get('filter_staffcategory')
+        filter_qualification = request.POST.get('filter_qualification')
+        filter_title = request.POST.get('filter_title')
+        filter_contract = request.POST.get('filter_contract')
+        filter_status = request.POST.get('filter_status')
+        filter_gender = request.POST.get('filter_gender')
+        
+        # Initial queryset for filtering
         staffs = Employee.objects.all()
-        company_info = CompanyInformation.objects.filter(staff_cat=filter)
-        staffcategory = StaffCategory.objects.all()
-        result = []
-        company_staffno = {company.staffno_id for company in company_info}
 
-        for staff in staffs:
-            if staff.staffno in company_staffno:
-                result.append(staff)
-                    
+        # Filter by staff category
+        if filter_staffcategory:
+            company_info = CompanyInformation.objects.filter(staff_cat=filter_staffcategory)
+            company_staffno = {company.staffno_id for company in company_info}
+            staffs = staffs.filter(staffno__in=company_staffno)
+
+        # Filter by Contract
+        if filter_contract:
+            company_info = CompanyInformation.objects.filter(contract=filter_contract)
+            company_staffno = {company.staffno_id for company in company_info}
+            staffs = staffs.filter(staffno__in=company_staffno)
+            
+        # Filter by qualification
+        if filter_qualification:
+            staffs = staffs.filter(heq=filter_qualification)
         
+        # Filter by title
+        if filter_title:
+            staffs = staffs.filter(title=filter_title)
+            
+        # Filter by title
+        if filter_gender:
+            staffs = staffs.filter(gender=filter_gender)
+            
+        # Filter by Staff Staus
+        if filter_status:
+            company_info = CompanyInformation.objects.filter(active_status=filter_status)
+            company_staffno = {company.staffno_id for company in company_info}
+            staffs = staffs.filter(staffno__in=company_staffno)
+
         context = {
-        'staffs':result,
-        'filter':filter,
-        'company_info':company_info,
-        'staff_count': len(result),
-        'staffcategory':staffcategory,        
-        
-    }
+            'staffs': staffs,
+            'filter_staffcategory': filter_staffcategory,
+            'filter_qualification': filter_qualification,
+            'filter_title':filter_title,
+            'company_info': company_info,
+            'staff_count': staffs.count(),
+            'staffcategory': staffcategory,
+            'qualification': qualification,
+            'title':title,
+            'contract':contract,
+            'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
+            'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
+
+        }
         return render(request, 'hr/allstaff.html', context)
-        
 
     context = {
-        'staffs':staffs,
-        'staff_count':staff_count,
-        'staffcategory':staffcategory,
+        'staffs': staffs,
+        'staff_count': staff_count,
+        'staffcategory': staffcategory,
         'company_info': company_info,
-        'STAFFRANK':[(q.name, q.name)  for q in ChoicesStaffRank.objects.all()],
-        
+        'qualification': qualification,
+        'title': title,
+        'contract':contract,
+        'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
+        'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
     }
     return render(request, 'hr/allstaff.html', context)
-    
     
 
 def newstaff(request):

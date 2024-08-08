@@ -17,7 +17,7 @@
                     </div>
                     <hr>
                     <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
-                    <a class="btn btn-sm btn-primary" href="{% url 'add-contract' %}">Cancel</a>
+                    <a class="btn btn-sm btn-info" href="{% url 'add-contract' %}">Cancel</a>
                 </form>
             </div>
         </div>
@@ -38,7 +38,7 @@
                     <tr>
                         <td>{{ contract.contract_type }}</td>
                         <td>
-                            <a class="btn btn-sm btn-primary bi-pencil-square" href="{% url 'edit-contract' contract.id %}"></a>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-contract' contract.id %}"></a>
                             <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-contract' contract.id %}" onclick="return confirm('Do you really want to delete the data for {{ contract.contract_type }}?');"></a>
                         </td>
                     </tr>
