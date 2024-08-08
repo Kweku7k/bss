@@ -17,8 +17,8 @@
                         <select name="staff_cat" class="form-select" required> 
                           <option selected="true" disabled="disabled">--Select--</option>
                           {% if staffcategorys %}
-                                {% for staffcategory in staffcategorys %}
-                                    <option value="{{ staffcategory.id }}" {% if job_title.staff_cat_id == staffcategory.id %} selected {% endif %}>{{ staffcategory.category_abbr }}</option>
+                                {% for cat in staffcategorys %}
+                                    <option value="{{ cat.id }}" {% if job_title.staff_cat_id == cat.id %} selected {% endif %}>{{ cat.category_name }}</option>
                                 {% endfor %}
                             {% endif %}
                       </select>

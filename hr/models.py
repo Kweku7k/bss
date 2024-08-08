@@ -3,6 +3,8 @@ from datetime import datetime, timezone
 from hr.choices import *
 from setup.models import *
 from django.contrib.auth.models import User as BaseUser
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 
 # Create your models here.
@@ -94,19 +96,16 @@ class Kith(models.Model):
      kith_relationship = models.CharField(max_length=50,blank=True,null=True)
      kith_gender = models.CharField(max_length=50,blank=True,null=True)
      kith_dob = models.DateField('Date of Birth')
-    #  phone = models.CharField('Phone No.',max_length=15,blank=True,null=True)
-    #  residential = models.CharField('Residential Address',max_length=100,blank=True,null=True)
-    #  status = models.CharField('Dead or Alive',max_length=100,blank=True,null=True)
-    #  kin = models.CharField('Next of Kin',max_length=100,blank=True,null=True)
-    #  beneficiary = models.CharField('Beneficiary',max_length=100,blank=True,null=True)
+     phone = models.CharField('Phone No.',max_length=15,blank=True,null=True)
+     residential = models.CharField('Residential Address',max_length=100,blank=True,null=True)
+     status = models.CharField('Dead or Alive',max_length=10,blank=True,null=True)
+     kin = models.CharField('Next of Kin',max_length=10,blank=True,null=True)
+     ben = models.CharField('Beneficiary',max_length=100,blank=True,null=True)
+     percentage = models.IntegerField('Beneficiary',validators=[ MinValueValidator(0), MaxValueValidator(100) ],blank=True,null=True)
      updated = models.DateTimeField(auto_now=True)
      created = models.DateTimeField(auto_now_add=True)
      def __str__(self):
-        f_name = self.kith_fname
-        if self.kith_middlenames:
-            f_name +=  ' ' +  self.kith_middlenames
-        f_name +=  ' ' +  self.kith_lname
-        return f_name #self.kith_fname + ' ' +  self.kith_middlenames + ' ' +  self.kith_lname
+        return self.kith_fname
      
 
 
@@ -130,6 +129,9 @@ class ChoicesRegion(models.Model):
     name = models.CharField(max_length=120, unique=True)
     
 class ChoicesDependants(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    
+class ChoicesRelationStatus(models.Model):
     name = models.CharField(max_length=120, unique=True)
 
 class ChoicesHEQ(models.Model):

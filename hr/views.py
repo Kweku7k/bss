@@ -1,5 +1,5 @@
 from math import e
-from django.http import HttpResponseRedirect # type: ignore
+from django.http import HttpResponseRedirect, JsonResponse # type: ignore
 from django.shortcuts import redirect, render
 from django.urls import reverse # type: ignore
 from .models import *
@@ -253,6 +253,14 @@ def newstaff(request):
     return render(request,'hr/new_staff.html',context)
 
 
+def get_bank_branches(request):
+    bank_code_id = request.GET.get('bank_code_id')  # Use the correct parameter name
+    if bank_code_id:
+        # Filter BankBranch based on the bank_code_id
+        bank_branches = BankBranch.objects.filter(bank_code_id=bank_code_id)
+        branches = list(bank_branches.values('id', 'branch_name'))
+        return JsonResponse({'branches': branches})
+    return JsonResponse({'branches': []})
 
 def company_info(request,staffno):
     submitted = False
@@ -353,7 +361,7 @@ def edit_company_info(request,staffno):
 
     return render(request, 'hr/company_info.html', context)
 
-# EMPLOYEE RELATIONSHIP 
+############### EMPLOYEE RELATIONSHIP ###############
 
 def emp_relation(request,staffno):
     submitted = False
@@ -364,8 +372,16 @@ def emp_relation(request,staffno):
         form = KithForm(request.POST)
         print("form has been recieved")
         if form.is_valid(): 
-            form.save()
-            return redirect('emp-relation', staffno)
+            new_percentage = form.cleaned_data['percentage']
+            current_total = sum(emp.percentage for emp in emp_relations)
+            
+            if current_total + new_percentage > 100:
+                messages.error(request, 'Total percentage exceeds 100%. Please adjust the percentage.')
+            else:
+                emp_relation = form.save(commit=False)
+                emp_relation.staffno = staff
+                emp_relation.save()
+                return redirect('emp-relation', staffno)
     else:
         form = KithForm
         if 'submitted' in request.GET:
@@ -376,7 +392,9 @@ def emp_relation(request,staffno):
                'emp_relations':emp_relations,
                'staff':staff,
                'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+               'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
                'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+                'total_percentage': sum(emp.percentage for emp in emp_relations),
             }
     return render(request,'hr/emp_relation.html',context)
 
@@ -401,6 +419,7 @@ def edit_emp_relation(request,staffno,emp_id):
                 'staff':staff,
                 'emp_count':emp_count,
                 'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+               'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
                 'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
                }
 
@@ -408,11 +427,9 @@ def edit_emp_relation(request,staffno,emp_id):
 
 def delete_emp_relation(request,emp_id,staffno):
     emp_relation = Kith.objects.get(pk=emp_id)
-    if request.method == 'POST':
+    if request.method == 'GET':
        emp_relation.delete()
-       return redirect('emp-relation', staffno)
-    return render(request, 'delete.html',{'obj':emp_relation})
-
+    return redirect('emp-relation')
 
 # END OF EMPLOYEE RELATIONSHIP 
 
@@ -518,51 +535,51 @@ def delete_prev_work(request,coy_id,staffno):
 ######################################################################
 ### Staff Dependants
 ######################################################################
-def dependants(request,staffno):
-    submitted = False
-    dependant_list = Kith.objects.order_by('kith_dob')
-    staff = Employee.objects.get(pk=staffno)
-    dependants = Kith.objects.order_by('kith_dob').filter(staffno__exact=staffno)
-    if request.method == 'POST':
-        form = KithForm(request.POST)
-        if form.is_valid(): 
-            form.save()
-            return redirect('dependants', staffno)
-        else:
-            print(form.errors)
-    else:
-        form = KithForm
-        if 'submitted' in request.GET:
-            submitted = True
-    context = {'form':form,'dependants':dependants,'staff':staff,'dependant_list':dependant_list,'submitted':submitted,'GENDER':ChoicesGender.objects.all().values_list("name","name"),'DEPENDANTS':ChoicesDependants.objects.all().values_list("name","name")}
-    return render(request,'hr/dependants.html',context)
+# def dependants(request,staffno):
+#     submitted = False
+#     dependant_list = Kith.objects.order_by('kith_dob')
+#     staff = Employee.objects.get(pk=staffno)
+#     dependants = Kith.objects.order_by('kith_dob').filter(staffno__exact=staffno)
+#     if request.method == 'POST':
+#         form = KithForm(request.POST)
+#         if form.is_valid(): 
+#             form.save()
+#             return redirect('dependants', staffno)
+#         else:
+#             print(form.errors)
+#     else:
+#         form = KithForm
+#         if 'submitted' in request.GET:
+#             submitted = True
+#     context = {'form':form,'dependants':dependants,'staff':staff,'dependant_list':dependant_list,'submitted':submitted,'GENDER':ChoicesGender.objects.all().values_list("name","name"),'DEPENDANTS':ChoicesDependants.objects.all().values_list("name","name")}
+#     return render(request,'hr/dependants.html',context)
 
-def edit_dependants(request,dep_id,staffno):
-    dependant_list = Kith.objects.order_by('kith_dob')
-    staff = Employee.objects.get(pk=staffno)
-    dependants = Kith.objects.order_by('kith_dob').filter(staffno__exact=staffno)
-    coy_count = dependants.count()
-    dependant = Kith.objects.get(pk=dep_id)
-    pkno = dependant.id
-    form = KithForm(request.POST or None,instance=dependant)
+# def edit_dependants(request,dep_id,staffno):
+#     dependant_list = Kith.objects.order_by('kith_dob')
+#     staff = Employee.objects.get(pk=staffno)
+#     dependants = Kith.objects.order_by('kith_dob').filter(staffno__exact=staffno)
+#     coy_count = dependants.count()
+#     dependant = Kith.objects.get(pk=dep_id)
+#     pkno = dependant.id
+#     form = KithForm(request.POST or None,instance=dependant)
 
-    if request.method == 'POST':
-        form = KithForm(request.POST, instance=dependant)
-        if form.is_valid():
-            form.save()
-            return redirect('dependants', staffno)
+#     if request.method == 'POST':
+#         form = KithForm(request.POST, instance=dependant)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('dependants', staffno)
 
-    context = {'pkno':pkno,'form':form,'dependants':dependants,'coy_count':coy_count,'dependant':dependant,'staff':staff,'dependant_list':dependant_list,'GENDER':GENDER,'DEPENDANTS':DEPENDANTS}
-    return render(request, 'hr/dependants.html', context)
+#     context = {'pkno':pkno,'form':form,'dependants':dependants,'coy_count':coy_count,'dependant':dependant,'staff':staff,'dependant_list':dependant_list,'GENDER':GENDER,'DEPENDANTS':DEPENDANTS}
+#     return render(request, 'hr/dependants.html', context)
 
 
-def delete_dependants(request,dep_id,staffno):
-    dependant = Kith.objects.get(pk=dep_id)
-    # dependant = dependant.coy_name
-    if request.method == 'POST':
-       dependant.delete()
-       return redirect('dependants', staffno)
-    return render(request, 'delete.html',{'obj':dependant})
+# def delete_dependants(request,dep_id,staffno):
+#     dependant = Kith.objects.get(pk=dep_id)
+#     # dependant = dependant.coy_name
+#     if request.method == 'POST':
+#        dependant.delete()
+#        return redirect('dependants', staffno)
+#     return render(request, 'delete.html',{'obj':dependant})
 
 ######################################################################
 ### End of Staff Dependants

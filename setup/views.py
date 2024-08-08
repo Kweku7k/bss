@@ -3,6 +3,8 @@ from django.shortcuts import redirect, render # type: ignore
 from .forms import *
 from .choices import STAFFLEVEL
 from setup.models import *
+from django.http import JsonResponse
+
 
 
 # Create your views here.
@@ -495,7 +497,8 @@ def edit_bankbranch(request, bankbranch_id,bankid):
             #    'bank_pk':bank_pk
                }
     return render(request, 'setup/add_bankbranch.html', context)
-########### END OF BANK VIEWS ################
+
+########### END OF BANK BRANCH VIEWS ################
 
 ########### STAFF RANK VIEWS ################
 def add_jobtitle(request):
@@ -521,10 +524,9 @@ def add_jobtitle(request):
 
 def delete_jobtitle(request,jobtitle_id):
     jobtitle = JobTitle.objects.get(pk=jobtitle_id)
-    if request.method == 'POST':
+    if request.method == 'GET':
        jobtitle.delete()
-       return redirect('add-jobtitle')
-    return render(request, 'delete.html',{'obj':jobtitle.job_title})
+    return redirect('add-jobtitle')
 
 # def delete_vehicle(request,veh_id,staffno):
 #     vehicle = Vehicle.objects.get(pk=veh_id)

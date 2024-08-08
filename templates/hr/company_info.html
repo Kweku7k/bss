@@ -103,6 +103,7 @@
                 <h5 class="mb-3 text-primary"><strong>Bank Information</strong></h5>
                 <div class="row g-3">
 
+                    
                     <div class="col-md-4">
                         <label for="bank_name" class="form-label">Bank Name</label>
                         <select id="bank_name" name="bank_name" class="form-select" required>
@@ -144,6 +145,38 @@
         </div>
     </div>
 </div>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#bank_name').change(function() {
+            var bankCodeId = $(this).val(); // Ensure this is the correct value for bank_code_id
+            if (bankCodeId) {
+                $.ajax({
+                    url: '{% url "get-bank-branches" %}', // URL of the view handling the AJAX request
+                    data: {
+                        'bank_code_id': bankCodeId // Use the correct parameter name
+                    },
+                    success: function(data) {
+                        var $branchSelect = $('#bank_branch');
+                        $branchSelect.empty(); // Clear existing options
+                        $branchSelect.append('<option value="" disabled selected>Select Bank Branch</option>'); // Add default option
+                        $.each(data.branches, function(index, branch) {
+                            $branchSelect.append('<option value="' + branch.id + '">' + branch.branch_name + '</option>');
+                        });
+                    }
+                });
+            } else {
+                $('#bank_branch').empty();
+                $('#bank_branch').append('<option value="" disabled selected>Select Bank Branch</option>');
+            }
+        });
+    });
+</script>
 
 
 {% endblock %}

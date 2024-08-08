@@ -17,7 +17,9 @@ urlpatterns = [
     path('company_info/<str:staffno>', views.company_info,name="company-info"),
     path('edit_company_info/<str:staffno>', views.edit_company_info,name="edit-company-info"),
     # path('delete_company_info/<str:staffno>', views.delete_company_info,name="delete-company-info"),
+    path('get_bank_branches/', views.get_bank_branches, name='get-bank-branches'),
 
+    
     path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),
     path('edit_emp_relation/<str:emp_id>/<str:staffno>', views.edit_emp_relation,name="edit-emp-relation"),
     path('delete_emp_relation/<str:emp_id>/<str:staffno>', views.delete_emp_relation,name="delete-emp-relation"),
@@ -31,9 +33,9 @@ urlpatterns = [
     path('edit_prev_work/<str:coy_id>/<str:staffno>', views.edit_prev_work,name="edit-prev-work"),
     path('delete_prev_work/<str:coy_id>/<str:staffno>', views.delete_prev_work,name="delete-prev-work"),
 
-    path('dependants/<str:staffno>', views.dependants,name="dependants"),
-    path('edit_dependants/<str:dep_id>/<str:staffno>', views.edit_dependants,name="edit-dependants"),
-    path('delete_dependants/<str:dep_id>/<str:staffno>', views.delete_dependants,name="delete-dependants"),
+    # path('dependants/<str:staffno>', views.dependants,name="dependants"),
+    # path('edit_dependants/<str:dep_id>/<str:staffno>', views.edit_dependants,name="edit-dependants"),
+    # path('delete_dependants/<str:dep_id>/<str:staffno>', views.delete_dependants,name="delete-dependants"),
 
     path('res_address/<str:staffno>', views.res_address,name="res-address"),
     path('edit_res_address/<str:ra_id>/<str:staffno>', views.edit_res_address,name="edit-res-address"),
