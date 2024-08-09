@@ -52,6 +52,7 @@
                     </div>
                 </div>
               </a>
+              <a href="{% url 'allstaff'%}">
                 <div class="dashboard-item">
                     <h6 class="text-muted dashboard-item-smalltext">Active Employees</h6>
                     <div class="d-flex align-items-center">
@@ -59,22 +60,24 @@
                             <i class="bi bi-person"></i>
                         </div>
                         <div class="ps-3">
-                            <h4 class="dashboard-item-text">0</h4>
+                            <h4 class="dashboard-item-text">{{ ative_count }}</h4>
                         </div>
                     </div>
                 </div>
-    
+              </a>
+              <a href="{% url 'allstaff'%}">
                 <div class="dashboard-item">
-                    <h6 class="text-muted dashboard-item-smalltext">Active Employees</h6>
+                    <h6 class="text-muted dashboard-item-smalltext">Leave Employees</h6>
                     <div class="d-flex align-items-center">
                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                             <i class="bi bi-person"></i>
                         </div>
                         <div class="ps-3">
-                            <h4 class="dashboard-item-text">0</h4>
+                            <h4 class="dashboard-item-text">{{ leave_count }}</h4>
                         </div>
                     </div>
                 </div>
+              </a>
   
             </div>    
         </div>

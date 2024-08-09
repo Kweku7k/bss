@@ -56,14 +56,14 @@
                         <th>Staff Category</th>
                         <th>Job Title</th>
                         <th>Salary Level</th>
-                        <th>Action</th>
+                        <th class="text-end">Action</th>
                     </tr>
                     {% for jobtitle in jobtitles %}
                     <tr>
                       <td>{{ jobtitle.staff_cat }}</td>
                         <td>{{ jobtitle.job_title }}</td>
                         <td>{{ jobtitle.salary_level }}</td>
-                        <td>
+                        <td class="text-end">
                             <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-jobtitle' jobtitle.id %}"></a>
                             <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-jobtitle' jobtitle.id %}" onclick="return confirm('Do you really want to delete the data for {{ jobtitle.job_title }}?');"></a>
                         </td>

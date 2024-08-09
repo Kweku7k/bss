@@ -157,8 +157,16 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="religion">Religion</label>
-                            <input type="text" class="form-control" id="religion" name="religion"
-                                {% if staff %} value="{{ staff.religion }}" {% else %} value="" {% endif %}>
+                            <select name="religion" id="religion" class="form-select">
+                                <option selected="true" disabled="disabled"></option>
+                                {% for key,value in RELIGION %}
+                                    <option value="{{ key }}"
+                                    {% if key == staff.religion %}
+                                        selected
+                                    {% endif %}
+                                    >{{ value }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-4">

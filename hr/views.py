@@ -60,11 +60,19 @@ def logoutUser(request):
 @login_required(login_url='login')
 def landing(request):
     staffs = Employee.objects.order_by('lname').filter()
+    active = CompanyInformation.objects.filter(active_status__exact='Active')
+    leave = CompanyInformation.objects.filter(active_status__exact='On Leave')
     staff_count = staffs.count()
+    ative_count = active.count()
+    leave_count = leave.count()
 
     context = {
         'staffs':staffs,
+        'active':active,
+        'leave':leave,
         'staff_count':staff_count,
+        'ative_count':ative_count,
+        'leave_count':leave_count,
     }
     
     return render(request,'hr/landing_page.html', context)
@@ -180,6 +188,7 @@ def allstaff(request):
         
         # Initial queryset for filtering
         staffs = Employee.objects.all()
+        company_info = CompanyInformation.objects.all()
 
         # Filter by staff category
         if filter_staffcategory:
@@ -227,7 +236,7 @@ def allstaff(request):
 
         }
         return render(request, 'hr/allstaff.html', context)
-
+    
     context = {
         'staffs': staffs,
         'staff_count': staff_count,
@@ -286,6 +295,7 @@ def newstaff(request):
                'MARITALSTATUS': ChoicesMaritalStatus.objects.all().values_list("name", "name"),
                'IDTYPE': ChoicesIdType.objects.all().values_list("name", "name"),
                'DENOMINATION': ChoicesDenomination.objects.all().values_list("name", "name"),
+               'RELIGION': ChoicesReligion.objects.all().values_list("name", "name"),
                'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
             }
     return render(request,'hr/new_staff.html',context)
@@ -322,7 +332,7 @@ def company_info(request,staffno):
             company_info.staffno = staff 
             company_info.save()
             staff_number = staff.pk  
-            url = reverse('emp_relation', kwargs={'staffno': str(staff_number)})
+            url = reverse('emp-relation', kwargs={'staffno': str(staff_number)})
             print(url)
             return HttpResponseRedirect(url)
         else:
