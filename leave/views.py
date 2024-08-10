@@ -71,3 +71,13 @@ def leave_entitlement(request):
                    }
         return render(request,'leave/leave_entitlement.html',context)
     return render(request,'leave/leave_entitlement.html',{'STAFFRANK':[(q.name,q.name) for q in ChoicesStaffRank.objects.all()]})
+
+
+
+############ LEAVE RWQUEST ##################
+
+def leave_request(request):
+    
+    context = {}
+    return render(request, 'leave/leave_request.html', context)
+    
