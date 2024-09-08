@@ -101,8 +101,8 @@
             </a>
           </li>
         </ul>
-      </li><!-- End Components Nav -->
-      <li class="nav-item">
+      </li>
+      {% comment %} <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#loans-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-people-fill"></i><span>Loans</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -118,10 +118,10 @@
             </a>
           </li>
         </ul>
-      </li><!-- End Components Nav -->
+      </li> {% endcomment %}
      
-       <!-- End Components Nav -->
-      <li class="nav-item">
+      
+      {% comment %} <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#leave-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>Leave</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -162,8 +162,8 @@
             </a>
           </li>
         </ul>
-      </li><!-- End Components Nav -->
-      <li class="nav-item">
+      </li>{% endcomment %}
+      {% comment %} <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#salary-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-cash-coin"></i><span>Payroll</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
@@ -215,12 +215,12 @@
             </a>
           </li>          
         </ul>
-      </li><!-- End Components Nav -->
+      </li> {% endcomment %}
 
      
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="login">
+        <a class="nav-link collapsed" href="{% url 'logout' %}">
           <i class="bi bi-box-arrow-in-right"></i>
           <span>Logout</span>
         </a>

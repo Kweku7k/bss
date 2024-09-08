@@ -9,7 +9,16 @@
                 <form action="" method="POST">
             {% csrf_token %}
             <br>
-            <label for="staff_rank">Staff Rank</label>
+            {% comment %} <div class="col-md-4">
+                <label for="staff_rank" class="form-label">Staff Category</label>
+                <select id="staff_rank" name="staff_rank" class="form-select" required>
+                    <option value="" disabled selected>Select Staff Category</option>
+                    {% for sc in staffcategory %}
+                    <option value="{{ sc }}" {% if sc.category_name == leave.staff_rank %} selected {% endif %}>{{ sc }}</option>
+                    {% endfor %}
+                </select>
+            </div> {% endcomment %}
+            <label for="staff_rank">Staff Category</label>
             <div class="form-control">
                 <select name="staff_rank"  class="form-select" required>
                     <option value="" ></option>

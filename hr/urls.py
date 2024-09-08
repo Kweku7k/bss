@@ -1,10 +1,12 @@
-from django.urls import path # type: ignore
+from django.urls import include, path # type: ignore
+from two_factor.urls import urlpatterns as tf_urls
 
 from . import views
 
 urlpatterns = [
     path('', views.landing,name="landing"),
     path('login', views.index,name="login"),
+    path('account/2fa/', include(tf_urls, namespace='two_factor')),
     path('register', views.register,name="register"),
     path('logout', views.logoutUser,name="logout"),
     path('search', views.search,name="search"),
@@ -17,13 +19,17 @@ urlpatterns = [
     path('company_info/<str:staffno>', views.company_info,name="company-info"),
     path('edit_company_info/<str:staffno>', views.edit_company_info,name="edit-company-info"),
     # path('delete_company_info/<str:staffno>', views.delete_company_info,name="delete-company-info"),
-    path('get_bank_branches/', views.get_bank_branches, name='get-bank-branches'),
+    path('get_bank_branches/<int:bank_id>/', views.get_bank_branches, name='get_bank_branches'),
+
 
     
     path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),
     path('edit_emp_relation/<str:emp_id>/<str:staffno>', views.edit_emp_relation,name="edit-emp-relation"),
     path('delete_emp_relation/<str:emp_id>/<str:staffno>', views.delete_emp_relation,name="delete-emp-relation"),
 
+    path('education/<str:staffno>', views.education,name="education"),
+    path('edit_education/<str:edu_id>/<str:staffno>', views.edit_education,name="edit-education"),
+    path('delete_education/<str:edu_id>/<str:staffno>', views.delete_education,name="delete-education"),
     
     path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),

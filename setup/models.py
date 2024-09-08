@@ -22,13 +22,6 @@ class ProfBody(models.Model):
     def __str__(self):
         return self.assoc_long_name
 
-class Department(models.Model):
-    dept_long_name = models.CharField('Name of Department',max_length=250,blank=False,null=False)
-    dept_short_name = models.CharField('Short Name',max_length=50,blank=True,null=True)
-    dept_notes = models.TextField('Notes',blank=True,null=True)
-    def __str__(self):
-        return self.dept_short_name
-
 class Bank(models.Model):
     bank_long_name = models.CharField('Name of Bank',max_length=250,blank=False,null=False)
     bank_short_name = models.CharField('Bank Short Name',max_length=50,blank=True,null=True)
@@ -73,10 +66,18 @@ class School_Faculty(models.Model):
     sch_fac_name = models.CharField('School/Faculty',max_length=250,blank=False,null=False)
     def __str__(self):
         return self.sch_fac_name
+    
+class Department(models.Model):
+    dept_long_name = models.CharField('Name of Department',max_length=250,blank=False,null=False)
+    dept_short_name = models.CharField('Short Name',max_length=50,blank=True,null=True)
+    sch_fac = models.ForeignKey(School_Faculty, on_delete=models.CASCADE, blank=True, null=True)
+    dept_notes = models.TextField('Notes',blank=True,null=True)
+    def __str__(self):
+        return self.dept_long_name
 
 class BankBranch(models.Model):
     branch_name = models.CharField('Name of Branch',max_length=250,blank=False,null=False)
-    bank_code = models.ForeignKey(Bank,on_delete=models.CASCADE,blank=False,null=False)
+    bank_code = models.ForeignKey(Bank,on_delete=models.CASCADE,blank=True,null=True)
     branch_location = models.CharField('Branch Location',max_length=250,blank=False,null=False)
     def __str__(self):
         return self.branch_name

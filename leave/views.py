@@ -1,9 +1,12 @@
 from datetime import date
 from django.shortcuts import render # type: ignore
 from .models import Leave
+from .models import *
 from hr.choices import STAFFRANK
-from hr.models import ChoicesStaffRank, Employee
+from hr.models import *
 from .forms import *
+from setup.models import *
+
 
 # Create your views here.
 def leave_entitlement(request):
@@ -18,6 +21,7 @@ def leave_entitlement(request):
     new_num_days = 0
     staff_no = ''
     msg = ''
+    staffcategory = StaffCategory.objects.all()
     
     if request.method == 'POST':
         staffRank = request.POST['staff_rank']
@@ -68,6 +72,7 @@ def leave_entitlement(request):
                    'msg':msg,
                    'all_leave_arrears':employees,
                 #    'arrears':qwe
+                'staffcategory':staffcategory,
                    }
         return render(request,'leave/leave_entitlement.html',context)
     return render(request,'leave/leave_entitlement.html',{'STAFFRANK':[(q.name,q.name) for q in ChoicesStaffRank.objects.all()]})

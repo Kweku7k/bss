@@ -29,25 +29,36 @@
                     <div class="col-md-4">
                         <label for="staff_cat" class="form-label">Staff Category</label>
                         <select id="staff_cat" name="staff_cat" class="form-select" required>
-                            <option value="" disabled selected>Select Staff Category</option>
-                            {% for sc in staffcategory %}
-                            <option value="{{ sc }}" {% if sc.category_name == company_info.staff_cat %} selected {% endif %}>{{ sc }}</option>
-                            {% endfor %}
+                            <option value="" disabled selected>N/A</option>
+                            {% if staffcategory %} 
+                                {% for sc in staffcategory %}
+                                    <option value="{{ sc.id }}"
+                                    {% if sc.id == company_info.staff_cat_id %} selected {% endif %}
+                                    
+                                    > {{ sc.category_name }} </option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label for="contract" class="form-label">Contract Type</label>
                         <select id="contract" name="contract" class="form-select" required>
-                            <option value="" disabled selected>Select Contract Type</option>
-                            {% for ct in contract %}
-                            <option value="{{ ct }}" {% if ct.contract_type == company_info.contract %} selected {% endif %}>{{ ct }}</option>
-                            {% endfor %}
+                            <option value="" disabled selected>N/A</option>
+                            {% if contract %} 
+                                {% for ct in contract %}
+                                    <option value="{{ ct.id }}"
+                                    {% if ct.id == company_info.contract_id %} selected {% endif %}
+                                    
+                                    > {{ ct.contract_type }} </option>
+                                {% endfor %}
+                            {% endif %}
+                            
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label for="active_status" class="form-label">Employee Status</label>
                         <select id="active_status" name="active_status" class="form-select" required>
-                            <option value="" disabled selected>Select Employee Status</option>
+                            <option value="" disabled selected>N/A</option>
                             {% for key, value in STAFFSTATUS %}
                             <option value="{{ key }}" {% if key == company_info.active_status %} selected {% endif %}>{{ value }}</option>
                             {% endfor %}
@@ -58,12 +69,53 @@
                         <input type="date" class="form-control" id="doa" name="doa" value="{{ company_info.doa|date:'Y-m-d' }}" required>
                     </div>
                     <div class="col-md-4">
-                        <label for="doe" class="form-label">Date of Expiration   <span id="duration" class="text-danger"></span> </label>
+                        <label for="doe" class="form-label">Date of Expiration
+                            <span id="duration" class="text-danger"></span>
+                        </label>
                         <input type="date" class="form-control" id="doe" name="doe" value="{{ company_info.doe|date:'Y-m-d' }}" required>
                     </div>
                     <div class="col-md-4">
                         <label for="renewal" class="form-label">Renewal</label>
                         <input type="date" class="form-control" id="renewal" name="renewal" value="{{ company_info.renewal|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="sch_fac_dir" class="form-label">School/Faculty</label>
+                        <select id="sch_fac_dir" name="sch_fac_dir" class="form-select" required>
+                            <option value="" disabled selected>N/A</option>
+                            {% if school_faculty %} 
+                                {% for sch_fac in school_faculty %}
+                                    <option value="{{ sch_fac.id }}"
+                                    {% if sch_fac.id == company_info.sch_fac_id %} selected {% endif %}               
+                                    > {{ sch_fac.sch_fac_name }} </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="dept" class="form-label">Department</label>
+                        <select id="dept" name="dept" class="form-select">
+                            <option value="" disabled selected>N/A</option>
+                            {% if department %}
+                                {% for dept in department %}
+                                <option value="{{ dept.id }}"
+                                {% if dept.id == company_info.dept_id %} selected {% endif %}
+                                > {{ dept.dept_long_name }} </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="directorate" class="form-label">Directorate</label>
+                        <select id="directorate" name="directorate" class="form-select">
+                            <option value="" disabled selected>N/A</option>
+                            {% if directorate %}
+                                {% for dir in directorate %}
+                                <option value="{{ dir.id }}"
+                                {% if dir.id == company_info.directorate_id %} selected {% endif %}
+                                > {{ dir.direct_name }} </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label for="rank" class="form-label">Designation/Rank</label>
@@ -94,9 +146,14 @@
                         <label for="cost_center" class="form-label">Cost Center</label>
                         <select id="cost_center" name="cost_center" class="form-select" required>
                             <option value="" disabled selected>Select Cost Center</option>
-                            {% for dept in department %}
-                            <option value="{{ dept }}" {% if dept.dept_short_name == company_info.cost_center %} selected {% endif %}>{{ dept }}</option>
-                            {% endfor %}
+                            {% if department %} 
+                                {% for dept in department %}
+                                    <option value="{{ dept.id }}"
+                                    {% if dept.id == company_info.dept_id %} selected {% endif %}
+                                    
+                                    > {{ dept.dept_long_name }} </option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
                 </div>
@@ -108,11 +165,16 @@
                         <label for="bank_name" class="form-label">Bank Name</label>
                         <select id="bank_name" name="bank_name" class="form-select" required>
                             <option value="" disabled selected>Select Bank Name</option>
-                            {% for bn in bank_list %}
-                            <option value="{{ bn }}" {% if bn.bank_short_name == company_info.bank_name %} selected {% endif %}>{{ bn }}</option>
-                            {% endfor %}
+                            {% if bank_list %} 
+                                {% for bn in bank_list %}
+                                    <option value="{{ bn.id }}"
+                                    {% if bn.id == pkno %} selected {% endif %}
+                                    >{{ bn.bank_short_name }}</option>
+                                {% endfor %}
+                            {% endif %}
                         </select>
                     </div>
+                   
                     <div class="col-md-4">
                         <label for="accno" class="form-label">Account Number</label>
                         <input type="text" class="form-control" id="accno" name="accno" value="{{ company_info.accno }}">
@@ -121,11 +183,23 @@
                         <label for="bank_branch" class="form-label">Bank Branch</label>
                         <select id="bank_branch" name="bank_branch" class="form-select" required>
                             <option value="" disabled selected>Select Bank Branch</option>
-                            {% for bb in bankbranches %}
-                            <option value="{{ bb }}" {% if bb.branch_name == company_info.bank_branch %} selected {% endif %}>{{ bb }}</option>
-                            {% endfor %}
                         </select>
                     </div>
+                    
+                    {% comment %} <div class="col-md-4">
+                        <label for="bank_branch" class="form-label">Bank Branch</label>
+                        <select id="bank_branch" name="bank_branch" class="form-select" required>
+                            <option value="" disabled selected>Select Bank Branch</option>
+                            {% if bankbranches %} 
+                                {% for bb in bankbranches %}
+                                    <option value="{{ bb.id }}"
+                                    {% if bb.id == pkno %} selected {% endif %}
+                                    
+                                    > {{ bb.branch_name }} </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div> {% endcomment %}
                     <div class="col-md-4">
                         <label for="ssn_con" class="form-check-label">SSN Contribution</label>
                         <input type="checkbox" class="form-check-input" role="switch" id="ssn_con" name="ssn_con" value="yes" {% if company_info.ssn_con %} checked {% endif %}>
@@ -159,31 +233,74 @@
         const durationSpan = document.getElementById('duration');
     
         function calculateDuration() {
+            if (!doaInput || !doeInput) return; // Check if both inputs exist
+    
             const doa = new Date(doaInput.value);
             const doe = new Date(doeInput.value);
-            
-            if (!isNaN(doa) && !isNaN(doe)) {
+    
+            if (!isNaN(doa) && !isNaN(doe) && doaInput.value && doeInput.value) {
                 let months = doe.getMonth() - doa.getMonth() + (12 * (doe.getFullYear() - doa.getFullYear()));
                 let days = doe.getDate() - doa.getDate();
-                
+    
                 if (days < 0) {
                     months -= 1;
                     days += new Date(doe.getFullYear(), doe.getMonth(), 0).getDate();
                 }
-                
+    
                 durationSpan.textContent = `(${months} months, ${days} days)`;
             } else {
                 durationSpan.textContent = '';
             }
         }
     
-        doaInput.addEventListener('change', calculateDuration);
+        if (doaInput) {
+            doaInput.addEventListener('change', calculateDuration);
+        }
         doeInput.addEventListener('change', calculateDuration);
     
         // Initial calculation on page load
         calculateDuration();
     });
+
+
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const bankNameSelect = document.getElementById('bank_name');
+        const branchSelect = document.getElementById('bank_branch');
+    
+        if (bankNameSelect) {
+            bankNameSelect.addEventListener('change', function() {
+                const bankId = this.value;
+    
+                // Clear current options
+                branchSelect.innerHTML = '<option value="" disabled selected>Select Bank Branch</option>';
+    
+                if (bankId) {
+                    fetch(`/get_bank_branches/${bankId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Fetched data:', data); // Add this to see the fetched data in the console
+                        if (data.branches && data.branches.length > 0) {
+                            data.branches.forEach(function(branch) {
+                                const option = document.createElement('option');
+                                option.value = branch.id;
+                                option.text = branch.branch_name;
+                                branchSelect.add(option);
+                            });
+                        } else {
+                            console.log('No branches found.');
+                        }
+                    })
+                    .catch(error => console.error('Error fetching branches:', error));
+                }
+            });
+        }
+    });
+    
+
 </script>
+
 
 
 {% endblock %}

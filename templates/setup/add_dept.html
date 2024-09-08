@@ -12,6 +12,17 @@
                 <form action="" method="POST">
                     {% csrf_token %}
                     <div class="form-group">
+                        <label for="sch_fac" class="col-form-label">School/Faculty</label>
+                        <select name="sch_fac" class="form-control" required> 
+                          <option selected="true" value="" disabled="disabled">--Select--</option>
+                          {% if schools %}
+                                {% for sch in schools %}
+                                    <option value="{{ sch.id }}" {% if dept.sch_fac_id == sch.id %} selected {% endif %}>{{ sch.sch_fac_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                      </select>
+                    </div>
+                    <div class="form-group">
                         <label for="dept_long_name" class="col-form-label">Name of Department</label>
                         <input type="text" name="dept_long_name" class="form-control" {% if dept %} value="{{ dept.dept_long_name }}" {% else %} value="" {% endif %} required>
                     </div>
@@ -39,15 +50,17 @@
                 {% if depts %}
                 <table class="table table-sm table-hover">
                     <tr>
+                        <th>School/Faculty</th>
                         <th>Name of Department</th>
-                        <th>Short Name</th>
-                        <th>Action</th>
+                        {% comment %} <th>Short Name</th> {% endcomment %}
+                        <th class="text-end">Action</th>
                     </tr>
                     {% for dept in depts %}
                     <tr>
+                        <td>{{ dept.sch_fac }}</td>
                         <td>{{ dept.dept_long_name }}</td>
-                        <td>{{ dept.dept_short_name }}</td>
-                        <td>
+                        {% comment %} <td>{{ dept.dept_short_name }}</td> {% endcomment %}
+                        <td class="text-end">
                             <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-dept' dept.id %}"></a>
                             <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-dept' dept.id %}" onclick="return confirm('Do you really want to delete the data for {{ dept.dept_long_name }}?');"></a>
                         </td>

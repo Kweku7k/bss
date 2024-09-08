@@ -1,5 +1,5 @@
 from math import e
-from django.http import HttpResponseRedirect, JsonResponse # type: ignore
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse # type: ignore
 from .models import *
@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from two_factor.utils import default_device
 
 
 
@@ -158,6 +160,7 @@ def edit_staff(request,staffno):
                'IDTYPE': ChoicesIdType.objects.all().values_list("name", "name"),
                'DENOMINATION': ChoicesDenomination.objects.all().values_list("name", "name"),
                'DEPENDANTS':DEPENDANTS,
+               'RELIGION': ChoicesReligion.objects.all().values_list("name", "name"),
                'HPQ': ChoicesHPQ.objects.all().values_list("name", "name"),
                'title':title,
                'qualification':qualification,
@@ -188,7 +191,6 @@ def allstaff(request):
         
         # Initial queryset for filtering
         staffs = Employee.objects.all()
-        company_info = CompanyInformation.objects.all()
 
         # Filter by staff category
         if filter_staffcategory:
@@ -300,15 +302,10 @@ def newstaff(request):
             }
     return render(request,'hr/new_staff.html',context)
 
-
-def get_bank_branches(request):
-    bank_code_id = request.GET.get('bank_code_id')  # Use the correct parameter name
-    if bank_code_id:
-        # Filter BankBranch based on the bank_code_id
-        bank_branches = BankBranch.objects.filter(bank_code_id=bank_code_id)
-        branches = list(bank_branches.values('id', 'branch_name'))
-        return JsonResponse({'branches': branches})
-    return JsonResponse({'branches': []})
+# function for fetch bank branch using bank id
+def get_bank_branches(request, bank_id):
+    branches = BankBranch.objects.filter(bank_code_id=bank_id).values('id', 'branch_name')
+    return JsonResponse({'branches': list(branches)})
 
 def company_info(request,staffno):
     submitted = False
@@ -319,6 +316,8 @@ def company_info(request,staffno):
     # company_info_count = company_infos.count()
     campus = Campus.objects.all()
     department = Department.objects.all()
+    school_faculty = School_Faculty.objects.all()
+    directorate = Directorate.objects.all()
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
     
@@ -353,6 +352,8 @@ def company_info(request,staffno):
                'department':department,
                'bank_list':bank_list,
                'bankbranches':bankbranches,
+               'school_faculty':school_faculty,
+               'directorate':directorate,
                'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
                'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
@@ -369,6 +370,8 @@ def edit_company_info(request,staffno):
     contract = Contract.objects.all()
     company_info_count = company_infos.count()
     campus = Campus.objects.all()
+    school_faculty = School_Faculty.objects.all()
+    directorate = Directorate.objects.all()
     department = Department.objects.all()
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
@@ -402,9 +405,11 @@ def edit_company_info(request,staffno):
                'contract':contract,
                'company_info_count':company_info_count,
                'campus':campus,
+               'school_faculty':school_faculty,
+               'directorate':directorate,
                'department':department,
                'bank_list':bank_list,
-               'bankbranches':bankbranches
+               'bankbranches':bankbranches,
                }
 
     return render(request, 'hr/company_info.html', context)
@@ -480,6 +485,84 @@ def delete_emp_relation(request,emp_id,staffno):
     return redirect('emp-relation')
 
 # END OF EMPLOYEE RELATIONSHIP 
+
+
+
+####### EDUCATIONAL BACKGROUND #################
+def education(request,staffno):
+    submitted = False
+    educations = Staff_School.objects.filter(staffno__exact=staffno)
+    staff = Employee.objects.get(pk=staffno)
+    qualification = Qualification.objects.all()
+    school = School.objects.all()
+    school_list = School.objects.order_by('school_name')
+
+    
+    if request.method == 'POST':
+        form = StaffSchoolForm(request.POST)
+        print("form has been recieved")
+        if form.is_valid(): 
+            education = form.save(commit=False)
+            education.staffno = staff
+            education.save()
+            return redirect('education', staffno)
+    else:
+        form = StaffSchoolForm
+        if 'submitted' in request.GET:
+            submitted = True
+    context = {
+               'form':form,
+               'submitted':submitted,
+               'educations':educations,
+               'staff':staff,
+               'qualification':qualification,
+               'school':school,
+               'school_list':school_list,
+               'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+               'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
+               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+            }
+    return render(request,'hr/education.html',context)
+
+
+def edit_education(request,staffno,edu_id):
+    educations = Staff_School.objects.filter(staffno__exact=staffno)  
+    education = Staff_School.objects.get(pk=edu_id)
+    staff = Employee.objects.get(pk=staffno)
+    edu_count = educations.count()
+    school = School.objects.all()
+    qualification = Qualification.objects.all()
+    school_list = School.objects.order_by('school_name')
+    form = StaffSchoolForm(request.POST or None,instance=education)
+    
+
+    if request.method == 'POST':
+        form = StaffSchoolForm(request.POST, instance=education)
+        if form.is_valid():
+            form.save()
+            return redirect('education', staffno=staffno)
+        
+    context = {
+                'form':form,
+                'educations':educations,
+                'education':education,
+                'staff':staff,
+                'edu_count':edu_count,
+                'qualification':qualification,
+                'school':school,
+                'school_list':school_list,
+                'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+               'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
+                'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+               }
+
+    return render(request, 'hr/education.html', context)
+
+def delete_education(request,edu_id,staffno):
+    education = Staff_School.objects.get(pk=edu_id)
+    if request.method == 'GET':
+       education.delete()
+    return redirect('education')
 
 
 def staff_education(request,staffno):

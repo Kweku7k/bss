@@ -65,8 +65,8 @@ class CompanyInformation(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
     job_title = models.CharField('Job Title',max_length=50,blank=True,null=True)
     job_description = models.TextField('Job Description',max_length=200,blank=True,null=True)
-    staff_cat = models.CharField('Staff Category',max_length=50,blank=True,null=True)
-    contract = models.CharField('Contract Type',max_length=100,blank=True,null=True) 
+    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.SET_NULL, blank=True, null=True)
+    contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, blank=True, null=True)
     active_status = models.CharField('Staff Status',max_length=50,blank=True,null=True)
     doa = models.DateField('Date of Appointment', blank=True,null=True)
     doe = models.DateField('Date of Expiration', blank=True,null=True)
@@ -75,15 +75,17 @@ class CompanyInformation(models.Model):
     campus = models.CharField('Campus',max_length=50,blank=True,null=True)
     city = models.CharField('City',max_length=50,blank=True,null=True)
     email = models.CharField('Official Email',max_length=50,blank=True,null=True)
-    sch_fac_dir = models.CharField('School/Faculty/Directorate',max_length=50,blank=True,null=True)
-    dept = models.CharField('Department',max_length=50,blank=True,null=True)
+    sch_fac_dir = models.ForeignKey(School_Faculty,on_delete=models.SET_NULL,blank=True,null=True)
+    directorate = models.ForeignKey(Directorate,on_delete=models.SET_NULL,blank=True,null=True)
+    dept = models.ForeignKey(Department,on_delete=models.SET_NULL,blank=True,null=True,related_name='dept_info')
     salary = models.CharField('Salary',max_length=50,blank=True,null=True)
-    cost_center = models.CharField('Cost Center',max_length=50,blank=True,null=True)
-    bank_name = models.CharField('Bank Name',max_length=50,blank=True,null=True)
+    cost_center = models.ForeignKey(Department,on_delete=models.SET_NULL,blank=True,null=True,related_name='cost_center_info')
+    bank_name = models.ForeignKey(Bank,on_delete=models.SET_NULL,blank=True,null=True)
     accno = models.CharField('Account Number',max_length=50,blank=True,null=True)
-    bank_branch = models.CharField('Bank Branch',max_length=100,blank=True,null=True)
+    bank_branch = models.ForeignKey(BankBranch,on_delete=models.SET_NULL,blank=True,null=True)
     ssn_con = models.CharField('SSN Contributor',max_length=10,blank=True,null=True)
     pf_con = models.CharField('PF Contributor',max_length=10,blank=True,null=True)
+   
     
     def __str__(self):
         return self.staffno

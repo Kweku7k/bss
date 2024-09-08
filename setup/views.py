@@ -14,43 +14,41 @@ def home(request):
 ########### SCHOOL VIEWS ################
 def add_school(request):
     submitted = False
-    schools = School.objects.order_by('-id') 
+    schools = School_Faculty.objects.order_by('-id') 
     sch_count = schools.count() 
     if request.method == 'POST':
-        form = SchoolForm(request.POST)
-        if form.is_valid(): 
-            print("---form----")
-
+        form = School_FacultyForm(request.POST)
+        if form.is_valid():
             form.save()
             return HttpResponseRedirect('school')
     else:
-        form = SchoolForm
+        form = School_FacultyForm
         if 'submitted' in request.GET:
             submitted = True
     context = {'form':form,'submitted':submitted,'schools':schools,'sch_count':sch_count}
-    return render(request,'setup/add_school.html',context)
+    return render(request,'setup/add_schoolfaculty.html',context)
 
 
 def delete_sch(request,sch_id):
-    school = School.objects.get(pk=sch_id)
+    school = School_Faculty.objects.get(pk=sch_id)
     if request.method == 'GET':
        school.delete()
     return redirect('add-school')
 
 def edit_school(request, sch_id):
-    schools = School.objects.order_by('-id') 
+    schools = School_Faculty.objects.order_by('-id') 
     sch_count = schools.count()
-    school = School.objects.get(pk=sch_id)
-    form = SchoolForm(instance=school)
+    school = School_Faculty.objects.get(pk=sch_id)
+    form = School_FacultyForm(instance=school)
 
     if request.method == 'POST':
-        form = SchoolForm(request.POST, instance=school)
+        form = School_FacultyForm(request.POST, instance=school)
         if form.is_valid():
             form.save()
             return redirect('add-school')
 
     context = {'form':form,'schools':schools,'sch_count':sch_count,'school':school}
-    return render(request, 'setup/add_school.html', context)
+    return render(request, 'setup/add_schoolfaculty.html', context)
 ########### END OF SCHOOL VIEWS ################
 
 
@@ -268,7 +266,6 @@ def add_directorate(request):
                 
     return render(request,'setup/add_directorate.html',{'form':form,'submitted':submitted,'directorate':directorate,'dict_count':dict_count })
 
-
 def delete_directorate(request,dict_id):
     directorate = Directorate.objects.get(pk=dict_id)
     if request.method == 'GET':
@@ -336,6 +333,7 @@ def add_dept(request):
     submitted = False
     depts = Department.objects.order_by('-id') 
     dept_count = depts.count()
+    schools = School_Faculty.objects.all()
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
         if form.is_valid(): 
@@ -346,7 +344,7 @@ def add_dept(request):
         if 'submitted' in request.GET:
             submitted = True
 
-    return render(request,'setup/add_dept.html',{'form':form,'submitted':submitted,'depts':depts,'dept_count':dept_count})
+    return render(request,'setup/add_dept.html',{'form':form,'submitted':submitted,'depts':depts,'dept_count':dept_count, 'schools':schools})
 
 def delete_dept(request,dept_id):
     dept = Department.objects.get(pk=dept_id)
@@ -357,6 +355,7 @@ def delete_dept(request,dept_id):
 def edit_dept(request, dept_id):
     depts = Department.objects.order_by('-id') 
     dept_count = depts.count()
+    schools = School_Faculty.objects.all()
     dept = Department.objects.get(pk=dept_id)
     form = DepartmentForm(instance=dept)
 
@@ -366,7 +365,7 @@ def edit_dept(request, dept_id):
             form.save()
             return redirect('add-dept')
 
-    context = {'form':form,'depts':depts,'dept_count':dept_count,'dept':dept}
+    context = {'form':form,'depts':depts,'dept_count':dept_count,'dept':dept, 'schools':schools}
     return render(request, 'setup/add_dept.html', context)
 ########### END OF DEPARTMENT VIEWS ################
 
@@ -542,6 +541,7 @@ def delete_jobtitle(request,jobtitle_id):
 def edit_jobtitle(request, jobtitle_id):
     jobtitles = JobTitle.objects.order_by('-id') 
     jobtitle_count = jobtitles.count()
+    staffcategorys = StaffCategory.objects.order_by('category_abbr') 
     jobtitle = JobTitle.objects.get(pk=jobtitle_id)
     form = JobTitleForm(instance=jobtitle)
 
@@ -551,6 +551,6 @@ def edit_jobtitle(request, jobtitle_id):
             form.save()
             return redirect('add-jobtitle')
 
-    context = {'form':form,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'jobtitle':jobtitle,'STAFFLEVEL':STAFFLEVEL}
+    context = {'form':form,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'jobtitle':jobtitle,'STAFFLEVEL':STAFFLEVEL, 'staffcategorys':staffcategorys}
     return render(request, 'setup/add_jobtitle.html', context)
 ########### END OF STAFF RANK VIEWS ################

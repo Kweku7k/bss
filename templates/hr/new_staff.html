@@ -258,24 +258,24 @@
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="study_area">Area of Study</label>
-                            <input type="text" class="form-control" id="study_area" name="study_area" 
-                                {% if staff %} value="{{ staff.study_area }}" {% else %} value="" {% endif %}>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
                             <label for="heq">Highest Educational Qualification</label>
                             <select name="heq" id="heq" class="form-select" required>
                                 <option selected="true" disabled="disabled"></option>
                                 {% for qual in qualification %}
-                                    <option value="{{ qual }}"
-                                    {% if qual.qual_abbr == staff.heq %}
-                                        selected
-                                    {% endif %}
-                                    >{{ qual }}</option>
+                                <option value="{{ qual }}"
+                                {% if qual.qual_abbr == staff.heq %}
+                                selected
+                                {% endif %}
+                                >{{ qual }}</option>
                                 {% endfor %}
                             </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="study_area">Area of Study</label>
+                            <input type="text" class="form-control" id="study_area" name="study_area" 
+                                {% if staff %} value="{{ staff.study_area }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
                     <div class="col-md-4">
