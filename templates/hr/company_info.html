@@ -80,7 +80,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="sch_fac_dir" class="form-label">School/Faculty</label>
-                        <select id="sch_fac_dir" name="sch_fac_dir" class="form-select" required>
+                        <select id="sch_fac_dir" name="sch_fac_dir" class="form-select">
                             <option value="" disabled selected>N/A</option>
                             {% if school_faculty %} 
                                 {% for sch_fac in school_faculty %}
@@ -144,7 +144,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="cost_center" class="form-label">Cost Center</label>
-                        <select id="cost_center" name="cost_center" class="form-select" required>
+                        <select id="cost_center" name="cost_center" class="form-select" >
                             <option value="" disabled selected>Select Cost Center</option>
                             {% if department %} 
                                 {% for dept in department %}

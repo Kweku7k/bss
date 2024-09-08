@@ -292,7 +292,7 @@
                                 {% if staff %} value="{{ staff.institution }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    {% comment %} <div class="col-md-4">
                         <div class="form-group">
                             <label for="other_heq">Other Educational Qualification</label>
                             <select name="other_heq" id="other_heq" class="form-select" required>
@@ -306,7 +306,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                    </div>
+                    </div> {% endcomment %}
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="hpq">Highest Professional Qualification</label>

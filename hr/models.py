@@ -215,7 +215,7 @@ class Postal_Address(models.Model):
     
 class Staff_School(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
-    school_code = models.ForeignKey(School,blank=False,null=False,on_delete=models.CASCADE) # Link to Setup.School model (Import School from Setup into this file)
+    school_code = models.CharField('Institution',max_length=250,blank=True,null=True) 
     prog_studied = models.CharField('Program of Study',max_length=100,blank=True,null=True)
     start_date = models.DateField()
     finish_date = models.DateField()

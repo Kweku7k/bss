@@ -30,8 +30,8 @@
                                         <td>{{ staff.lname }}</td>
                                         {% for company_data in company_info %}
                                             {% if staff.staffno == company_data.staffno_id %}
-                                                <td>{{ company_data.staff_cat }}</td>
-                                                <td>{{ company_data.job_title }}</td>
+                                            <td>{{ company_data.job_title }}</td>
+                                            <td>{{ company_data.staff_cat }}</td>
                                             {% endif %}
                                         {% endfor %}
                                     </tr>

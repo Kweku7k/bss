@@ -90,6 +90,14 @@ def search(request):
                 Q(lname__icontains=search_query) |
                 Q(fname__icontains=search_query)
             )
+            
+            # Filter company information based on any relevant fields  
+            company_info = company_info.filter(
+                Q(job_title__icontains=search_query) |
+                Q(staff_cat_id__category_name__icontains=search_query)  # assuming staff_cat is a foreign key to StaffCategory
+            )
+   
+                   
 
         staff_count = staffs.count()
     
@@ -172,6 +180,9 @@ def edit_staff(request,staffno):
     return render(request, 'hr/new_staff.html', context)
 
 
+# Write a filtering query set for 
+
+
 def allstaff(request): 
     staffs = Employee.objects.order_by('lname')
     staff_count = staffs.count()
@@ -180,6 +191,7 @@ def allstaff(request):
     qualification = Qualification.objects.all()
     title = Title.objects.all()
     contract = Contract.objects.all()
+    staff_school = Staff_School.objects.all()
 
     if request.method == 'POST':
         filter_staffcategory = request.POST.get('filter_staffcategory')
@@ -191,12 +203,21 @@ def allstaff(request):
         
         # Initial queryset for filtering
         staffs = Employee.objects.all()
-
+        company_info = CompanyInformation.objects.all()
+        staff_school = Staff_School.objects.all()        
+        
         # Filter by staff category
         if filter_staffcategory:
-            company_info = CompanyInformation.objects.filter(staff_cat=filter_staffcategory)
-            company_staffno = {company.staffno_id for company in company_info}
-            staffs = staffs.filter(staffno__in=company_staffno)
+            try:
+                # Try to get the StaffCategory instance based on the provided name
+                staff_category = StaffCategory.objects.get(category_name=filter_staffcategory)
+                # Use the StaffCategory instance to filter CompanyInformation
+                company_info = company_info.filter(staff_cat=staff_category)
+                company_staffno = {company.staffno_id for company in company_info}
+                staffs = staffs.filter(staffno__in=company_staffno)
+            except StaffCategory.DoesNotExist:
+                # Handle the case where the StaffCategory is not found
+                staffs = staffs.none()
 
         # Filter by Contract
         if filter_contract:
@@ -204,9 +225,22 @@ def allstaff(request):
             company_staffno = {company.staffno_id for company in company_info}
             staffs = staffs.filter(staffno__in=company_staffno)
             
-        # Filter by qualification
         if filter_qualification:
-            staffs = staffs.filter(heq=filter_qualification)
+            # Filter Employee model
+            employee_staffs = staffs.filter(heq=filter_qualification)
+            
+            # Filter Staff_School model
+            filtered_staff_school = staff_school.filter(certification=filter_qualification)
+            
+            # Get staff numbers from both querysets
+            staff_numbers_from_employee = set(employee_staffs.values_list('staffno', flat=True))
+            staff_numbers_from_school = set(filtered_staff_school.values_list('staffno', flat=True))
+            
+            # Combine the staff numbers
+            combined_staff_numbers = staff_numbers_from_employee.union(staff_numbers_from_school)
+            
+            # Filter the staffs queryset based on the combined staff numbers
+            staffs = staffs.filter(staffno__in=combined_staff_numbers)    
         
         # Filter by title
         if filter_title:
@@ -224,6 +258,7 @@ def allstaff(request):
 
         context = {
             'staffs': staffs,
+            'staff_school': staff_school,
             'filter_staffcategory': filter_staffcategory,
             'filter_qualification': filter_qualification,
             'filter_title':filter_title,
@@ -241,6 +276,7 @@ def allstaff(request):
     
     context = {
         'staffs': staffs,
+        'staff_school': staff_school,
         'staff_count': staff_count,
         'staffcategory': staffcategory,
         'company_info': company_info,
