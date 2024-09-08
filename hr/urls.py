@@ -21,6 +21,9 @@ urlpatterns = [
     # path('delete_company_info/<str:staffno>', views.delete_company_info,name="delete-company-info"),
     path('get_bank_branches/<int:bank_id>/', views.get_bank_branches, name='get_bank_branches'),
 
+    path('get_directorates/', views.get_directorates, name='get_directorates'),
+    path('get_school_faculties/', views.get_school_faculties, name='get_school_faculties'),
+    path('get_departments/<int:school_faculty_id>/', views.get_departments, name='get_departments'),
 
     
     path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),

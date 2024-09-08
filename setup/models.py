@@ -73,7 +73,7 @@ class Department(models.Model):
     sch_fac = models.ForeignKey(School_Faculty, on_delete=models.CASCADE, blank=True, null=True)
     dept_notes = models.TextField('Notes',blank=True,null=True)
     def __str__(self):
-        return self.dept_long_name
+        return self.dept_short_name
 
 class BankBranch(models.Model):
     branch_name = models.CharField('Name of Branch',max_length=250,blank=False,null=False)

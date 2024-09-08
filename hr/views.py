@@ -343,6 +343,21 @@ def get_bank_branches(request, bank_id):
     branches = BankBranch.objects.filter(bank_code_id=bank_id).values('id', 'branch_name')
     return JsonResponse({'branches': list(branches)})
 
+def get_directorates(request):
+    directorates = Directorate.objects.all()
+    data = {'directorates': list(directorates.values('id', 'direct_name'))}
+    return JsonResponse(data)
+
+def get_school_faculties(request):
+    school_faculties = School_Faculty.objects.all()
+    data = {'school_faculties': list(school_faculties.values('id', 'sch_fac_name'))}
+    return JsonResponse(data)
+
+def get_departments(request, school_faculty_id):
+    departments = Department.objects.filter(sch_fac_id=school_faculty_id)
+    data = {'departments': list(departments.values('id', 'dept_long_name'))}
+    return JsonResponse(data)
+
 def company_info(request,staffno):
     submitted = False
     company_infos = CompanyInformation.objects.filter(staffno__exact=staffno)    
@@ -410,7 +425,13 @@ def edit_company_info(request,staffno):
     directorate = Directorate.objects.all()
     department = Department.objects.all()
     bank_list = Bank.objects.all()
-    bankbranches = BankBranch.objects.all()
+    
+    # Filter bank branches based on the selected bank from the database
+    bankbranches = BankBranch.objects.filter(bank_code_id=company_info.bank_name_id) if company_info.bank_name_id else BankBranch.objects.none()
+
+    # Pass the selected bank and branch IDs to the template
+    selected_bank_id = company_info.bank_name_id
+    selected_branch_id = company_info.bank_branch_id
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
@@ -444,8 +465,10 @@ def edit_company_info(request,staffno):
                'school_faculty':school_faculty,
                'directorate':directorate,
                'department':department,
-               'bank_list':bank_list,
-               'bankbranches':bankbranches,
+               'bank_list': bank_list,
+                'bank_branches': bankbranches,
+                'selected_bank_id': selected_bank_id,
+                'selected_branch_id': selected_branch_id,
                }
 
     return render(request, 'hr/company_info.html', context)
