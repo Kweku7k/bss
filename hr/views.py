@@ -89,15 +89,7 @@ def search(request):
                 Q(staffno__icontains=search_query) |
                 Q(lname__icontains=search_query) |
                 Q(fname__icontains=search_query)
-            )
-            
-            # Filter company information based on any relevant fields  
-            company_info = company_info.filter(
-                Q(job_title__icontains=search_query) |
-                Q(staff_cat_id__category_name__icontains=search_query)  # assuming staff_cat is a foreign key to StaffCategory
-            )
-   
-                   
+            )      
 
         staff_count = staffs.count()
     
@@ -343,20 +335,9 @@ def get_bank_branches(request, bank_id):
     branches = BankBranch.objects.filter(bank_code_id=bank_id).values('id', 'branch_name')
     return JsonResponse({'branches': list(branches)})
 
-def get_directorates(request):
-    directorates = Directorate.objects.all()
-    data = {'directorates': list(directorates.values('id', 'direct_name'))}
-    return JsonResponse(data)
-
-def get_school_faculties(request):
-    school_faculties = School_Faculty.objects.all()
-    data = {'school_faculties': list(school_faculties.values('id', 'sch_fac_name'))}
-    return JsonResponse(data)
-
-def get_departments(request, school_faculty_id):
-    departments = Department.objects.filter(sch_fac_id=school_faculty_id)
-    data = {'departments': list(departments.values('id', 'dept_long_name'))}
-    return JsonResponse(data)
+def get_departments(request, sch_fac_id):
+    departments = Department.objects.filter(sch_fac_id=sch_fac_id).values('id', 'dept_long_name')
+    return JsonResponse({'departments': list(departments)})
 
 def company_info(request,staffno):
     submitted = False
@@ -423,15 +404,17 @@ def edit_company_info(request,staffno):
     campus = Campus.objects.all()
     school_faculty = School_Faculty.objects.all()
     directorate = Directorate.objects.all()
-    department = Department.objects.all()
     bank_list = Bank.objects.all()
     
-    # Filter bank branches based on the selected bank from the database
+    # Filter bank branches and department based on the selected bank and school from the database
     bankbranches = BankBranch.objects.filter(bank_code_id=company_info.bank_name_id) if company_info.bank_name_id else BankBranch.objects.none()
+    departments = Department.objects.filter(sch_fac_id=company_info.sch_fac_dir_id) if company_info.sch_fac_dir_id else Department.objects.none()
 
-    # Pass the selected bank and branch IDs to the template
+    # Pass the selected bank and branch, school/faculty and department IDs to the template
     selected_bank_id = company_info.bank_name_id
     selected_branch_id = company_info.bank_branch_id
+    selected_sch_fac_id = company_info.sch_fac_dir_id
+    selected_dept_id = company_info.dept_id
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
@@ -464,12 +447,14 @@ def edit_company_info(request,staffno):
                'campus':campus,
                'school_faculty':school_faculty,
                'directorate':directorate,
-               'department':department,
+               'departments':departments,
                'bank_list': bank_list,
                 'bank_branches': bankbranches,
                 'selected_bank_id': selected_bank_id,
                 'selected_branch_id': selected_branch_id,
-               }
+                'selected_sch_fac_id': selected_sch_fac_id,
+                'selected_dept_id': selected_dept_id,
+            }
 
     return render(request, 'hr/company_info.html', context)
 
