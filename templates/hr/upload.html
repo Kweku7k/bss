@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="align-items-center p-5">
+                <h5 class="mb-3 text-primary"><strong>Bulk Upload</strong></h5>
+                <div>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-success me-2">Upload</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

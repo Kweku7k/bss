@@ -13,6 +13,11 @@ from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from two_factor.utils import default_device
+import csv
+from django.db import transaction
+from django.utils import timezone
+
+
 
 
 
@@ -142,6 +147,8 @@ def edit_staff(request,staffno):
         # form = EmployeeForm(request.POST, instance=staff)
         if form.is_valid():
             form.save()
+            full_name = f"{staff.fname} {staff.lname}"
+            messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return redirect('staff-details', staffno)
         
     context = {
@@ -405,6 +412,7 @@ def edit_company_info(request,staffno):
     school_faculty = School_Faculty.objects.all()
     directorate = Directorate.objects.all()
     bank_list = Bank.objects.all()
+    dept = Department.objects.all()
     
     # Filter bank branches and department based on the selected bank and school from the database
     bankbranches = BankBranch.objects.filter(bank_code_id=company_info.bank_name_id) if company_info.bank_name_id else BankBranch.objects.none()
@@ -448,6 +456,7 @@ def edit_company_info(request,staffno):
                'school_faculty':school_faculty,
                'directorate':directorate,
                'departments':departments,
+               'dept':dept,
                'bank_list': bank_list,
                 'bank_branches': bankbranches,
                 'selected_bank_id': selected_bank_id,
@@ -532,6 +541,130 @@ def delete_emp_relation(request,emp_id,staffno):
 
 
 
+# Write a function for bulk upload csv format
+def bulk_upload(request):
+    if request.method == 'POST':
+        form = CSVUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            csv_file = request.FILES['csv_file']
+
+            # Check file extension
+            if not csv_file.name.endswith('.csv'):
+                messages.error(request, 'This is not a CSV file.')
+                return render(request, 'hr/upload.html', {'form': form})
+
+            # Read and parse the CSV file
+            try:
+                decoded_file = csv_file.read().decode('utf-8')
+                reader = csv.DictReader(decoded_file.splitlines())
+                
+                errors = []  # To store errors
+                success_count = 0  # Count successful uploads
+
+                # Using transaction.atomic to ensure all-or-nothing
+                with transaction.atomic():
+                    for row in reader:
+                        print(type(row))
+                        print(row)
+                        try:
+                            # Process Employee CSV data
+                            employee = Employee(
+                                staffno=row['staffno'],
+                                title=row['title'],
+                                lname=row['lname'],
+                                fname=row['fname'],
+                                middlenames=row.get('middlenames', ''),
+                                suffix=row.get('suffix', ''),
+                                gender=row.get('gender', ''),
+                                dob=row.get('dob', ''),
+                                m_status=row.get('m_status', ''),
+                                nationality=row.get('nationality', ''),
+                                ethnic=row.get('ethnic', ''),
+                                home_town=row.get('home_town', ''),
+                                region=row.get('region', ''),
+                                pob=row.get('pob', ''),
+                                religion=row.get('religion', ''),
+                                denomination=row.get('denomination', ''),
+                                email_address=row.get('email_address', ''),
+                                active_phone=row.get('active_phone', ''),
+                                ssnitno=row.get('ssnitno', ''),
+                                idtype=row.get('idtype', ''),
+                                gcardno=row.get('gcardno', ''),
+                                digital=row.get('digital', ''),
+                                residential=row.get('residential', ''),
+                                postal=row.get('postal', ''),
+                                blood=row.get('blood', ''),
+                                car=row.get('car', ''),
+                                chassis=row.get('chassis', ''),
+                                vech_type=row.get('vech_type', ''),
+                                study_area=row.get('study_area', ''),
+                                heq=row.get('heq', ''),
+                                completion_year=row.get('completion_year', ''),
+                                institution=row.get('institution', ''),
+                                hpq=row.get('hpq', ''),
+                                created=timezone.now(),
+                            )
+                            employee.save()
+                            
+                            print(f"Processing row: {row}")  # Output each row to the console
+                            # Handle Bank instance
+                            bank_short_name = row.get('bank_name')
+                            bank_instance, created = Bank.objects.get_or_create(bank_short_name=bank_short_name)
+                            
+                            # Handle BankBranch instance
+                            branch_name = row.get('bank_branch')
+                            branch_instance, created = BankBranch.objects.get_or_create(branch_name=branch_name, bank_code=bank_instance)
+                            
+                            # Process CompanyInformation data if present in CSV
+                            company_info = CompanyInformation(
+                                staffno=employee,  # linking to the employee instance
+                                job_title=row.get('job_title', ''),
+                                job_description=row.get('job_description', ''),
+                                staff_cat=row.get('staff_cat', None),
+                                contract=row.get('contract', None),
+                                active_status=row.get('active_status', ''),
+                                doa=row.get('doa', None),
+                                doe=row.get('doe', None),
+                                renewal=row.get('renewal', None),
+                                rank=row.get('rank', ''),
+                                campus=row.get('campus', ''),
+                                city=row.get('city', ''),
+                                email=row.get('email', ''),
+                                sch_fac_dir=row.get('sch_fac_dir', None),
+                                directorate=row.get('directorate', None),
+                                dept=row.get('dept', None),
+                                salary=row.get('salary', ''),
+                                cost_center=row.get('cost_center', None),
+                                bank_name=bank_instance,
+                                bank_branch=branch_instance,
+                                accno=row.get('accno', ''),
+                                ssn_con=row.get('ssn_con', ''),
+                                pf_con=row.get('pf_con', ''),
+                            )
+                            company_info.save()
+                            
+                            success_count += 1
+                        except Exception as row_error:
+                            # Log errors for individual rows, but continue
+                            errors.append(f"Error in row {reader.line_num}: {row_error}")
+                            continue
+
+                # Report success and any errors
+                if success_count:
+                    messages.success(request, f'Successfully uploaded {success_count} records.')
+                if errors:
+                    for error in errors:
+                        messages.error(request, error)
+            except Exception as e:
+                messages.error(request, f"Error processing file: {e}")
+        
+    else:
+        form = CSVUploadForm()
+
+    return render(request, 'hr/upload.html', {'form': form})
+
+
+
 ####### EDUCATIONAL BACKGROUND #################
 def education(request,staffno):
     submitted = False
@@ -575,7 +708,7 @@ def edit_education(request,staffno,edu_id):
     staff = Employee.objects.get(pk=staffno)
     edu_count = educations.count()
     school = School.objects.all()
-    qualification = Qualification.objects.all()
+    qualification = Qualification.objects.all() 
     school_list = School.objects.order_by('school_name')
     form = StaffSchoolForm(request.POST or None,instance=education)
     

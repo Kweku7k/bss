@@ -169,12 +169,12 @@
                         <label for="cost_center" class="form-label">Cost Center</label>
                         <select id="cost_center" name="cost_center" class="form-select" >
                             <option value="" disabled selected>Select Cost Center</option>
-                            {% if department %} 
-                                {% for dept in department %}
-                                    <option value="{{ dept.id }}"
-                                    {% if dept.id == company_info.dept_id %} selected {% endif %}
+                            {% if dept %} 
+                                {% for dt in dept %}
+                                    <option value="{{ dt.id }}"
+                                    {% if dt.id == company_info.dept_id %} selected {% endif %}
                                     
-                                    > {{ dept.dept_long_name }} </option>
+                                    > {{ dt.dept_long_name }} </option>
                                 {% endfor %}
                             {% endif %}
                         </select>

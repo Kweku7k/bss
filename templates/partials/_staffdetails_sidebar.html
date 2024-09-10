@@ -1,8 +1,13 @@
 <div class=" sidebar bg-info-light pt-4">
         <div class="card-header text-center mb-2">
-          <a href="{% url 'staff-details' staff.staffno %}">
+          {% if staff.staff_pix %}
+              <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 200px; width: 200px; object-fit: cover;"> 
+          {% else %}
+              <p>No image available</p>
+          {% endif %}
+          {% comment %} <a href="{% url 'staff-details' staff.staffno %}">
             <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" style="height: 200px; width: 200px; object-fit: cover;" />
-          </a>
+          </a> {% endcomment %}
           <br />
             <strong>
               {{ staff.title }} {{ staff.fname }}  {{ staff.lname }} 
