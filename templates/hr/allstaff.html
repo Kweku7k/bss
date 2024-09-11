@@ -118,7 +118,7 @@
                         {% for staff in staffs %}
                             <tr class="clickable-row" onclick="window.location='{% url 'staff-details' staff.staffno %}'">
                                 <td>{{ staff.staffno }}</td>
-                                <td>{{ staff.fname }} {{ staff.lname }}</td>
+                                <td>{{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }}</td>
                                 {% for company_data in company_info %}
                                     {% if staff.staffno == company_data.staffno_id %}
                                         <td>{{ company_data.staff_cat }}</td>

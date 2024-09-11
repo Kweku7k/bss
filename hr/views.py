@@ -16,8 +16,19 @@ from two_factor.utils import default_device
 import csv
 from django.db import transaction
 from django.utils import timezone
+import logging
+from datetime import datetime, timedelta
 
 
+logger = logging.getLogger(__name__)
+
+def parse_date(date_str):
+    if not date_str:
+        return None 
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        raise ValueError(f"Invalid date format: {date_str}. Expected format is YYYY-MM-DD.")
 
 
 
@@ -183,7 +194,7 @@ def edit_staff(request,staffno):
 
 
 def allstaff(request): 
-    staffs = Employee.objects.order_by('lname')
+    staffs = Employee.objects.order_by('fname')
     staff_count = staffs.count()
     staffcategory = StaffCategory.objects.all()
     company_info = CompanyInformation.objects.all()
@@ -305,6 +316,8 @@ def newstaff(request):
             staff_number = form.cleaned_data['staffno']
             url = reverse('company-info', kwargs={'staffno': str(staff_number)})
             print(url)
+            full_name = f"{staff.fname} {staff.lname}"
+            messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return HttpResponseRedirect(url)
         else:
             print("form.errors")
@@ -372,6 +385,8 @@ def company_info(request,staffno):
             staff_number = staff.pk  
             url = reverse('emp-relation', kwargs={'staffno': str(staff_number)})
             print(url)
+            full_name = f"{staff.fname} {staff.lname}"
+            messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return HttpResponseRedirect(url)
         else:
             print("form.errors")
@@ -428,6 +443,8 @@ def edit_company_info(request,staffno):
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
         if form.is_valid():
             form.save()
+            full_name = f"{staff.fname} {staff.lname}"
+            messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return redirect('staff-details', staffno=staffno)
         else:
             print("form.errors")
@@ -487,6 +504,8 @@ def emp_relation(request,staffno):
                 emp_relation = form.save(commit=False)
                 emp_relation.staffno = staff
                 emp_relation.save()
+                full_name = f"{staff.fname} {staff.lname}"
+                messages.success(request, f"Staff data for {full_name} has been updated successfully")
                 return redirect('emp-relation', staffno)
     else:
         form = KithForm
@@ -516,6 +535,8 @@ def edit_emp_relation(request,staffno,emp_id):
         form = KithForm(request.POST, instance=emp_relation)
         if form.is_valid():
             form.save()
+            full_name = f"{staff.fname} {staff.lname}"
+            messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return redirect('emp-relation', staffno=staffno)
         
     context = {
@@ -535,7 +556,7 @@ def delete_emp_relation(request,emp_id,staffno):
     emp_relation = Kith.objects.get(pk=emp_id)
     if request.method == 'GET':
        emp_relation.delete()
-    return redirect('emp-relation')
+    return redirect('emp-relation', staffno)
 
 # END OF EMPLOYEE RELATIONSHIP 
 
@@ -556,14 +577,14 @@ def bulk_upload(request):
             # Read and parse the CSV file
             try:
                 decoded_file = csv_file.read().decode('utf-8')
-                reader = csv.DictReader(decoded_file.splitlines())
-                
+                reader = csv.DictReader(decoded_file.splitlines())  
                 errors = []  # To store errors
                 success_count = 0  # Count successful uploads
 
                 # Using transaction.atomic to ensure all-or-nothing
                 with transaction.atomic():
                     for row in reader:
+                        savepoint = transaction.savepoint()
                         print(type(row))
                         print(row)
                         try:
@@ -576,7 +597,7 @@ def bulk_upload(request):
                                 middlenames=row.get('middlenames', ''),
                                 suffix=row.get('suffix', ''),
                                 gender=row.get('gender', ''),
-                                dob=row.get('dob', ''),
+                                dob=parse_date(row.get('dob', '')),
                                 m_status=row.get('m_status', ''),
                                 nationality=row.get('nationality', ''),
                                 ethnic=row.get('ethnic', ''),
@@ -615,28 +636,48 @@ def bulk_upload(request):
                             branch_name = row.get('bank_branch')
                             branch_instance, created = BankBranch.objects.get_or_create(branch_name=branch_name, bank_code=bank_instance)
                             
+                            # Handle Staff Categoty instance
+                            category_name = row.get('staff_cat')
+                            staff_category_instance, created = StaffCategory.objects.get_or_create(category_name=category_name)
+                            
+                            # Handle Contract instance
+                            contract_type = row.get('contract')
+                            contract_instance, created = Contract.objects.get_or_create(contract_type=contract_type)
+                            
+                            # Handle School/Faculty instance
+                            sch_fac_name = row.get('sch_fac_dir')
+                            sch_fac_instance, created = School_Faculty.objects.get_or_create(sch_fac_name=sch_fac_name)
+                            
+                            # Handle School/Faculty instance
+                            direct_name = row.get('directorate')
+                            direct_instance, created = Directorate.objects.get_or_create(direct_name=direct_name)
+                            
+                            # Handle School/Faculty instance
+                            dept_long_name = row.get('dept')
+                            dept_long_instance, created = Department.objects.get_or_create(dept_long_name=dept_long_name, sch_fac=sch_fac_instance)
+                            
                             # Process CompanyInformation data if present in CSV
                             company_info = CompanyInformation(
                                 staffno=employee,  # linking to the employee instance
                                 job_title=row.get('job_title', ''),
                                 job_description=row.get('job_description', ''),
-                                staff_cat=row.get('staff_cat', None),
-                                contract=row.get('contract', None),
+                                staff_cat=staff_category_instance,
+                                contract=contract_instance,
                                 active_status=row.get('active_status', ''),
-                                doa=row.get('doa', None),
-                                doe=row.get('doe', None),
-                                renewal=row.get('renewal', None),
+                                doa=parse_date(row.get('doa', None)),
+                                doe=parse_date(row.get('doe', None)),
+                                renewal=parse_date(row.get('renewal', None)), 
                                 rank=row.get('rank', ''),
                                 campus=row.get('campus', ''),
                                 city=row.get('city', ''),
                                 email=row.get('email', ''),
-                                sch_fac_dir=row.get('sch_fac_dir', None),
-                                directorate=row.get('directorate', None),
-                                dept=row.get('dept', None),
+                                sch_fac_dir=sch_fac_instance,
+                                directorate=direct_instance,
+                                dept=dept_long_instance,
                                 salary=row.get('salary', ''),
-                                cost_center=row.get('cost_center', None),
+                                cost_center=dept_long_instance,
                                 bank_name=bank_instance,
-                                bank_branch=branch_instance,
+                                bank_branch=branch_instance, 
                                 accno=row.get('accno', ''),
                                 ssn_con=row.get('ssn_con', ''),
                                 pf_con=row.get('pf_con', ''),
@@ -645,17 +686,22 @@ def bulk_upload(request):
                             
                             success_count += 1
                         except Exception as row_error:
+                            transaction.savepoint_rollback(savepoint)
                             # Log errors for individual rows, but continue
                             errors.append(f"Error in row {reader.line_num}: {row_error}")
                             continue
+                        finally:
+                            transaction.savepoint_commit(savepoint)
 
                 # Report success and any errors
                 if success_count:
                     messages.success(request, f'Successfully uploaded {success_count} records.')
                 if errors:
-                    for error in errors:
-                        messages.error(request, error)
+                    error_message = "\n".join(errors)
+                    messages.error(request, f"Errors occurred during upload:\n{error_message}")
+                    logger.error(f"Upload Errors:\n{error_message}")
             except Exception as e:
+                logger.error(f"Error processing file: {e}")
                 messages.error(request, f"Error processing file: {e}")
         
     else:
@@ -682,6 +728,8 @@ def education(request,staffno):
             education = form.save(commit=False)
             education.staffno = staff
             education.save()
+            full_name = f"{staff.fname} {staff.lname}"
+            messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return redirect('education', staffno)
     else:
         form = StaffSchoolForm
@@ -739,7 +787,7 @@ def delete_education(request,edu_id,staffno):
     education = Staff_School.objects.get(pk=edu_id)
     if request.method == 'GET':
        education.delete()
-    return redirect('education')
+    return redirect('education', staffno)
 
 
 def staff_education(request,staffno):
