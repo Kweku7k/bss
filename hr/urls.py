@@ -30,7 +30,8 @@ urlpatterns = [
     path('education/<str:staffno>', views.education,name="education"),
     path('edit_education/<str:edu_id>/<str:staffno>', views.edit_education,name="edit-education"),
     path('delete_education/<str:edu_id>/<str:staffno>', views.delete_education,name="delete-education"),
-    
+    path('topnav/', views.topnav_view, name='topnav'),
+
     path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),
     path('delete_staff_education/<str:sch_id>/<str:staffno>', views.delete_staff_education,name="delete-staff-education"),

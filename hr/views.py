@@ -83,6 +83,9 @@ def landing(request):
     staff_count = staffs.count()
     ative_count = active.count()
     leave_count = leave.count()
+    
+    today = timezone.now().date()
+    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=30)).order_by('doe')
 
     context = {
         'staffs':staffs,
@@ -91,9 +94,18 @@ def landing(request):
         'staff_count':staff_count,
         'ative_count':ative_count,
         'leave_count':leave_count,
+        'expiring_soon':expiring_soon,
     }
     
     return render(request,'hr/landing_page.html', context)
+
+
+def topnav_view(request):
+    # Get all contracts expiring in the next month
+    today = timezone.now().date()
+    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=30)).order_by('doe')
+
+    return render(request, 'partials/_topnav.html', {'expiring_soon': expiring_soon})
 
 def search(request):
     if request.method == 'POST' and 'search' in request.POST:
@@ -580,54 +592,61 @@ def bulk_upload(request):
                 reader = csv.DictReader(decoded_file.splitlines())  
                 errors = []  # To store errors
                 success_count = 0  # Count successful uploads
+                duplicates = []  # To store duplicate entries
 
                 # Using transaction.atomic to ensure all-or-nothing
                 with transaction.atomic():
                     for row in reader:
                         savepoint = transaction.savepoint()
-                        print(type(row))
-                        print(row)
+
                         try:
                             # Process Employee CSV data
-                            employee = Employee(
+                            employee, created = Employee.objects.get_or_create(
                                 staffno=row['staffno'],
-                                title=row['title'],
-                                lname=row['lname'],
-                                fname=row['fname'],
-                                middlenames=row.get('middlenames', ''),
-                                suffix=row.get('suffix', ''),
-                                gender=row.get('gender', ''),
-                                dob=parse_date(row.get('dob', '')),
-                                m_status=row.get('m_status', ''),
-                                nationality=row.get('nationality', ''),
-                                ethnic=row.get('ethnic', ''),
-                                home_town=row.get('home_town', ''),
-                                region=row.get('region', ''),
-                                pob=row.get('pob', ''),
-                                religion=row.get('religion', ''),
-                                denomination=row.get('denomination', ''),
-                                email_address=row.get('email_address', ''),
-                                active_phone=row.get('active_phone', ''),
-                                ssnitno=row.get('ssnitno', ''),
-                                idtype=row.get('idtype', ''),
-                                gcardno=row.get('gcardno', ''),
-                                digital=row.get('digital', ''),
-                                residential=row.get('residential', ''),
-                                postal=row.get('postal', ''),
-                                blood=row.get('blood', ''),
-                                car=row.get('car', ''),
-                                chassis=row.get('chassis', ''),
-                                vech_type=row.get('vech_type', ''),
-                                study_area=row.get('study_area', ''),
-                                heq=row.get('heq', ''),
-                                completion_year=row.get('completion_year', ''),
-                                institution=row.get('institution', ''),
-                                hpq=row.get('hpq', ''),
-                                created=timezone.now(),
+                                defaults={  # Only set these fields if it's a new entry
+                                    'title': row['title'],
+                                    'lname': row['lname'],
+                                    'fname': row['fname'],
+                                    'middlenames': row.get('middlenames', ''),
+                                    'suffix': row.get('suffix', ''),
+                                    'gender': row.get('gender', ''),
+                                    'dob': parse_date(row.get('dob', '')),
+                                    'm_status': row.get('m_status', ''),
+                                    'nationality': row.get('nationality', ''),
+                                    'ethnic': row.get('ethnic', ''),
+                                    'home_town': row.get('home_town', ''),
+                                    'region': row.get('region', ''),
+                                    'pob': row.get('pob', ''),
+                                    'religion': row.get('religion', ''),
+                                    'denomination': row.get('denomination', ''),
+                                    'email_address': row.get('email_address', ''),
+                                    'active_phone': row.get('active_phone', ''),
+                                    'ssnitno': row.get('ssnitno', ''),
+                                    'idtype': row.get('idtype', ''),
+                                    'gcardno': row.get('gcardno', ''),
+                                    'digital': row.get('digital', ''),
+                                    'residential': row.get('residential', ''),
+                                    'postal': row.get('postal', ''),
+                                    'blood': row.get('blood', ''),
+                                    'car': row.get('car', ''),
+                                    'chassis': row.get('chassis', ''),
+                                    'vech_type': row.get('vech_type', ''),
+                                    'study_area': row.get('study_area', ''),
+                                    'heq': row.get('heq', ''),
+                                    'completion_year': row.get('completion_year', ''),
+                                    'institution': row.get('institution', ''),
+                                    'hpq': row.get('hpq', ''),
+                                    'created': timezone.now(),
+                                }
                             )
-                            employee.save()
                             
-                            print(f"Processing row: {row}")  # Output each row to the console
+                            # If employee already exists, add to duplicates and skip
+                            if not created:
+                                duplicates.append(f"{row['fname']} {row['lname']}")
+                                transaction.savepoint_rollback(savepoint)
+                                continue
+                            
+                            # Continue processing if it's a new employee
                             # Handle Bank instance
                             bank_short_name = row.get('bank_name')
                             bank_instance, created = Bank.objects.get_or_create(bank_short_name=bank_short_name)
@@ -636,7 +655,7 @@ def bulk_upload(request):
                             branch_name = row.get('bank_branch')
                             branch_instance, created = BankBranch.objects.get_or_create(branch_name=branch_name, bank_code=bank_instance)
                             
-                            # Handle Staff Categoty instance
+                            # Handle Staff Category instance
                             category_name = row.get('staff_cat')
                             staff_category_instance, created = StaffCategory.objects.get_or_create(category_name=category_name)
                             
@@ -648,46 +667,47 @@ def bulk_upload(request):
                             sch_fac_name = row.get('sch_fac_dir')
                             sch_fac_instance, created = School_Faculty.objects.get_or_create(sch_fac_name=sch_fac_name)
                             
-                            # Handle School/Faculty instance
+                            # Process Directorate if available
                             direct_name = row.get('directorate')
-                            direct_instance, created = Directorate.objects.get_or_create(direct_name=direct_name)
+                            direct_instance = None
+                            if direct_name:
+                                direct_instance, created = Directorate.objects.get_or_create(direct_name=direct_name)
                             
-                            # Handle School/Faculty instance
+                            # Handle Department instance
                             dept_long_name = row.get('dept')
                             dept_long_instance, created = Department.objects.get_or_create(dept_long_name=dept_long_name, sch_fac=sch_fac_instance)
                             
                             # Process CompanyInformation data if present in CSV
-                            company_info = CompanyInformation(
+                            company_info, created = CompanyInformation.objects.get_or_create(
                                 staffno=employee,  # linking to the employee instance
-                                job_title=row.get('job_title', ''),
-                                job_description=row.get('job_description', ''),
-                                staff_cat=staff_category_instance,
-                                contract=contract_instance,
-                                active_status=row.get('active_status', ''),
-                                doa=parse_date(row.get('doa', None)),
-                                doe=parse_date(row.get('doe', None)),
-                                renewal=parse_date(row.get('renewal', None)), 
-                                rank=row.get('rank', ''),
-                                campus=row.get('campus', ''),
-                                city=row.get('city', ''),
-                                email=row.get('email', ''),
-                                sch_fac_dir=sch_fac_instance,
-                                directorate=direct_instance,
-                                dept=dept_long_instance,
-                                salary=row.get('salary', ''),
-                                cost_center=dept_long_instance,
-                                bank_name=bank_instance,
-                                bank_branch=branch_instance, 
-                                accno=row.get('accno', ''),
-                                ssn_con=row.get('ssn_con', ''),
-                                pf_con=row.get('pf_con', ''),
+                                defaults={
+                                    'job_title': row.get('job_title', ''),
+                                    'job_description': row.get('job_description', ''),
+                                    'staff_cat': staff_category_instance,
+                                    'contract': contract_instance,
+                                    'active_status': row.get('active_status', ''),
+                                    'doa': parse_date(row.get('doa', None)),
+                                    'doe': parse_date(row.get('doe', None)),
+                                    'renewal': parse_date(row.get('renewal', None)), 
+                                    'rank': row.get('rank', ''),
+                                    'campus': row.get('campus', ''),
+                                    'city': row.get('city', ''),
+                                    'email': row.get('email', ''),
+                                    'sch_fac_dir': sch_fac_instance,
+                                    'directorate': direct_instance,
+                                    'dept': dept_long_instance,
+                                    'salary': row.get('salary', ''),
+                                    'cost_center': dept_long_instance,
+                                    'bank_name': bank_instance,
+                                    'bank_branch': branch_instance, 
+                                    'accno': row.get('accno', ''),
+                                    'ssn_con': row.get('ssn_con', ''),
+                                    'pf_con': row.get('pf_con', ''),
+                                }
                             )
-                            company_info.save()
-                            
                             success_count += 1
                         except Exception as row_error:
                             transaction.savepoint_rollback(savepoint)
-                            # Log errors for individual rows, but continue
                             errors.append(f"Error in row {reader.line_num}: {row_error}")
                             continue
                         finally:
@@ -696,8 +716,13 @@ def bulk_upload(request):
                 # Report success and any errors
                 if success_count:
                     messages.success(request, f'Successfully uploaded {success_count} records.')
+                
+                if duplicates:
+                    duplicate_message = ', '.join(duplicates)
+                    messages.warning(request, f'Duplicate entries found for the following staff members: {duplicate_message}')
+                
                 if errors:
-                    error_message = "\n".join(errors)
+                    error_message = "</p><p>".join(errors)
                     messages.error(request, f"Errors occurred during upload:\n{error_message}")
                     logger.error(f"Upload Errors:\n{error_message}")
             except Exception as e:
@@ -708,6 +733,7 @@ def bulk_upload(request):
         form = CSVUploadForm()
 
     return render(request, 'hr/upload.html', {'form': form})
+
 
 
 

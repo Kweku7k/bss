@@ -31,7 +31,7 @@ urlpatterns = [
     path('campus', views.add_campus, name="add-campus"),
     path('edit_campus/<int:camp_id>', views.edit_campus, name="edit-campus"),
     path('delete_campus/<int:camp_id>', views.delete_campus, name="delete-campus"),
-    
+
     path('directorate', views.add_directorate, name="add-directorate"),
     path('edit_directorate/<int:dict_id>', views.edit_directorate, name="edit-directorate"),
     path('delete_directorate/<int:dict_id>', views.delete_directorate, name="delete-directorate"),

@@ -1,60 +1,20 @@
-<div class="col-lg-12">
-			
-			<h5 class="mb-3 text-primary text-center"><strong>Social Basket</strong></h5>
-
-		
-			<div class="card">
-			<div class="card-body">
-				<h5 class="card-title">Funerals</h5>
-				<ol>
-				<li><a href="#"> John Johnson's mother</a></li>
-				<li><a href="#">Grace Akpatse's Father</a></li>
-				<li><a href="#">Michael Jackson (Staff)</a></li> 
-				</ol>
-			</div>
-			</div>
-			
-			<div class="card">
-			<div class="card-body">
-				<h5 class="card-title">Birthdays</h5>
-				<ol>
-				<li><a href="#"> Dr. Jack Toronto</a></li>
-				<li><a href="#">Prof. Kojo Kojoson</a></li>
-				<li><a href="#">Ms Anna Clerk</a></li> 
-				<li><a href="#">Mrs Dora Selwyn</a></li> 
-				</ol>
-			</div>
-			</div>
-			<div class="card">
-			<div class="card-body">
-				<h5 class="card-title">Newly Promoted</h5>
-				<ol>
-				<li><a href="#"> Dr. Jim Janjo</a></li>
-				<li><a href="#">Mr. Kojo Korkugah</a></li>
-					
-				</ol>
-			</div>
-			</div>
-			<div class="card">
-			<div class="card-body">
-				<h5 class="card-title">Newly Employed</h5>
-				<ol>
-				<li><a href="#"> Dr. Jack Toronto</a></li>
-				<li><a href="#">Prof. Kojo Kojoson</a></li>
-				<li><a href="#">Ms Anna Clerk</a></li> 
-				<li><a href="#">Mrs Dora Selwyn</a></li> 
-				</ol>
-			</div>
-			</div>
-			<div class="card">
-			<div class="card-body">
-				<h5 class="card-title">Newly Transfered</h5>
-				<ol>
-				<li><a href="#"> Dr. Jack Toronto</a></li>
-				<li><a href="#">Prof. Kojo Kojoson</a></li>
-				<li><a href="#">Ms Anna Clerk</a></li> 
-				<li><a href="#">Mrs Dora Selwyn</a></li> 
-				</ol>
-			</div>
-			</div>
+<div class="col-lg-4 col-sm-6">
+    <div class="card">
+        <div class="card-body">
+			<h5 class="pt-3 mb-3 text-primary text-center"><strong>Contracts Expiring Soon</strong></h5>
+            <ol>
+                {% for staff in expiring_soon %}
+				<li>
+					<a href="{% url 'staff-details' staff.staffno.staffno %}">
+						{{ staff.staffno.fname }} {{ staff.staffno.lname }} (Expires on {{ staff.doe }})
+					</a>
+				</li>
+                {% empty %}
+                    <li>No contracts expiring within the next month.</li>
+                {% endfor %}
+            </ol>
         </div>
+    </div>
+
+	
+</div>
