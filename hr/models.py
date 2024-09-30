@@ -117,7 +117,7 @@ class User(BaseUser):
     
     def __str__(self):
         return self.username
-    
+
 class Rank(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
@@ -129,7 +129,10 @@ class ChoicesHPQ(models.Model):
     
 class ChoicesRegion(models.Model):
     name = models.CharField(max_length=120, unique=True)
-    
+
+class ChoicesLeaveType(models.Model):
+    name = models.CharField(max_length=120, unique=True)    
+
 class ChoicesDependants(models.Model):
     name = models.CharField(max_length=120, unique=True)
     
@@ -224,6 +227,20 @@ class Staff_School(models.Model):
     notes = models.TextField('Notes',blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
+    
+
+class Staff_Leave(models.Model):
+    staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE) # Link to Employees model
+    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.CASCADE, blank=True, null=True)
+    leave_type = models.CharField('Type of Leave', max_length=100, blank=True, null=True)
+    academic_year = models.CharField('Academic Year', max_length=20, blank=True, null=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    days_taken = models.IntegerField()
+    reason = models.TextField('Reason for Leave', blank=True, null=True)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
     
 class Medical(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model

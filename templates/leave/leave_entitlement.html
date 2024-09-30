@@ -1,99 +1,76 @@
- {% extends "base.html" %} {% load static %}
+{% extends "base.html" %}
+{% load static %}
 
-{% block content %} 
-        <div class="row">
-            <div class="row col-4 pt-2">
-                <div class="card bg-info pt-4">
-                <div class="card-header text-center"><h5><strong>Add Annual Leave Entitlements</strong></h5></div>
-                <div class="card-body">
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Leave Entitlements</strong></h5>
+            </div>
+            <div class="card-body">
                 <form action="" method="POST">
-            {% csrf_token %}
-            <br>
-            {% comment %} <div class="col-md-4">
-                <label for="staff_rank" class="form-label">Staff Category</label>
-                <select id="staff_rank" name="staff_rank" class="form-select" required>
-                    <option value="" disabled selected>Select Staff Category</option>
-                    {% for sc in staffcategory %}
-                    <option value="{{ sc }}" {% if sc.category_name == leave.staff_rank %} selected {% endif %}>{{ sc }}</option>
+                    {% csrf_token %}
+                
+                    <div class="form-group">
+                        <label for="staff_cat" class="col-form-label">Staff Category</label>
+                        <select name="staff_cat" class="form-select" required> 
+                          <option selected="true" disabled="disabled">--Select--</option>
+                            {% if staffcategorys %}
+                                {% for cat in staffcategorys %}
+                                    <option value="{{ cat.id }}" {% if leave_ent.staff_cat_id == cat.id %} selected {% endif %}>{{ cat.category_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                      </select>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="entitlement" class="col-form-label">Entitlement (Days)</label>
+                        <input type="text" name="entitlement" class="form-control" {% if leave_ent %} value="{{ leave_ent.entitlement }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
+                        <label for="academic_year" class="col-form-label">Academic Year</label>
+                        <input type="text" name="academic_year" class="form-control" {% if leave_ent %} value="{{ leave_ent.academic_year }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'leave-entitlement' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-lg">
+            <div class="card-header text-center">
+                <h5><strong>Number of Leave Entitlements: {{ leave_entitlement_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if leave_entitlements %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Staff Category</th>
+                        <th>Entitlement</th>
+                        <th>Academic year</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for entitlements in leave_entitlements %}
+                    <tr>
+                      <td>{{ entitlements.staff_cat }}</td>
+                        <td>{{ entitlements.entitlement }}</td>
+                        <td>{{ entitlements.academic_year }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-entitlement' entitlements.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-leave-entitlement' entitlements.id %}" onclick="return confirm('Do you really want to delete the data for {{ entitlements.staff_cat }} leave entitlement?');"></a>
+                        </td>
+                    </tr>
                     {% endfor %}
-                </select>
-            </div> {% endcomment %}
-            <label for="staff_rank">Staff Category</label>
-            <div class="form-control">
-                <select name="staff_rank"  class="form-select" required>
-                    <option value="" ></option>
-                    {% for key,value in STAFFRANK %}
-                        <option value="{{ key }}"
-                        {% if key == staff.staff_rank %}
-                            selected
-                        {% endif %}
-                        >{{ value }}</option>
-                        {% endfor %}
-                </select>
-                
+                </table>
+                {% else %}
+                <h5>Add Leave Entitlement</h5>
+                {% endif %}
             </div>
-         
-            <div class="form-group">
-              <label for="leave_entitlement" class="col-form-label">No. of Days</label>
-              <input required type="number" name="leave_entitlement" class="form-control" {% if leave %} value="{{ leave.leave_entitlement }}" {% else %} value="" {% endif %}>
-            </div>
-            <div class="form-group">
-              <label for="fin_year" class="col-form-label">Fiscal Year</label>
-              <input required type="number" name="fin_year" class="form-control" {% if leave %} value="{{ leave.fin_year }}" {% else %} value="" {% endif %}>
-            
-              <label for="leave_description" class="col-form-label">Leave Description</label>
-              <input required type="text" name="leave_description" class="form-control" {% if leave %} value="{{ leave.leave_description }}" {% else %} value="" {% endif %}>
-            
-            <label for="add_arrears">Add Arrears?</label>
-            
-                <select name="add_arrears"  class="form-select" required>
-                    <option value="" ></option>
-                    <option value="YES">Yes</option>
-                    <option value="NO">No</option>
-                </select>
-                
-            </div>
-            
-            <hr>
-            <input type="submit" value="Add" class="btn btn-block btn-secondary">
-                        <a class="btn btn-sm btn-primary" href="{% url 'leave' %}">Cancel</a>
-          </form>
-            </div> </div></div>
-
-            <div class="row col-8 p-1">
-                <div class="card pt-1 mx-3">
-                    <div class="card-header text-center">Staff Leave Lists</div>
-                        <div class="card-body">
-                            
-                                {{arrears}} <br>
-                           
-
-                            CARD BODY <br>
-                            {{ staff }}<br>                     
-                            {{ num_days }}<br>                     
-                            {{ yr }}<br>                     
-                            {{ all_leave_arrears.leave_arrears }}<br>    
-                            {% if employee %}
-                                {% for emp in employee %}                 
-                                    {{ emp.lname }} {{ emp.staffno }}<br>   
-                                   
-                                {% endfor %}                             
-                            {% endif %}        
-                            <br>      
-                            {% if leaves %}
-                                {% for lv in leaves %}                 
-                                    {{ lv.leave_entitlement }} {{ lv.staffno.lname }} {{ lv.leave_arrears }}<br>   
-                                   
-                                {% endfor %}   
-                                {% else %} NO LEAVE                          
-                            {% endif %}        
-                            <br>      
-                                                        </div>
-                </div>
-            </div>
-    
-    </div>    
-             
+        </div>
+    </div>
+</div>
 {% endblock %}
-
-  

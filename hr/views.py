@@ -57,18 +57,20 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            form.save(commit=False)
-            user = form.cleaned_data.get('username')
-            user = form.cleaned_data.get('staffno')
-            messages.success(request, f'Registration successful for {user}', extra_tags='alert alert-success')  
+            user = form.save(commit=False)
+            user.staffno = form.cleaned_data.get('staffno')
+            user.save()
+
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Registration successful for {username}', extra_tags='alert alert-success')  
             return redirect('login')
         else:
+            print(form.errors)
             messages.error(request, 'Error in creating account.', extra_tags='alert alert-warning')
-    else:
-        form = RegistrationForm()
-    context = {'form':form}
-
+    
+    context = {'form': form}
     return render(request, 'authentication/register.html', context)
+
 
 def logoutUser(request):
     logout(request)

@@ -7,3 +7,8 @@ class LeaveForm(ModelForm):
         model = Leave
         fields = '__all__'
         exclude = ['updated','created']
+        
+class LeaveEntitlementForm(ModelForm):
+    class Meta:
+        model = LeaveEntitlement
+        fields = ['staff_cat', 'entitlement', 'academic_year']

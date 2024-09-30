@@ -54,40 +54,11 @@
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
 
-        <!-- Notification Icon in Top Nav -->
         <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
           <i class="bi bi-bell"></i>
-          <!-- Show the number of expiring contracts -->
-          {% if expiring_soon.count > 0 %}
-              <span class="badge bg-primary badge-number">{{ expiring_soon.count }}</span>
-          {% endif %}
+          <span class="badge bg-primary badge-number">4</span>
         </a><!-- End Notification Icon -->
-
-        <!-- Notification Dropdown -->
-        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
-          <li class="dropdown-header">
-              <!-- Display total number of expiring contracts -->
-              {% if expiring_soon.count > 0 %}
-                  {{ expiring_soon.count }} staff contracts are expiring soon, check them out!
-              {% else %}
-                  No contracts expiring soon.
-              {% endif %}
-          </li>
-          <li><hr class="dropdown-divider"></li>
-
-          <!-- Loop through expiring contracts to show individual notifications -->
-          {% for staff in expiring_soon %}
-          <li class="notification-item">
-              <i class="bi bi-exclamation-circle text-warning"></i>
-              <div>
-                  <h4>Contract Expiring</h4>
-                  <p>{{ staff.staffno.fname }} {{ staff.staffno.lname }}'s contract is expiring on {{ staff.doe }}</p>
-                  <p>{{ staff.doe|timesince }} remaining</p>
-              </div>
-          </li>
-          <li><hr class="dropdown-divider"></li>
-          {% endfor %}
-        </ul>
+        
 
         <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
           <i class="bi bi-chat-left-text"></i>

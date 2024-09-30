@@ -1,5 +1,6 @@
-from django.db import models # type: ignore
-from hr.models import Employee
+from django.db import models 
+from hr.models import *
+from setup.models import *
 
 class Leave(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
@@ -16,4 +17,12 @@ class Leave(models.Model):
     leave_end_date = models.DateField(blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-
+    
+    
+class LeaveEntitlement(models.Model):
+    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.SET_NULL, blank=True, null=True)
+    entitlement = models.IntegerField()
+    academic_year = models.CharField(max_length=20)
+    
+    def __str__(self):
+        return f"{self.staff_cat} - {self.entitlement} - {self.academic_year}"

@@ -12,7 +12,7 @@ class RegistrationForm(UserCreationForm):
     staffno = forms.CharField(max_length=50, required=False) 
     class Meta:
         model = User
-        fields = ['username', 'email', 'staffno', 'password1', 'password2']
+        fields = ['username', 'email', 'password1', 'password2']
         exclude = ['updated','created']
 
         
