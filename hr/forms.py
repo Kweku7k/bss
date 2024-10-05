@@ -35,6 +35,13 @@ class StaffSchoolForm(ModelForm):
         fields = '__all__'
         exclude = ['updated','created']
 
+
+class LeaveTransactionForm(ModelForm):
+    class Meta:
+        model = Staff_Leave
+        fields = '__all__'
+        exclude = ['updated','created']
+
 class StaffCompanyForm(ModelForm):
     class Meta:
         model = Prev_Company

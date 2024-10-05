@@ -40,7 +40,10 @@
                 <p>No Education Background added yet.</p>
                 {% endif %}
             </div>
+
             <br/>
+
+
             <h6><b>Add New Education Background </b></h6>
             <form action="" method="POST" enctype="multipart/form-data"> 
                 {% csrf_token %}
@@ -52,7 +55,7 @@
                     <div class="col-md-4">
                         <label class="form-label" for="certification">Educational Qualification</label>
                         <select name="certification" id="certification" class="form-select" required>
-                            <option selected="true" disabled="disabled"></option>
+                            <option selected="true" disabled="disabled">-----Select------</option>
                             {% for qual in qualification %}
                             <option value="{{ qual }}"
                             {% if qual.qual_abbr == education.certification %}

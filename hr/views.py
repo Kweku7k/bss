@@ -1,9 +1,10 @@
 from math import e
 from django.http import HttpResponseRedirect, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse # type: ignore
 from .models import *
 from setup.models import *
+from leave.models import *
 from django.db.models import Q
 from .forms import *
 from django.db import connection # type: ignore
@@ -81,7 +82,7 @@ def logoutUser(request):
 def landing(request):
     staffs = Employee.objects.order_by('lname').filter()
     active = CompanyInformation.objects.filter(active_status__exact='Active')
-    leave = CompanyInformation.objects.filter(active_status__exact='On Leave')
+    leave = CompanyInformation.objects.filter(active_status__exact='Leave')
     staff_count = staffs.count()
     ative_count = active.count()
     leave_count = leave.count()
@@ -771,9 +772,6 @@ def education(request,staffno):
                'qualification':qualification,
                'school':school,
                'school_list':school_list,
-               'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-               'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
-               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
             }
     return render(request,'hr/education.html',context)
 
@@ -816,6 +814,62 @@ def delete_education(request,edu_id,staffno):
     if request.method == 'GET':
        education.delete()
     return redirect('education', staffno)
+
+
+
+# Staff leave transaction
+def leave_transaction(request, staffno):
+    submitted = False
+    staff = get_object_or_404(Employee, pk=staffno) 
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)   
+    leave_entitlement = LeaveEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
+    leave_transactions = Staff_Leave.objects.filter(staffno__exact=staffno)
+    leave_trans_count = leave_transactions.count()
+
+    if not leave_entitlement:
+        messages.error(request, 'No leave entitlement found for this staff category.')
+        return redirect('leave-entitlement')
+    
+    if request.method == 'POST':
+        print("Form submitted")
+        form = LeaveTransactionForm(request.POST)
+        if form.is_valid():
+            days_taken = int(form.cleaned_data['days_taken'])
+            academic_year = form.cleaned_data['academic_year']
+            
+            leave_transaction = form.save(commit=False)
+            leave_transaction.staffno = staff
+            leave_transaction.staff_cat_id = request.POST.get('staff_cat')  # Use staff_cat_id to directly set the foreign key
+            
+            if leave_entitlement.entitlement >= days_taken:
+                leave_transaction.academic_year = academic_year
+                leave_transaction.save()
+                
+                leave_entitlement.entitlement -= days_taken
+                leave_entitlement.save()
+                
+                messages.success(request, 'Leave transaction created successfully.')
+                return redirect('leave-transaction', staffno=staffno)
+            else:
+                messages.error(request, 'Not enough leave entitlement remaining.')
+        else:
+            print(form.errors)
+
+    else:
+        form = LeaveTransactionForm()
+        if 'submitted' in request.GET:
+            submitted = True
+
+    return render(request, 'hr/leave.html', {
+        'staff': staff,
+        'staff_cat': company_info.staff_cat,
+        'leave_entitlement': leave_entitlement,
+        'leave_transactions': leave_transactions,
+        'form': form,
+        'company_info': company_info,
+        'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
+        'leave_trans_count':leave_trans_count
+    })
 
 
 def staff_education(request,staffno):
