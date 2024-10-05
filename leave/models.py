@@ -24,5 +24,8 @@ class LeaveEntitlement(models.Model):
     entitlement = models.IntegerField()
     academic_year = models.CharField(max_length=20)
     
-    def __str__(self):
-        return f"{self.staff_cat} - {self.entitlement} - {self.academic_year}"
+    def get_remaining_days(self, staff):
+        # Sum the days taken by this staff member
+        total_days_taken = Staff_Leave.objects.filter(staffno=staff, staff_cat=self.staff_cat).aggregate(models.Sum('days_taken'))['days_taken__sum'] or 0
+        remaining_days = self.entitlement - total_days_taken
+        return remaining_days

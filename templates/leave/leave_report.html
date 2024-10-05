@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="GET" action="{% url 'leave-report' %}">
+    <div class="row">
+        <div class="col-md-4">
+            <label for="filter_staffcategory">Staff Category</label>
+            <select id="filter_staffcategory" name="filter_staffcategory" class="form-control">
+                <option selected="true" disabled="disabled">
+                    {% if filter_staffcategory %} {{ filter_staffcategory }} {% else %} Select {% endif %}
+                </option>
+                {% for sc in staff_categories %}
+                    <option value="{{ sc.id }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
+                        {{ sc.category_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-4">
+            <label for="academic_year">Academic Year</label>
+            <input type="text" id="academic_year" name="academic_year" class="form-control"
+                   value="{{ selected_academic_year }}">
+        </div>
+        
+        <div class="col-md-4 mt-4">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+</form>
+
+<button onclick="window.print()" class="btn btn-secondary mt-3">Print Report</button>
+
+<!-- Table to display leave transactions -->
+<table class="table table-striped mt-4">
+    <thead>
+        <tr>
+            <th>Staff Number</th>
+            <th>Staff Category</th>
+            <th>Academic Year</th>
+            <th>Days Taken</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for transaction in leave_transactions %}
+            <tr>
+                <td>{{ transaction.staffno }}</td>
+                <td>{{ transaction.staff_cat.name }}</td>
+                <td>{{ transaction.academic_year }}</td>
+                <td>{{ transaction.days_taken }}</td>
+                <td>{{ transaction.start_date }}</td>
+                <td>{{ transaction.end_date }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="6">No leave transactions found.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

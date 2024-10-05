@@ -829,7 +829,10 @@ def leave_transaction(request, staffno):
     if not leave_entitlement:
         messages.error(request, 'No leave entitlement found for this staff category.')
         return redirect('leave-entitlement')
-    
+
+    remaining_days = leave_entitlement.get_remaining_days(staff)
+
+        
     if request.method == 'POST':
         print("Form submitted")
         form = LeaveTransactionForm(request.POST)
@@ -839,14 +842,11 @@ def leave_transaction(request, staffno):
             
             leave_transaction = form.save(commit=False)
             leave_transaction.staffno = staff
-            leave_transaction.staff_cat_id = request.POST.get('staff_cat')  # Use staff_cat_id to directly set the foreign key
+            leave_transaction.staff_cat_id = request.POST.get('staff_cat')
             
-            if leave_entitlement.entitlement >= days_taken:
+            if remaining_days >= days_taken:
                 leave_transaction.academic_year = academic_year
                 leave_transaction.save()
-                
-                leave_entitlement.entitlement -= days_taken
-                leave_entitlement.save()
                 
                 messages.success(request, 'Leave transaction created successfully.')
                 return redirect('leave-transaction', staffno=staffno)
@@ -868,7 +868,8 @@ def leave_transaction(request, staffno):
         'form': form,
         'company_info': company_info,
         'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
-        'leave_trans_count':leave_trans_count
+        'leave_trans_count':leave_trans_count,
+        'remaining_days': remaining_days
     })
 
 

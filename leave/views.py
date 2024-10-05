@@ -52,3 +52,33 @@ def edit_leave_entitlement(request, le_id):
             return redirect('leave-entitlement')
     context = {'form':form, 'leave_entitlements':leave_entitlements, 'leave_entitlement_count':leave_entitlement_count, 'staffcategorys':staffcategorys, 'leave_ent':leave_ent}
     return render(request, 'leave/leave_entitlement.html', context)
+
+
+# Leave report view
+def leave_report(request):
+    # Get all staff categories for dropdown selection
+    staff_categories = StaffCategory.objects.all()
+    
+    # Retrieve filter values from request
+    filter_staffcategory = request.GET.get('filter_staffcategory')
+    selected_academic_year = request.GET.get('academic_year')
+    
+    # Get all leave transactions
+    leave_transactions = Staff_Leave.objects.all()
+
+    # Apply filters based on user input
+    if filter_staffcategory:
+        leave_transactions = leave_transactions.filter(staff_cat__id=filter_staffcategory)
+    
+    if selected_academic_year:
+        leave_transactions = leave_transactions.filter(academic_year=selected_academic_year)
+
+    # Render the filtered leave transactions and staff categories to the template
+    context = {
+        'leave_transactions': leave_transactions,
+        'staff_categories': staff_categories,
+        'filter_staffcategory': filter_staffcategory,
+        'selected_academic_year': selected_academic_year,
+    }
+    
+    return render(request, 'leave/leave_report.html', context)
