@@ -118,8 +118,9 @@ def search(request):
         if search_query:
             staffs = staffs.filter(
                 Q(staffno__icontains=search_query) |
+                Q(fname__icontains=search_query) |
                 Q(lname__icontains=search_query) |
-                Q(fname__icontains=search_query)
+                Q(middlenames__icontains=search_query)
             )      
 
         staff_count = staffs.count()

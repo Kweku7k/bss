@@ -30,7 +30,6 @@
 
 <button onclick="window.print()" class="btn btn-secondary mt-3">Print Report</button>
 
-<!-- Table to display leave transactions -->
 <table class="table table-striped mt-4">
     <thead>
         <tr>
@@ -44,9 +43,9 @@
     </thead>
     <tbody>
         {% for transaction in leave_transactions %}
-            <tr>
+            <tr class="clickable-row" onclick="window.location='{% url 'leave-transaction' transaction.staffno.staffno %}'">
                 <td>{{ transaction.staffno }}</td>
-                <td>{{ transaction.staff_cat.name }}</td>
+                <td>{{ transaction.staff_cat }}</td>
                 <td>{{ transaction.academic_year }}</td>
                 <td>{{ transaction.days_taken }}</td>
                 <td>{{ transaction.start_date }}</td>
