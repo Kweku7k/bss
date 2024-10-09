@@ -69,12 +69,17 @@ def leave_report(request):
     
     if selected_academic_year:
         leave_transactions = leave_transactions.filter(academic_year=selected_academic_year)
+        
+    try:
+        filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
+    except StaffCategory.DoesNotExist:
+        filter_staffcategory_body = None
 
     context = {
         'leave_transactions': leave_transactions,
         'staff_categories': staff_categories,
         'filter_staffcategory': filter_staffcategory,
-        'filter_staffcategory_body': StaffCategory.objects.get(pk=filter_staffcategory).category_name,
+        'filter_staffcategory_body': filter_staffcategory_body,
         'selected_academic_year': selected_academic_year,
     }
     

@@ -23,7 +23,7 @@
             </div>
 
 
-            <h5><b>Leave transactions</b></h5>
+            <h5><b>Leave transactions {{leave_trans_count}}</b></h5>
 
             <!-- Check if there are any leave transactions -->
             {% if leave_transactions %}
@@ -45,7 +45,7 @@
                             <td>{{ transaction.start_date }}</td>
                             <td>{{ transaction.end_date }}</td>
                             <td>{{ transaction.days_taken }}</td>
-                            <td>
+                            <td class="text-end">
                                 <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a>
                             </td>
                         </tr>
