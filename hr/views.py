@@ -817,8 +817,9 @@ def delete_education(request,edu_id,staffno):
     return redirect('education', staffno)
 
 
-
-# Staff leave transaction
+######################################################################
+### Staff leave transaction
+######################################################################
 def leave_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno) 
@@ -832,7 +833,6 @@ def leave_transaction(request, staffno):
         return redirect('leave-entitlement')
 
     remaining_days = leave_entitlement.get_remaining_days(staff)
-
         
     if request.method == 'POST':
         print("Form submitted")
@@ -872,10 +872,37 @@ def leave_transaction(request, staffno):
         'leave_trans_count':leave_trans_count,
         'remaining_days': remaining_days
     })
+    
+def edit_leave_transaction(request,staffno,lt_id):
+    staff = get_object_or_404(Employee, pk=staffno) 
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)   
+    leave_transactions = Staff_Leave.objects.filter(staffno__exact=staffno)
+    leave_transaction = get_object_or_404(Staff_Leave, pk=lt_id)
+    form = LeaveTransactionForm(request.POST or None, instance=leave_transaction)
+    
+    if request.method == 'POST':
+        form = LeaveTransactionForm(request.POST, instance=leave_transaction)
+        if form.is_valid():
+            form.save()
+            return redirect('leave-transaction', staffno=staffno)
+    
+    context = {
+        'staff': staff,
+        'staff_cat': company_info.staff_cat,
+        'leave_transactions': leave_transactions,
+        'leave_transaction':leave_transaction,
+        'form': form,
+        'company_info': company_info,
+        'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
+    }
+    
+    return render(request, 'hr/leave.html', context)
 
 
+######################################################################
+### Staff education views
+######################################################################
 def staff_education(request,staffno):
-    # stno = request.POST['staffno']
     submitted = False
     school_list = School.objects.order_by('school_name')
     staff = Employee.objects.get(pk=staffno)
@@ -908,8 +935,8 @@ def edit_staff_education(request,sch_id,staffno):
             return redirect('staff-education', staffno)
 
     context = {'HEQ':HEQ,'form':form,'schools':schools,'sch_count':sch_count,'school':school,'staff':staff,'school_list':school_list,'pkno':pkno}
-    return render(request, 'hr/staff_education.html', context)
-
+    return render(request, 'hr/staff_education.html', context)    
+    
 def delete_staff_education(request,sch_id,staffno):
     school = Staff_School.objects.get(pk=sch_id)
     school = school.school_code

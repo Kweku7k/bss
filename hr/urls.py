@@ -33,6 +33,7 @@ urlpatterns = [
     path('topnav/', views.topnav_view, name='topnav'),
 
     path('leave_transaction/<str:staffno>', views.leave_transaction, name="leave-transaction"),
+    path('edit_leave_transaction/<str:lt_id>/<str:staffno>', views.edit_leave_transaction,name="edit-leave-transaction"),
     
     path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),

@@ -45,6 +45,9 @@
                             <td>{{ transaction.start_date }}</td>
                             <td>{{ transaction.end_date }}</td>
                             <td>{{ transaction.days_taken }}</td>
+                            <td>
+                                <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>

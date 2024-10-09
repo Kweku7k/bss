@@ -1,12 +1,14 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
+
 <form method="GET" action="{% url 'leave-report' %}">
     <div class="row">
         <div class="col-md-4">
             <label for="filter_staffcategory">Staff Category</label>
             <select id="filter_staffcategory" name="filter_staffcategory" class="form-control">
                 <option selected="true" disabled="disabled">
-                    {% if filter_staffcategory %} {{ filter_staffcategory }} {% else %} Select {% endif %}
+                    {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}
                 </option>
                 {% for sc in staff_categories %}
                     <option value="{{ sc.id }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
@@ -18,12 +20,11 @@
         
         <div class="col-md-4">
             <label for="academic_year">Academic Year</label>
-            <input type="text" id="academic_year" name="academic_year" class="form-control"
-                   value="{{ selected_academic_year }}">
+            <input type="text" id="academic_year" name="academic_year" class="form-control" value="{{ selected_academic_year }}">
         </div>
         
         <div class="col-md-4 mt-4">
-            <button type="submit" class="btn btn-primary">Filter</button>
+            <button type="submit" class="btn btn-info">Filter</button>
         </div>
     </div>
 </form>

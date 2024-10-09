@@ -1,5 +1,6 @@
 from datetime import date
-from django.shortcuts import render, redirect 
+from django.shortcuts import render, redirect
+import pprint
 from .models import Leave
 from .models import *
 from hr.models import *
@@ -73,7 +74,10 @@ def leave_report(request):
         'leave_transactions': leave_transactions,
         'staff_categories': staff_categories,
         'filter_staffcategory': filter_staffcategory,
+        'filter_staffcategory_body': StaffCategory.objects.get(pk=filter_staffcategory).category_name,
         'selected_academic_year': selected_academic_year,
     }
+    
+    pprint.pprint(context)
     
     return render(request, 'leave/leave_report.html', context)
