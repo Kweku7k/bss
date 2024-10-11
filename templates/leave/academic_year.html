@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Academic Year</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="academic_year" class="col-form-label">Academic Year</label>
+                        <input type="text" name="academic_year" class="form-control" {% if leave_ent %} value="{{ leave_ent.academic_year }}" {% else %} value="" {% endif %}>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'leave-entitlement' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

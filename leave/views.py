@@ -54,6 +54,36 @@ def edit_leave_entitlement(request, le_id):
     context = {'form':form, 'leave_entitlements':leave_entitlements, 'leave_entitlement_count':leave_entitlement_count, 'staffcategorys':staffcategorys, 'leave_ent':leave_ent}
     return render(request, 'leave/leave_entitlement.html', context)
 
+def leave_academic_year(request):
+    submitted = False
+    academic_years = AcademicYear.objects.all()
+    academic_year_count = academic_years.count()
+    if request.method == "POST":
+        form = AcademicYearForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('leave-academic-year')
+    else:
+        form = AcademicYearForm
+        if 'submitted' in request.GET:
+            submitted = True
+    context = {'form':form, 'academic_years':academic_years, 'academic_year_count':academic_year_count, 'submitted':submitted}
+    return render(request, 'leave/academic_year.html', context)
+
+def edit_leave_academic_year(request, ay_id):
+    academic_years = AcademicYear.objects.order_by('-id')
+    academic_year_count = academic_years.count()
+    academic_year = AcademicYear.objects.get(pk=ay_id)
+    form = AcademicYearForm(instance=academic_year)
+
+    if request.method == 'POST':
+        form = AcademicYearForm(request.POST, instance=academic_year)
+        if form.is_valid():
+            form.save()
+            return redirect('leave-academic-year')
+    context = {'form':form, 'academic_years':academic_years, 'academic_year_count':academic_year_count, 'academic_year':academic_year}
+    return render(request, 'leave/leave_academic_year.html', context)
+    
 
 # Leave report view
 def leave_report(request):
