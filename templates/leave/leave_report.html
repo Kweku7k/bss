@@ -7,7 +7,7 @@
         <div class="col-md-4">
             <label for="filter_staffcategory">Staff Category</label>
             <select id="filter_staffcategory" name="filter_staffcategory" class="form-control">
-                <option selected="true" disabled="disabled">  {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}</option>
+                <option selected="true" disabled="disabled"> {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}</option>
                 {% for sc in staff_categories %}
                     <option value="{{ sc.id }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
                         {{ sc.category_name }}
@@ -15,10 +15,17 @@
                 {% endfor %}
             </select>
         </div>
-        
+
         <div class="col-md-4">
-            <label for="academic_year">Academic Year</label>
-            <input type="text" id="academic_year" name="academic_year" class="form-control" value="{{ selected_academic_year }}">
+            <label for="selected_academic_year">Academic Year</label>
+            <select id="selected_academic_year" name="selected_academic_year" class="form-control">
+                <option selected="true" disabled="disabled"> {% if selected_academic_year %} {{ selected_academic_year }} {% else %} Select {% endif %}</option>
+                {% for year in academic_years %}
+                    <option value="{{ year.id }}" {% if year.academic_year == selected_academic_year %} selected {% endif %}>
+                        {{ year.academic_year }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
         
         <div class="col-md-4 mt-4">

@@ -233,7 +233,7 @@ class Staff_Leave(models.Model):
     staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE) # Link to Employees model
     staff_cat = models.ForeignKey(StaffCategory, on_delete=models.CASCADE, blank=True, null=True)
     leave_type = models.CharField('Type of Leave', max_length=100, blank=True, null=True)
-    academic_year = models.CharField('Academic Year', max_length=20, blank=True, null=True)
+    academic_year = models.CharField('AcademicYear', max_length=20, blank=True, null=True)
     start_date = models.DateField()
     end_date = models.DateField()
     days_taken = models.IntegerField()

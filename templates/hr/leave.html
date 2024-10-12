@@ -73,9 +73,18 @@
                         <input type="hidden" name="staff_cat" value="{{ company_info.staff_cat.id }}">
                     </div>
                     <div class="col-md-4">
+                        <label class="form-label" for="academic_year">Academic Year</label>
+                        <select name="academic_year" id="academic_year" class="form-select" required>
+                            <option selected="true" disabled="disabled">-----Select------</option>
+                            {% for year in academic_years %}
+                            <option value="{{ year }}" {% if year.academic_year == leave_transaction.academic_year %} selected{% endif %} >{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% comment %} <div class="col-md-4">
                         <label for="academic_year" class="form-label">Academic Year </label>
                         <input type="text" name="academic_year" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.academic_year }}" {% else %} value="" {% endif %} required>
-                    </div>
+                    </div> {% endcomment %}
                     <div class="col-md-4">
                         <label class="form-label" for="leave_type">Type of Leave</label>
                         <select name="leave_type" id="leave_type" class="form-select" required>

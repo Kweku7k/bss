@@ -13,15 +13,43 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="academic_year" class="col-form-label">Academic Year</label>
-                        <input type="text" name="academic_year" class="form-control" {% if leave_ent %} value="{{ leave_ent.academic_year }}" {% else %} value="" {% endif %}>
+                        <input type="text" name="academic_year" class="form-control" {% if academic_year %} value="{{ academic_year.academic_year }}" {% else %} value="" {% endif %}>
                     </div>
                     <hr>
                     <input type="submit" value="Add" class="btn btn-block btn-success">
-                    <a class="btn btn-sm btn-info" href="{% url 'leave-entitlement' %}">Cancel</a>
+                    <a class="btn btn-sm btn-info" href="{% url 'leave-academic-year' %}">Cancel</a>
                 </form>
             </div>
         </div>
     </div>
-    
+
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-lg">
+            <div class="card-header text-center">
+                <h5><strong>Number of Academic Year: {{ academic_year_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if academic_years %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Academic year</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for year in academic_years %}
+                    <tr>
+                        <td>{{ year.academic_year }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-academic-year' year.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-leave-academic-year' year.id %}" onclick="return confirm('Do you really want to delete the data for {{ year.academic_year }} academic year?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add New Academic Year</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>    
 </div>
 {% endblock %}

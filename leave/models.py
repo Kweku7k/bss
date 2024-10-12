@@ -19,7 +19,7 @@ class Leave(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     
 class AcademicYear(models.Model):
-    academic_year = models.CharField(max_length=20)
+    academic_year = models.CharField(max_length=10)
     
     def __str__(self):
         return self.academic_year

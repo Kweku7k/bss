@@ -827,6 +827,7 @@ def leave_transaction(request, staffno):
     leave_entitlement = LeaveEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
     leave_transactions = Staff_Leave.objects.filter(staffno__exact=staffno)
     leave_trans_count = leave_transactions.count()
+    academic_years = AcademicYear.objects.all()
 
     if not leave_entitlement:
         messages.error(request, 'No leave entitlement found for this staff category.')
@@ -870,12 +871,14 @@ def leave_transaction(request, staffno):
         'company_info': company_info,
         'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
         'leave_trans_count':leave_trans_count,
-        'remaining_days': remaining_days
+        'remaining_days': remaining_days,
+        'academic_years': academic_years,
     })
     
 def edit_leave_transaction(request,staffno,lt_id):
     staff = get_object_or_404(Employee, pk=staffno) 
-    company_info = get_object_or_404(CompanyInformation, staffno=staff)   
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)  
+    academic_years = AcademicYear.objects.all() 
     leave_transactions = Staff_Leave.objects.filter(staffno__exact=staffno)
     leave_transaction = get_object_or_404(Staff_Leave, pk=lt_id)
     form = LeaveTransactionForm(request.POST or None, instance=leave_transaction)
@@ -894,6 +897,7 @@ def edit_leave_transaction(request,staffno,lt_id):
         'form': form,
         'company_info': company_info,
         'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
+        'academic_years':academic_years
     }
     
     return render(request, 'hr/leave.html', context)
