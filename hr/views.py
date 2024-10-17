@@ -1,5 +1,5 @@
 from math import e
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse # type: ignore
 from .models import *
@@ -19,6 +19,10 @@ from django.db import transaction
 from django.utils import timezone
 import logging
 from datetime import datetime, timedelta
+import os
+from django.conf import settings
+
+
 
 
 logger = logging.getLogger(__name__)
@@ -644,6 +648,8 @@ def bulk_upload(request):
                                 }
                             )
                             
+                            print(f"Employee: {employee}")
+                            
                             # If employee already exists, add to duplicates and skip
                             if not created:
                                 duplicates.append(f"{row['fname']} {row['lname']}")
@@ -709,6 +715,7 @@ def bulk_upload(request):
                                     'pf_con': row.get('pf_con', ''),
                                 }
                             )
+                            print(f"Company Information: {company_info}")
                             success_count += 1
                         except Exception as row_error:
                             transaction.savepoint_rollback(savepoint)
@@ -738,6 +745,12 @@ def bulk_upload(request):
 
     return render(request, 'hr/upload.html', {'form': form})
 
+
+def download_csv(request):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'docs/sample_format.csv')
+    response = FileResponse(open(file_path, 'rb'), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sample_format.csv"'
+    return response
 
 
 
@@ -875,31 +888,42 @@ def leave_transaction(request, staffno):
         'academic_years': academic_years,
     })
     
-def edit_leave_transaction(request,staffno,lt_id):
-    staff = get_object_or_404(Employee, pk=staffno) 
-    company_info = get_object_or_404(CompanyInformation, staffno=staff)  
-    academic_years = AcademicYear.objects.all() 
+def edit_leave_transaction(request, staffno, lt_id):
+    staff = get_object_or_404(Employee, pk=staffno)
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)
+    academic_years = AcademicYear.objects.all()
     leave_transactions = Staff_Leave.objects.filter(staffno__exact=staffno)
     leave_transaction = get_object_or_404(Staff_Leave, pk=lt_id)
-    form = LeaveTransactionForm(request.POST or None, instance=leave_transaction)
+    leave_entitlement = LeaveEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
     
+    # Calculate the remaining leave days
+    remaining_days = leave_entitlement.get_remaining_days(staff)
+    form = LeaveTransactionForm(request.POST or None, instance=leave_transaction)
+    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
     if request.method == 'POST':
-        form = LeaveTransactionForm(request.POST, instance=leave_transaction)
         if form.is_valid():
-            form.save()
-            return redirect('leave-transaction', staffno=staffno)
+            days_taken = int(form.cleaned_data['days_taken'])
+            
+            if remaining_days >= days_taken:
+                form.save()
+                messages.success(request, 'Leave transaction updated successfully.')
+                return redirect('leave-transaction', staffno=staffno)
+            else:
+                messages.error(request, f'Not enough leave entitlement remaining for {staff_fullname}.')
     
     context = {
         'staff': staff,
         'staff_cat': company_info.staff_cat,
         'leave_transactions': leave_transactions,
-        'leave_transaction':leave_transaction,
+        'leave_transaction': leave_transaction,
         'form': form,
         'company_info': company_info,
         'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
-        'academic_years':academic_years
+        'academic_years': academic_years,
+        'leave_entitlement': leave_entitlement,
+        'remaining_days': remaining_days,  # Pass remaining days to the template
     }
-    
+
     return render(request, 'hr/leave.html', context)
 
 

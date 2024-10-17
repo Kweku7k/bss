@@ -7,7 +7,7 @@
         <div class="col-md-4">
             <label for="filter_staffcategory">Staff Category</label>
             <select id="filter_staffcategory" name="filter_staffcategory" class="form-control">
-                <option selected="true" disabled="disabled"> {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}</option>
+                <option selected="true" disabled> {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}</option>
                 {% for sc in staff_categories %}
                     <option value="{{ sc.id }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
                         {{ sc.category_name }}
@@ -17,11 +17,11 @@
         </div>
 
         <div class="col-md-4">
-            <label for="selected_academic_year">Academic Year</label>
-            <select id="selected_academic_year" name="selected_academic_year" class="form-control">
-                <option selected="true" disabled="disabled"> {% if selected_academic_year %} {{ selected_academic_year }} {% else %} Select {% endif %}</option>
+            <label for="academic_year">Academic Year</label>
+            <select id="academic_year" name="academic_year" class="form-control">
+                <option selected="true" disabled> {% if selected_academic_year %} {{ selected_academic_year }} {% else %} Select {% endif %}</option>
                 {% for year in academic_years %}
-                    <option value="{{ year.id }}" {% if year.academic_year == selected_academic_year %} selected {% endif %}>
+                    <option value="{{ year }}" {% if year.academic_year == selected_academic_year %} selected {% endif %}>
                         {{ year.academic_year }}
                     </option>
                 {% endfor %}
@@ -30,19 +30,20 @@
         
         <div class="col-md-4 mt-4">
             <button type="submit" class="btn btn-info">Filter</button>
+            <a class="btn btn-secondary" href="{% url 'leave-report' %}">Reset</a>
+            <button  onclick="window.print()" class="btn btn-outline-primary">Print</button>
         </div>
     </div>
 </form>
 
-<button onclick="window.print()" class="btn btn-secondary mt-3">Print Report</button>
 
-<table class="table table-striped mt-4">
+<table class="table table-striped mt-5">
     <thead>
         <tr>
             <th>Staff Number</th>
             <th>Staff Category</th>
-            <th>Academic Year</th>
-            <th>Days Taken</th>
+            <th>Year</th>
+            <th>Days</th>
             <th>Start Date</th>
             <th>End Date</th>
         </tr>
@@ -50,7 +51,7 @@
     <tbody>
         {% for transaction in leave_transactions %}
             <tr class="clickable-row" onclick="window.location='{% url 'leave-transaction' transaction.staffno.staffno %}'">
-                <td>{{ transaction.staffno }}</td>
+                <td>{{ transaction.staffno.title }} {{ transaction.staffno.fname }} {{ transaction.staffno.lname }} {{ transaction.staffno.middlenames }}</td>
                 <td>{{ transaction.staff_cat }}</td>
                 <td>{{ transaction.academic_year }}</td>
                 <td>{{ transaction.days_taken }}</td>

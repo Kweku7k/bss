@@ -1,6 +1,6 @@
-{% comment %} {% extends "base2.html" %} {% endcomment %} {% load static %} {% include "partials/_topnav.html" %} 
-{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} {% comment %} 
-{% block content %} {% endcomment %}
+{% load static %} 
+{% include "partials/_topnav.html" %} 
+
 
   {% if messages %}
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
@@ -19,11 +19,13 @@
   {% endif %}
 
 <div class="row">
-      <div class="row col-3 pt-5">
-        {% include "partials/_staffdetails_sidebar.html" %} 
-      </div>
-      <div class="row col-9">
-        <div class="card pt-5 mt-5">
+      <div class="row">
+        <div class="col-md-3 mt-5">
+          {% include "partials/_staffdetails_sidebar.html" %} 
+        </div>
+      
+      <div class="col-md-9">
+        <div class="card pt-5 mt-5 p-5">
           <table class="table table-sm table-hover">
                 <tr><th>Staff Number</th><td>{{ staff.staffno }}</td></tr>
                 <tr><th>Gender</th><td>{{ staff.gender }}</td></tr>
@@ -47,6 +49,7 @@
               
         </div>
       </div>
+    </div>
 </div>
 
 

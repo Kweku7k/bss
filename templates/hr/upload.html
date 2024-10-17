@@ -5,7 +5,12 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <div class="align-items-center p-5">
-                <h5 class="mb-3 text-primary"><strong>Bulk Upload</strong></h5>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-3 text-primary"><strong>Bulk Upload</strong></h5>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        Tips to import data
+                    </button>
+                </div>
                 <div>
                     <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -17,6 +22,37 @@
         </div>
     </div>
 </div>
+
+
+<!-- Modal -->
+
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Bulk Upload Instructions</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Please upload a CSV file containing employees' personal and company information with the following structure:</p>
+                <ul>
+                    <li>File format should be <code>.csv</code>.</li>
+                    <li>Ensure the data is well-formed before uploading.</li>
+                    <li>This will upload both employees' personal information and company-related details.</li>
+                </ul>
+                
+                <h6>Sample CSV Format:</h6>
+
+                <p><strong>Note:</strong> Make sure to follow the exact column format as shown in the example above.</p>
+                
+                <a href="{% url 'download_sample_csv' %}" class="btn btn-sm btn-primary">Download Sample CSV</a>
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 
 
 

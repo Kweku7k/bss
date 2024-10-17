@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+    <!-- Leave Request Form -->
+    <h5><b>Leave Request</b></h5>
+    <form action="" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-4">
+                <label for="staffno" class="form-label">Staff Number</label>
+                <!-- Autocomplete-filling Staff Number -->
+                <input type="text" class="form-control" id="staffno" name="staffno">
+            </div>
+
+            <!-- <div class="col-md-4">
+                <label for="staff_cat" class="form-label">Staff Category</label>
+                <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}">
+                <input type="hidden" name="staff_cat" value="{{ company_info.staff_cat.id }}">
+            </div> -->
+
+            <div class="col-md-4">
+                <label class="form-label" for="staff_cat">Academic Year</label>
+                <select name="staff_cat" id="staff_cat" class="form-select" required>
+                    <option selected="true" disabled="disabled">-----Select------</option>
+                    {% for cat in staffcategories %}
+                    <option value="{{ cat }}" {% if cat.staff_cat == leave_transaction.staff_cat %} selected {% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label" for="academic_year">Academic Year</label>
+                <select name="academic_year" id="academic_year" class="form-select" required>
+                    <option selected="true" disabled="disabled">-----Select------</option>
+                    {% for year in academic_years %}
+                    <option value="{{ year }}" {% if year.academic_year == leave_transaction.academic_year %} selected {% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label" for="leave_type">Type of Leave</label>
+                <select name="leave_type" id="leave_type" class="form-select" required>
+                    <option selected="true" disabled="disabled">----Select----</option>
+                    {% for key, value in LEAVE_TYPE %}
+                    <option value="{{ key }}" {% if key == leave_transaction.leave_type %} selected {% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" class="form-control" name="start_date" id="start_date" {% if leave_transaction %} value="{{ leave_transaction.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="finish_date" class="form-label">End Date</label>
+                <input type="date" class="form-control" name="end_date" id="end_date" {% if leave_transaction %} value="{{ leave_transaction.end_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+            </div>
+            
+            <div class="col-md-2">
+                <label for="days_taken" class="form-label">Days Taken</label>
+                <input type="text" name="days_taken" id="days_taken" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.days_taken }}" {% else %} value="" {% endif %} required>
+            </div>
+
+            <div class="col-md-4">
+                <label for="reason" class="form-label">Reason</label>
+                <textarea name="reason" class="form-control">{% if leave_transaction %}{{ leave_transaction.reason }}{% endif %}</textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-4">
+            <button type="submit" class="btn btn-info me-2">Submit</button>
+        </div>
+    </form>
+
+    <script>
+        function populateStaffNo() {
+            var staffNameInput = document.getElementById('staff_name');
+            var staffNoInput = document.getElementById('staffno');
+            var staffList = document.getElementById('staff_list');
+
+            // Find the selected staff from the list and set the staffno
+            for (var i = 0; i < staffList.options.length; i++) {
+                if (staffList.options[i].value === staffNameInput.value) {
+                    staffNoInput.value = staffList.options[i].getAttribute('data-staffno');
+                    break;
+                }
+            }
+        }
+    </script>
+
+{% endblock %}

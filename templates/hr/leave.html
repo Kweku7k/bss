@@ -34,7 +34,8 @@
                             <th>Description</th>
                             <th>Start Date</th>
                             <th>End Date</th>
-                            <th>Days Taken</th>
+                            <th>Days</th>
+                            <th>Academic Year</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -45,6 +46,7 @@
                             <td>{{ transaction.start_date }}</td>
                             <td>{{ transaction.end_date }}</td>
                             <td>{{ transaction.days_taken }}</td>
+                            <td>{{ transaction.academic_year }}</td>
                             <td class="text-end">
                                 <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a>
                             </td>
