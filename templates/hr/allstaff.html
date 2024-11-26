@@ -21,11 +21,11 @@
                         <label for="filter_staffcategory" class="form-label">Staff Category</label>
                         <select name="filter_staffcategory" id="filter_staffcategory" class="form-select">
                             <option selected="true" disabled="disabled">
-                                {% if filter_staffcategory %} {{ filter_staffcategory }} {% else %} Select {% endif %}
+                                {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}
                             </option>
                             {% for sc in staffcategory %}
-                                <option value="{{ sc }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
-                                    {{ sc }}
+                                <option value="{{ sc.id }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
+                                    {{ sc.category_name }}
                                 </option>
                             {% endfor %}
                         </select>
@@ -50,7 +50,7 @@
                                 {% if filter_title %} {{ filter_title }} {% else %} Select {% endif %}
                             </option>
                             {% for ts in title %}
-                                <option value="{{ ts }}" {% if ts.title_name == filter_title %} selected {% endif %}>
+                                <option value="{{ ts }}" {% if ts == filter_title %} selected {% endif %}>
                                     {{ ts }}
                                 </option>
                             {% endfor %}
@@ -63,8 +63,8 @@
                                 {% if filter_contract %} {{ filter_contract }} {% else %} Select {% endif %}
                             </option>
                             {% for ct in contract %}
-                                <option value="{{ ct }}" {% if ct.contract_type == filter_contract %} selected {% endif %}>
-                                    {{ ct }}
+                                <option value="{{ ct.id }}" {% if ct.id == filter_contract %} selected {% endif %}>
+                                    {{ ct.contract_type }} 
                                 </option>
                             {% endfor %}
                         </select>

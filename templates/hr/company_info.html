@@ -78,15 +78,15 @@
                         <label for="renewal" class="form-label">Renewal</label>
                         <input type="date" class="form-control" id="renewal" name="renewal" value="{{ company_info.renewal|date:'Y-m-d' }}">
                     </div>
+
                     <div class="col-md-4">
                         <label for="sch_fac_dir" class="form-label">School/Faculty</label>
                         <select id="sch_fac_dir" name="sch_fac_dir" class="form-select">
-                            <option value="" disabled>Select School/Faculty</option>
+                            <option value="" disabled selected>N/A</option>
                             {% if school_faculty %} 
                                 {% for sch_fac in school_faculty %}
                                     <option value="{{ sch_fac.id }}"
-                                    {% if sch_fac.id == selected_sch_fac_id %} selected {% endif %}
-                                    > {{ sch_fac.sch_fac_name }} </option>
+                                    {% if sch_fac.id == company_info.sch_fac_dir_id %} selected {% endif %}> {{ sch_fac.sch_fac_name }} </option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -94,11 +94,11 @@
                     <div class="col-md-4">
                         <label for="dept" class="form-label">Department</label>
                         <select id="dept" name="dept" class="form-select">
-                            <option value="" disabled>Select Department</option>
+                            <option value="" disabled selected>N/A</option>
                             {% if departments %}
                                 {% for dept in departments %}
                                     <option value="{{ dept.id }}"
-                                    {% if dept.id == selected_dept_id %} selected {% endif %}
+                                    {% if dept.id == company_info.dept_id %} selected {% endif %}
                                     > {{ dept.dept_long_name }} </option>
                                 {% endfor %}
                             {% endif %}

@@ -1,7 +1,7 @@
 from django import forms
 from django.forms import ModelForm # type: ignore
 from .models import *
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.contrib.auth.models import User
 
 
@@ -9,14 +9,24 @@ class CSVUploadForm(forms.Form):
     csv_file = forms.FileField(label='Select a CSV file', widget=forms.ClearableFileInput(attrs={'class': 'form-control'}))
         
 class RegistrationForm(UserCreationForm):   
-    staffno = forms.CharField(max_length=50, required=False) 
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
         exclude = ['updated','created']
-
+        # add helpertext to display errors
         
 
+class UserUpdateForm(UserChangeForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+        
 class EmployeeForm(ModelForm):
     class Meta:
         model = Employee

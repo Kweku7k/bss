@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>BSS Login </title>
+  <title>Login </title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -35,28 +35,34 @@
 <body>
 
   <main>
+
+    <!-- Toast for success or error messages -->
+   {% if messages %}
+   <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      {% for message in messages %}
+         <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+            <div class="toast-header text-white bg-{{ message.tags }}">
+               <strong class="me-auto">{{ message.tags|title }}</strong>
+               <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-white">
+               {{ message }}
+            </div>
+         </div>
+      {% endfor %}
+   </div>
+  {% endif %}
     <div class="container">
 
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
         <div class="container">
           <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-              <div>
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="{{ message.tags }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                {% endif %}
-              </div>
-              <div class="justify-content-center py-4">
-                <!-- <a href="index.html" class="logo d-flex align-items-center w-auto">
-                  <img src="../assets/img/logo.png" alt=""> 
-                  <span class="d-none d-lg-block">NiceAdmin</span> </a> -->
-				  
-                <h3>CENTRAL UNIVERSITY</h3>
-				  <h4>Business Support System</h4>
+            <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center">
+              <div class="text-center justify-content-center py-4">
+                <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="100%">
+
+                  {% comment %} <img src="../static/img/Central-Uni-logo.png" width="100%" style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;" class="center" alt=""> {% endcomment %}
+                <h4><b>Human Resource Support System</b></h4>
               </div><!-- End Logo -->
 
               <div class="card mb-3">
@@ -117,6 +123,23 @@
 
   <!-- Template Main JS File -->
   <script src="{% static 'js/main.js' %}"></script>
+
+  <!-- Include Bootstrap JS and Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+   // Wait until the DOM is fully loaded
+   document.addEventListener('DOMContentLoaded', function () {
+      // Loop through and show all the toasts for each message
+      {% for message in messages %}
+         const toastEl{{ forloop.counter }} = document.getElementById('toast{{ forloop.counter }}');
+         if (toastEl{{ forloop.counter }}) {
+            const toast{{ forloop.counter }} = new bootstrap.Toast(toastEl{{ forloop.counter }});
+            toast{{ forloop.counter }}.show();
+         }
+      {% endfor %}
+   });
+</script>
 
 </body>
 

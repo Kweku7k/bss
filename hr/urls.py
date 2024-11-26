@@ -9,6 +9,7 @@ urlpatterns = [
     path('account/2fa/', include(tf_urls, namespace='two_factor')),
     path('register', views.register,name="register"),
     path('logout', views.logoutUser,name="logout"),
+    path('profile', views.user_profile,name="profile"),
     path('search', views.search,name="search"),
     path('newstaff', views.newstaff,name="newstaff"),
     path('allstaff', views.allstaff,name="allstaff"),

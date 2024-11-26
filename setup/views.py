@@ -4,6 +4,7 @@ from .forms import *
 from .choices import STAFFLEVEL
 from setup.models import *
 from django.http import JsonResponse
+from django.contrib import messages
 
 
 
@@ -19,8 +20,14 @@ def add_school(request):
     if request.method == 'POST':
         form = School_FacultyForm(request.POST)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('school')
+            # Check if the school already exists
+            school_name = form.cleaned_data.get('sch_fac_name')
+            if School_Faculty.objects.filter(sch_fac_name=school_name).exists():
+                messages.error(request, f'{school_name} School already exists.')
+                return redirect('add-school')
+            else:
+                form.save()
+                return HttpResponseRedirect('school?submitted=True')
     else:
         form = School_FacultyForm
         if 'submitted' in request.GET:
@@ -60,8 +67,14 @@ def add_title(request):
     if request.method == 'POST':
         form = TitleForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('title')
+            # Check if the title already exists
+            title_name = form.cleaned_data.get('title_name')
+            if Title.objects.filter(title_name=title_name).exists():
+                messages.error(request, f'{title_name} Title already exists.')
+                return redirect('add-title')
+            else:
+                form.save()
+                return HttpResponseRedirect('title?submitted=True')
     else:
         form = TitleForm
         if 'submitted' in request.GET:
@@ -99,8 +112,14 @@ def add_qualification(request):
     if request.method == 'POST':
         form = QualificationForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('qualification')
+            # Check if the qualification already exists
+            qual_name = form.cleaned_data.get('qual_name')
+            if Qualification.objects.filter(qual_name=qual_name).exists():
+                messages.error(request, f'{qual_name} Qualification already exists.')
+                return redirect('add-qualification')
+            else:
+                form.save()
+                return HttpResponseRedirect('qualification?submitted=True')
     else:
         form = QualificationForm
         if 'submitted' in request.GET:
@@ -138,8 +157,13 @@ def add_staffcategory(request):
     if request.method == 'POST':
         form = StaffCategoryForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('staffcategory')
+            category_name = form.cleaned_data.get('category_name')
+            if StaffCategory.objects.filter(category_name=category_name).exists():
+                messages.error(request, f'{category_name} Staff Category already exists.')
+                return redirect('add-staffcategory')
+            else:
+                form.save()
+                return HttpResponseRedirect('staffcategory?submitted=True')
     else:
         form = StaffCategoryForm
         if 'submitted' in request.GET:
@@ -177,8 +201,14 @@ def add_contract(request):
     if request.method == 'POST':
         form = ContractForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('contract')
+            # Check if the contract already exists
+            contract_type = form.cleaned_data.get('contract_type')
+            if Contract.objects.filter(contract_type=contract_type).exists():
+                messages.error(request, f'{contract_type} Contract Type already exists.')
+                return redirect('add-contract')
+            else:
+                form.save()
+                return HttpResponseRedirect('contract?submitted=True')
     else:
         form = ContractForm
         if 'submitted' in request.GET:
@@ -216,8 +246,14 @@ def add_campus(request):
     if request.method == 'POST':
         form = CampusForm(request.POST)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('campus')
+            # Check if the campus already exists
+            campus_name = form.cleaned_data.get('campus_name')
+            if Campus.objects.filter(campus_name=campus_name).exists():
+                messages.error(request, f'{campus_name} Campus already exists.')
+                return redirect('add-campus')
+            else:
+                form.save()
+                return HttpResponseRedirect('campus?submitted=True')
     else:
         form = CampusForm
         if 'submitted' in request.GET:
@@ -257,8 +293,14 @@ def add_directorate(request):
     if request.method == 'POST':
         form = DirectorateForm(request.POST)
         if form.is_valid():
-            form.save()
-            return HttpResponseRedirect('directorate')
+            # Check if the directorate already exists
+            direct_name = form.cleaned_data.get('direct_name')
+            if Directorate.objects.filter(direct_name=direct_name).exists():
+                messages.error(request, f'{direct_name} Directorate already exists.')
+                return redirect('add-directorate')
+            else:
+                form.save()
+                return HttpResponseRedirect('directorate?submitted=True')
     else:
         form = DirectorateForm
         if 'submitted' in request.GET:
@@ -297,8 +339,14 @@ def add_profbody(request):
     if request.method == 'POST':
         form = ProfBodyForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('profbody')
+            # Check if the professional body already exists
+            assoc_long_name = form.cleaned_data.get('assoc_long_name')
+            if ProfBody.objects.filter(assoc_long_name=assoc_long_name).exists():
+                messages.error(request, f'{assoc_long_name} Professional Body already exists.')
+                return redirect('add-profbody')
+            else:
+                form.save()
+                return HttpResponseRedirect('profbody?submitted=True')
     else:
         form = ProfBodyForm
         if 'submitted' in request.GET:
@@ -337,8 +385,15 @@ def add_dept(request):
     if request.method == 'POST':
         form = DepartmentForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('dept')
+            # Check if the department already exists
+            dept_long_name = form.cleaned_data.get('dept_long_name')
+            sch_fac = form.cleaned_data.get('sch_fac')
+            if Department.objects.filter(dept_long_name=dept_long_name, sch_fac=sch_fac).exists():
+                messages.error(request, f'{dept_long_name} Department already exists  for {sch_fac}.')
+                return redirect('add-dept')
+            else:
+                form.save()
+                return HttpResponseRedirect('dept?submitted=True')
     else:
         form = DepartmentForm
         if 'submitted' in request.GET:
@@ -377,8 +432,14 @@ def add_hosp(request):
     if request.method == 'POST':
         form = HospitalForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('hosp')
+            # Check if the hospital already exists
+            hospital_name = form.cleaned_data.get('hospital_name')
+            if Hospital.objects.filter(hospital_name=hospital_name).exists():
+                messages.error(request, f'{hospital_name} Hospital already exists.')
+                return redirect('add-hosp')
+            else:
+                form.save()
+                return HttpResponseRedirect('hosp?submitted=True')
     else:
         form = HospitalForm
         if 'submitted' in request.GET:
@@ -416,8 +477,14 @@ def add_bank(request):
     if request.method == 'POST':
         form = BankForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('bank')
+            # Check if the bank already exists
+            bank_long_name = form.cleaned_data.get('bank_long_name')
+            if Bank.objects.filter(bank_long_name=bank_long_name).exists():
+                messages.error(request, f'{bank_long_name} Bank already exists.')
+                return redirect('add-bank')
+            else:
+                form.save()
+                return HttpResponseRedirect('bank?submitted=True')
     else:
         form = BankForm
         if 'submitted' in request.GET:
@@ -457,8 +524,16 @@ def add_bankbranch(request):
     if request.method == 'POST':
         form = BankBranchForm(request.POST)
         if form.is_valid(): 
-            form.save()
-            return HttpResponseRedirect('bankbranch')
+            # Check if the bank branch already exists
+            branch_name = form.cleaned_data.get('branch_name')
+            bank_code = form.cleaned_data.get('bank_code')
+            
+            if BankBranch.objects.filter(branch_name=branch_name, bank_code=bank_code).exists():
+                messages.error(request, f'{branch_name} Branch already exists for {bank_code} Bank.')
+                return redirect('add-bankbranch')
+            else:            
+                form.save()
+                return HttpResponseRedirect('bankbranch?submitted=True')
     else:
         form = BankBranchForm
         if 'submitted' in request.GET:

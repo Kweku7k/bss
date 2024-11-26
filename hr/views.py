@@ -11,7 +11,8 @@ from django.db import connection # type: ignore
 from django.contrib.auth.decorators import user_passes_test, login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from two_factor.utils import default_device
 import csv
@@ -21,6 +22,8 @@ import logging
 from datetime import datetime, timedelta
 import os
 from django.conf import settings
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 
 
 
@@ -45,16 +48,42 @@ def index(request):
         if user is not None:
             # if user.approval:
             login(request, user)
+            messages.success(request, f"Login  Successful. Welcome Back {user.username}")
             return redirect('landing')
-            # else:
-            #     messages.error(request, 'Account not approved yet.', extra_tags='alert alert-warning')
-            #     return redirect('login')
         else:
-            messages.error(request, 'Invalid login credentials.', extra_tags='alert alert-warning')
+            messages.error(request, "Invalid login credentials." )
             return redirect('login')
     
     return render(request, 'authentication/login.html',{})
 
+def user_profile(request):
+    if request.method == 'POST':
+        form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f"Profile Updated Successful for {username}")
+            return redirect('profile')
+    else:
+        form = UserUpdateForm(instance=request.user)
+
+    context = {'form': form}
+    print(context)
+    return render(request, 'hr/profile.html', context)  
+
+def user_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'hr/password.html', {'form': form})
 
 def register(request):
     form = RegistrationForm()
@@ -62,18 +91,17 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.staffno = form.cleaned_data.get('staffno')
-            user.save()
-
+            form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request, f'Registration successful for {username}', extra_tags='alert alert-success')  
+            messages.success(request, f"Account Creation for {username} has been successful")  
             return redirect('login')
         else:
+            messages.error(request, f" Oops, Error in creating account. {form.errors}")
             print(form.errors)
-            messages.error(request, 'Error in creating account.', extra_tags='alert alert-warning')
+            return redirect('register')
     
     context = {'form': form}
+    print(context)
     return render(request, 'authentication/register.html', context)
 
 
@@ -93,6 +121,7 @@ def landing(request):
     
     today = timezone.now().date()
     expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=30)).order_by('doe')
+    notification_count = expiring_soon.count()
 
     context = {
         'staffs':staffs,
@@ -102,6 +131,7 @@ def landing(request):
         'ative_count':ative_count,
         'leave_count':leave_count,
         'expiring_soon':expiring_soon,
+        'notification_count':notification_count,
     }
     
     return render(request,'hr/landing_page.html', context)
@@ -187,7 +217,7 @@ def edit_staff(request,staffno):
             #    'submitted':submitted,
                'staffs':staffs,
                'staff_count':staff_count,
-               'RBA':RBA,
+               'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
                'STAFFLEVEL':STAFFLEVEL,
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
                'STAFFRANK':STAFFRANK,
@@ -236,19 +266,18 @@ def allstaff(request):
         company_info = CompanyInformation.objects.all()
         staff_school = Staff_School.objects.all()        
         
-        # Filter by staff category
+        #Filter by Staff Category
         if filter_staffcategory:
-            try:
-                # Try to get the StaffCategory instance based on the provided name
-                staff_category = StaffCategory.objects.get(category_name=filter_staffcategory)
-                # Use the StaffCategory instance to filter CompanyInformation
-                company_info = company_info.filter(staff_cat=staff_category)
-                company_staffno = {company.staffno_id for company in company_info}
-                staffs = staffs.filter(staffno__in=company_staffno)
-            except StaffCategory.DoesNotExist:
-                # Handle the case where the StaffCategory is not found
-                staffs = staffs.none()
-
+            company_info = CompanyInformation.objects.filter(staff_cat=filter_staffcategory)
+            company_staffno = {company.staffno_id for company in company_info}
+            staffs = staffs.filter(staffno__in=company_staffno)
+            
+        try:
+            filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
+        except StaffCategory.DoesNotExist:
+            filter_staffcategory_body = None
+        
+        
         # Filter by Contract
         if filter_contract:
             company_info = CompanyInformation.objects.filter(contract=filter_contract)
@@ -292,12 +321,16 @@ def allstaff(request):
             'filter_staffcategory': filter_staffcategory,
             'filter_qualification': filter_qualification,
             'filter_title':filter_title,
+            'filter_contract':filter_contract,
+            'filter_status':filter_status,
+            'filter_gender':filter_gender,
             'company_info': company_info,
             'staff_count': staffs.count(),
             'staffcategory': staffcategory,
             'qualification': qualification,
             'title':title,
             'contract':contract,
+            'filter_staffcategory_body':filter_staffcategory_body,
             'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
             'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
 
@@ -336,7 +369,7 @@ def newstaff(request):
             staff_number = form.cleaned_data['staffno']
             url = reverse('company-info', kwargs={'staffno': str(staff_number)})
             print(url)
-            full_name = f"{staff.fname} {staff.lname}"
+            full_name = f"{staffs.fname} {staffs.lname}"
             messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return HttpResponseRedirect(url)
         else:
@@ -525,7 +558,7 @@ def emp_relation(request,staffno):
                 emp_relation.staffno = staff
                 emp_relation.save()
                 full_name = f"{staff.fname} {staff.lname}"
-                messages.success(request, f"Staff data for {full_name} has been updated successfully")
+                messages.success(request, f"Beneficiaries for {full_name} has been updated successfully")
                 return redirect('emp-relation', staffno)
     else:
         form = KithForm
@@ -576,6 +609,8 @@ def delete_emp_relation(request,emp_id,staffno):
     emp_relation = Kith.objects.get(pk=emp_id)
     if request.method == 'GET':
        emp_relation.delete()
+       messages.success(request, ("Beneficiary deleted successfully"))
+       
     return redirect('emp-relation', staffno)
 
 # END OF EMPLOYEE RELATIONSHIP 

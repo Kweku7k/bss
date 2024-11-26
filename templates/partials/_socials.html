@@ -1,20 +1,24 @@
 <div class="col-lg-6 col-sm-6">
     <div class="card">
         <div class="card-body">
-			<h5 class="pt-3 mb-3 text-primary text-center"><strong>Contracts Expiring Soon</strong></h5>
-            <ol>
+			<h5 class="pt-3 mb-3 text-black text-center"><strong>Contracts Expiring Soon</strong></h5>
+            <div>
                 {% for staff in expiring_soon %}
-				<li>
-					<a href="{% url 'staff-details' staff.staffno.staffno %}">
-						{{ staff.staffno.fname }} {{ staff.staffno.lname }} (Expires on {{ staff.doe }})
-					</a>
-				</li>
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="background-color: #992621; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;"></div>
+                        <a href="{% url 'staff-details' staff.staffno.staffno %}" style="text-decoration: none; color: inherit;">
+                            {{ staff.staffno.fname }} {{ staff.staffno.lname }} (Expires on {{ staff.doe }})
+                        </a>
+                    </div>
                 {% empty %}
                     <li>No contracts expiring within the next month.</li>
                 {% endfor %}
-            </ol>
+
+            </div>
         </div>
     </div>
+
+
 
 	
 </div>

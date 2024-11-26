@@ -78,7 +78,7 @@ class Department(models.Model):
 class BankBranch(models.Model):
     branch_name = models.CharField('Name of Branch',max_length=250,blank=False,null=False)
     bank_code = models.ForeignKey(Bank,on_delete=models.CASCADE,blank=True,null=True)
-    branch_location = models.CharField('Branch Location',max_length=250,blank=False,null=False)
+    branch_location = models.TextField('Branch Location',max_length=300,blank=False,null=False)
     def __str__(self):
         return self.branch_name
 
