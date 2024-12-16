@@ -103,7 +103,7 @@ body {
 /* Sidebar */
 
 
-#sidebar {
+.sidebar {
   grid-area: sidebar;
   height: 100%;
   background-color: #fff;

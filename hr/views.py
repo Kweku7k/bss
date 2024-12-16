@@ -120,7 +120,7 @@ def landing(request):
     leave_count = leave.count()
     
     today = timezone.now().date()
-    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=30)).order_by('doe')
+    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=200)).order_by('doe')
     notification_count = expiring_soon.count()
 
     context = {
@@ -252,7 +252,18 @@ def allstaff(request):
     title = Title.objects.all()
     contract = Contract.objects.all()
     staff_school = Staff_School.objects.all()
+    
+     # Handle GET parameters for filtering
+    get_filtered_staff_by_status = request.GET.get('status')  # Get the status filter from query parameters
+    print(f"Filter Status from GET: {get_filtered_staff_by_status}")
 
+    
+    if get_filtered_staff_by_status:
+        company_info = CompanyInformation.objects.filter(active_status=get_filtered_staff_by_status)
+        company_staffno = {company.staffno_id for company in company_info}
+        staffs = staffs.filter(staffno__in=company_staffno)
+        
+        
     if request.method == 'POST':
         filter_staffcategory = request.POST.get('filter_staffcategory')
         filter_qualification = request.POST.get('filter_qualification')
@@ -333,9 +344,11 @@ def allstaff(request):
             'filter_staffcategory_body':filter_staffcategory_body,
             'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
             'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
+            'get_filtered_staff_by_status': get_filtered_staff_by_status
 
         }
         return render(request, 'hr/allstaff.html', context)
+    
     
     context = {
         'staffs': staffs,
@@ -367,9 +380,11 @@ def newstaff(request):
             print("form was submitted successfully")
             form.save()
             staff_number = form.cleaned_data['staffno']
+            fname = form.cleaned_data['fname']
+            lname = form.cleaned_data['lname']
             url = reverse('company-info', kwargs={'staffno': str(staff_number)})
             print(url)
-            full_name = f"{staffs.fname} {staffs.lname}"
+            full_name = f"{fname} {lname}"
             messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return HttpResponseRedirect(url)
         else:
