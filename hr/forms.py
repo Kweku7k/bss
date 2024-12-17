@@ -129,3 +129,4 @@ class CelebrationForm(ModelForm):
         model = Celebration
         fields = '__all__'
         exclude = ['updated','created']
+    

@@ -1,10 +1,13 @@
 from django.http import HttpResponseRedirect # type: ignore
-from django.shortcuts import redirect, render # type: ignore
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse # type: ignore
 from .forms import *
 from .choices import STAFFLEVEL
 from setup.models import *
 from django.http import JsonResponse
 from django.contrib import messages
+from django.forms import modelform_factory
+
 
 
 
@@ -203,39 +206,49 @@ def add_contract(request):
         if form.is_valid(): 
             # Check if the contract already exists
             contract_type = form.cleaned_data.get('contract_type')
-            if Contract.objects.filter(contract_type=contract_type).exists():
+            if Contract.objects.filter(contract_type__iexact=contract_type).exists():
+
                 messages.error(request, f'{contract_type} Contract Type already exists.')
                 return redirect('add-contract')
             else:
                 form.save()
-                return HttpResponseRedirect('contract?submitted=True')
+                return HttpResponseRedirect(reverse('add-contract') + '?submitted=True')
     else:
-        form = ContractForm
+        form = ContractForm()
         if 'submitted' in request.GET:
             submitted = True
 
     return render(request,'setup/add_contract.html',{'form':form,'submitted':submitted,'contracts':contracts,'contract_count':contract_count})
 
 def delete_contract(request,ct_id):
-    contract = Contract.objects.get(pk=ct_id)
+    contract = get_object_or_404(Contract, pk=ct_id)
     if request.method == 'GET':
-       contract.delete()
+        contract.delete()
+        messages.success(request, 'Contract deleted successfully.')
     return redirect('add-contract')
 
+
 def edit_contract(request, ct_id):
-    contracts = Contract.objects.order_by('-id') 
+    contracts = Contract.objects.order_by('-id')
     contract_count = contracts.count()
-    contract = Contract.objects.get(pk=ct_id)
+    contract = get_object_or_404(Contract, pk=ct_id)
     form = ContractForm(instance=contract)
 
     if request.method == 'POST':
         form = ContractForm(request.POST, instance=contract)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Contract updated successfully.')
             return redirect('add-contract')
 
-    context = {'form':form,'contracts':contracts,'contract_count':contract_count,'contract':contract}
+    context = {
+        'form': form,
+        'contracts': contracts,
+        'contract_count': contract_count,
+        'contract': contract,
+    }
     return render(request, 'setup/add_contract.html', context)
+
 ########### CONTRACT ################
 
 ########### CAMPUS VIEW ################
@@ -603,16 +616,6 @@ def delete_jobtitle(request,jobtitle_id):
        jobtitle.delete()
     return redirect('add-jobtitle')
 
-# def delete_vehicle(request,veh_id,staffno):
-#     vehicle = Vehicle.objects.get(pk=veh_id)
-#     # vehicle = vehicle.coy_name
-#     if request.method == 'POST':
-#        vehicle.delete()
-#        return redirect('vehicle', staffno)
-#     return render(request, 'delete.html',{'obj':vehicle.car_no})
-
-
-
 def edit_jobtitle(request, jobtitle_id):
     jobtitles = JobTitle.objects.order_by('-id') 
     jobtitle_count = jobtitles.count()
@@ -629,3 +632,47 @@ def edit_jobtitle(request, jobtitle_id):
     context = {'form':form,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'jobtitle':jobtitle,'STAFFLEVEL':STAFFLEVEL, 'staffcategorys':staffcategorys}
     return render(request, 'setup/add_jobtitle.html', context)
 ########### END OF STAFF RANK VIEWS ################
+
+########### DYNAMIC CHOICE VIEWS ################
+
+def generic_model_crud(request, model_class, model_name, template_name):
+    # Generic function to handle Add, Edit, and Delete for models with a 'name' field.
+    
+    form_class = modelform_factory(model_class, fields=['name'])  # Dynamically create the form
+    records = model_class.objects.order_by('-id')  # Fetch all records
+    record_count = records.count()  # Count total records
+
+    record = None
+    if 'edit_id' in request.GET:
+        record = get_object_or_404(model_class, id=request.GET['edit_id'])  # Edit record
+
+    if request.method == 'POST':
+        if 'delete_id' in request.POST:  # Handle Delete
+            delete_record = get_object_or_404(model_class, id=request.POST['delete_id'])
+            delete_record.delete()
+            messages.success(request, f"{model_name} has been deleted successfully.")
+            return redirect(request.path)
+
+        form = form_class(request.POST, instance=record)  # Add/Edit Form
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            if not record and model_class.objects.filter(name=name).exists():
+                messages.error(request, f"{model_name} '{name}' already exists.")
+            else:
+                form.save()
+                if record:
+                    messages.success(request, f"{model_name} has been updated successfully.")
+                else:
+                    messages.success(request, f"New {model_name} has been added successfully.")
+                return redirect(request.path)
+    else:
+        form = form_class(instance=record)
+
+    context = {
+        'form': form,
+        'records': records,
+        'record_count': record_count,
+        'model_name': model_name,
+        'record': record,
+    }
+    return render(request, template_name, context)

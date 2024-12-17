@@ -1,5 +1,7 @@
 from django.urls import include, path # type: ignore
 from two_factor.urls import urlpatterns as tf_urls
+from .models import *
+from .forms import *
 
 from . import views
 
@@ -92,4 +94,6 @@ urlpatterns = [
     path('celebration/<str:staffno>', views.celebration,name="celebration"),
     path('edit_celebration/<str:bno>/<str:staffno>', views.edit_celebration,name="edit-celebration"),
     path('delete_celebration/<str:bno>/<str:staffno>', views.delete_celebration,name="delete-celebration"),
+    
+    
 ]

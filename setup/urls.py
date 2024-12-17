@@ -1,5 +1,5 @@
 from django.urls import path # type: ignore
-
+from hr.models import *
 from . import views
 
 urlpatterns = [
@@ -55,4 +55,18 @@ urlpatterns = [
     path('jobtitle', views.add_jobtitle,name="add-jobtitle"),
     path('edit_jobtitle/<int:jobtitle_id>', views.edit_jobtitle,name="edit-jobtitle"),
     path('delete_jobtitle/<int:jobtitle_id>', views.delete_jobtitle,name="delete-jobtitle"),
+    
+    path('choices_hpq/', views.generic_model_crud, {'model_class': ChoicesHPQ, 'model_name': 'Professional Qualifications', 'template_name': 'setup/generic.html'}, name='choices-hpq'),
+    path('choices_region/', views.generic_model_crud, {'model_class': ChoicesRegion, 'model_name': 'Region', 'template_name': 'setup/generic.html'}, name='choices-region'),
+    path('choices_leave_type/', views.generic_model_crud, {'model_class': ChoicesLeaveType, 'model_name': 'Leave Type', 'template_name': 'setup/generic.html'}, name='choices-leave-type'),
+    path('choices_dependants/', views.generic_model_crud, {'model_class': ChoicesDependants, 'model_name': 'Dependants', 'template_name': 'setup/generic.html'}, name='choices-dependants'),
+    path('choices_relation_status/', views.generic_model_crud, {'model_class': ChoicesRelationStatus, 'model_name': 'Relation Status', 'template_name': 'setup/generic.html'}, name='choices-relation-status'),
+    path('choices_suffix/', views.generic_model_crud, {'model_class': ChoicesSuffix, 'model_name': 'Suffix', 'template_name': 'setup/generic.html'}, name='choices-suffix'),
+    path('choices_ethnic_group/', views.generic_model_crud, {'model_class': ChoicesRBA, 'model_name': 'Ethnic Group', 'template_name': 'setup/generic.html'}, name='choices-ethnic-group'),
+    path('choices_gender/', views.generic_model_crud, {'model_class': ChoicesGender, 'model_name': 'Gender', 'template_name': 'setup/generic.html'}, name='choices-gender'),
+    path('choices_marital_status/', views.generic_model_crud, {'model_class': ChoicesMaritalStatus, 'model_name': 'Marital Status', 'template_name': 'setup/generic.html'}, name='choices-marital-status'),
+    path('choices_denomination/', views.generic_model_crud, {'model_class': ChoicesDenomination, 'model_name': 'Denomination', 'template_name': 'setup/generic.html'}, name='choices-denomination'),
+    path('choices_religion', views.generic_model_crud, {'model_class': ChoicesReligion, 'model_name': 'Religion', 'template_name': 'setup/generic.html'}, name='choices-religion'),
+    path('choices_id_type', views.generic_model_crud, {'model_class': ChoicesIdType, 'model_name': 'ID Type', 'template_name': 'setup/generic.html'}, name='choices-id-type'),
+    path('choices_staff_status', views.generic_model_crud, {'model_class': ChoicesStaffStatus, 'model_name': 'Staff Status', 'template_name': 'setup/generic.html'}, name='choices-staff-status'),
 ]

@@ -1,5 +1,6 @@
 from django.forms import ModelForm # type: ignore
 from .models import *
+from hr.models import *
 
 
 class SchoolForm(ModelForm):

@@ -461,6 +461,8 @@ def company_info(request,staffno):
     directorate = Directorate.objects.all()
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
+    dept = Department.objects.all()
+    
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES)
@@ -501,6 +503,7 @@ def company_info(request,staffno):
                'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
                'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
+               'dept':dept,
             }
     return render(request,'hr/company_info.html',context)
 
