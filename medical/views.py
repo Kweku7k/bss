@@ -78,3 +78,58 @@ def delete_medical_entitlement(request, me_id):
     if request.method == 'GET':
         medical_entitlement.delete()
     return redirect('medical-entitlement')
+
+
+############## Mediacl Report ###################
+def medical_report(request):
+    staff_categories = StaffCategory.objects.all()
+    academic_years = AcademicYear.objects.all()
+    medical_transactions = Medical.objects.all()
+    hospitals = Hospital.objects.all()
+    
+    filter_staffcategory = request.GET.get('filter_staffcategory')
+    selected_academic_year = request.GET.get('academic_year')
+    filter_by_hospital = request.GET.get('filter_by_hospital')
+    filter_by_month = request.GET.get('filter_by_month') 
+
+
+    # Apply filters based on user input
+    if filter_staffcategory:
+        medical_transactions = medical_transactions.filter(staff_cat=filter_staffcategory)
+    
+    if selected_academic_year:
+        medical_transactions = medical_transactions.filter(academic_year=selected_academic_year)
+    
+    if filter_by_hospital:
+        medical_transactions = medical_transactions.filter(hospital_code=filter_by_hospital)
+        
+    # Apply month filter if provided
+    if filter_by_month:
+        try:
+            # Ensure filter_by_month is a valid integer for month (1-12)
+            filter_by_month = int(filter_by_month)
+            medical_transactions = medical_transactions.filter(date_attended__month=filter_by_month)
+        except ValueError:
+            # If not a valid month, you could set an error or handle gracefully
+            medical_transactions = medical_transactions.none()
+        
+    try:
+        filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
+    except StaffCategory.DoesNotExist:
+        filter_staffcategory_body = None
+
+    context = {
+        'medical_transactions': medical_transactions,
+        'staff_categories': staff_categories,
+        'filter_staffcategory': filter_staffcategory,
+        'filter_staffcategory_body': filter_staffcategory_body,
+        'selected_academic_year': selected_academic_year,
+        'academic_years': academic_years,
+        'filter_by_hospital': filter_by_hospital,
+        'hospitals': hospitals,
+        'filter_by_month': filter_by_month,
+    }
+    
+    pprint.pprint(context)
+    
+    return render(request, 'medical/medical_report.html', context)

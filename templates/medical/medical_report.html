@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="row col-12 p-1">
+    <div class="card pt-1 mx-3">
+        <div class="card-header ">
+            <h5><strong>Number of Staff: {{ staff_count }}</strong></h5>
+
+            
+        </div>
+
+        <div class="card-body mb-3">
+            <form method="GET" action="{% url 'medical-report' %}">
+                <div class="mb-1">
+                    <label class="form-label" style="font-weight:bold;">Filter by:</label>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-3">
+                        <label for="filter_staffcategory">Staff Category</label>
+                        <select id="filter_staffcategory" name="filter_staffcategory" class="form-control">
+                            <option selected="true" disabled> {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}</option>
+                            {% for sc in staff_categories %}
+                                <option value="{{ sc.id }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
+                                    {{ sc.category_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="filter_by_hospital">Hospital</label>
+                        <select id="filter_by_hospital" name="filter_by_hospital" class="form-control">
+                            <option selected="true" disabled> {% if filter_by_hospital %} {{ filter_by_hospital }} {% else %} Select {% endif %}</option>
+                            {% for hos in hospitals %}
+                                <option value="{{ hos }}" {% if hos.hospital_name == filter_by_hospital %} selected {% endif %}>
+                                    {{ hos.hospital_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="academic_year">Academic Year</label>
+                        <select id="academic_year" name="academic_year" class="form-control">
+                            <option selected="true" disabled> {% if selected_academic_year %} {{ selected_academic_year }} {% else %} Select {% endif %}</option>
+                            {% for year in academic_years %}
+                                <option value="{{ year }}" {% if year.academic_year == selected_academic_year %} selected {% endif %}>
+                                    {{ year.academic_year }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="filter_by_month">Month</label>
+                        <select name="filter_by_month" id="filter_by_month" class="form-control">
+                            <option value="">Select</option>
+                            <option value="1" {% if filter_by_month == '1' %}selected{% endif %}>January</option>
+                            <option value="2" {% if filter_by_month == '2' %}selected{% endif %}>February</option>
+                            <option value="3" {% if filter_by_month == '3' %}selected{% endif %}>March</option>
+                            <option value="4" {% if filter_by_month == '4' %}selected{% endif %}>April</option>
+                            <option value="5" {% if filter_by_month == '5' %}selected{% endif %}>May</option>
+                            <option value="6" {% if filter_by_month == '6' %}selected{% endif %}>June</option>
+                            <option value="7" {% if filter_by_month == '7' %}selected{% endif %}>July</option>
+                            <option value="8" {% if filter_by_month == '8' %}selected{% endif %}>August</option>
+                            <option value="9" {% if filter_by_month == '9' %}selected{% endif %}>September</option>
+                            <option value="10" {% if filter_by_month == '10' %}selected{% endif %}>October</option>
+                            <option value="11" {% if filter_by_month == '11' %}selected{% endif %}>November</option>
+                            <option value="12" {% if filter_by_month == '12' %}selected{% endif %}>December</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4 mt-4">
+                        <button type="submit" class="btn btn-info">Filter</button>
+                        <a class="btn btn-secondary" href="{% url 'medical-report' %}">Reset</a>
+                        <button  onclick="window.print()" class="btn btn-outline-primary">Print</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="card-body">
+            <table class="table table-striped mt-5">
+                <thead>
+                    <tr>
+                        <th>Staff</th>
+                        <th>Patient</th>
+                        <th>Staff Category</th>
+                        <th>Hospital</th>
+                        <th>Cost </th>
+                        <th>Date Attended</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in medical_transactions %}
+                        <tr class="clickable-row" onclick="window.location='{% url 'medical-transaction' transaction.staffno.staffno %}'">
+                            <td>{{ transaction.staffno.title }} {{ transaction.staffno.fname }} {{ transaction.staffno.lname }} {{ transaction.staffno.middlenames }}</td>
+                            <td>{{ transaction.patient_name }}</td>
+                            <td>{{ transaction.staff_cat }}</td>
+                            <td>{{ transaction.hospital_code }}</td>
+                            <td>{{ transaction.treatment_cost }}</td>
+                            <td>{{ transaction.date_attended }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6">No medical transactions found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
