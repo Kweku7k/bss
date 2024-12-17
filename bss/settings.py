@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'two_factor',
     'django_otp.plugins.otp_email',
     'qrcode',
+    'medical.apps.MedicalConfig',
 ]
 
 MIDDLEWARE = [

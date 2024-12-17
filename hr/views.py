@@ -5,6 +5,7 @@ from django.urls import reverse # type: ignore
 from .models import *
 from setup.models import *
 from leave.models import *
+from medical.models import *
 from django.db.models import Q
 from .forms import *
 from django.db import connection # type: ignore
@@ -120,7 +121,7 @@ def landing(request):
     leave_count = leave.count()
     
     today = timezone.now().date()
-    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=200)).order_by('doe')
+    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
     notification_count = expiring_soon.count()
 
     context = {
@@ -197,6 +198,7 @@ def staff_details(request, staffno):
     return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
 def edit_staff(request,staffno):
+    submitted = False
     staffs = Employee.objects.order_by('lname').filter() 
     staff_count = staffs.count()
     title = Title.objects.all()
@@ -207,14 +209,24 @@ def edit_staff(request,staffno):
     if request.method == 'POST':
         # form = EmployeeForm(request.POST, instance=staff)
         if form.is_valid():
+            fname = form.cleaned_data['fname']
+            lname = form.cleaned_data['lname']
+            
+            print("Form was submitted successfully")
             form.save()
-            full_name = f"{staff.fname} {staff.lname}"
+            full_name = f"{fname} {lname}"
             messages.success(request, f"Staff data for {full_name} has been updated successfully")
             return redirect('staff-details', staffno)
-        
+        else:
+            print(form.errors)
+            messages.error(request, "Form submission failed. Please check the form for errors.")
+    else:
+        form = EmployeeForm
+        if 'submitted' in request.GET:
+            submitted = True   
     context = {
                 'form':form,
-            #    'submitted':submitted,
+               'submitted':submitted,
                'staffs':staffs,
                'staff_count':staff_count,
                'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
@@ -372,24 +384,33 @@ def newstaff(request):
     qualification = Qualification.objects.all()
     staffcategory = StaffCategory.objects.all()
     staff_count = staffs.count()
+    
+    
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
-        # print(form)
-        print("form has been recieved")
-        if form.is_valid(): 
-            print("form was submitted successfully")
-            form.save()
+        print("Form has been received")
+
+        if form.is_valid():
             staff_number = form.cleaned_data['staffno']
             fname = form.cleaned_data['fname']
             lname = form.cleaned_data['lname']
-            url = reverse('company-info', kwargs={'staffno': str(staff_number)})
-            print(url)
-            full_name = f"{fname} {lname}"
-            messages.success(request, f"Staff data for {full_name} has been updated successfully")
-            return HttpResponseRedirect(url)
+
+            # Check if staffno already exists
+            if Employee.objects.filter(staffno=staff_number).exists():
+                full_name = f"{fname} {lname}"
+                messages.error(request, f"Staff number {staff_number} for {full_name} already exists. Please use another unique staff number.")
+                print(f"Staff number {staff_number} already exists")
+            else:
+                print("Form was submitted successfully")
+                form.save()
+                url = reverse('company-info', kwargs={'staffno': str(staff_number)})
+                full_name = f"{fname} {lname}"
+                messages.success(request, f"The details for staff member {full_name} have been successfully created in the system")
+                print(url)
+                return HttpResponseRedirect(url)
         else:
-            print("form.errors")
             print(form.errors)
+            messages.error(request, "Form submission failed. Please check the form for errors.")
     else:
         form = EmployeeForm
         if 'submitted' in request.GET:
@@ -897,7 +918,8 @@ def leave_transaction(request, staffno):
         return redirect('leave-entitlement')
 
     remaining_days = leave_entitlement.get_remaining_days(staff)
-        
+    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
+
     if request.method == 'POST':
         print("Form submitted")
         form = LeaveTransactionForm(request.POST)
@@ -913,13 +935,14 @@ def leave_transaction(request, staffno):
                 leave_transaction.academic_year = academic_year
                 leave_transaction.save()
                 
-                messages.success(request, 'Leave transaction created successfully.')
+                messages.success(request, f'Leave transaction created successfully for {staff_fullname}.')
                 return redirect('leave-transaction', staffno=staffno)
             else:
-                messages.error(request, 'Not enough leave entitlement remaining.')
+                messages.error(request, 'Insufficient leave balance to process this request. Please review the leave days entered')
         else:
             print(form.errors)
-
+            messages.error(request, 'Form is not valid. Please check the entered data.')
+            return redirect('leave-transaction', staffno=staffno)
     else:
         form = LeaveTransactionForm()
         if 'submitted' in request.GET:
@@ -931,6 +954,7 @@ def leave_transaction(request, staffno):
         'leave_entitlement': leave_entitlement,
         'leave_transactions': leave_transactions,
         'form': form,
+        'submitted': submitted,
         'company_info': company_info,
         'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
         'leave_trans_count':leave_trans_count,
@@ -948,6 +972,7 @@ def edit_leave_transaction(request, staffno, lt_id):
     
     # Calculate the remaining leave days
     remaining_days = leave_entitlement.get_remaining_days(staff)
+    remaining_days += leave_transaction.days_taken
     form = LeaveTransactionForm(request.POST or None, instance=leave_transaction)
     staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
     if request.method == 'POST':
@@ -956,10 +981,10 @@ def edit_leave_transaction(request, staffno, lt_id):
             
             if remaining_days >= days_taken:
                 form.save()
-                messages.success(request, 'Leave transaction updated successfully.')
+                messages.success(request, f'Leave transaction updated successfully for {staff_fullname}.')
                 return redirect('leave-transaction', staffno=staffno)
             else:
-                messages.error(request, f'Not enough leave entitlement remaining for {staff_fullname}.')
+                messages.error(request, 'Insufficient leave balance to process this request. Please review the leave days entered')
     
     context = {
         'staff': staff,
@@ -976,6 +1001,113 @@ def edit_leave_transaction(request, staffno, lt_id):
 
     return render(request, 'hr/leave.html', context)
 
+
+
+######################################################################
+### Staff Medical views
+######################################################################
+def medical_transaction(request, staffno):
+    submitted = False
+    staff = get_object_or_404(Employee, pk=staffno)
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)
+    medical_entitlement = MedicalEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
+    medical_transactions = Medical.objects.filter(staffno__exact=staffno)
+    medical_trans_count = medical_transactions.count()
+    academic_years = AcademicYear.objects.all()
+    hospitals = Hospital.objects.all()
+
+    
+    if not medical_entitlement:
+        messages.error(request, 'No medical entitlement found for this staff category.')
+        return redirect('medical-entitlement')
+    
+    remaining_amount = medical_entitlement.get_remaining_amount(staff)
+    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
+    
+    if request.method == 'POST':
+        form = MedicalTransactionForm(request.POST)
+        if form.is_valid():
+            treatment_cost = int(form.cleaned_data['treatment_cost'])
+            academic_year = form.cleaned_data['academic_year']
+
+            medical_transaction = form.save(commit=False)
+            medical_transaction.staffno = staff
+            medical_transaction.staff_cat_id = request.POST.get('staff_cat')
+            
+            if remaining_amount >= treatment_cost:
+                medical_transaction.academic_year = academic_year
+                medical_transaction.save()
+
+                messages.success(request, f'Medical transaction created successfully  {staff_fullname}.')
+                return redirect('medical-transaction', staffno=staffno)
+            else:
+                messages.error(request, 'Insufficient Medical balance to process this request. Please review the treatment cost entered')
+        else:
+            print(form.errors)
+            messages.error(request, 'Form is not valid. Please check the entered data.')
+            return redirect('medical-transaction', staffno=staffno)
+    else:
+        form = MedicalTransactionForm()
+        if 'submitted' in request.GET:
+            submitted = True
+            
+    context = {
+               'form':form,
+               'staff':staff,
+               'submitted':submitted,
+               'medical_entitlement':medical_entitlement,
+               'medical_transactions':medical_transactions,
+               'remaining_amount':remaining_amount,
+               'medical_trans_count':medical_trans_count,
+               'company_info':company_info,
+               'academic_years':academic_years,
+               'hospitals':hospitals,
+                'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+
+            }
+    return render(request, 'hr/medical.html', context)
+
+
+def edit_medical_transaction(request, staffno, med_id):
+    staff = get_object_or_404(Employee, pk=staffno)
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)
+    academic_years = AcademicYear.objects.all()
+    medical_transactions = Medical.objects.filter(staffno__exact=staffno)
+    medical_transaction = get_object_or_404(Medical, pk=med_id)
+    medical_entitlement = MedicalEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
+    hospitals = Hospital.objects.all()
+
+    # Calculate the remaining Medical Balance
+    remaining_amount = medical_entitlement.get_remaining_amount(staff)
+    remaining_amount += medical_transaction.treatment_cost
+    form = MedicalTransactionForm(request.POST or None, instance=medical_transaction)
+    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
+    if request.method == 'POST':
+        if form.is_valid():
+            treatment_cost = int(form.cleaned_data['treatment_cost'])
+
+            if remaining_amount >= treatment_cost:
+                form.save()
+                messages.success(request, f'Medical transaction updated successfully for {staff_fullname}.')
+                return redirect('medical-transaction', staffno=staffno)
+            else:
+                messages.error(request, 'Insufficient Medical balance to process this request. Please review the treatment cost entered')
+
+    context = {
+        'staff': staff,
+        'staff_cat': company_info.staff_cat,
+        'medical_transactions': medical_transactions,
+        'medical_transaction': medical_transaction,
+        'form': form,
+        'company_info': company_info,
+        'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
+        'academic_years': academic_years,
+        'medical_entitlement': medical_entitlement,
+        'remaining_amount': remaining_amount,
+        'hospitals': hospitals,
+    }
+
+    return render(request, 'hr/medical.html', context)
 
 ######################################################################
 ### Staff education views

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Medical Entitlements</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                
+                    <div class="form-group">
+                        <label for="staff_cat" class="col-form-label">Staff Category</label>
+                        <select name="staff_cat" class="form-select" required> 
+                          <option selected="true" disabled="disabled">--Select--</option>
+                            {% if staffcategorys %}
+                                {% for cat in staffcategorys %}
+                                    <option value="{{ cat.id }}" {% if leave_ent.staff_cat_id == cat.id %} selected {% endif %}>{{ cat.category_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                      </select>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="entitlement" class="col-form-label">Medical Entitlement (Amount)</label>
+                        <input type="text" placeholder="example 3000" name="entitlement" class="form-control" {% if leave_ent %} value="{{ leave_ent.entitlement }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="academic_year" class="col-form-label">Academic Year</label>
+                        <select name="academic_year" class="form-select" required> 
+                          <option selected="true" disabled="disabled">--Select--</option>
+                            {% if academic_years %}
+                                {% for year in academic_years %}
+                                    <option value="{{ year.id }}" {% if leave_ent.academic_year_id == year.id %} selected {% endif %}>{{ year.academic_year }}</option>
+                                {% endfor %}
+                            {% endif %}
+                      </select>
+                    </div>
+                    
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'leave-entitlement' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-lg">
+            <div class="card-header text-center">
+                <h5><strong>Number of Medical Entitlements: {{ medical_entitlement_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if medical_entitlements %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Staff Category</th>
+                        <th>Entitlement</th>
+                        <th>Academic year</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for entitlements in medical_entitlements %}
+                    <tr>
+                      <td>{{ entitlements.staff_cat }}</td>
+                        <td>₵{{ entitlements.entitlement }}</td>
+                        <td>{{ entitlements.academic_year }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-medical-entitlement' entitlements.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-medical-entitlement' entitlements.id %}" onclick="return confirm('Do you really want to delete the data for {{ entitlements.staff_cat }} Medical Entitlement?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add Medical Entitlement</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

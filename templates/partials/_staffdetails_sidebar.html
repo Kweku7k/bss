@@ -48,29 +48,16 @@
           <li class="nav-item">
             <a class="nav-link collapsed" href="{% url 'leave-transaction' staff.staffno %}">
               <i class="bi bi-circle"></i>
-              <span>Leave Entitlement</span>
+              <span>Leave History</span>
             </a>
           </li> 
-          
-          
-          {% comment %} <a href="{% url 'company-info' staff.staffno %}"> Company Information</a> <br />
-          <a href="{% url 'staff-education' staff.staffno %}"> Education</a> <br />
-          <a href="{% url 'prev-work' staff.staffno %}"> Prev. Employment</a> <br />
-          <a href="{% url 'dependants' staff.staffno %}"> Dependants</a> <br />
-          <a href="{% url 'res-address' staff.staffno %}"> Res. Address</a> <br />
-          <a href="{% url 'post-address' staff.staffno %}"> Postal Address</a> <br />
-          <a href="{% url 'staffbank' staff.staffno %}"> Bank Details</a> <br />
-          <a href="{% url 'promotion' staff.staffno %}"> Job Description</a> <br />
-          <a href="{% url 'transfer' staff.staffno %}"> Job Location</a> <br />
-          <a href="{% url 'vehicle' staff.staffno %}"> Vehicle</a> <br />
-          <a href="{% url 'bereavement' staff.staffno %}">Bereavement</a><br />
-          <a href="{% url 'marriage' staff.staffno %}">Marriage</a><br />
-          <a href="{% url 'christening' staff.staffno %}">Christening</a><br />
-          <a href="{% url 'celebration' staff.staffno %}">Celebration</a><br />
-          <a href="{% url 'bereavement' staff.staffno %}">Medical Expenses</a> {% endcomment %}
-          
-          <!-- <hr> -->
-          {% comment %} <a href="{% url 'edit-staff' staff.staffno %}">Finish</a> {% endcomment %}
+
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'medical-transaction' staff.staffno %}">
+              <i class="bi bi-circle"></i>
+              <span>Medical History</span>
+            </a>
+          </li> 
         </ul>
         <div class="">
          <a href="{% url 'allstaff' %}" class="btn btn-success">Done</a>

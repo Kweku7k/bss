@@ -24,6 +24,7 @@ urlpatterns = [
     path('leave/', include('leave.urls')),
     path('setup/', include('setup.urls')),
     path('admin/', admin.site.urls),
+    path('medical/', include('medical.urls')),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

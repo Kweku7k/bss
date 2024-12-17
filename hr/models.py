@@ -243,14 +243,16 @@ class Staff_Leave(models.Model):
     
     
 class Medical(models.Model):
-    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
-    hospital_code = models.ForeignKey(Hospital,blank=False,null=False,on_delete=models.CASCADE)
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
+    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.CASCADE, blank=True, null=True)
+    hospital_code = models.CharField('Hospital', max_length=100, blank=True, null=True)
+    academic_year = models.CharField('AcademicYear', max_length=20, blank=True, null=True)
     date_attended = models.DateField()
-    complaint = models.CharField(max_length=100,blank=True,null=True)
-    patient_name = models.CharField(max_length=100,blank=False,null=False)
-    relationship = models.CharField(max_length=120) # Select from Self, Spouse, Child
-    treatment_cost = models.IntegerField()
-    quota_balance = models.IntegerField()
+    complaint = models.TextField(max_length=300,blank=True,null=True)
+    patient_name = models.CharField(max_length=100,blank=True,null=True)
+    relationship = models.CharField(max_length=20, blank=True, null=True) # Select from Self, Spouse, Child
+    treatment_cost = models.DecimalField(max_digits=10, decimal_places=3)
+    other = models.CharField(max_length=100, blank=True, null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 

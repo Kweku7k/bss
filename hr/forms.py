@@ -51,6 +51,12 @@ class LeaveTransactionForm(ModelForm):
         model = Staff_Leave
         fields = '__all__'
         exclude = ['updated','created']
+        
+class MedicalTransactionForm(ModelForm):
+    class Meta:
+        model = Medical
+        fields = '__all__'
+        exclude = ['updated','created']
 
 class StaffCompanyForm(ModelForm):
     class Meta:

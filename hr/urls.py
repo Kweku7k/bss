@@ -38,6 +38,9 @@ urlpatterns = [
     path('leave_transaction/<str:staffno>', views.leave_transaction, name="leave-transaction"),
     path('edit_leave_transaction/<str:lt_id>/<str:staffno>', views.edit_leave_transaction,name="edit-leave-transaction"),
     
+    path('medical_transaction/<str:staffno>', views.medical_transaction, name="medical-transaction"),
+    path('edit_medical_transaction/<str:med_id>/<str:staffno>', views.edit_medical_transaction, name="edit-medical-transaction"),
+    
     path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),
     path('delete_staff_education/<str:sch_id>/<str:staffno>', views.delete_staff_education,name="delete-staff-education"),

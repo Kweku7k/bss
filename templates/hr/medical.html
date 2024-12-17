@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div>
+                <h5 class="my-3 text-primary"><strong>Medical Details for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+            </div>
+
+            <h5><b>Medical Entitlement</b></h5>
+
+            <!-- Display leave entitlement -->
+            <div class="mb-5">
+                <div class="col-lg-6 col-md-12 mb-2">
+                    <div class="card p-3">
+                        <p><strong>Staff Category:</strong> {{ company_info.staff_cat }}</p>
+                        <p><strong>Entitled Days:</strong> {{ medical_entitlement.entitlement }}</p>
+                        <p><strong>Remaining Medical Balance:</strong> ₵{{ remaining_amount }}</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <h5><b>Medical transactions {{medical_trans_count}}</b></h5>
+
+            <!-- Check if there are any medical transactions -->
+            {% if medical_transactions %}
+                <table class="table table-striped mb-5">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Hospital</th>
+                            <th>Date</th>
+                            <th>Cost</th>
+                            <th>Academic Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for transaction in medical_transactions %}
+                        <tr>
+                            <td>{{ transaction.patient_name }}</td>
+                            <td>{{ transaction.hospital_code }}</td>
+                            <td>{{ transaction.date_attended }}</td>
+                            <td>{{ transaction.treatment_cost }}</td>
+                            <td>{{ transaction.academic_year }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-medical-transaction' transaction.id staff.staffno %}"></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No medical transactions for this staff.</p>
+            {% endif %}
+
+
+            <!-- Medical Request Form -->
+            <h5><b>Medical Request</b></h5>
+            <form action="" method="POST" enctype="multipart/form-data"> 
+                {% csrf_token %}
+                <div class="row g-3 mb-4">
+                    {% comment %} <div class="col-md-4">
+                        <label for="staffno" class="form-label">Staff Number</label>
+                        </div> {% endcomment %}
+                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+                    {% comment %} <div class="col-md-4">
+                        <label for="staff_cat" class="form-label">Staff Category</label>
+                    </div> {% endcomment %}
+                    <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden>
+
+                    <div class="col-md-4">
+                        <label for="patient_name" class="form-label">Patient Name</label>
+                        <input type="text" class="form-control" name="patient_name" {% if medical_transaction %} value="{{ medical_transaction.patient_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="relationship" class="form-label">Relationship</label>
+                        <select name="relationship" class="form-select">
+                            <option value="" disabled selected>Type</option>
+                            {% for key, value in RELATIONSHIP %}
+                            <option value="{{ key }}" {% if key == medical_transaction.relationship %} selected {% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="hospital_code">Hospital</label>
+                        <select name="hospital_code" id="hospital_code" class="form-select" required>
+                            <option selected="true" disabled="disabled">-----Select------</option>
+                            {% for hos in hospitals %}
+                            <option value="{{ hos }}" {% if hos.hospital_name == medical_transaction.hospital_code %} selected{% endif %} >{{ hos }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="date_attended" class="form-label">Date Attended</label>
+                        <input type="date" class="form-control" name="date_attended" {% if medical_transaction %} value="{{ medical_transaction.date_attended|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="academic_year">Academic Year</label>
+                        <select name="academic_year" id="academic_year" class="form-select" required>
+                            <option selected="true" disabled="disabled">-----Select------</option>
+                            {% for year in academic_years %}
+                            <option value="{{ year }}" {% if year.academic_year == medical_transaction.academic_year %} selected{% endif %} >{{ year }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="treatment_cost" class="form-label">Cost (₵)</label>
+                        <input type="text" class="form-control" placeholder="example 300" name="treatment_cost" {% if medical_transaction %} value="{{ medical_transaction.treatment_cost }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label for="complaint" class="form-label">Prescription</label>
+                        <textarea name="complaint" class="form-control">{% if medical_transaction %}{{ medical_transaction.complaint }}{% endif %}</textarea>
+                    </div>        
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-info me-2">Add</button>
+                    <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock %}

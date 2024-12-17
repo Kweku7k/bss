@@ -5,8 +5,11 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
-            <div>
-                <h5 class="my-3 text-primary"><strong>Leave Details for {{ staff.fname }} {{ staff.lname }}</strong></h5>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <h5 class="my-3 text-primary"><strong>Leave Details for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                {% if staff.staff_pix %}
+                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                {% endif %}
             </div>
 
             <h5><b>Leave Entitlement</b></h5>
@@ -17,7 +20,7 @@
                     <div class="card p-3">
                         <p><strong>Staff Category:</strong> {{ company_info.staff_cat }}</p>
                         <p><strong>Entitled Days:</strong> {{ leave_entitlement.entitlement }}</p>
-                        <p><strong>Remaining Entitlement Days:</strong> {{ remaining_days }}</p>
+                        <p><strong>Remaining Leave Balance:</strong> {{ remaining_days }}</p>
                     </div>
                 </div>
             </div>
@@ -64,16 +67,17 @@
             <form action="" method="POST" enctype="multipart/form-data"> 
                 {% csrf_token %}
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4">
+                    {% comment %} <div class="col-md-4">
                         <label for="staffno" class="form-label">Staff Number</label>
-                        <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly>
-                    </div>
+                    </div> {% endcomment %}
+                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
-                    <div class="col-md-4">
+                    {% comment %} <div class="col-md-4">
                         <label for="staff_cat" class="form-label">Staff Category</label>
-                        <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}" readonly>
                         <input type="hidden" name="staff_cat" value="{{ company_info.staff_cat.id }}">
-                    </div>
+                    </div> {% endcomment %}
+                    <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden>
+
                     <div class="col-md-4">
                         <label class="form-label" for="academic_year">Academic Year</label>
                         <select name="academic_year" id="academic_year" class="form-select" required>
