@@ -58,6 +58,13 @@
               <span>Medical History</span>
             </a>
           </li> 
+
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'medical-transaction' staff.staffno %}">
+              <i class="bi bi-circle"></i>
+              <span>Renewal History</span>
+            </a>
+          </li> 
         </ul>
         <div class="">
          <a href="{% url 'allstaff' %}" class="btn btn-success">Done</a>
