@@ -33,8 +33,8 @@
                             <option value="" disabled selected>N/A</option>
                             {% if staffcategory %} 
                                 {% for sc in staffcategory %}
-                                    <option value="{{ sc.id }}"
-                                    {% if sc.id == company_info.staff_cat_id %} selected {% endif %}
+                                    <option value="{{ sc.category_name }}"
+                                    {% if sc.category_name == company_info.staff_cat %} selected {% endif %}
                                     
                                     > {{ sc.category_name }} </option>
                                 {% endfor %}
@@ -47,8 +47,8 @@
                             <option value="" disabled selected>N/A</option>
                             {% if contract %} 
                                 {% for ct in contract %}
-                                    <option value="{{ ct.id }}"
-                                    {% if ct.id == company_info.contract_id %} selected {% endif %}
+                                    <option value="{{ ct.contract_type }}"
+                                    {% if ct.contract_type == company_info.contract %} selected {% endif %}
                                     
                                     > {{ ct.contract_type }} </option>
                                 {% endfor %}

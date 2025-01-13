@@ -10,10 +10,6 @@ urlpatterns = [
     path('edit_leave_entitlement/<int:le_id>', views.edit_leave_entitlement, name="edit-leave-entitlement"),
     path('delete_leave_entitlement/<int:le_id>', views.delete_leave_entitlement, name="delete-leave-entitlement"),
     
-    path('leave_academic_year', views.leave_academic_year, name="leave-academic-year"),
-    path('edit_leave_academic_year/<int:ay_id>', views.edit_leave_academic_year, name="edit-leave-academic-year"),
-    path('delete_leave_academic_year/<int:ay_id>', views.delete_leave_academic_year, name="delete-leave-academic-year"),
-    
     path('leave_report/', views.leave_report, name='leave-report'),
     path('general_leave_request/', views.general_leave_request, name='general-leave-request'),
     path('get_staff_details/<str:staffno>/', views.get_staff_details, name='get-staff-details'),

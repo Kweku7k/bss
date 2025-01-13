@@ -63,7 +63,7 @@ def edit_medical_entitlement(request, me_id):
             academic_year = form.cleaned_data.get('academic_year')
 
             # Check if another medical entitlement with the same staff category and academic year exists
-            if MedicalEntitlement.objects.filter(staff_cat_id=staff_category, academic_year=academic_year).exclude(pk=me_id).exists():
+            if MedicalEntitlement.objects.filter(staff_cat=staff_category, academic_year=academic_year).exclude(pk=me_id).exists():
                 messages.error(request, 'Medical entitlement already exists for the selected staff category and academic year.')
             else:
                 # Save the changes if no conflict
@@ -112,17 +112,12 @@ def medical_report(request):
         except ValueError:
             # If not a valid month, you could set an error or handle gracefully
             medical_transactions = medical_transactions.none()
-        
-    try:
-        filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
-    except StaffCategory.DoesNotExist:
-        filter_staffcategory_body = None
+
 
     context = {
         'medical_transactions': medical_transactions,
         'staff_categories': staff_categories,
         'filter_staffcategory': filter_staffcategory,
-        'filter_staffcategory_body': filter_staffcategory_body,
         'selected_academic_year': selected_academic_year,
         'academic_years': academic_years,
         'filter_by_hospital': filter_by_hospital,

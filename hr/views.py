@@ -266,14 +266,17 @@ def allstaff(request):
     staff_school = Staff_School.objects.all()
     
      # Handle GET parameters for filtering
-    get_filtered_staff_by_status = request.GET.get('status')  # Get the status filter from query parameters
-    print(f"Filter Status from GET: {get_filtered_staff_by_status}")
+    # get_filtered_staff_by_status = request.GET.get('status')  # Get the status filter from query parameters
+    # print(f"Filter Status from GET: {get_filtered_staff_by_status}")
+    
+    # Build query parameters dynamically
+    filters = Q()
 
     
-    if get_filtered_staff_by_status:
-        company_info = CompanyInformation.objects.filter(active_status=get_filtered_staff_by_status)
-        company_staffno = {company.staffno_id for company in company_info}
-        staffs = staffs.filter(staffno__in=company_staffno)
+    # if get_filtered_staff_by_status:
+    #     company_info = CompanyInformation.objects.filter(active_status=get_filtered_staff_by_status)
+    #     company_staffno = {company.staffno_id for company in company_info}
+    #     staffs = staffs.filter(staffno__in=company_staffno)
         
         
     if request.method == 'POST':
@@ -291,52 +294,62 @@ def allstaff(request):
         
         #Filter by Staff Category
         if filter_staffcategory:
-            company_info = CompanyInformation.objects.filter(staff_cat=filter_staffcategory)
-            company_staffno = {company.staffno_id for company in company_info}
-            staffs = staffs.filter(staffno__in=company_staffno)
+            # company_info = CompanyInformation.objects.filter(staff_cat=filter_staffcategory)
+            # company_staffno = {company.staffno_id for company in company_info}
+            filters &= Q(companyinformation__staff_cat=filter_staffcategory)
             
-        try:
-            filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
-        except StaffCategory.DoesNotExist:
-            filter_staffcategory_body = None
+        # try:
+        #     filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
+        # except StaffCategory.DoesNotExist:
+        #     filter_staffcategory_body = None
+        
         
         
         # Filter by Contract
         if filter_contract:
-            company_info = CompanyInformation.objects.filter(contract=filter_contract)
-            company_staffno = {company.staffno_id for company in company_info}
-            staffs = staffs.filter(staffno__in=company_staffno)
+            # company_info = CompanyInformation.objects.filter(contract=filter_contract)
+            # company_staffno = {company.staffno_id for company in company_info}
+            # contract = Contract.objects.filter(contract_type=filter_contract)
+            filters &= Q(companyinformation__contract=filter_contract)
             
         if filter_qualification:
-            # Filter Employee model
-            employee_staffs = staffs.filter(heq=filter_qualification)
+            qualification_filter = Q(heq=filter_qualification) | Q(staff_school__certification=filter_qualification)
+            filters &= qualification_filter
+
+            # # Filter Employee model
+            # employee_staffs = staffs.filter(heq=filter_qualification)
             
-            # Filter Staff_School model
-            filtered_staff_school = staff_school.filter(certification=filter_qualification)
+            # # Filter Staff_School model
+            # filtered_staff_school = staff_school.filter(certification=filter_qualification)
             
-            # Get staff numbers from both querysets
-            staff_numbers_from_employee = set(employee_staffs.values_list('staffno', flat=True))
-            staff_numbers_from_school = set(filtered_staff_school.values_list('staffno', flat=True))
+            # # Get staff numbers from both querysets
+            # staff_numbers_from_employee = set(employee_staffs.values_list('staffno', flat=True))
+            # staff_numbers_from_school = set(filtered_staff_school.values_list('staffno', flat=True))
             
-            # Combine the staff numbers
-            combined_staff_numbers = staff_numbers_from_employee.union(staff_numbers_from_school)
+            # # Combine the staff numbers
+            # combined_staff_numbers = staff_numbers_from_employee.union(staff_numbers_from_school)
             
-            # Filter the staffs queryset based on the combined staff numbers
-            staffs = staffs.filter(staffno__in=combined_staff_numbers)    
+            # # Filter the staffs queryset based on the combined staff numbers
+            # filters &= Q(staffno__in=combined_staff_numbers) 
+        
+        qualifications_from_employees = Employee.objects.values_list('heq', flat=True).distinct()
+        qualifications_from_staff_school = Staff_School.objects.values_list('certification', flat=True).distinct()   
         
         # Filter by title
         if filter_title:
-            staffs = staffs.filter(title=filter_title)
+            filters &= Q(title=filter_title)
             
         # Filter by title
         if filter_gender:
-            staffs = staffs.filter(gender=filter_gender)
+            filters &= Q(gender=filter_gender)
             
         # Filter by Staff Staus
         if filter_status:
             company_info = CompanyInformation.objects.filter(active_status=filter_status)
             company_staffno = {company.staffno_id for company in company_info}
-            staffs = staffs.filter(staffno__in=company_staffno)
+            filters &= Q(staffno__in=company_staffno)
+            
+        staffs = staffs.filter(filters).distinct()
 
         context = {
             'staffs': staffs,
@@ -349,14 +362,14 @@ def allstaff(request):
             'filter_gender':filter_gender,
             'company_info': company_info,
             'staff_count': staffs.count(),
-            'staffcategory': staffcategory,
-            'qualification': qualification,
-            'title':title,
-            'contract':contract,
-            'filter_staffcategory_body':filter_staffcategory_body,
+            'staffcategory': [(q.category_name, q.category_name ) for q in StaffCategory.objects.all()],
+            'qualification': list(set(qualifications_from_employees) | set(qualifications_from_staff_school)),
+            'title': [(q.title_abbr, q.title_abbr ) for q in Title.objects.all()],
+            'contract': [(q.contract_type, q.contract_type ) for q in Contract.objects.all()],
+            # 'filter_staffcategory_body':filter_staffcategory_body,
             'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
             'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
-            'get_filtered_staff_by_status': get_filtered_staff_by_status
+            # 'get_filtered_staff_by_status': get_filtered_staff_by_status
 
         }
         return render(request, 'hr/allstaff.html', context)
@@ -366,16 +379,74 @@ def allstaff(request):
         'staffs': staffs,
         'staff_school': staff_school,
         'staff_count': staff_count,
-        'staffcategory': staffcategory,
+        'staffcategory': [(q.category_name, q.category_name ) for q in StaffCategory.objects.all()],
         'company_info': company_info,
         'qualification': qualification,
-        'title': title,
-        'contract':contract,
+        'title': [(q.title_abbr, q.title_abbr ) for q in Title.objects.all()],
+        'contract': [(q.contract_type, q.contract_type ) for q in Contract.objects.all()],
         'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
         'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
     }
     return render(request, 'hr/allstaff.html', context)
     
+def test(request): 
+    staffs = Employee.objects.order_by('fname')
+    staff_count = staffs.count()
+    company_info = CompanyInformation.objects.all()
+    staffcategory = StaffCategory.objects.all()
+    qualification = Qualification.objects.all()
+    title = Title.objects.all()
+    contract = Contract.objects.all()
+
+    # Build query parameters dynamically
+    filters = Q()
+
+    # Process GET parameters for filtering
+    filter_staffcategory = request.GET.get('staffcategory')
+    filter_qualification = request.GET.get('qualification')
+    filter_title = request.GET.get('title')
+    filter_contract = request.GET.get('contract')
+    filter_gender = request.GET.get('gender')
+    filter_status = request.GET.get('status')
+
+    # Apply filters based on input
+    if filter_staffcategory:
+        filters &= Q(companyinformation__staff_cat=filter_staffcategory)
+    if filter_qualification:
+        filters &= Q(heq=filter_qualification)
+    if filter_title:
+        filters &= Q(title=filter_title)
+    if filter_contract:
+        filters &= Q(companyinformation__contract=filter_contract)
+    if filter_gender:
+        filters &= Q(gender=filter_gender)
+    if filter_status:
+        filters &= Q(companyinformation__active_status=filter_status)
+
+    # Apply the accumulated filters to the queryset
+    staffs = staffs.filter(filters).distinct()
+
+    # Create context with filters
+    context = {
+        'staffs': staffs,
+        'staff_count': staffs.count(),
+        'staffcategory': staffcategory,
+        'qualification': [(q.qual_name, q.qual_name ) for q in Qualification.objects.all()],
+        'title': [(q.title_name, q.title_name ) for q in Title.objects.all()],
+        'contract': [(q.id, q.contract_type ) for q in Contract.objects.all()],
+        'company_info': company_info,
+        'filter_staffcategory': filter_staffcategory,
+        'filter_qualification': filter_qualification,
+        'filter_title': filter_title,
+        'filter_contract': filter_contract,
+        'filter_gender': filter_gender,
+        'filter_status': filter_status,
+        'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
+        'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
+    }
+
+    return render(request, 'hr/test.html', context)
+
 
 def newstaff(request):
     submitted = False
@@ -932,7 +1003,7 @@ def leave_transaction(request, staffno):
             
             leave_transaction = form.save(commit=False)
             leave_transaction.staffno = staff
-            leave_transaction.staff_cat_id = request.POST.get('staff_cat')
+            leave_transaction.staff_cat = request.POST.get('staff_cat')
             
             if remaining_days >= days_taken:
                 leave_transaction.academic_year = academic_year
@@ -1025,6 +1096,7 @@ def medical_transaction(request, staffno):
         return redirect('medical-entitlement')
     
     remaining_amount = medical_entitlement.get_remaining_amount(staff)
+    amount_spent = medical_entitlement.get_amount_used(staff)
     staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
     
     if request.method == 'POST':
@@ -1035,7 +1107,7 @@ def medical_transaction(request, staffno):
 
             medical_transaction = form.save(commit=False)
             medical_transaction.staffno = staff
-            medical_transaction.staff_cat_id = request.POST.get('staff_cat')
+            medical_transaction.staff_cat = request.POST.get('staff_cat')
             
             if remaining_amount >= treatment_cost:
                 medical_transaction.academic_year = academic_year
@@ -1061,6 +1133,7 @@ def medical_transaction(request, staffno):
                'medical_entitlement':medical_entitlement,
                'medical_transactions':medical_transactions,
                'remaining_amount':remaining_amount,
+               'amount_spent':amount_spent,
                'medical_trans_count':medical_trans_count,
                'company_info':company_info,
                'academic_years':academic_years,
@@ -1108,6 +1181,7 @@ def edit_medical_transaction(request, staffno, med_id):
         'medical_entitlement': medical_entitlement,
         'remaining_amount': remaining_amount,
         'hospitals': hospitals,
+        'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
     }
 
     return render(request, 'hr/medical.html', context)

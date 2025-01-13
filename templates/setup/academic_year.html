@@ -17,7 +17,7 @@
                     </div>
                     <hr>
                     <input type="submit" value="Add" class="btn btn-block btn-success">
-                    <a class="btn btn-sm btn-info" href="{% url 'leave-academic-year' %}">Cancel</a>
+                    <a class="btn btn-sm btn-info" href="{% url 'academic-year' %}">Cancel</a>
                 </form>
             </div>
         </div>
@@ -39,8 +39,8 @@
                     <tr>
                         <td>{{ year.academic_year }}</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-academic-year' year.id %}"></a>
-                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-leave-academic-year' year.id %}" onclick="return confirm('Do you really want to delete the data for {{ year.academic_year }} academic year?');"></a>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-academic-year' year.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-academic-year' year.id %}" onclick="return confirm('Do you really want to delete the data for {{ year.academic_year }} academic year?');"></a>
                         </td>
                     </tr>
                     {% endfor %}

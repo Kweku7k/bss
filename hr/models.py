@@ -65,8 +65,8 @@ class CompanyInformation(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
     job_title = models.CharField('Job Title',max_length=50,blank=True,null=True)
     job_description = models.TextField('Job Description',max_length=200,blank=True,null=True)
-    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.SET_NULL, blank=True, null=True)
-    contract = models.ForeignKey(Contract, on_delete=models.SET_NULL, blank=True, null=True)
+    staff_cat = models.CharField('Staff Category',max_length=100,blank=True,null=True)
+    contract = models.CharField('Contract',max_length=50,blank=True,null=True)
     active_status = models.CharField('Staff Status',max_length=50,blank=True,null=True)
     doa = models.DateField('Date of Appointment', blank=True,null=True)
     doe = models.DateField('Date of Expiration', blank=True,null=True)
@@ -231,7 +231,7 @@ class Staff_School(models.Model):
 
 class Staff_Leave(models.Model):
     staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE) # Link to Employees model
-    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.CASCADE, blank=True, null=True)
+    staff_cat = models.CharField('Staff Category',max_length=100,blank=True,null=True)
     leave_type = models.CharField('Type of Leave', max_length=100, blank=True, null=True)
     academic_year = models.CharField('AcademicYear', max_length=20, blank=True, null=True)
     start_date = models.DateField()
@@ -244,7 +244,7 @@ class Staff_Leave(models.Model):
     
 class Medical(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
-    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.CASCADE, blank=True, null=True)
+    staff_cat = models.CharField('Staff Category',max_length=100,blank=True,null=True)
     hospital_code = models.CharField('Hospital', max_length=100, blank=True, null=True)
     academic_year = models.CharField('AcademicYear', max_length=20, blank=True, null=True)
     date_attended = models.DateField()

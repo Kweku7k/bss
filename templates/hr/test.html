@@ -1,0 +1,102 @@
+{% extends "base.html" %} {% load static %}
+{% block content %}
+<div class="container">
+    <form method="get"> 
+        <label for="staffcategory">Staff Category:</label> 
+        <select name="staffcategory" id="staffcategory"> 
+            <option value="">All</option> 
+            {% for category in staffcategory %} 
+            <option value="{{ category.id }}" {% if filter_staffcategory == category.id|stringformat:"s" %}selected{% endif %}> 
+                {{ category.category_name }} 
+            </option> 
+            {% endfor %} 
+        </select> 
+     
+        <label for="qualification">Qualification:</label> 
+        <select name="qualification" id="qualification"> 
+            <option value="">All</option> 
+            {% for qual in qualifications %} 
+            <option value="{{ qual.id }}" {% if filter_qualification == qual.id|stringformat:"s" %}selected{% endif %}> 
+                {{ qual.name }} 
+            </option> 
+            {% endfor %} 
+        </select> 
+     
+        <label for="title">Title:</label> 
+        <select name="title" id="title"> 
+            <option value="">All</option> 
+            {% for key, value in title %} 
+            <option value="{{ key }}" {% if filter_title == t.id|stringformat:"s" %}selected{% endif %}> 
+                {{ value }} 
+            </option> 
+            {% endfor %} 
+        </select> 
+     
+        <label for="contract">Contract:</label> 
+        <select name="contract" id="contract"> 
+            <option value="">All</option> 
+            {% for key, value in contract %} 
+            <option value="{{ key }}" {% if filter_contract == contract.id|stringformat:"s" %}selected{% endif %}> 
+                {{ value }} 
+            </option> 
+            {% endfor %} 
+        </select> 
+     
+        <label for="gender">Gender:</label> 
+        <select name="gender" id="gender"> 
+            <option value="">All</option> 
+            <option value="M" {% if filter_gender == "M" %}selected{% endif %}>Male</option> 
+            <option value="F" {% if filter_gender == "F" %}selected{% endif %}>Female</option> 
+        </select> 
+     
+        <label for="status">Status:</label> 
+        <select name="status" id="status"> 
+            <option value="">All</option> 
+            <option value="active" {% if filter_status == "active" %}selected{% endif %}>Active</option> 
+            <option value="inactive" {% if filter_status == "inactive" %}selected{% endif %}>Inactive</option> 
+        </select> 
+     
+        <button type="submit">Filter</button> 
+    </form>
+
+
+    <div>
+        {% if staffs %}
+                <table class="table table-hover">
+                    <thead class="">
+                        <tr>
+                            <th>Staff No</th>
+                            <th>Full Name</th>
+                            <th>Staff Category</th>
+                            <th>Job Title</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staffs %}
+                            <tr class="clickable-row">
+                                <td>{{ staff.staffno }}</td>
+                                <td>{{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }}</td>
+                                {% for company_data in company_info %}
+                                    {% if staff.staffno == company_data.staffno_id %}
+                                        <td>{{ company_data.staff_cat }}</td>
+                                        <td>{{ company_data.job_title }}</td>
+                                        <td>
+                                            {{ company_data.active_status }}
+                                        </td>
+                                    {% endif %}
+                                {% endfor %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No staff found.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-center">No staff found.</p>
+            {% endif %}
+    </div>
+</div>
+{% endblock %}

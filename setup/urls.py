@@ -56,6 +56,10 @@ urlpatterns = [
     path('edit_jobtitle/<int:jobtitle_id>', views.edit_jobtitle,name="edit-jobtitle"),
     path('delete_jobtitle/<int:jobtitle_id>', views.delete_jobtitle,name="delete-jobtitle"),
     
+    path('academic_year', views.academic_year, name="academic-year"),
+    path('edit_academic_year/<int:ay_id>', views.edit_academic_year, name="edit-academic-year"),
+    path('delete_academic_year/<int:ay_id>', views.delete_academic_year, name="delete-academic-year"),
+    
     path('choices_hpq/', views.generic_model_crud, {'model_class': ChoicesHPQ, 'model_name': 'Professional Qualifications', 'template_name': 'setup/generic.html'}, name='choices-hpq'),
     path('choices_region/', views.generic_model_crud, {'model_class': ChoicesRegion, 'model_name': 'Region', 'template_name': 'setup/generic.html'}, name='choices-region'),
     path('choices_leave_type/', views.generic_model_crud, {'model_class': ChoicesLeaveType, 'model_name': 'Leave Type', 'template_name': 'setup/generic.html'}, name='choices-leave-type'),

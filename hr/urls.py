@@ -26,6 +26,8 @@ urlpatterns = [
     path('get_departments/<int:sch_fac_id>/', views.get_departments, name='get_departments'),
     path('upload/', views.bulk_upload, name='bulk_upload'),
     path('download-sample-csv/', views.download_csv, name='download_sample_csv'),
+    
+    path('test', views.test,name="test"),
 
     
     path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),

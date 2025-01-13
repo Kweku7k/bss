@@ -7,9 +7,9 @@
         <div class="col-md-4">
             <label for="filter_staffcategory">Staff Category</label>
             <select id="filter_staffcategory" name="filter_staffcategory" class="form-control">
-                <option selected="true" disabled> {% if filter_staffcategory_body %} {{ filter_staffcategory_body }} {% else %} Select {% endif %}</option>
+                <option selected="true" disabled> {% if filter_staffcategory %} {{ filter_staffcategory }} {% else %} Select {% endif %}</option>
                 {% for sc in staff_categories %}
-                    <option value="{{ sc.id }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
+                    <option value="{{ sc.category_name }}" {% if sc.category_name == filter_staffcategory %} selected {% endif %}>
                         {{ sc.category_name }}
                     </option>
                 {% endfor %}

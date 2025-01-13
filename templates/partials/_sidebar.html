@@ -131,6 +131,13 @@
               <i class="bi bi-circle"></i><span>Job Title</span>
             </a>
           </li>
+
+          <li>
+            <a href="{% url 'academic-year' %}">
+              <i class="bi bi-circle"></i><span>Academic Year</span>
+            </a>
+          </li>
+
           <li>
             <a href="{% url 'add-profbody' %}">
               <i class="bi bi-circle"></i><span>Professional Bodies</span>
@@ -196,11 +203,6 @@
             </a>
           </li>
           <li>
-            <a href="{% url 'leave-academic-year' %}">
-              <i class="bi bi-circle"></i><span>Academic Year</span>
-            </a>
-          </li>
-          <li>
             <a href="{% url 'leave-report' %}">
               <i class="bi bi-circle"></i><span>Report</span>
             </a>       
@@ -247,10 +249,17 @@
         </a>
       </li>
 
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="{% url 'test' %}">
+          <i class="bi bi-funnel"></i>
+          <span>Filter</span>
+        </a>
+      </li>
+
 
       <li class="nav-item">
         <a class="nav-link collapsed" href="{% url 'profile' %}">
-          <i class="bi bi-clipboard-data"></i>
+          <i class="bi bi-person"></i>
           <span>Profile</span>
         </a>
       </li>

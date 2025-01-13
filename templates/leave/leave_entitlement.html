@@ -18,7 +18,7 @@
                           <option selected="true" disabled="disabled">--Select--</option>
                             {% if staffcategorys %}
                                 {% for cat in staffcategorys %}
-                                    <option value="{{ cat.id }}" {% if leave_ent.staff_cat_id == cat.id %} selected {% endif %}>{{ cat.category_name }}</option>
+                                    <option value="{{ cat.category_name }}" {% if leave_ent.staff_cat == cat.category_name %} selected {% endif %}>{{ cat.category_name }}</option>
                                 {% endfor %}
                             {% endif %}
                       </select>
@@ -36,7 +36,7 @@
                           <option selected="true" disabled="disabled">--Select--</option>
                             {% if academic_years %}
                                 {% for year in academic_years %}
-                                    <option value="{{ year.id }}" {% if leave_ent.academic_year_id == year.id %} selected {% endif %}>{{ year.academic_year }}</option>
+                                    <option value="{{ year.academic_year }}" {% if leave_ent.academic_year == year.academic_year %} selected {% endif %}>{{ year.academic_year }}</option>
                                 {% endfor %}
                             {% endif %}
                       </select>

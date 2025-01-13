@@ -23,7 +23,7 @@
       {% include "partials/_staffdetails_sidebar.html" %} 
     </div>
   
-    <div class="col-md-9">
+    <div class="col-md-8">
       <div class="card pt-3 mt-5 p-4">
         <div class="card-header mb-2 d-flex justify-content-between text-black ">
           <h5><strong>General Overview for {{ staff.title }} {{ staff.fname }}  {{ staff.lname }} </strong></h5>
@@ -70,6 +70,10 @@
               <div class="col-md-6 mb-3">
                   <strong>Job Title:</strong>
                   <p class="text-muted">{{ company_info.job_title }}</p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <strong>School/ Faculty:</strong>
+                <p class="text-muted">{{ company_info.sch_fac_dir }}</p>
               </div>
               <div class="col-md-6 mb-3">
                   <strong>Department:</strong>

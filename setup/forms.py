@@ -78,3 +78,9 @@ class JobTitleForm(ModelForm):
         model = JobTitle
         fields = '__all__'
         exclude = ['updated','created']
+        
+class AcademicYearForm(ModelForm):
+    class Meta:
+        model = AcademicYear
+        fields = '__all__'
+        exclude = ['updated','created']

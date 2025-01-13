@@ -72,11 +72,9 @@
                     </div> {% endcomment %}
                     <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
-                    {% comment %} <div class="col-md-4">
-                        <label for="staff_cat" class="form-label">Staff Category</label>
-                        <input type="hidden" name="staff_cat" value="{{ company_info.staff_cat.id }}">
-                    </div> {% endcomment %}
-                    <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden>
+                    <input type="text" name="staff_cat" class="form-control" value="{{ company_info.staff_cat }}" readonly hidden>
+
+                    {% comment %} <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden> {% endcomment %}
 
                     <div class="col-md-4">
                         <label class="form-label" for="academic_year">Academic Year</label>

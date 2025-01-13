@@ -34,7 +34,7 @@ def leave_entitlement(request):
             staff_category = form.cleaned_data.get('staff_cat')
             academic_year = form.cleaned_data.get('academic_year')
             
-            if LeaveEntitlement.objects.filter(staff_cat_id=staff_category, academic_year=academic_year).exists():
+            if LeaveEntitlement.objects.filter(staff_cat=staff_category, academic_year=academic_year).exists():
                 messages.error(request, 'Leave entitlement already exists for the selected staff category and academic year.')
             else:
                 form.save()
@@ -68,7 +68,7 @@ def edit_leave_entitlement(request, le_id):
             academic_year = form.cleaned_data.get('academic_year')
 
             # Check if another leave entitlement with the same staff category and academic year exists
-            if LeaveEntitlement.objects.filter(staff_cat_id=staff_category, academic_year=academic_year).exclude(pk=le_id).exists():
+            if LeaveEntitlement.objects.filter(staff_cat=staff_category, academic_year=academic_year).exclude(pk=le_id).exists():
                 messages.error(request, 'Leave entitlement already exists for the selected staff category and academic year.')
             else:
                 # Save the changes if no conflict
@@ -76,53 +76,6 @@ def edit_leave_entitlement(request, le_id):
                 return redirect('leave-entitlement')
     context = {'form':form, 'leave_entitlements':leave_entitlements, 'leave_entitlement_count':leave_entitlement_count, 'staffcategorys':staffcategorys, 'leave_ent':leave_ent, 'academic_years':academic_years}
     return render(request, 'leave/leave_entitlement.html', context)
-
-
-############ Academic Year ##################
-def leave_academic_year(request):
-    submitted = False
-    academic_years = AcademicYear.objects.all()
-    academic_year_count = academic_years.count()
-    if request.method == "POST":
-        form = AcademicYearForm(request.POST)
-        if form.is_valid():
-            # Check if the academic year already exists
-            academic_year = form.cleaned_data.get('academic_year')
-            if AcademicYear.objects.filter(academic_year=academic_year).exists():
-                messages.error(request, 'Academic year already exists.')
-                return redirect('leave-academic-year')
-            else:
-                form.save()
-                return HttpResponseRedirect('leave_academic_year?submitted=True')
-    else:
-        form = AcademicYearForm
-        if 'submitted' in request.GET:
-            submitted = True
-    context = {'form':form, 'academic_years':academic_years, 'academic_year_count':academic_year_count, 'submitted':submitted}
-    print(context)
-    return render(request, 'leave/academic_year.html', context)
-
-def edit_leave_academic_year(request, ay_id):
-    academic_years = AcademicYear.objects.order_by('-id')
-    academic_year_count = academic_years.count()
-    academic_year = AcademicYear.objects.get(pk=ay_id)
-    form = AcademicYearForm(instance=academic_year)
-
-    if request.method == 'POST':
-        form = AcademicYearForm(request.POST, instance=academic_year)
-        if form.is_valid():
-            form.save()
-            return redirect('leave-academic-year')
-    context = {'form':form, 'academic_years':academic_years, 'academic_year_count':academic_year_count, 'academic_year':academic_year}
-    return render(request, 'leave/academic_year.html', context)
-
-
-def delete_leave_academic_year(request, ay_id):
-    academic_year = AcademicYear.objects.get(pk=ay_id)
-    if request.method == 'GET':
-        academic_year.delete()
-    return redirect('leave-academic-year')
-
 
 
 ############## Leave Report ###################
@@ -141,16 +94,10 @@ def leave_report(request):
     if selected_academic_year:
         leave_transactions = leave_transactions.filter(academic_year=selected_academic_year)
         
-    try:
-        filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
-    except StaffCategory.DoesNotExist:
-        filter_staffcategory_body = None
-
     context = {
         'leave_transactions': leave_transactions,
         'staff_categories': staff_categories,
         'filter_staffcategory': filter_staffcategory,
-        'filter_staffcategory_body': filter_staffcategory_body,
         'selected_academic_year': selected_academic_year,
         'academic_years': academic_years,
     }

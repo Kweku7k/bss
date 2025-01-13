@@ -5,8 +5,11 @@
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
-            <div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
                 <h5 class="my-3 text-primary"><strong>Medical Details for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                {% if staff.staff_pix %}
+                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                {% endif %}
             </div>
 
             <h5><b>Medical Entitlement</b></h5>
@@ -16,8 +19,9 @@
                 <div class="col-lg-6 col-md-12 mb-2">
                     <div class="card p-3">
                         <p><strong>Staff Category:</strong> {{ company_info.staff_cat }}</p>
-                        <p><strong>Entitled Days:</strong> {{ medical_entitlement.entitlement }}</p>
-                        <p><strong>Remaining Medical Balance:</strong> ₵{{ remaining_amount }}</p>
+                        <p><strong>Entitled Amount:</strong> ₵{{ medical_entitlement.entitlement }}</p>
+                        <p><strong>Medical Balance:</strong> ₵{{ remaining_amount }}</p>
+                        <p><strong>Amount Spent:</strong> ₵{{ amount_spent }}</p>
                     </div>
                 </div>
             </div>
@@ -70,7 +74,7 @@
                     {% comment %} <div class="col-md-4">
                         <label for="staff_cat" class="form-label">Staff Category</label>
                     </div> {% endcomment %}
-                    <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden>
+                    <input type="text" class="form-control" name="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden>
 
                     <div class="col-md-4">
                         <label for="patient_name" class="form-label">Patient Name</label>

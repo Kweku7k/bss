@@ -97,8 +97,16 @@ class StaffRank(models.Model):
 
 class JobTitle(models.Model):
     job_title = models.CharField("Job Title",max_length=150,blank=False,null=False)
-    staff_cat = models.ForeignKey(StaffCategory,on_delete=models.CASCADE,blank=True,null=True)
+    staff_cat = models.CharField('Staff Category',max_length=100,blank=True,null=True)
     salary_level = models.CharField("Salary Level",max_length=150,blank=True,null=True)
     jobtitle_notes = models.TextField("Notes",blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) 
+
+
+class AcademicYear(models.Model):
+    academic_year = models.CharField(max_length=10)
+    
+    def __str__(self):
+        return self.academic_year
+    

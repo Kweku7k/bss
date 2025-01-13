@@ -18,16 +18,11 @@ class Leave(models.Model):
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
-class AcademicYear(models.Model):
-    academic_year = models.CharField(max_length=10)
-    
-    def __str__(self):
-        return self.academic_year
     
 class LeaveEntitlement(models.Model):
-    staff_cat = models.ForeignKey(StaffCategory, on_delete=models.SET_NULL, blank=True, null=True)
+    staff_cat = models.CharField('Staff Category',max_length=100,blank=True,null=True)
     entitlement = models.IntegerField()
-    academic_year = models.ForeignKey(AcademicYear, on_delete=models.SET_NULL, blank=True, null=True)
+    academic_year = models.CharField(max_length=10, blank=True, null=True)
         
     def get_remaining_days(self, staff):
         # Sum the days taken by this staff member

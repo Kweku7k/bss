@@ -12,9 +12,3 @@ class LeaveEntitlementForm(ModelForm):
     class Meta:
         model = LeaveEntitlement
         fields = ['staff_cat', 'entitlement', 'academic_year']
-        
-class AcademicYearForm(ModelForm):
-    class Meta:
-        model = AcademicYear
-        fields = '__all__'
-        exclude = ['updated','created']
