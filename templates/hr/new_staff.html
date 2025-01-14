@@ -68,9 +68,17 @@
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="middlenames">Middle Names</label>
+                            <label for="middlenames">Middle Name</label>
                             <input type="text" class="form-control" id="middlenames" name="middlenames"
                                 {% if staff %} value="{% if staff.middlenames %}{{ staff.middlenames }}{% endif %}" {% else %} value="" {% endif %}>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="oname">Other/Previous Name</label>
+                            <input type="text" class="form-control" id="oname" name="oname"
+                                {% if staff %} value="{% if staff.oname %}{{ staff.oname }}{% endif %}" {% else %} value="" {% endif %}>
                         </div>
                     </div>
                     
@@ -289,7 +297,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="completion_year">Completion Year</label>
-                            <input type="text" class="form-control" id="completion_year" name="completion_year" 
+                            <input type="text" class="form-control" id="completion_year" name="completion_year" placeholder="YYYY"
                                 {% if staff %} value="{{ staff.completion_year }}" {% else %} value="" {% endif %}>
                         </div>
                     </div>

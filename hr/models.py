@@ -15,6 +15,7 @@ class Employee(models.Model):
     lname = models.CharField('Surname',max_length=120,blank=False,null=False)
     fname = models.CharField('First Name',max_length=120,blank=False,null=False)
     middlenames = models.CharField('Middle Names',max_length=120,blank=True,null=True)
+    oname = models.CharField('Other Names', max_length=120, blank=True, null=True)
     suffix = models.CharField('Name Suffixe',max_length=20,blank=True,null=True)
     gender = models.CharField(max_length=20)
     dob = models.DateField('Date of Birth')

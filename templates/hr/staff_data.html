@@ -24,97 +24,104 @@
     </div>
   
     <div class="col-md-8">
-      <div class="card pt-3 mt-5 p-4">
-        <div class="card-header mb-2 d-flex justify-content-between text-black ">
-          <h5><strong>General Overview for {{ staff.title }} {{ staff.fname }}  {{ staff.lname }} </strong></h5>
-          <button  onclick="window.print()" class="btn btn-outline-primary">Print</button>
+      <div class="card pt-3 mt-5 p-4" style="background-color: white; border: none; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
+        <div class="card-header mb-4 d-flex justify-content-end align-items-center">
+          <img src="/static/img/Central-Uni-logo.png" alt="Logo" style="width: 200px; height: auto; object-fit: contain;">
         </div>
         <div class="card-body">
           <div class="row mb-3">
-              <div class="col-md-6 mb-3">
-                  <strong>Staff Number:</strong>
-                  <p class="text-muted">{{ staff.staffno }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Gender:</strong>
-                  <p class="text-muted">{{ staff.gender }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Home Town:</strong>
-                  <p class="text-muted">{{ staff.home_town }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Region:</strong>
-                  <p class="text-muted">{{ staff.region }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Date of Birth:</strong>
-                  <p class="text-muted">{{ staff.dob }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Date of Appointment:</strong>
-                  <p class="text-muted">{{ company_info.doa }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Date of Expiration:</strong>
-                  <p class="text-muted">{{ company_info.doe }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Highest Educational Qualification:</strong>
-                  <p class="text-muted">{{ staff.heq }} in {{ staff.study_area }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Highest Professional Qualification:</strong>
-                  <p class="text-muted">{{ staff.hpq }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Job Title:</strong>
-                  <p class="text-muted">{{ company_info.job_title }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                <strong>School/ Faculty:</strong>
-                <p class="text-muted">{{ company_info.sch_fac_dir }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Department:</strong>
-                  <p class="text-muted">{{ company_info.dept }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Directorate:</strong>
-                  <p class="text-muted">{{ company_info.directorate }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Staff Category:</strong>
-                  <p class="text-muted">{{ company_info.staff_cat }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Contract Type:</strong>
-                  <p class="text-muted">{{ company_info.contract }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Official Email:</strong>
-                  <p class="text-muted">{{ company_info.email }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Personal Email:</strong>
-                  <p class="text-muted">{{ staff.email_address }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Telephone:</strong>
-                  <p class="text-muted">{{ staff.active_phone }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>SSNIT No.:</strong>
-                  <p class="text-muted">{{ staff.ssnitno }}</p>
-              </div>
-              <div class="col-md-6 mb-3">
-                  <strong>Identification:</strong>
-                  <p class="text-muted">{{ staff.idtype }} ({{ staff.gcardno }})</p>
-              </div>
+            <h5 class="mb-3">Detailed Overview of <b> {{ staff.title }} {{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }} {{ staff.oname }}</b></h5>
+
+            <!-- Staff details -->
+            <div class="col-md-6 mb-3">
+              <strong>Staff Number:</strong>
+              <p class="text-muted">{{ staff.staffno }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Gender:</strong>
+              <p class="text-muted">{{ staff.gender }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Home Town:</strong>
+              <p class="text-muted">{{ staff.home_town }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Region:</strong>
+              <p class="text-muted">{{ staff.region }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Date of Birth:</strong>
+              <p class="text-muted">{{ staff.dob }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Date of Appointment:</strong>
+              <p class="text-muted">{{ company_info.doa }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Date of Expiration:</strong>
+              <p class="text-muted">{{ company_info.doe }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Highest Educational Qualification:</strong>
+              <p class="text-muted">{{ staff.heq }} in {{ staff.study_area }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Highest Professional Qualification:</strong>
+              <p class="text-muted">{{ staff.hpq }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Job Title:</strong>
+              <p class="text-muted">{{ company_info.job_title }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>School/ Faculty:</strong>
+              <p class="text-muted">{{ company_info.sch_fac_dir }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Department:</strong>
+              <p class="text-muted">{{ company_info.dept }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Directorate:</strong>
+              <p class="text-muted">{{ company_info.directorate }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Staff Category:</strong>
+              <p class="text-muted">{{ company_info.staff_cat }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Contract Type:</strong>
+              <p class="text-muted">{{ company_info.contract }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Official Email:</strong>
+              <p class="text-muted">{{ company_info.email }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Personal Email:</strong>
+              <p class="text-muted">{{ staff.email_address }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Telephone:</strong>
+              <p class="text-muted">{{ staff.active_phone }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>SSNIT No.:</strong>
+              <p class="text-muted">{{ staff.ssnitno }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Identification:</strong>
+              <p class="text-muted">{{ staff.idtype }} ({{ staff.gcardno }})</p>
+            </div>
           </div>
         </div>
+        <div class="card-footer text-center mt-4">
+          <p class="text-muted" style="font-size: 14px;">
+            P.O Box 2305 Tema or P.O. Box DS 2310 Dansoman, Accra- Ghana -West Africa 
+          </p>
+        </div>
       </div>
-    </div>    
+    </div>      
   </div>
 
 

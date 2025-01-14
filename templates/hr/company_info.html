@@ -21,8 +21,16 @@
 
                     <div class="col-md-4">
                         <label for="job_title" class="form-label">Job Title</label>
-                        <input type="text" class="form-control" id="job_title" name="job_title" value="{{ company_info.job_title }}" required>
+                        <select id="job_title" name="job_title" class="form-select" required>
+                            <option value="" selected>N/A</option>
+                            {% if jobtitle %} 
+                                {% for jt in jobtitle %}
+                                    <option value="{{ jt.job_title }}" {% if jt.job_title == company_info.job_title %} selected {% endif %}> {{ jt.job_title }} </option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
                     </div>
+
                     <div class="col-md-4">
                         <label for="job_description" class="form-label">Job Description</label>
                         <input type="text" class="form-control" id="job_description" name="job_description" value="{{ company_info.job_description }}">

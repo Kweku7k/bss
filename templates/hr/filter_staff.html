@@ -1,0 +1,73 @@
+<h1>Dynamic Staff Filter</h1>
+<form method="POST">
+    {% csrf_token %}
+    
+    <h3>Filter Employee Fields</h3>
+    {% for field in fields.employee %}
+        <label for="{{ field }}">{{ field|capfirst }}:</label>
+        <input type="text" name="{{ field }}" id="{{ field }}">
+        <br>
+    {% endfor %}
+    
+    <h3>Filter Company Information Fields</h3>
+    {% for field in fields.company_info %}
+        <label for="{{ field }}">{{ field|capfirst }}:</label>
+        <input type="text" name="{{ field }}" id="{{ field }}">
+        <br>
+    {% endfor %}
+
+    <!-- Dropdowns for predefined choices -->
+    <h3>Gender</h3>
+    <select name="gender" id="gender">
+        <option value="">Select Gender</option>
+        {% for gender in gender_choices %}
+            <option value="{{ gender }}" {% if gender == filter_gender %}selected{% endif %}>{{ gender }}</option>
+        {% endfor %}
+    </select>
+
+    <h3>Staff Status</h3>
+    <select name="filter_status" id="filter_status">
+        <option value="">Select Status</option>
+        {% for status in status_choices %}
+            <option value="{{ status }}" {% if status == filter_status %}selected{% endif %}>{{ status }}</option>
+        {% endfor %}
+    </select>
+
+    <h3>Staff Category</h3>
+    <select name="filter_staffcategory" id="filter_staffcategory">
+        <option value="">Select Category</option>
+        {% for category in staff_category_choices %}
+            <option value="{{ category }}" {% if category == filter_staffcategory %}selected{% endif %}>{{ category }}</option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Filter</button>
+</form>
+
+<h2>Filtered Results</h2>
+<ul>
+    {% for staff in staffs %}
+        <li>{{ staff }}</li>
+    {% empty %}
+        <li>No results found.</li>
+    {% endfor %}
+</ul>
+
+<!-- Pagination Controls -->
+<div class="pagination">
+    <span class="step-links">
+        {% if staffs.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ staffs.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ staffs.number }} of {{ staffs.paginator.num_pages }}.
+        </span>
+
+        {% if staffs.has_next %}
+            <a href="?page={{ staffs.next_page_number }}">next</a>
+            <a href="?page={{ staffs.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>

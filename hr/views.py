@@ -9,10 +9,12 @@ from medical.models import *
 from django.db.models import Q
 from .forms import *
 from django.db import connection # type: ignore
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from two_factor.utils import default_device
@@ -25,9 +27,22 @@ import os
 from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
+from django.core.paginator import Paginator
 
 
 
+def is_in_group(user, group_name):
+    return user.groups.filter(name=group_name).exists()
+
+def superadmin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        user = request.user
+        if request.user.is_authenticated and user.groups.filter(name='superadmin').exists():
+            return view_func(request, *args, **kwargs)
+        else:
+            messages.error(request, "Page restricted. You do not have the required permissions.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))  # Redirect to the previous page or home
+    return wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -255,29 +270,16 @@ def edit_staff(request,staffno):
 # Write a filtering query set for 
 
 
+@login_required
+@superadmin_required
 def allstaff(request): 
     staffs = Employee.objects.order_by('fname')
     staff_count = staffs.count()
-    staffcategory = StaffCategory.objects.all()
     company_info = CompanyInformation.objects.all()
     qualification = Qualification.objects.all()
-    title = Title.objects.all()
-    contract = Contract.objects.all()
     staff_school = Staff_School.objects.all()
-    
-     # Handle GET parameters for filtering
-    # get_filtered_staff_by_status = request.GET.get('status')  # Get the status filter from query parameters
-    # print(f"Filter Status from GET: {get_filtered_staff_by_status}")
-    
-    # Build query parameters dynamically
+   
     filters = Q()
-
-    
-    # if get_filtered_staff_by_status:
-    #     company_info = CompanyInformation.objects.filter(active_status=get_filtered_staff_by_status)
-    #     company_staffno = {company.staffno_id for company in company_info}
-    #     staffs = staffs.filter(staffno__in=company_staffno)
-        
         
     if request.method == 'POST':
         filter_staffcategory = request.POST.get('filter_staffcategory')
@@ -294,43 +296,15 @@ def allstaff(request):
         
         #Filter by Staff Category
         if filter_staffcategory:
-            # company_info = CompanyInformation.objects.filter(staff_cat=filter_staffcategory)
-            # company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(companyinformation__staff_cat=filter_staffcategory)
-            
-        # try:
-        #     filter_staffcategory_body = StaffCategory.objects.get(pk=filter_staffcategory).category_name
-        # except StaffCategory.DoesNotExist:
-        #     filter_staffcategory_body = None
-        
-        
         
         # Filter by Contract
         if filter_contract:
-            # company_info = CompanyInformation.objects.filter(contract=filter_contract)
-            # company_staffno = {company.staffno_id for company in company_info}
-            # contract = Contract.objects.filter(contract_type=filter_contract)
             filters &= Q(companyinformation__contract=filter_contract)
             
         if filter_qualification:
             qualification_filter = Q(heq=filter_qualification) | Q(staff_school__certification=filter_qualification)
             filters &= qualification_filter
-
-            # # Filter Employee model
-            # employee_staffs = staffs.filter(heq=filter_qualification)
-            
-            # # Filter Staff_School model
-            # filtered_staff_school = staff_school.filter(certification=filter_qualification)
-            
-            # # Get staff numbers from both querysets
-            # staff_numbers_from_employee = set(employee_staffs.values_list('staffno', flat=True))
-            # staff_numbers_from_school = set(filtered_staff_school.values_list('staffno', flat=True))
-            
-            # # Combine the staff numbers
-            # combined_staff_numbers = staff_numbers_from_employee.union(staff_numbers_from_school)
-            
-            # # Filter the staffs queryset based on the combined staff numbers
-            # filters &= Q(staffno__in=combined_staff_numbers) 
         
         qualifications_from_employees = Employee.objects.values_list('heq', flat=True).distinct()
         qualifications_from_staff_school = Staff_School.objects.values_list('certification', flat=True).distinct()   
@@ -350,6 +324,11 @@ def allstaff(request):
             filters &= Q(staffno__in=company_staffno)
             
         staffs = staffs.filter(filters).distinct()
+        
+        # Pagination
+        paginator = Paginator(staffs, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
 
         context = {
             'staffs': staffs,
@@ -366,17 +345,18 @@ def allstaff(request):
             'qualification': list(set(qualifications_from_employees) | set(qualifications_from_staff_school)),
             'title': [(q.title_abbr, q.title_abbr ) for q in Title.objects.all()],
             'contract': [(q.contract_type, q.contract_type ) for q in Contract.objects.all()],
-            # 'filter_staffcategory_body':filter_staffcategory_body,
             'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
             'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
-            # 'get_filtered_staff_by_status': get_filtered_staff_by_status
-
         }
         return render(request, 'hr/allstaff.html', context)
-    
+    else:
+        # Pagination on initial load
+        paginator = Paginator(staffs, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
     
     context = {
-        'staffs': staffs,
+        'staffs': page_obj,
         'staff_school': staff_school,
         'staff_count': staff_count,
         'staffcategory': [(q.category_name, q.category_name ) for q in StaffCategory.objects.all()],
@@ -389,6 +369,66 @@ def allstaff(request):
     }
     return render(request, 'hr/allstaff.html', context)
     
+
+@user_passes_test(lambda user: is_in_group(user, 'superadmin') )
+def filter_staff(request):
+    staffs = Employee.objects.all()
+    # company_info = CompanyInformation.objects.all()
+    filters = Q()  # Initialize an empty Q object for dynamic filtering
+
+    # Get all Employee and CompanyInformation fields
+    employee_fields = [field.name for field in Employee._meta.get_fields()]
+    company_info_fields = [field.name for field in CompanyInformation._meta.get_fields()]
+
+    # Choices for dropdowns (static options for known fields)
+    gender_choices = ChoicesGender.objects.all()
+    status_choices = ChoicesStaffStatus.objects.all()
+    staff_category_choices = StaffCategory.objects.all()
+
+    # Prepare dictionaries for easy lookup in templates
+    gender_dict = {choice.name: choice.name for choice in gender_choices}
+    status_dict = {choice.name: choice.name for choice in status_choices}
+    staff_category_dict = {choice.category_name: choice.category_name for choice in staff_category_choices}
+
+    if request.method == 'POST':
+        # Process the form data dynamically
+        for key, value in request.POST.items():
+            if value:  # Only process fields with values
+                if key in employee_fields:
+                    filters &= Q(**{key: value})
+                elif key in company_info_fields:
+                    filters &= Q(companyinformation__**{key: value})
+
+        # Apply filters dynamically to the queryset
+        staffs = Employee.objects.filter(filters).distinct()
+
+        # Pagination
+        paginator = Paginator(staffs, 3)  # Show 10 staffs per page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+    else:
+        # Pagination on initial load
+        paginator = Paginator(staffs, 3)  # Show 10 staffs per page
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+
+    # Context for rendering the filter form and results
+    context = {
+        'staffs': page_obj,  # Use the page object for pagination
+        'fields': {
+            'employee': employee_fields,
+            'company_info': company_info_fields,
+        },
+        'gender_choices': gender_dict,
+        'status_choices': status_dict,
+        'staff_category_choices': staff_category_dict,
+    }
+
+    return render(request, 'hr/filter_staff.html', context)
+
+
+
 def test(request): 
     staffs = Employee.objects.order_by('fname')
     staff_count = staffs.count()
@@ -533,6 +573,7 @@ def company_info(request,staffno):
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
     dept = Department.objects.all()
+    jobtitle = JobTitle.objects.all()
     
     
     if request.method == 'POST':
@@ -575,6 +616,7 @@ def company_info(request,staffno):
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
                'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
                'dept':dept,
+               'jobtitle':jobtitle,
             }
     return render(request,'hr/company_info.html',context)
 
@@ -591,6 +633,8 @@ def edit_company_info(request,staffno):
     directorate = Directorate.objects.all()
     bank_list = Bank.objects.all()
     dept = Department.objects.all()
+    jobtitle = JobTitle.objects.all()
+    
     
     # Filter bank branches and department based on the selected bank and school from the database
     bankbranches = BankBranch.objects.filter(bank_code_id=company_info.bank_name_id) if company_info.bank_name_id else BankBranch.objects.none()
@@ -643,6 +687,7 @@ def edit_company_info(request,staffno):
                 'selected_branch_id': selected_branch_id,
                 'selected_sch_fac_id': selected_sch_fac_id,
                 'selected_dept_id': selected_dept_id,
+                'jobtitle':jobtitle,
             }
 
     return render(request, 'hr/company_info.html', context)

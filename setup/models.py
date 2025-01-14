@@ -102,6 +102,9 @@ class JobTitle(models.Model):
     jobtitle_notes = models.TextField("Notes",blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) 
+    
+    def __str__(self):
+        return self.job_title
 
 
 class AcademicYear(models.Model):

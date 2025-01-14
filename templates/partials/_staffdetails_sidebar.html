@@ -5,13 +5,9 @@
           {% else %}
               <p>No image available</p>
           {% endif %}
-          {% comment %} <a href="{% url 'staff-details' staff.staffno %}">
-            <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" style="height: 200px; width: 200px; object-fit: cover;" />
-          </a> {% endcomment %}
+          
           <br />
-            <strong>
-              {{ staff.title }} {{ staff.fname }}  {{ staff.lname }} 
-            </strong>
+          <h5><b>{{ staff.title }} {{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }} {{ staff.oname }}</b></h5>
         </div>
         <ul class="sidebar-nav">
 
