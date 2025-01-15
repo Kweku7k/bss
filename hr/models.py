@@ -178,6 +178,9 @@ class ChoicesMaritalStatus(models.Model):
     
 class ChoicesMedicalTreatment(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    
+class ChoicesMedicalType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
 class ProfessionalBody(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
@@ -250,6 +253,8 @@ class Medical(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
     staff_cat = models.CharField('Staff Category',max_length=100,blank=True,null=True)
     hospital_code = models.CharField('Hospital', max_length=100, blank=True, null=True)
+    payment_type = models.CharField('Payment Type', max_length=100, blank=True, null=True)
+    nature = models.CharField('Nature of Treatment', max_length=100, blank=True, null=True)
     academic_year = models.CharField('AcademicYear', max_length=20, blank=True, null=True)
     date_attended = models.DateField()
     complaint = models.TextField(max_length=300,blank=True,null=True)

@@ -1169,6 +1169,7 @@ def medical_transaction(request, staffno):
                'academic_years':academic_years,
                'hospitals':hospitals,
                 'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+                'MEDICALTYPE': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
 
             }
     return render(request, 'hr/medical.html', context)
@@ -1212,6 +1213,8 @@ def edit_medical_transaction(request, staffno, med_id):
         'remaining_amount': remaining_amount,
         'hospitals': hospitals,
         'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+        'MEDICALTYPE': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
+        
     }
 
     return render(request, 'hr/medical.html', context)
