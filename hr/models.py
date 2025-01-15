@@ -175,6 +175,9 @@ class ChoicesIdType(models.Model):
 
 class ChoicesMaritalStatus(models.Model):
     name = models.CharField(max_length=120, unique=True)
+    
+class ChoicesMedicalTreatment(models.Model):
+    name = models.CharField(max_length=100, unique=True)
 
 class ProfessionalBody(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model

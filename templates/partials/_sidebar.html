@@ -190,35 +190,32 @@
       </li>
      
       
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-toggle="collapse" href="#leave-nav" aria-expanded="false">
-          <i class="bi bi-menu-button-wide"></i>
-          <span>Leave</span>
-          <i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="leave-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{% url 'leave-entitlement' %}">
-              <i class="bi bi-circle"></i><span>Leave Entitlements</span>
+      {% if 'superadmin' in user_groups or 'leave' in user_groups %}
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-toggle="collapse" href="#leave-nav" aria-expanded="false">
+                <i class="bi bi-menu-button-wide"></i>
+                <span>Leave</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
             </a>
-          </li>
-          <li>
-            <a href="{% url 'leave-report' %}">
-              <i class="bi bi-circle"></i><span>Report</span>
-            </a>       
-          </li>
-          {% comment %} <li>
-            <a href="{% url 'general-leave-request' %}">
-              <i class="bi bi-circle"></i><span>Request Leave</span>
-            </a>
-          </li> {% endcomment %}
-          <li>
-            <a href="{% url 'leave-form' %}">
-              <i class="bi bi-circle"></i><span>Leave Form</span>
-            </a>
-          </li>
-        </ul>
-      </li>
+            <ul id="leave-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="{% url 'leave-entitlement' %}">
+                        <i class="bi bi-circle"></i><span>Leave Entitlements</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'leave-report' %}">
+                        <i class="bi bi-circle"></i><span>Report</span>
+                    </a>       
+                </li>
+                <li>
+                    <a href="{% url 'leave-form' %}">
+                        <i class="bi bi-circle"></i><span>Leave Form</span>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        {% endif %}
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-toggle="collapse" href="#medical-nav" aria-expanded="false">

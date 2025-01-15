@@ -9,11 +9,9 @@ from medical.models import *
 from django.db.models import Q
 from .forms import *
 from django.db import connection # type: ignore
-from django.contrib.auth.decorators import user_passes_test, login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django_otp.plugins.otp_totp.models import TOTPDevice
@@ -28,21 +26,9 @@ from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
+from hr.decorators import role_required
 
 
-
-def is_in_group(user, group_name):
-    return user.groups.filter(name=group_name).exists()
-
-def superadmin_required(view_func):
-    def wrapper(request, *args, **kwargs):
-        user = request.user
-        if request.user.is_authenticated and user.groups.filter(name='superadmin').exists():
-            return view_func(request, *args, **kwargs)
-        else:
-            messages.error(request, "Page restricted. You do not have the required permissions.")
-            return redirect(request.META.get('HTTP_REFERER', '/'))  # Redirect to the previous page or home
-    return wrapper
 
 logger = logging.getLogger(__name__)
 
@@ -271,7 +257,7 @@ def edit_staff(request,staffno):
 
 
 @login_required
-@superadmin_required
+@role_required(['superadmin'])
 def allstaff(request): 
     staffs = Employee.objects.order_by('fname')
     staff_count = staffs.count()
@@ -369,8 +355,7 @@ def allstaff(request):
     }
     return render(request, 'hr/allstaff.html', context)
     
-
-@user_passes_test(lambda user: is_in_group(user, 'superadmin') )
+@login_required
 def filter_staff(request):
     staffs = Employee.objects.all()
     # company_info = CompanyInformation.objects.all()
@@ -428,7 +413,7 @@ def filter_staff(request):
     return render(request, 'hr/filter_staff.html', context)
 
 
-
+@role_required(['superadmin', 'leave'])
 def test(request): 
     staffs = Employee.objects.order_by('fname')
     staff_count = staffs.count()
