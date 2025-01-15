@@ -73,5 +73,6 @@ urlpatterns = [
     path('choices_religion', views.generic_model_crud, {'model_class': ChoicesReligion, 'model_name': 'Religion', 'template_name': 'setup/generic.html'}, name='choices-religion'),
     path('choices_id_type', views.generic_model_crud, {'model_class': ChoicesIdType, 'model_name': 'ID Type', 'template_name': 'setup/generic.html'}, name='choices-id-type'),
     path('choices_staff_status', views.generic_model_crud, {'model_class': ChoicesStaffStatus, 'model_name': 'Staff Status', 'template_name': 'setup/generic.html'}, name='choices-staff-status'),
-    path('choices_medical_type', views.generic_model_crud, {'model_class': ChoicesMedicalTreatment, 'model_name': 'Nature of Treatment', 'template_name': 'setup/generic.html'}, name='choices-medical-type'),
+    path('choices_medical_treatment', views.generic_model_crud, {'model_class': ChoicesMedicalTreatment, 'model_name': 'Nature of Treatment', 'template_name': 'setup/generic.html'}, name='choices-medical-treatment'),
+    path('choices_medical_payment_type', views.generic_model_crud, {'model_class': ChoicesMedicalType, 'model_name': 'Medical Payment Type', 'template_name': 'setup/generic.html'}, name='choices-medical-payment-type'),
 ]

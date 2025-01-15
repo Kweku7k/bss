@@ -36,7 +36,8 @@
                         <tr>
                             <th>Name</th>
                             <th>Hospital</th>
-                            <th>Treatment </th>
+                            <th>Payment Type</th>
+                            <th>Treatment</th>
                             <th>Date</th>
                             <th>Cost</th>
                             <th>Academic Year</th>
@@ -47,6 +48,8 @@
                         <tr>
                             <td>{{ transaction.patient_name }}</td>
                             <td>{{ transaction.hospital_code }}</td>
+                            <td>{{ transaction.payment_type }}</td>
+                            <td>{{ transaction.nature }}</td>
                             <td>{{ transaction.date_attended }}</td>
                             <td>{{ transaction.treatment_cost }}</td>
                             <td>{{ transaction.academic_year }}</td>
@@ -77,17 +80,39 @@
                     </div> {% endcomment %}
                     <input type="text" class="form-control" name="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden>
 
-                    <div class="col-md-4">
+                    {% comment %} <div class="col-md-4">
                         <label for="patient_name" class="form-label">Patient Name</label>
                         <input type="text" class="form-control" name="patient_name" {% if medical_transaction %} value="{{ medical_transaction.patient_name }}" {% else %} value="" {% endif %} required>
+                    </div> {% endcomment %}
+
+                    <div class="col-md-4">
+                        <label for="patient_name" class="form-label">Patient Name</label>
+                        <select name="patient_name" class="form-select">
+                            <option value="" disabled selected>Choose from Beneficiary</option>
+                            {% for key, value in BENE %}
+                            <option value="{{ key }}" {% if key == medical_transaction.patient_name %} selected {% endif %}>
+                                {{ value }}
+                            </option>
+                            {% endfor %}
+                        </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label for="relationship" class="form-label">Relationship</label>
-                        <select name="relationship" class="form-select">
+                        <label for="payment_type" class="form-label">Payment Type</label>
+                        <select name="payment_type" class="form-select">
                             <option value="" disabled selected>Type</option>
-                            {% for key, value in RELATIONSHIP %}
-                            <option value="{{ key }}" {% if key == medical_transaction.relationship %} selected {% endif %}>{{ value }}</option>
+                            {% for key, value in MEDICALTYPE %}
+                            <option value="{{ key }}" {% if key == medical_transaction.payment_type %} selected {% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="nature" class="form-label">Nature of Treatment</label>
+                        <select name="nature" class="form-select">
+                            <option value="" disabled selected>Type</option>
+                            {% for key, value in MEDICALTREATMENT %}
+                            <option value="{{ key }}" {% if key == medical_transaction.nature %} selected {% endif %}>{{ value }}</option>
                             {% endfor %}
                         </select>
                     </div>

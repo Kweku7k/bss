@@ -27,6 +27,12 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from hr.decorators import role_required
+from django.db.models.functions import Concat
+from django.db.models import F, Value, CharField
+
+
+
+
 
 
 
@@ -1119,6 +1125,13 @@ def medical_transaction(request, staffno):
     medical_trans_count = medical_transactions.count()
     academic_years = AcademicYear.objects.all()
     hospitals = Hospital.objects.all()
+    
+    # Filter beneficiaries based on staffno
+    bene_list = Kith.objects.filter(staffno=staff).annotate(full_name=Concat( F('kith_fname'), Value(' '), F('kith_middlenames'), Value(' '), F('kith_lname'), output_field=CharField())).values_list('id', 'full_name')
+    
+    # Add the staff name to the list
+    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"  # Update field names as per your Employee model
+    final_bene_list = list(bene_list) + [(staff.staffno, staff_fullname)]
 
     
     if not medical_entitlement:
@@ -1169,8 +1182,9 @@ def medical_transaction(request, staffno):
                'academic_years':academic_years,
                'hospitals':hospitals,
                 'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-                'MEDICALTYPE': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
-
+                'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
+                'MEDICALTYPE': ChoicesMedicalType.objects.all().values_list("name", "name"),
+                'BENE': final_bene_list,
             }
     return render(request, 'hr/medical.html', context)
 
@@ -1183,6 +1197,13 @@ def edit_medical_transaction(request, staffno, med_id):
     medical_transaction = get_object_or_404(Medical, pk=med_id)
     medical_entitlement = MedicalEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
     hospitals = Hospital.objects.all()
+    
+    # Filter beneficiaries based on staffno
+    bene_list = Kith.objects.filter(staffno=staff).annotate(full_name=Concat( F('kith_fname'), Value(' '), F('kith_middlenames'), Value(' '), F('kith_lname'), output_field=CharField())).values_list('full_name', 'full_name')
+    
+    # Add the staff name to the list
+    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"  # Update field names as per your Employee model
+    final_bene_list = list(bene_list) + [(staff_fullname, staff_fullname)]
 
     # Calculate the remaining Medical Balance
     remaining_amount = medical_entitlement.get_remaining_amount(staff)
@@ -1213,8 +1234,9 @@ def edit_medical_transaction(request, staffno, med_id):
         'remaining_amount': remaining_amount,
         'hospitals': hospitals,
         'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-        'MEDICALTYPE': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
-        
+        'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
+        'MEDICALTYPE': ChoicesMedicalType.objects.all().values_list("name", "name"),
+        'BENE': final_bene_list,        
     }
 
     return render(request, 'hr/medical.html', context)

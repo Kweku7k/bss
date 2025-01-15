@@ -706,6 +706,7 @@ def generic_model_crud(request, model_class, model_name, template_name):
             name = form.cleaned_data['name']
             if not record and model_class.objects.filter(name=name).exists():
                 messages.error(request, f"{model_name} '{name}' already exists.")
+                return redirect(request.path)
             else:
                 form.save()
                 if record:
