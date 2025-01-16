@@ -131,6 +131,8 @@ def landing(request):
     expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
     notification_count = expiring_soon.count()
 
+    pending_renewals = RenewalHistory.objects.filter(is_approved=False)
+
     context = {
         'staffs':staffs,
         'active':active,
@@ -140,6 +142,7 @@ def landing(request):
         'leave_count':leave_count,
         'expiring_soon':expiring_soon,
         'notification_count':notification_count,
+        'pending_renewals':pending_renewals,
     }
     
     return render(request,'hr/landing_page.html', context)
@@ -1911,3 +1914,48 @@ def delete_celebration(request,bno,staffno):
 ######################################################################
 ### End of Celebration
 ######################################################################
+
+# View for adding a new renewal history
+@role_required(['admin', 'superadmin'])
+def add_renewal_history(request, staffno):
+    submitted = False
+    staff = get_object_or_404(Employee, pk=staffno)
+    renewal_list = RenewalHistory.objects.filter(staffno=staff)
+    
+    if request.method == 'POST':
+        form = RenewalHistoryForm(request.POST)
+        if form.is_valid():
+            renewal = form.save(commit=False)
+            renewal.staffno = staff
+            renewal.is_approved = False  # Default: not approved yet
+            renewal.save()
+            messages.success(request, "New renewal history added successfully.")
+            return redirect('renewal')
+    else:
+        form = RenewalHistoryForm()
+        if 'submitted' in request.GET:
+            submitted = True
+            
+    context = {'form': form, 'submitted': submitted, 'staff': staff, 'renewal_list': renewal_list}
+
+    return render(request, 'hr/renewal.html', context)
+
+
+# View for approving a renewal history
+@role_required(['superadmin'])
+def approve_renewal(request, renewal_id):
+    renewal = get_object_or_404(RenewalHistory, id=renewal_id)
+
+    if request.method == 'POST':
+        form = RenewalHistoryForm(request.POST, instance=renewal)
+        if form.is_valid():
+            renewal = form.save(commit=False)
+            renewal.is_approved = True
+            renewal.approved_by = request.user  # Set the approver
+            renewal.save()
+            messages.success(request, f"Renewal for {renewal.staffno} has been approved.")
+            return redirect('pending-renewals')
+    else:
+        form = RenewalHistoryForm(instance=renewal)
+
+    return render(request, 'approve_renewal.html', {'form': form, 'renewal': renewal})

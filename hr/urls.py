@@ -98,5 +98,6 @@ urlpatterns = [
     path('edit_celebration/<str:bno>/<str:staffno>', views.edit_celebration,name="edit-celebration"),
     path('delete_celebration/<str:bno>/<str:staffno>', views.delete_celebration,name="delete-celebration"),
     
-    
+    path('renewal/<str:staffno>/', views.add_renewal_history, name='renewal-history'),
+    path('renewals/approve/<int:renewal_id>/', views.approve_renewal, name='approve-renewal'),
 ]

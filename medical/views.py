@@ -91,6 +91,8 @@ def medical_report(request):
     selected_academic_year = request.GET.get('academic_year')
     filter_by_hospital = request.GET.get('filter_by_hospital')
     filter_by_month = request.GET.get('filter_by_month') 
+    filter_by_not = request.GET.get('filter_by_not')
+    filter_by_payment = request.GET.get('filter_by_payment')
 
 
     # Apply filters based on user input
@@ -103,15 +105,17 @@ def medical_report(request):
     if filter_by_hospital:
         medical_transactions = medical_transactions.filter(hospital_code=filter_by_hospital)
         
+    if filter_by_not: 
+        medical_transactions = medical_transactions.filter(nature=filter_by_not)
+        
+    if filter_by_payment:
+        medical_transactions = medical_transactions.filter(payment_type=filter_by_payment)
+        
     # Apply month filter if provided
     if filter_by_month:
-        try:
-            # Ensure filter_by_month is a valid integer for month (1-12)
-            filter_by_month = int(filter_by_month)
-            medical_transactions = medical_transactions.filter(date_attended__month=filter_by_month)
-        except ValueError:
-            # If not a valid month, you could set an error or handle gracefully
-            medical_transactions = medical_transactions.none()
+        # Ensure filter_by_month is a valid integer for month (1-12)
+        filter_by_month = int(filter_by_month)
+        medical_transactions = medical_transactions.filter(date_attended__month=filter_by_month)
 
 
     context = {
@@ -123,6 +127,10 @@ def medical_report(request):
         'filter_by_hospital': filter_by_hospital,
         'hospitals': hospitals,
         'filter_by_month': filter_by_month,
+        'filter_by_not': filter_by_not,
+        'filter_by_payment': filter_by_payment,
+        'TREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
+        'NATURE': ChoicesMedicalType.objects.all().values_list("name", "name"),
     }
     
     pprint.pprint(context)

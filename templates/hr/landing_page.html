@@ -1,5 +1,5 @@
-  {% extends "base.html" %} {% load static %}
-  {% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %}
+{% extends "base.html" %} 
+{% load static %}
 {% block content %}
 
 <style>
@@ -83,10 +83,12 @@
         </div>
     </div>
       <div class="row">
-        <div class="col-lg-12">
-			        
-
+        <div class="col-lg-6 col-sm-6">
           {% include "partials/_socials.html" %}
+        </div>
+        
+        <div class="col-lg-6 col-sm-6">       
+          {% include "partials/_renewal.html" %}
         </div>
 
          

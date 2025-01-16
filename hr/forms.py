@@ -130,3 +130,16 @@ class CelebrationForm(ModelForm):
         fields = '__all__'
         exclude = ['updated','created']
     
+    
+class RenewalHistoryForm(ModelForm):
+    class Meta:
+        model = RenewalHistory
+        fields = '__all__'
+        exclude = ['updated', 'created']
+        widgets = {
+            'approved_by': forms.HiddenInput(),  # Use this to hide the approved_by field
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['approved_by'].widget = forms.HiddenInput()

@@ -1,0 +1,23 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+
+<h1>Add Renewal for {{ staff }}</h1>
+
+<p>Existing Renewals:</p>
+<ul>
+    {% for renewal in renewal_list %}
+        <li>{{ renewal.renewal_date }} - {{ renewal.job_title }}</li>
+    {% empty %}
+        <li>No renewal history found.</li>
+    {% endfor %}
+</ul>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Add Renewal</button>
+</form>
+
+
+{% endblock %}

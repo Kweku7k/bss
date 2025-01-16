@@ -4,6 +4,8 @@ from hr.choices import *
 from setup.models import *
 from django.contrib.auth.models import User as BaseUser
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 
@@ -369,3 +371,24 @@ class Celebration(models.Model):
     cel_notes = models.TextField('Notes',blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) 
+    
+    
+class RenewalHistory(models.Model):
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
+    renewal_date = models.DateField()
+    staff_category = models.CharField(max_length=120)
+    job_title = models.CharField(max_length=120)
+    is_approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_renewals')
+
+    def __str__(self):
+        return f"Renewal for {self.staffno} on {self.renewal_date}"
+    
+@receiver(post_save, sender=RenewalHistory)
+def update_company_info_on_approval(sender, instance, **kwargs):
+    if instance.is_approved:
+        company_info = CompanyInformation.objects.filter(staffno=instance.staffno).first()
+        if company_info:
+            company_info.job_title = instance.job_title
+            company_info.staff_cat = instance.staff_category
+            company_info.save()

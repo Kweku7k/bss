@@ -6,8 +6,6 @@
     <div class="card pt-1 mx-3">
         <div class="card-header ">
             <h5><strong>Number of Staff: {{ staff_count }}</strong></h5>
-
-            
         </div>
 
         <div class="card-body mb-3">
@@ -16,7 +14,7 @@
                     <label class="form-label" style="font-weight:bold;">Filter by:</label>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-3">
+                    <div class="col-2">
                         <label for="filter_staffcategory">Staff Category</label>
                         <select id="filter_staffcategory" name="filter_staffcategory" class="form-control">
                             <option selected="true" disabled> {% if filter_staffcategory %} {{ filter_staffcategory }} {% else %} Select {% endif %}</option>
@@ -28,7 +26,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-2">
                         <label for="filter_by_hospital">Hospital</label>
                         <select id="filter_by_hospital" name="filter_by_hospital" class="form-control">
                             <option selected="true" disabled> {% if filter_by_hospital %} {{ filter_by_hospital }} {% else %} Select {% endif %}</option>
@@ -40,7 +38,31 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-2">
+                        <label for="filter_by_not">Treatment</label>
+                        <select id="filter_by_not" name="filter_by_not" class="form-control">
+                            <option selected="true" disabled> {% if filter_by_not %} {{ filter_by_not }} {% else %} Select {% endif %}</option>
+                            {% for key, value in TREATMENT %}
+                                <option value="{{ key }}" {% if key == filter_by_not %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-2">
+                        <label for="filter_by_payment">Type</label>
+                        <select id="filter_by_payment" name="filter_by_payment" class="form-control">
+                            <option selected="true" disabled> {% if filter_by_payment %} {{ filter_by_payment }} {% else %} Select {% endif %}</option>
+                            {% for key, value in NATURE %}
+                                <option value="{{ key }}" {% if key == filter_by_payment %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-2">
                         <label for="academic_year">Academic Year</label>
                         <select id="academic_year" name="academic_year" class="form-control">
                             <option selected="true" disabled> {% if selected_academic_year %} {{ selected_academic_year }} {% else %} Select {% endif %}</option>
@@ -52,7 +74,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-3">
+                    <div class="col-2">
                         <label for="filter_by_month">Month</label>
                         <select name="filter_by_month" id="filter_by_month" class="form-control">
                             <option value="">Select</option>
@@ -72,9 +94,9 @@
                     </div>
                     
                     <div class="col-md-4 mt-4">
-                        <button type="submit" class="btn btn-info">Filter</button>
-                        <a class="btn btn-secondary" href="{% url 'medical-report' %}">Reset</a>
-                        <button  onclick="window.print()" class="btn btn-outline-primary">Print</button>
+                        <button type="submit" class="btn btn-success btn-sm">Filter</button>
+                        <a class="btn btn-outline-secondary btn-sm" href="{% url 'medical-report' %}">Reset</a>
+                        {% comment %} <button  onclick="window.print()" class="btn btn-outline-primary btn-sm">Print</button> {% endcomment %}
                     </div>
                 </div>
             </form>
@@ -84,10 +106,11 @@
             <table class="table table-striped mt-5">
                 <thead>
                     <tr>
-                        <th>Staff</th>
                         <th>Patient</th>
                         <th>Staff Category</th>
                         <th>Hospital</th>
+                        <th>Type</th>
+                        <th>Treatment</th>
                         <th>Cost </th>
                         <th>Date Attended</th>
                     </tr>
@@ -95,10 +118,12 @@
                 <tbody>
                     {% for transaction in medical_transactions %}
                         <tr class="clickable-row" onclick="window.location='{% url 'medical-transaction' transaction.staffno.staffno %}'">
-                            <td>{{ transaction.staffno.title }} {{ transaction.staffno.fname }} {{ transaction.staffno.lname }} {{ transaction.staffno.middlenames }}</td>
+                            {% comment %} <td>{{ transaction.staffno.title }} {{ transaction.staffno.fname }} {{ transaction.staffno.lname }} {{ transaction.staffno.middlenames }}</td> {% endcomment %}
                             <td>{{ transaction.patient_name }}</td>
                             <td>{{ transaction.staff_cat }}</td>
                             <td>{{ transaction.hospital_code }}</td>
+                            <td>{{ transaction.payment_type }}</td>
+                            <td>{{ transaction.nature }}</td>
                             <td>{{ transaction.treatment_cost }}</td>
                             <td>{{ transaction.date_attended }}</td>
                         </tr>
