@@ -31,10 +31,10 @@
                         </select>
                     </div>
 
-                    <div class="col-md-4">
+                    {% comment %} <div class="col-md-4">
                         <label for="job_description" class="form-label">Job Description</label>
                         <input type="text" class="form-control" id="job_description" name="job_description" value="{{ company_info.job_description }}">
-                    </div>
+                    </div> {% endcomment %}
                     <div class="col-md-4">
                         <label for="staff_cat" class="form-label">Staff Category</label>
                         <select id="staff_cat" name="staff_cat" class="form-select" required>
@@ -155,7 +155,7 @@
                     </div>
                     <div class="col-md-4">
                         <label for="campus" class="form-label">Campus</label>
-                        <select id="campus" name="campus" class="form-select" required>
+                        <select id="campus" name="campus" class="form-select">
                             <option value="" disabled selected>Select Campus</option>
                             {% for camp in campus %}
                             <option value="{{ camp }}" {% if camp.campus_name == company_info.campus %} selected {% endif %}>{{ camp }}</option>

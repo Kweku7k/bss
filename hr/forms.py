@@ -2,7 +2,6 @@ from django import forms
 from django.forms import ModelForm # type: ignore
 from .models import *
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from django.contrib.auth.models import User
 
 
 class CSVUploadForm(forms.Form):
@@ -11,15 +10,14 @@ class CSVUploadForm(forms.Form):
 class RegistrationForm(UserCreationForm):   
     class Meta:
         model = User
-        fields = ['username', 'email', 'password1', 'password2']
-        exclude = ['updated','created']
+        fields = ['username', 'email', 'staffno', 'password1', 'password2']
         # add helpertext to display errors
         
 
 class UserUpdateForm(UserChangeForm):
     class Meta:
         model = User
-        fields = ['username', 'email', 'first_name', 'last_name']
+        fields = ['username', 'email', 'staffno', 'first_name', 'last_name']
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
@@ -136,10 +134,3 @@ class RenewalHistoryForm(ModelForm):
         model = RenewalHistory
         fields = '__all__'
         exclude = ['updated', 'created']
-        widgets = {
-            'approved_by': forms.HiddenInput(),  # Use this to hide the approved_by field
-        }
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['approved_by'].widget = forms.HiddenInput()

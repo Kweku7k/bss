@@ -2,10 +2,13 @@ from django.db import models # type: ignore
 from datetime import datetime, timezone
 from hr.choices import *
 from setup.models import *
-from django.contrib.auth.models import User as BaseUser
+from django.contrib.auth.models import AbstractUser
+# from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth import get_user_model
+
 
 
 
@@ -114,12 +117,14 @@ class Kith(models.Model):
      
 
 
-class User(BaseUser):
-    staffno = models.CharField(max_length=50, blank=True)
+class User(AbstractUser): 
+    staffno = models.CharField(max_length=50, blank=False, null=False, unique=True)
     approval = models.BooleanField(default=False)
-    
+    is_admin = models.BooleanField(default=False)
+
     def __str__(self):
-        return self.username
+        return f"{self.username} ({self.staffno})"
+
 
 class Rank(models.Model):
     name = models.CharField(max_length=50, unique=True)
@@ -379,7 +384,7 @@ class RenewalHistory(models.Model):
     staff_category = models.CharField(max_length=120)
     job_title = models.CharField(max_length=120)
     is_approved = models.BooleanField(default=False)
-    approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_renewals')
+    approved_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_renewals')
 
     def __str__(self):
         return f"Renewal for {self.staffno} on {self.renewal_date}"

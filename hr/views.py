@@ -1,4 +1,5 @@
 from math import e
+import pprint
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse # type: ignore
@@ -29,6 +30,7 @@ from django.core.paginator import Paginator
 from hr.decorators import role_required
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
+
 
 
 
@@ -1920,42 +1922,56 @@ def delete_celebration(request,bno,staffno):
 def add_renewal_history(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)
     renewal_list = RenewalHistory.objects.filter(staffno=staff)
+    renewal_count = renewal_list.count()
+    staffcategory = StaffCategory.objects.all()
+    jobtitle = JobTitle.objects.all()
+
     
     if request.method == 'POST':
         form = RenewalHistoryForm(request.POST)
         if form.is_valid():
             renewal = form.save(commit=False)
             renewal.staffno = staff
-            renewal.is_approved = False  # Default: not approved yet
+            renewal.is_approved = False
             renewal.save()
             messages.success(request, "New renewal history added successfully.")
-            return redirect('renewal')
+            return redirect('renewal-history', staffno)
+        else:
+            messages.error(request, "Form is not valid. Please check the data.")            
     else:
         form = RenewalHistoryForm()
         if 'submitted' in request.GET:
             submitted = True
             
-    context = {'form': form, 'submitted': submitted, 'staff': staff, 'renewal_list': renewal_list}
-
+    context = {
+        'form': form, 
+        'submitted': submitted, 
+        'staff': staff, 
+        'renewal_list': renewal_list, 
+        'renewal_count':renewal_count,
+        'staffcategory':staffcategory,
+        'jobtitle':jobtitle,
+        'company_info':company_info,
+    }
+    
     return render(request, 'hr/renewal.html', context)
 
 
 # View for approving a renewal history
+@login_required
 @role_required(['superadmin'])
 def approve_renewal(request, renewal_id):
     renewal = get_object_or_404(RenewalHistory, id=renewal_id)
 
     if request.method == 'POST':
-        form = RenewalHistoryForm(request.POST, instance=renewal)
-        if form.is_valid():
-            renewal = form.save(commit=False)
-            renewal.is_approved = True
-            renewal.approved_by = request.user  # Set the approver
-            renewal.save()
-            messages.success(request, f"Renewal for {renewal.staffno} has been approved.")
-            return redirect('pending-renewals')
-    else:
-        form = RenewalHistoryForm(instance=renewal)
+        # approval status directly
+        renewal.is_approved = True
+        renewal.approved_by = request.user
+        renewal.save()
+        
+        messages.success(request, f"Renewal for {renewal.staffno} has been approved.")
+        return redirect('staff-details', staffno=renewal.staffno.staffno)
 
-    return render(request, 'approve_renewal.html', {'form': form, 'renewal': renewal})
+    return redirect('landing')

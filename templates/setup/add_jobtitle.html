@@ -34,7 +34,7 @@
                         <input type="text" name="salary_level" class="form-control" {% if jobtitle %} value="{{ jobtitle.salary_level }}" {% else %} value="" {% endif %}>
                     </div>
                     <div class="form-group">
-                        <label for="jobtitle_notes" class="col-form-label">Notes</label>
+                        <label for="jobtitle_notes" class="col-form-label">Job Description</label>
                         <textarea name="jobtitle_notes" class="form-control">{% if jobtitle %} {{ jobtitle.jobtitle_notes }} {% endif %}</textarea>
                     </div>
                     <hr>

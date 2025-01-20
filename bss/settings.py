@@ -66,6 +66,14 @@ AUTHENTICATION_BACKENDS = (
     # 'django_otp.backends.OTPBackend',
 )
 
+AUTH_USER_MODEL = 'hr.User'
+
+# Session will expire when the browser is closed
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+# Session timeout duration in seconds (e.g., 1 hour = 3600 seconds)
+SESSION_COOKIE_AGE = 3600  # 1 hour
+
 ROOT_URLCONF = 'bss.urls'
 
 TEMPLATES = [
