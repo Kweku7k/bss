@@ -11,7 +11,7 @@
                             
                             <!-- Staff name link -->
                             <a href="{% url 'staff-details' renewal.staffno.staffno %}" style="text-decoration: none; color: inherit; flex-grow: 1;">
-                                {{ renewal.staffno.fname }} {{ renewal.staffno.lname }}
+                                {{ renewal.staffno.title }} {{ renewal.staffno.fname }} {{ renewal.staffno.lname }} {{ renewal.staffno.middlenames }}
                             </a>
 
                             <!-- Approve button -->
@@ -20,7 +20,7 @@
                                 <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Do you really want to approve the renewal for {{ renewal.staffno.fname }} {{ renewal.staffno.lname }}?');">Approve</button>
                             </form>
                         </li>
-                    {% endfor %}
+                    {% endfor %} 
                 </ul>
             {% else %}
                 <p class="text-muted text-center">No pending renewals.</p>

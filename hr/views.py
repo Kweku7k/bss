@@ -1137,6 +1137,7 @@ def medical_transaction(request, staffno):
     # Add the staff name to the list
     staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"  # Update field names as per your Employee model
     final_bene_list = list(bene_list) + [(staff.staffno, staff_fullname)]
+    pprint.pprint(final_bene_list)
 
     
     if not medical_entitlement:
@@ -1175,22 +1176,22 @@ def medical_transaction(request, staffno):
             submitted = True
             
     context = {
-               'form':form,
-               'staff':staff,
-               'submitted':submitted,
-               'medical_entitlement':medical_entitlement,
-               'medical_transactions':medical_transactions,
-               'remaining_amount':remaining_amount,
-               'amount_spent':amount_spent,
-               'medical_trans_count':medical_trans_count,
-               'company_info':company_info,
-               'academic_years':academic_years,
-               'hospitals':hospitals,
-                'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-                'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
-                'MEDICALTYPE': ChoicesMedicalType.objects.all().values_list("name", "name"),
-                'BENE': final_bene_list,
-            }
+        'form':form,
+        'staff':staff,
+        'submitted':submitted,
+        'medical_entitlement':medical_entitlement,
+        'medical_transactions':medical_transactions,
+        'remaining_amount':remaining_amount,
+        'amount_spent':amount_spent,
+        'medical_trans_count':medical_trans_count,
+        'company_info':company_info,
+        'academic_years':academic_years,
+        'hospitals':hospitals,
+        'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+        'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
+        'MEDICALTYPE': ChoicesMedicalType.objects.all().values_list("name", "name"),
+        'BENE': final_bene_list,
+    }
     return render(request, 'hr/medical.html', context)
 
 
