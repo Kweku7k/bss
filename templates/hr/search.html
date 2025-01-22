@@ -12,36 +12,64 @@
                 </div>
                 <div class="card-body">
                     {% if staffs %}
-                        <table class="table table-hover">
-                            <thead class="table-primary">
+                        <table class="table align-middle mb-0 bg-white">
+                            <thead class="bg-light">
                                 <tr>
-                                    <th>Staff No</th>
                                     <th>Name</th>
                                     <th>School/Directorate</th>
                                     <th>Job Title</th>
                                     <th>Staff Category</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for staff in staffs  %}
-                                    <tr class="clickable-row"  onclick="window.location='{% url 'staff-details' staff.staffno %}'" >
-                                        <td>{{ staff.staffno }}</td>
-                                        <td>{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</td>
-                                        {% for company_data in company_info %}
-                                            {% if staff.staffno == company_data.staffno_id %}
-                                            {% if company_data.sch_fac_dir_id %}
-                                                <td>{{ company_data.sch_fac_dir_id }}</td>
-                                            {% elif company_data.directorate_id %}
-                                                <td>{{ company_data.directorate_id }}</td>
-                                            {% endif %}
-                                            <td>{{ company_data.job_title }}</td>
-                                            <td>{{ company_data.staff_cat }}</td>
-                                            {% endif %}
-                                        {% endfor %}
+                                {% for staff in staffs %}
+                                    <tr class="clickable-row" onclick="window.location='{% url 'staff-details' staff.staffno %}'">
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="{{ staff.staff_pix.url }}" alt="Avatar" style="width: 45px; height: 45px" class="rounded-circle" />
+                                                <div class="ms-3">
+                                                    <p class="fw-bold mb-1">{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</p>
+                                                    {% for company_data in company_info %}
+                                                    <p>{{ company_data.email }}</p>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% for company_data in company_info %}
+                                                {% if staff.staffno == company_data.staffno_id %}
+                                                    {% if company_data.dept and company_data.directorate %}
+                                                        <p class="fw-normal mb-1">{{ company_data.dept.dept_long_name }} / {{ company_data.directorate.direct_name }}</p>
+                                                    {% elif company_data.dept %}
+                                                        <p class="fw-normal mb-1">{{ company_data.dept.dept_long_name }}</p>
+                                                    {% elif company_data.directorate %}
+                                                        <p class="fw-normal mb-1">{{ company_data.directorate.direct_name }}</p>
+                                                    {% endif %}
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            {% for company_data in company_info %}
+                                                {% if staff.staffno == company_data.staffno_id %}
+                                                    <p class="fw-normal mb-1">{{ company_data.job_title }}</p>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            {% for company_data in company_info %}
+                                                {% if staff.staffno == company_data.staffno_id %}
+                                                    <p class="fw-normal mb-1">{{ company_data.staff_cat }}</p>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-link btn-sm btn-rounded">View</button>
+                                        </td>
                                     </tr>
                                 {% empty %}
                                     <tr>
-                                        <td colspan="5" class="text-center">No staff found.</td>
+                                        <td colspan="6" class="text-center">No staff found.</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
@@ -49,6 +77,7 @@
                     {% else %}
                         <p class="text-center">No results to display.</p>
                     {% endif %}
+
                 </div>
             </div>
         </div>

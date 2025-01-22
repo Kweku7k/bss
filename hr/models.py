@@ -55,17 +55,9 @@ class Employee(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
-        staffname = self.title + ' '
-        if self.fname:
-            staffname += self.fname + ' '
-        if self.middlenames:
-            staffname += self.middlenames + ' '
-        if self.lname:
-            staffname += self.lname + ' '
-        if self.suffix:
-            staffname += self.suffix 
-        return staffname
-        #self.title + ' ' + self.fname + ' ' + self.middlenames + ' ' + self.lname + ' ' + self.suffix
+        return f"{self.staffno} {self.title} {self.fname or ''} {self.lname or ''}".strip()
+
+
 
 class CompanyInformation(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model

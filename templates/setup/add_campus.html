@@ -40,7 +40,7 @@
                         <td>{{ camp.campus_name }}</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-campus' camp.id %}"></a>
-                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-campus' camp.id %}" onclick="return confirm('Do you really want to delete the data for {{ campus.campus_name }}?');"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-campus' camp.id %}" onclick="return confirm('Do you really want to delete the data for {{ camp.campus_name }}?');"></a>
                         </td>
                     </tr>
                     {% endfor %}

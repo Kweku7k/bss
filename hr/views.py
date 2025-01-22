@@ -802,6 +802,7 @@ def bulk_upload(request):
                                     'lname': row['lname'],
                                     'fname': row['fname'],
                                     'middlenames': row.get('middlenames', ''),
+                                    'oname': row.get('oname', ''),
                                     'suffix': row.get('suffix', ''),
                                     'gender': row.get('gender', ''),
                                     'dob': parse_date(row.get('dob', '')),
@@ -835,6 +836,7 @@ def bulk_upload(request):
                             )
                             
                             print(f"Employee: {employee}")
+                            print(f"Created")
                             
                             # If employee already exists, add to duplicates and skip
                             if not created:
@@ -873,6 +875,7 @@ def bulk_upload(request):
                             dept_long_name = row.get('dept')
                             dept_long_instance, created = Department.objects.get_or_create(dept_long_name=dept_long_name, sch_fac=sch_fac_instance)
                             
+                            print("Starting Company Info")
                             # Process CompanyInformation data if present in CSV
                             company_info, created = CompanyInformation.objects.get_or_create(
                                 staffno=employee,  # linking to the employee instance

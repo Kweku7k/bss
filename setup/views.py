@@ -7,6 +7,8 @@ from setup.models import *
 from django.http import JsonResponse
 from django.contrib import messages
 from django.forms import modelform_factory
+from django.db import IntegrityError
+
 
 
 
@@ -703,16 +705,19 @@ def generic_model_crud(request, model_class, model_name, template_name):
 
         form = form_class(request.POST, instance=record)  # Add/Edit Form
         if form.is_valid():
-            name = form.cleaned_data['name']
-            if not record and model_class.objects.filter(name=name).exists():
+            name = form.cleaned_data.get('name')
+            if model_class.objects.filter(name=name).exists():
                 messages.error(request, f"{model_name} '{name}' already exists.")
                 return redirect(request.path)
             else:
-                form.save()
-                if record:
-                    messages.success(request, f"{model_name} has been updated successfully.")
-                else:
-                    messages.success(request, f"New {model_name} has been added successfully.")
+                try:
+                    form.save()
+                    if record:
+                        messages.success(request, f"{model_name} has been updated successfully.")
+                    else:
+                        messages.success(request, f"New {model_name} has been added successfully.")
+                except IntegrityError:
+                    messages.error(request, f"{model_name} '{name}' already exists.")
                 return redirect(request.path)
     else:
         form = form_class(instance=record)

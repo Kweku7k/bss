@@ -94,27 +94,58 @@
 
         <div class="card-body">
             {% if staffs %}
-                <table class="table table-hover">
-                    <thead class="">
+                <table class="table align-middle mb-0 bg-white">
+                    <thead class="bg-light">
                         <tr>
-                            <th>Staff No</th>
-                            <th>Full Name</th>
-                            <th>Staff Category</th>
+                            <th>Name</th>
                             <th>Job Title</th>
+                            <th>Staff Category</th>
                             <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for staff in staffs %}
                             <tr class="clickable-row" onclick="window.location='{% url 'staff-details' staff.staffno %}'">
-                                <td>{{ staff.staffno }}</td>
-                                <td>{{ staff.title }} {{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if staff.staff_pix %}
+                                            <img src="{{ staff.staff_pix.url }}" alt="Avatar" style="width: 45px; height: 45px" class="rounded-circle" />
+                                        {% else %}
+                                            <img src="/media/images/fav.png" alt="Avatar" style="width: 45px; height: 45px" class="rounded-circle" />
+                                        {% endif %} 
+                                        <div class="ms-3">
+                                            <p class="fw-bold mb-1">{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</p>
+                                            {% for company_data in  company_info %}
+                                                {% if staff.staffno == company_data.staffno_id %}
+                                                    <p class="text-muted mb-0">{{ company_data.email }}</p>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </td>
                                 {% for company_data in company_info %}
                                     {% if staff.staffno == company_data.staffno_id %}
-                                        <td>{{ company_data.staff_cat }}</td>
-                                        <td>{{ company_data.job_title }}</td>
                                         <td>
-                                            {{ company_data.active_status }}
+                                            <p class="fw-normal mb-1">{{ company_data.job_title }}</p>
+                                            {% if company_data.dept and company_data.directorate %}
+                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }} - {{ company_data.directorate.direct_name }}</p>
+                                            {% elif company_data.dept %}
+                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }}</p>
+                                            {% elif company_data.directorate %}
+                                                <p class="text-muted mb-0">{{ company_data.directorate.direct_name }}</p>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ company_data.staff_cat }}</td>
+                                        <td>
+                                            <span class="badge {% if company_data.active_status == 'Active' %}bg-success{% elif company_data.active_status == 'Leave' %}bg-info{% else %}bg-warning{% endif %} rounded-pill d-inline">
+                                                {{ company_data.active_status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button type="button" class="btn btn-link btn-sm btn-rounded" onclick="window.location='{% url 'staff-details' staff.staffno %}'">
+                                                View
+                                            </button>
                                         </td>
                                     {% endif %}
                                 {% endfor %}
@@ -129,6 +160,7 @@
             {% else %}
                 <p class="text-center">No staff found.</p>
             {% endif %}
+
 
 
             <div class="mt-5">
@@ -179,10 +211,6 @@
                 </nav>
             </div>
         </div>
-
-        
-
-          
     </div>
 </div>
 

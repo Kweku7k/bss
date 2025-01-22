@@ -30,7 +30,7 @@
         </div>
         <div class="card-body">
           <div class="row mb-3">
-            <h5 class="mb-3">Detailed Overview of <b> {{ staff.title }} {{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }} {{ staff.oname }}</b></h5>
+            <h5 class="mb-3">Detailed Overview of <b> {{ staff.title }} {{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }}</b></h5>
 
             <!-- Staff details -->
             <div class="col-md-6 mb-3">
@@ -60,6 +60,10 @@
             <div class="col-md-6 mb-3">
               <strong>Date of Expiration:</strong>
               <p class="text-muted">{{ company_info.doe }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Confirmation Date:</strong>
+              <p class="text-muted">{{ company_info.renewal }}</p>
             </div>
             <div class="col-md-6 mb-3">
               <strong>Highest Educational Qualification:</strong>
