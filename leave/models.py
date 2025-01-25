@@ -25,8 +25,10 @@ class LeaveEntitlement(models.Model):
     academic_year = models.CharField(max_length=10, blank=True, null=True)
         
     def get_remaining_days(self, staff):
-        # Sum the days taken by this staff member
-        total_days_taken = Staff_Leave.objects.filter(staffno=staff, staff_cat=self.staff_cat).aggregate(models.Sum('days_taken'))['days_taken__sum'] or 0
+        # Fetch deductible leave types from ChoicesLeaveType
+        deductible_leave_types = ChoicesLeaveType.objects.filter(deductible=True).values_list('name', flat=True)
+
+        # Filter leave transactions with deductible leave types
+        total_days_taken = Staff_Leave.objects.filter(staffno=staff, staff_cat=self.staff_cat, leave_type__in=deductible_leave_types).aggregate(models.Sum('days_taken'))['days_taken__sum'] or 0
         remaining_days = self.entitlement - total_days_taken
         return remaining_days
-    

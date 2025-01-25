@@ -140,7 +140,9 @@ class ChoicesRegion(models.Model):
     name = models.CharField(max_length=120, unique=True)
 
 class ChoicesLeaveType(models.Model):
-    name = models.CharField(max_length=120, unique=True)    
+    name = models.CharField(max_length=120, unique=True)  
+    deductible = models.BooleanField(default=False)
+
 
 class ChoicesDependants(models.Model):
     name = models.CharField(max_length=120, unique=True)

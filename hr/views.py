@@ -1067,6 +1067,7 @@ def leave_transaction(request, staffno):
         print("Form submitted")
         form = LeaveTransactionForm(request.POST)
         if form.is_valid():
+            leave_type = ChoicesLeaveType.objects.get(name=form.cleaned_data['leave_type'])
             days_taken = int(form.cleaned_data['days_taken'])
             academic_year = form.cleaned_data['academic_year']
             
@@ -1074,14 +1075,21 @@ def leave_transaction(request, staffno):
             leave_transaction.staffno = staff
             leave_transaction.staff_cat = request.POST.get('staff_cat')
             
-            if remaining_days >= days_taken:
+            if leave_type.deductible:
+                if remaining_days >= days_taken:
+                    leave_transaction.academic_year = academic_year
+                    leave_transaction.save()
+                    
+                    messages.success(request, f'Leave transaction created successfully for {staff_fullname}.')
+                    return redirect('leave-transaction', staffno=staffno)
+                else:
+                    messages.error(request, 'Insufficient leave balance to process this request. Please review the leave days entered')
+            else:
                 leave_transaction.academic_year = academic_year
                 leave_transaction.save()
                 
-                messages.success(request, f'Leave transaction created successfully for {staff_fullname}.')
+                messages.success(request, f'Leave transaction created successfully for {staff_fullname}. (Non-deductible leave)')
                 return redirect('leave-transaction', staffno=staffno)
-            else:
-                messages.error(request, 'Insufficient leave balance to process this request. Please review the leave days entered')
         else:
             print(form.errors)
             messages.error(request, 'Form is not valid. Please check the entered data.')

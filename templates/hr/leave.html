@@ -67,14 +67,10 @@
             <form action="" method="POST" enctype="multipart/form-data"> 
                 {% csrf_token %}
                 <div class="row g-3 mb-4">
-                    {% comment %} <div class="col-md-4">
-                        <label for="staffno" class="form-label">Staff Number</label>
-                    </div> {% endcomment %}
+                    
                     <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
                     <input type="text" name="staff_cat" class="form-control" value="{{ company_info.staff_cat }}" readonly hidden>
-
-                    {% comment %} <input type="text" class="form-control" id="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden> {% endcomment %}
 
                     <div class="col-md-4">
                         <label class="form-label" for="academic_year">Academic Year</label>
@@ -85,10 +81,6 @@
                             {% endfor %}
                         </select>
                     </div>
-                    {% comment %} <div class="col-md-4">
-                        <label for="academic_year" class="form-label">Academic Year </label>
-                        <input type="text" name="academic_year" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.academic_year }}" {% else %} value="" {% endif %} required>
-                    </div> {% endcomment %}
                     <div class="col-md-4">
                         <label class="form-label" for="leave_type">Type of Leave</label>
                         <select name="leave_type" id="leave_type" class="form-select" required>
