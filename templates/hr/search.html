@@ -31,7 +31,9 @@
                                                 <div class="ms-3">
                                                     <p class="fw-bold mb-1">{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</p>
                                                     {% for company_data in company_info %}
-                                                    <p>{{ company_data.email }}</p>
+                                                        {% if staff.staffno == company_data.staffno_id %}
+                                                            <p>{{ company_data.email }}</p>
+                                                        {% endif %}
                                                     {% endfor %}
                                                 </div>
                                             </div>

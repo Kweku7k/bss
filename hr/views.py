@@ -131,9 +131,12 @@ def landing(request):
     
     today = timezone.now().date()
     expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
-    notification_count = expiring_soon.count()
-
-    pending_renewals = RenewalHistory.objects.filter(is_approved=False)
+    sixty_and_above = Employee.objects.filter(dob__lte=today - timedelta(days=60*365))  # Approximates 60 years
+    pending_renewals = RenewalHistorys.objects.filter(is_approved=False, is_disapproved=False)
+    pending_promotions = PromotionHistory.objects.filter(is_approved=False, is_disapproved=False)
+    
+    
+    notification_count = ( expiring_soon.count() + sixty_and_above.count() + pending_renewals.count() + pending_promotions.count() )
 
     context = {
         'staffs':staffs,
@@ -145,6 +148,8 @@ def landing(request):
         'expiring_soon':expiring_soon,
         'notification_count':notification_count,
         'pending_renewals':pending_renewals,
+        'sixty_and_above':sixty_and_above,
+        'pending_promotions':pending_promotions,
     }
     
     return render(request,'hr/landing_page.html', context)
@@ -275,6 +280,8 @@ def allstaff(request):
     company_info = CompanyInformation.objects.all()
     qualification = Qualification.objects.all()
     staff_school = Staff_School.objects.all()
+    department = Department.objects.all()
+    
    
     filters = Q()
         
@@ -285,11 +292,17 @@ def allstaff(request):
         filter_contract = request.POST.get('filter_contract')
         filter_status = request.POST.get('filter_status')
         filter_gender = request.POST.get('filter_gender')
+        filter_department = request.POST.get('filter_department')
+        search_query = request.POST.get('search')
         
         # Initial queryset for filtering
         staffs = Employee.objects.all()
         company_info = CompanyInformation.objects.all()
         staff_school = Staff_School.objects.all()        
+        
+        # Search functionality
+        if search_query:
+            staffs = staffs.filter(Q(fname__icontains=search_query) | Q(lname__icontains=search_query) | Q(staffno__icontains=search_query) | Q(middlenames__icontains=search_query))
         
         #Filter by Staff Category
         if filter_staffcategory:
@@ -303,8 +316,10 @@ def allstaff(request):
             qualification_filter = Q(heq=filter_qualification) | Q(staff_school__certification=filter_qualification)
             filters &= qualification_filter
         
-        qualifications_from_employees = Employee.objects.values_list('heq', flat=True).distinct()
-        qualifications_from_staff_school = Staff_School.objects.values_list('certification', flat=True).distinct()   
+        # qualifications_from_employees = Employee.objects.values_list('heq', flat=True).distinct()
+        # qualifications_from_staff_school = Staff_School.objects.values_list('certification', flat=True).distinct() 
+        # qualification_set = set(qualifications_from_employees) | set(qualifications_from_staff_school)
+  
         
         # Filter by title
         if filter_title:
@@ -320,30 +335,39 @@ def allstaff(request):
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
             
-        staffs = staffs.filter(filters).distinct()
+        # Filter by Department
+        if filter_department:
+            company_info = CompanyInformation.objects.filter(dept_id=filter_department)  # Use dept_id
+            company_staffno = {company.staffno_id for company in company_info}
+            filters &= Q(staffno__in=company_staffno)
+                    
+        staffs = staffs.filter(filters).distinct()        
         
-        # Pagination
+        # Pagination on initial load
         paginator = Paginator(staffs, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-
+        
         context = {
-            'staffs': staffs,
+            'staffs': page_obj,
             'staff_school': staff_school,
-            'filter_staffcategory': filter_staffcategory,
-            'filter_qualification': filter_qualification,
-            'filter_title':filter_title,
-            'filter_contract':filter_contract,
-            'filter_status':filter_status,
-            'filter_gender':filter_gender,
+            'staff_count': staff_count,
+            'staffcategory': [(q.category_name, q.category_name) for q in StaffCategory.objects.all()],
             'company_info': company_info,
-            'staff_count': staffs.count(),
-            'staffcategory': [(q.category_name, q.category_name ) for q in StaffCategory.objects.all()],
-            'qualification': list(set(qualifications_from_employees) | set(qualifications_from_staff_school)),
-            'title': [(q.title_abbr, q.title_abbr ) for q in Title.objects.all()],
-            'contract': [(q.contract_type, q.contract_type ) for q in Contract.objects.all()],
+            'qualification': [(q.qual_abbr, q.qual_abbr) for q in Qualification.objects.all()],
+            'title': [(q.title_abbr, q.title_abbr) for q in Title.objects.all()],
+            'contract': [(q.contract_type, q.contract_type) for q in Contract.objects.all()],
             'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
             'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
+            'department': [(q.id, q.dept_long_name) for q in Department.objects.all()],
+            'filter_staffcategory': filter_staffcategory,
+            'filter_qualification': filter_qualification,
+            'filter_title': filter_title,
+            'filter_contract': filter_contract,
+            'filter_status': filter_status,
+            'filter_gender': filter_gender,
+            'filter_department': filter_department,
+            'search_query': search_query,
         }
         return render(request, 'hr/allstaff.html', context)
     else:
@@ -351,18 +375,19 @@ def allstaff(request):
         paginator = Paginator(staffs, 10)
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
-    
+        
     context = {
         'staffs': page_obj,
         'staff_school': staff_school,
         'staff_count': staff_count,
-        'staffcategory': [(q.category_name, q.category_name ) for q in StaffCategory.objects.all()],
+        'staffcategory': [(q.category_name, q.category_name) for q in StaffCategory.objects.all()],
         'company_info': company_info,
-        'qualification': qualification,
-        'title': [(q.title_abbr, q.title_abbr ) for q in Title.objects.all()],
-        'contract': [(q.contract_type, q.contract_type ) for q in Contract.objects.all()],
+        'qualification': [(q.qual_abbr, q.qual_abbr) for q in Qualification.objects.all()],
+        'title': [(q.title_abbr, q.title_abbr) for q in Title.objects.all()],
+        'contract': [(q.contract_type, q.contract_type) for q in Contract.objects.all()],
         'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
         'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
+        'department': [(q.id, q.dept_long_name) for q in Department.objects.all()],
     }
     return render(request, 'hr/allstaff.html', context)
     
@@ -835,7 +860,7 @@ def bulk_upload(request):
                                 }
                             )
                             
-                            print(f"Employee: {employee}")
+                            # print(f"Employee: {employee}")
                             print(f"Created")
                             
                             # If employee already exists, add to duplicates and skip
@@ -904,7 +929,7 @@ def bulk_upload(request):
                                     'pf_con': row.get('pf_con', ''),
                                 }
                             )
-                            print(f"Company Information: {company_info}")
+                            # print(f"Company Information: {company_info}")
                             success_count += 1
                         except Exception as row_error:
                             transaction.savepoint_rollback(savepoint)
@@ -1927,7 +1952,7 @@ def add_renewal_history(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
-    renewal_list = RenewalHistory.objects.filter(staffno=staff)
+    renewal_list = RenewalHistorys.objects.filter(staffno=staff)
     renewal_count = renewal_list.count()
     staffcategory = StaffCategory.objects.all()
     jobtitle = JobTitle.objects.all()
@@ -1940,7 +1965,7 @@ def add_renewal_history(request, staffno):
             renewal.staffno = staff
             renewal.is_approved = False
             renewal.save()
-            messages.success(request, "New renewal history added successfully.")
+            messages.success(request, "New renewal history added successfully, waiting approval.")
             return redirect('renewal-history', staffno)
         else:
             messages.error(request, "Form is not valid. Please check the data.")            
@@ -1967,7 +1992,7 @@ def add_renewal_history(request, staffno):
 @login_required
 @role_required(['superadmin'])
 def approve_renewal(request, renewal_id):
-    renewal = get_object_or_404(RenewalHistory, id=renewal_id)
+    renewal = get_object_or_404(RenewalHistorys, id=renewal_id)
 
     if request.method == 'POST':
         # approval status directly
@@ -1977,5 +2002,98 @@ def approve_renewal(request, renewal_id):
         
         messages.success(request, f"Renewal for {renewal.staffno} has been approved.")
         return redirect('staff-details', staffno=renewal.staffno.staffno)
+
+    return redirect('landing')
+
+# View for rejecting a renewal history
+@login_required
+@role_required(['superadmin'])
+def disapprove_renewal(request, renewal_id):
+    renewal = get_object_or_404(RenewalHistorys, id=renewal_id)
+
+    if request.method == 'POST':
+        # approval status directly
+        renewal.is_disapproved = True
+        renewal.approved_by = request.user
+        renewal.save()
+
+        messages.success(request, f"Renewal for {renewal.staffno} has been rejected.")
+        return redirect('staff-details', staffno=renewal.staffno.staffno)
+
+    return redirect('landing')
+
+
+# View for adding new promotion history
+@role_required(['admin', 'superadmin'])
+def add_promotion_history(request, staffno):
+    submitted = False
+    staff = get_object_or_404(Employee, pk=staffno)
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)
+    promotion_list = PromotionHistory.objects.filter(staffno=staff)
+    promotion_count = promotion_list.count()
+    staffcategory = StaffCategory.objects.all()
+    jobtitle = JobTitle.objects.all()
+
+
+    if request.method == 'POST':
+        form = PromotionHistoryForm(request.POST)
+        if form.is_valid():
+            promotion = form.save(commit=False)
+            promotion.staffno = staff
+            promotion.is_approved = False
+            promotion.save()
+            messages.success(request, "New promotion history added successfully, waiting approval.")
+            return redirect('promotion-history', staffno)
+        else:
+            messages.error(request, "Form is not valid. Please check the data.")
+    else:
+        form = PromotionHistoryForm()
+        if 'submitted' in request.GET:
+            submitted = True
+
+    context = {
+        'form': form,
+        'submitted': submitted,
+        'staff': staff,
+        'promotion_list': promotion_list,
+        'promotion_count':promotion_count,
+        'staffcategory':staffcategory,
+        'jobtitle':jobtitle,
+        'company_info':company_info,
+    }
+
+    return render(request, 'hr/promotion.html', context)
+
+# View for approving a promotion history
+@login_required
+@role_required(['superadmin'])
+def approve_promotion(request, promotion_id):
+    promotion = get_object_or_404(PromotionHistory, id=promotion_id)
+
+    if request.method == 'POST':
+        # approval status directly
+        promotion.is_approved = True
+        promotion.approved_by = request.user
+        promotion.save()
+
+        messages.success(request, f"Promotion for {promotion.staffno} has been approved.")
+        return redirect('staff-details', staffno=promotion.staffno.staffno)
+
+    return redirect('landing')
+
+# View for rejecting a promotion history
+@login_required
+@role_required(['superadmin'])
+def disapprove_promotion(request, promotion_id):
+    promotion = get_object_or_404(PromotionHistory, id=promotion_id)
+
+    if request.method == 'POST':
+        # approval status directly
+        promotion.is_disapproved = True
+        promotion.approved_by = request.user
+        promotion.save()
+
+        messages.success(request, f"Promotion for {promotion.staffno} has been rejected.")
+        return redirect('staff-details', staffno=promotion.staffno.staffno)
 
     return redirect('landing')

@@ -200,7 +200,7 @@
       </li>
      
       
-      {% if 'superadmin' in user_groups or 'leave' in user_groups %}
+      {% comment %} {% if 'superadmin' in user_groups or 'leave' in user_groups %} {% endcomment %}
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-toggle="collapse" href="#leave-nav" aria-expanded="false">
                 <i class="bi bi-menu-button-wide"></i>
@@ -225,7 +225,7 @@
                 </li>
             </ul>
         </li>
-        {% endif %}
+        {% comment %} {% endif %} {% endcomment %}
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-toggle="collapse" href="#medical-nav" aria-expanded="false">

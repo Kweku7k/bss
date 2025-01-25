@@ -131,6 +131,13 @@ class CelebrationForm(ModelForm):
     
 class RenewalHistoryForm(ModelForm):
     class Meta:
-        model = RenewalHistory
+        model = RenewalHistorys
+        fields = '__all__'
+        exclude = ['updated', 'created']
+        
+        
+class PromotionHistoryForm(ModelForm):
+    class Meta:
+        model = PromotionHistory
         fields = '__all__'
         exclude = ['updated', 'created']

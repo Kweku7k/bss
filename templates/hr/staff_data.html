@@ -42,12 +42,16 @@
               <p class="text-muted">{{ staff.gender }}</p>
             </div>
             <div class="col-md-6 mb-3">
-              <strong>Home Town:</strong>
-              <p class="text-muted">{{ staff.home_town }}</p>
+              <strong>Official Email:</strong>
+              <p class="text-muted">{{ company_info.email }}</p>
             </div>
             <div class="col-md-6 mb-3">
-              <strong>Region:</strong>
-              <p class="text-muted">{{ staff.region }}</p>
+              <strong>Personal Email:</strong>
+              <p class="text-muted">{{ staff.email_address }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Telephone:</strong>
+              <p class="text-muted">{{ staff.active_phone }}</p>
             </div>
             <div class="col-md-6 mb-3">
               <strong>Date of Birth:</strong>
@@ -98,16 +102,8 @@
               <p class="text-muted">{{ company_info.contract }}</p>
             </div>
             <div class="col-md-6 mb-3">
-              <strong>Official Email:</strong>
-              <p class="text-muted">{{ company_info.email }}</p>
-            </div>
-            <div class="col-md-6 mb-3">
-              <strong>Personal Email:</strong>
-              <p class="text-muted">{{ staff.email_address }}</p>
-            </div>
-            <div class="col-md-6 mb-3">
-              <strong>Telephone:</strong>
-              <p class="text-muted">{{ staff.active_phone }}</p>
+              <strong>Campus:</strong>
+              <p class="text-muted">{{ company_info.campus }}</p>
             </div>
             <div class="col-md-6 mb-3">
               <strong>SSNIT No.:</strong>
@@ -117,6 +113,7 @@
               <strong>Identification:</strong>
               <p class="text-muted">{{ staff.idtype }} ({{ staff.gcardno }})</p>
             </div>
+
           </div>
         </div>
         <div class="card-footer text-center mt-4">

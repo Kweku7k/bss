@@ -54,7 +54,6 @@
     <!-- Notification and User Profile -->
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
-
         <div class="dropdown">
           <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
             <i class="bi bi-bell"></i>
@@ -65,35 +64,105 @@
           
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications">
             <li class="dropdown-header">
-              {% if notification_count > 0 %}
-                You have {{ notification_count }} new notification{{ notification_count|pluralize }}
-              {% else %}
-                No new notifications
-              {% endif %}
+                {% if notification_count > 0 %}
+                    You have {{ notification_count }} new notification{{ notification_count|pluralize }}
+                {% else %}
+                    No new notifications
+                {% endif %}
             </li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+        
+            <!-- Expiring Contracts -->
+            {% if expiring_soon %}
+                {% for item in expiring_soon %}
+                    <li class="notification-item">
+                        <i class="bi bi-exclamation-circle text-warning"></i>
+                        <div>
+                            <a href="{% url 'staff-details' item.staffno.staffno %}" style="text-decoration: none; color: inherit;">
+                                <p>{{ item.staffno.fname }} {{ item.staffno.lname }} contract expires on {{ item.doe }}</p>
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="notification-item text-center">
+                    <i class="bi bi-bell-slash text-secondary"></i>
+                    <p>No contracts expiring soon</p>
+                </li>
+            {% endif %}
+        
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+        
+            <!-- Staff Aged 60 and Above -->
+            {% if sixty_and_above %}
+                {% for staff in sixty_and_above %}
+                    <li class="notification-item">
+                        <i class="bi bi-person-check text-primary"></i>
+                        <div>
+                            <a href="{% url 'staff-details' staff.staffno %}" style="text-decoration: none; color: inherit;">
+                                <p>{{ staff.fname }} {{ staff.lname }} is 60 years or older</p>
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="notification-item text-center">
+                    <i class="bi bi-person-x text-secondary"></i>
+                    <p>No staff aged 60 or above</p>
+                </li>
+            {% endif %}
+        
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+        
+            <!-- Pending Renewals -->
+            {% if pending_renewals %}
+                {% for renewal in pending_renewals %}
+                    <li class="notification-item">
+                        <i class="bi bi-clock-history text-info"></i>
+                        <div>
+                            <a href="{% url 'staff-details' renewal.staffno %}" style="text-decoration: none; color: inherit;">
+                                <p>Renewal pending approval for {{ renewal.staff.fname }} {{ renewal.staff.lname }}</p>
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li class="notification-item text-center">
+                    <i class="bi bi-clock text-secondary"></i>
+                    <p>No pending renewals</p>
+                </li>
+            {% endif %}
+
             <li>
               <hr class="dropdown-divider">
             </li>
-        
-            {% if expiring_soon %}
-              {% for item in expiring_soon %}
-                <li class="notification-item">
-                  <i class="bi bi-exclamation-circle text-warning"></i>
-                  <div>
-                    <!-- <h6>Contract Expiration</h6> -->
-                    <a href="{% url 'staff-details' item.staffno.staffno %}" style="text-decoration: none; color: inherit;">
-                      <p>{{ item.staffno.fname }} {{ item.staffno.lname }} contract expires on {{ item.doe }}</p>
-                    </a>
-                  </div>
-                </li>
-              {% endfor %}
+
+            <!-- Pending Promotions -->
+            {% if pending_promotions %}
+                {% for promotion in pending_promotions %}
+                    <li class="notification-item">
+                        <i class="bi bi-clock-history text-info"></i>
+                        <div>
+                            <a href="{% url 'staff-details' promotion.staffno.staffno %}" style="text-decoration: none; color: inherit;">
+                                <p>Promotion pending approval for {{ promotion.staffno.title }} {{ promotion.staffno.fname }} {{ promotion.staffno.lname }}</p>
+                            </a>
+                        </div>
+                    </li>
+                {% endfor %}
             {% else %}
-              <li class="notification-item text-center">
-                <i class="bi bi-bell-slash text-secondary"></i>
-                <p>No contracts expiring soon</p>
-              </li>
+                <li class="notification-item text-center">
+                    <i class="bi  bi-graph-up-arrow text-secondary"></i>
+                    <p>No pending promotions</p>
+                </li>
             {% endif %}
-          </ul>
+        </ul>
+        
         </div>
         
         <div class="dropdown pe-3">

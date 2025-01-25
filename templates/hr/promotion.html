@@ -1,141 +1,124 @@
-{% comment %} {% extends "base2.html" %} {% endcomment %} 
-{% load static %} 
-{% include "partials/_topnav.html" %} 
-{% comment %} {% load humanize %}{% block title %} | {{ listing.title }} {% endblock %} {% endcomment %} 
-{% comment %} {% block content %} {% endcomment %}
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
 
-<div class="row">
-  <div class="row col-2 pt-5">
-    {% include "partials/_staffdetails_sidebar.html" %} 
-  </div>
-  <div class="row col-10">
-        <div class="row mt-5">
-          
-            <div class="row col-4 pt-2" style="font-size:90%">
-                <div class="card bg-info pt-1 m-3">
-               
-                <div class="card-body">
-                  <fieldset>
-                    <legend>Employee's Promotions/(Job Description)</legend>
-                <form action="" method="POST">
-            {% csrf_token %}        
-            <div class="form-group"> 
-                <label for="staffno" class="col-form-label">Staff Number </label>
-                <input type="text" name="staffno" class="form-control" value="{{ staff.staffno }}" readonly=True required>
-              </div>
 
-              <div class="form-group">
-                <label for="prev_jobtitle">Current Job Title</label>
-                <select name="prev_jobtitle"  class="form-select">
-                    <option selected="true" disabled="disabled"></option>
-                    {% for bk in jobtitle_list %}
-                        <option value="{{ bk.job_title }}"
-                        {% if bk.job_title == promotion.prev_jobtitle %}
-                            selected
-                        {% endif %}
-                        >{{ bk.job_title }}</option>
-                        {% endfor %}
-                </select>               
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <h5 class="my-3 text-primary"><strong>Promotion History for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                {% if staff.staff_pix %}
+                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                {% endif %}
             </div>
-              
-            <div class="form-group">
-                <label for="new_jobtitle">New Job Title</label>
-                <select name="new_jobtitle"  class="form-select">
-                    <option selected="true" disabled="disabled"></option>
-                    {% for bk in jobtitle_list %}
-                        <option value="{{ bk.job_title }}"
-                        {% if bk.job_title == promotion.new_jobtitle %}
-                            selected
-                        {% endif %}
-                        >{{ bk.job_title }}</option>
-                        {% endfor %}
-                </select>               
-            </div>
-
-            <div class="form-group">
-                <label for="prev_rank">Current Staff Level</label>
-                <select name="prev_rank"  class="form-select">
-                    <option selected="true" disabled="disabled"></option>
-                    {% for key,value in STAFFRANK %}
-                        <option value="{{ value }}"
-                        {% if value == promotion.prev_rank %}
-                            selected
-                        {% endif %}
-                        >{{ value }}</option>
-                        {% endfor %}
-                </select>
-                
-            </div>
-            <div class="form-group">
-                <label for="new_rank">New Staff Level</label>
-                <select name="new_rank"  class="form-select">
-                    <option selected="true" disabled="disabled"></option>
-                    {% for key,value in STAFFRANK %}
-                        <option value="{{ value }}"
-                        {% if value == promotion.new_rank %}
-                            selected
-                        {% endif %}
-                        >{{ value }}</option>
-                        {% endfor %}
-                </select>
-                
-            </div>
-
-              <div class="form-group">
-                <label for="approved_by" class="col-form-label"> Approved By</label>
-                <input type="text" name="approved_by" class="form-control" {% if promotion %} value="{{ promotion.approved_by }}" {% else %} value="" {% endif %} required>
-              </div> <!--- Later change this to a Select Option when Approvers have been set up-->
-
-              <div class="form-group">
-                <label for="effective_date" class="col-form-label">Effective Date</label>
-                <input type="date" name="effective_date" class="form-control" {% if promotion %} value="{{ promotion.effective_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
-              </div>
-
-            <hr>
-            <input type="submit" value="Add" class="btn btn-block btn-secondary">
-            <a class="btn btn-sm btn-primary" href="{% url 'promotion' staff.staffno %}">Cancel</a>
-          </form>
-        </fieldset>
-            </div> </div></div>
-          
             
-            <div class="row col-8 pt-2 mt-3">
-              <div class="card pt-1 mx-4">
-                <div class="card-header text-center"><h5><strong>Employee's Promotions/(Job Description)</strong></h5></div>
-                <div class="card-body">
-                {% if promotions %}
-                
-                <table class="table table-sm table-hover table-responsive" style="font-size:80%">
-				<tr>
-					<th>Prev. Job Title</th>
-					<th>New Job Title</th>
-                    <th>New Rank</th>
-                    <th>Effective Date</th>
-					<th>Action</th>
-					
-				</tr>
+            <h5><b>Existing Promotion {{renewal_count}}</b></h5>
 
-                {% for sb in promotions %} 
-                
-                    <tr>
-                        <td>{{ sb.prev_jobtitle }}</td>
-                        <td>{{ sb.new_jobtitle }}</td>
-                        <td>{{ sb.new_rank }}</td>
-                        <td>{{ sb.effective_date }}</td>
-                        <td><a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-promotion' sb.id staff.staffno %}"></a>
-                            <a class="btn btn-sm btn-info bi-trash" href="{% url 'delete-promotion' sb.id staff.staffno %}"></a>
-                        </td>
-                    </tr>
-
-                {% endfor %}
-                   
-			</table>
-            {% else %}
-            <h3>ADD PROMOTIONS/(JOB DESCRIPTION)</h3>
-            {% endif %}
+            <div class="mb-4">
+                {% if promotion_list %}
+                <div class="row">
+                    {% for promotion in promotion_list %}
+                    <div class="col-6 col-md-4 mb-2">
+                        <div class="card p-3">
+                            <div class="w-100 d-flex justify-content-between align-items-start mb-1">
+                                <div class="flex-grow-1 me-2">
+                                    <h6 class="mb-0"><b>{{ promotion.new_staff_category }}</b></h6>
+                                    <p class="mb-0">{{ promotion.effective_date }}</p>
+                                    <p class="mb-0">{{ promotion.end_date }}</p>
+                                    <p class="mb-0">{{ promotion.new_job_title }}</p>
+                                    {% if renpromotionewal.new_position %}
+                                        <p class="mb-0">{{ promotion.new_position }}</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Display approval or disapprove status -->
+                                <div class="ms-2">
+                                    {% if promotion.is_approved %}
+                                        <span class="badge bg-success">Approved</span>
+                                    {% elif promotion.is_disapproved %}
+                                        <span class="badge bg-danger">Declined</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p>No promotion history found.</p>
+                {% endif %}
             </div>
+            <br/>
 
-        </div></div></div>
+            <!-- Renewal Request Form -->
+            <h5><b>Promotion Request</b></h5>
+            <form action="" method="POST" enctype="multipart/form-data"> 
+                {% csrf_token %}
+                <div class="row g-3 mb-4">
+                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+                    <div class="col-md-4">
+                        <label for="prev_staff_category" class="form-label">Prev. Staff Category</label>
+                        <input type="text" name="prev_staff_category" class="form-control" value="{{ company_info.staff_cat }}" readonly >
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="prev_job_title" class="form-label">Prev. Job Title</label>
+                        <input type="text" name="prev_job_title" class="form-control" value="{{ company_info.job_title }}" readonly >
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="prev_position" class="form-label">Prev. Position</label>
+                        <input type="text" name="prev_position" class="form-control" value="{{ company_info.rank }}" readonly >
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="new_staff_category">New Staff Category</label>
+                        <select name="new_staff_category" id="new_staff_category" class="form-select" required>
+                            <option selected="true" disabled="disabled">-----Select------</option>
+                            {% for sc in staffcategory %}
+                                <option value="{{ sc }}" {% if sc.category_name == promotion_list.new_staff_category %} selected{% endif %} >{{ sc }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="new_job_title">New Job Title</label>
+                        <select name="new_job_title" id="new_job_title" class="form-select" required>
+                            <option selected="true" disabled="disabled">-----Select------</option>
+                            {% for jt in jobtitle %}
+                                <option value="{{ jt }}" {% if jt.job_title == promotion_list.new_job_title %} selected{% endif %} >{{ jt }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="new_position">New Position</label>
+                        <input type="text" name="new_position" class="form-control" value="{{ promotion_list.new_position }}" >
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="effective_date" class="form-label">Effective Date</label>
+                        <input type="date" class="form-control" name="effective_date" {% if promotion_list %} value="{{ promotion_list.effective_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" name="end_date" {% if promotion_list %} value="{{ promotion_list.end_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-info me-2">Add</button>
+                    <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
-</div>
-{% include "partials/_footer.html" %}
+
+{% endblock %}

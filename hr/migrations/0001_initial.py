@@ -323,18 +323,6 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='RenewalHistory',
-            fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('renewal_date', models.DateField()),
-                ('staff_category', models.CharField(max_length=120)),
-                ('job_title', models.CharField(max_length=120)),
-                ('is_approved', models.BooleanField(default=False)),
-                ('approved_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='approved_renewals', to=settings.AUTH_USER_MODEL)),
-                ('staffno', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hr.employee')),
-            ],
-        ),
-        migrations.CreateModel(
             name='Promotion',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),

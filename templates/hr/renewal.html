@@ -23,15 +23,21 @@
                         <div class="card p-3">
                             <div class="w-100 d-flex justify-content-between align-items-start mb-1">
                                 <div class="flex-grow-1 me-2">
-                                    <h6 class="mb-0"><b>{{ renewal.staff_category }}</b></h6>
-                                    <p class="mb-0">{{ renewal.renewal_date }}</p>
-                                    <p class="mb-0">{{ renewal.job_title }}</p>
+                                    <h6 class="mb-0"><b>{{ renewal.new_staff_category }}</b></h6>
+                                    <p class="mb-0">{{ renewal.effective_date }}</p>
+                                    <p class="mb-0">{{ renewal.end_date }}</p>
+                                    <p class="mb-0">{{ renewal.new_job_title }}</p>
+                                    {% if renewal.new_position %}
+                                        <p class="mb-0">{{ renewal.new_position }}</p>
+                                    {% endif %}
                                 </div>
                                 
-                                <!-- Display approval status -->
+                                <!-- Display approval or disapprove status -->
                                 <div class="ms-2">
                                     {% if renewal.is_approved %}
                                         <span class="badge bg-success">Approved</span>
+                                    {% elif renewal.is_disapproved %}
+                                        <span class="badge bg-danger">Declined</span>
                                     {% else %}
                                         <span class="badge bg-warning">Pending</span>
                                     {% endif %}
@@ -55,41 +61,54 @@
                     <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
                     <div class="col-md-4">
-                        <label class="form-label">Prev. Staff Category</label>
-                        <input type="text" class="form-control" value="{{ company_info.staff_cat }}" readonly >
+                        <label for="prev_staff_category" class="form-label">Prev. Staff Category</label>
+                        <input type="text" name="prev_staff_category" class="form-control" value="{{ company_info.staff_cat }}" readonly >
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label">Prev. Job Title</label>
-                        <input type="text" class="form-control" value="{{ company_info.job_title }}" readonly >
+                        <label for="prev_job_title" class="form-label">Prev. Job Title</label>
+                        <input type="text" name="prev_job_title" class="form-control" value="{{ company_info.job_title }}" readonly >
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label" for="staff_category">New Staff Category</label>
-                        <select name="staff_category" id="staff_category" class="form-select" required>
+                        <label for="prev_position" class="form-label">Prev. Position</label>
+                        <input type="text" name="prev_position" class="form-control" value="{{ company_info.rank }}" readonly >
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label" for="new_staff_category">New Staff Category</label>
+                        <select name="new_staff_category" id="new_staff_category" class="form-select" required>
                             <option selected="true" disabled="disabled">-----Select------</option>
                             {% for sc in staffcategory %}
-                                <option value="{{ sc }}" {% if sc.category_name == renewal_list.staff_category %} selected{% endif %} >{{ sc }}</option>
+                                <option value="{{ sc }}" {% if sc.category_name == renewal_list.new_staff_category %} selected{% endif %} >{{ sc }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label" for="job_title">New Job Title</label>
-                        <select name="job_title" id="job_title" class="form-select" required>
+                        <label class="form-label" for="new_job_title">New Job Title</label>
+                        <select name="new_job_title" id="new_job_title" class="form-select" required>
                             <option selected="true" disabled="disabled">-----Select------</option>
                             {% for jt in jobtitle %}
-                                <option value="{{ jt }}" {% if jt.job_title == renewal_list.job_title %} selected{% endif %} >{{ jt }}</option>
+                                <option value="{{ jt }}" {% if jt.job_title == renewal_list.new_job_title %} selected{% endif %} >{{ jt }}</option>
                             {% endfor %}
                         </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label for="renewal_date" class="form-label">Renewal Date</label>
-                        <input type="date" class="form-control" name="renewal_date" {% if renewal_list %} value="{{ renewal_list.renewal_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                        <label class="form-label" for="new_position">New Position</label>
+                        <input type="text" name="new_position" class="form-control" value="{{ renewal_list.new_position }}" >
                     </div>
 
-                    
+                    <div class="col-md-4">
+                        <label for="effective_date" class="form-label">Effective Date</label>
+                        <input type="date" class="form-control" name="effective_date" {% if renewal_list %} value="{{ renewal_list.effective_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" name="end_date" {% if renewal_list %} value="{{ renewal_list.end_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                    </div>
 
                 </div>
 

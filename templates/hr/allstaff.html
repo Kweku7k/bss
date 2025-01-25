@@ -6,88 +6,24 @@
     <div class="card pt-1 mx-3">
         <div class="card-header ">
             <h5><strong>Number of Staff: {{ staff_count }}</strong></h5>
-
-            
         </div>
 
         <div class="card-body mb-3">
             <form method="POST" class="filter-form">
                 {% csrf_token %}
-                <div class="mb-1">
-                    <label class="form-label" style="font-weight:bold;">Filter by:</label>
+                <div class="my-3">
+                    <label class="form-label" style="font-weight:bold;">Search by:</label>
                 </div>
+
                 <div class="row mb-2">
-                    <div class="col-2">
-                        <label for="filter_staffcategory" class="form-label">Staff Category</label>
-                        <select name="filter_staffcategory" id="filter_staffcategory" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in staffcategory %}
-                                <option value="{{ key }}" {% if key == filter_staffcategory %} selected {% endif %}>
-                                    {{ value }}
-                                </option>
-                            {% endfor %}
-                        </select>
+                    <div class="col-5">
+                        <form method="get" action="{% url 'allstaff' %}">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="search" placeholder="Search by Name or Staff Number" value="{{ search_query }}">
+                                <button class="btn btn-success" type="submit">Search</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="col-2">
-                        <label for="filter_qualification" class="form-label">Qualification</label>
-                        <select name="filter_qualification" id="filter_qualification" class="form-select">
-                            <option value="">All</option> 
-                            {% for qual in qualification %}
-                                <option value="{{ qual }}" {% if qual == filter_qualification %} selected {% endif %}>
-                                    {{ qual }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-2">
-                        <label for="filter_title" class="form-label">Title</label>
-                        <select name="filter_title" id="filter_title" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in title %}
-                                <option value="{{ key }}" {% if key == filter_title %} selected {% endif %}>
-                                    {{ value }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <label for="filter_contract" class="form-label">Contract Type</label>
-                        <select name="filter_contract" id="filter_contract" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in contract %}
-                                <option value="{{ key }}" {% if key == filter_contract %} selected {% endif %}>
-                                    {{ value }} 
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <label for="filter_status" class="form-label">Status</label>
-                        <select name="filter_status" id="filter_status" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in STAFFSTATUS %}
-                                <option value="{{ key }}" {% if key == filter_status %} selected {% endif %}>
-                                    {{ value }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <label for="filter_gender" class="form-label">Gender</label>
-                        <select name="filter_gender" id="filter_gender" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in GENDER %}
-                                <option value="{{ key }}" {% if key == filter_gender %} selected {% endif %}>
-                                    {{ value }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-4 mt-4">
-                    <button type="submit" class="btn btn-success btn-sm">Apply</button>
-                    <a class="btn btn-outline-secondary btn-sm" href="{% url 'allstaff' %}">Reset</a>
                 </div>
             </form>
         </div>
@@ -138,7 +74,7 @@
                                         </td>
                                         <td>{{ company_data.staff_cat }}</td>
                                         <td>
-                                            <span class="badge {% if company_data.active_status == 'Active' %}bg-success{% elif company_data.active_status == 'Leave' %}bg-info{% else %}bg-warning{% endif %} rounded-pill d-inline">
+                                            <span class="badge {% if company_data.active_status == 'Active' %}bg-success{% elif company_data.active_status == 'Leave' %}bg-danger{% else %}bg-warning{% endif %} rounded-pill d-inline">
                                                 {{ company_data.active_status }}
                                             </span>
                                         </td>

@@ -100,4 +100,9 @@ urlpatterns = [
     
     path('renewal/<str:staffno>/', views.add_renewal_history, name='renewal-history'),
     path('renewals/approve/<int:renewal_id>/', views.approve_renewal, name='approve-renewal'),
+    path('renewals/disapprove/<int:renewal_id>/', views.disapprove_renewal, name='disapprove-renewal'),
+
+    path('promotion/<str:staffno>/', views.add_promotion_history, name='promotion-history'),
+    path('promotion/approve/<int:promotion_id>/', views.approve_promotion, name='approve-promotion'),
+    path('promotion/disapprove/<int:promotion_id>/', views.disapprove_promotion, name='disapprove-promotion'),
 ]

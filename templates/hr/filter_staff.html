@@ -1,48 +1,100 @@
 <h1>Dynamic Staff Filter</h1>
-<form method="POST">
-    {% csrf_token %}
-    
-    <h3>Filter Employee Fields</h3>
-    {% for field in fields.employee %}
-        <label for="{{ field }}">{{ field|capfirst }}:</label>
-        <input type="text" name="{{ field }}" id="{{ field }}">
-        <br>
-    {% endfor %}
-    
-    <h3>Filter Company Information Fields</h3>
-    {% for field in fields.company_info %}
-        <label for="{{ field }}">{{ field|capfirst }}:</label>
-        <input type="text" name="{{ field }}" id="{{ field }}">
-        <br>
-    {% endfor %}
+<div class="card-body mb-3">
+    <form method="POST" class="filter-form">
+        {% csrf_token %}
+        <div class="mb-1">
+            <label class="form-label" style="font-weight:bold;">Filter by:</label>
+        </div>
 
-    <!-- Dropdowns for predefined choices -->
-    <h3>Gender</h3>
-    <select name="gender" id="gender">
-        <option value="">Select Gender</option>
-        {% for gender in gender_choices %}
-            <option value="{{ gender }}" {% if gender == filter_gender %}selected{% endif %}>{{ gender }}</option>
-        {% endfor %}
-    </select>
+        <div class="row mb-2">
 
-    <h3>Staff Status</h3>
-    <select name="filter_status" id="filter_status">
-        <option value="">Select Status</option>
-        {% for status in status_choices %}
-            <option value="{{ status }}" {% if status == filter_status %}selected{% endif %}>{{ status }}</option>
-        {% endfor %}
-    </select>
+            <div class="col-2">
+                <label for="filter_staffcategory" class="form-label">Staff Category</label>
+                <select name="filter_staffcategory" id="filter_staffcategory" class="form-select">
+                    <option value="">All</option> 
+                    {% for key, value in staffcategory %}
+                        <option value="{{ key }}" {% if key == filter_staffcategory %} selected {% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <h3>Staff Category</h3>
-    <select name="filter_staffcategory" id="filter_staffcategory">
-        <option value="">Select Category</option>
-        {% for category in staff_category_choices %}
-            <option value="{{ category }}" {% if category == filter_staffcategory %}selected{% endif %}>{{ category }}</option>
-        {% endfor %}
-    </select>
+            <div class="col-2">
+                <label for="filter_department" class="form-label">Department</label>
+                <select name="filter_department" id="filter_department" class="form-select">
+                    <option value="">All</option>
+                    {% for key, value in department %}
+                        <option value="{{ key }}" {% if key == filter_department %} selected {% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <button type="submit">Filter</button>
-</form>
+            <div class="col-2">
+                <label for="filter_qualification" class="form-label">Qualification</label>
+                <select name="filter_qualification" id="filter_qualification" class="form-select">
+                    <option value="">All</option>
+                    {% for key, value in qualification %}
+                        <option value="{{ key }}" {% if key == filter_qualification %} selected {% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-2">
+                <label for="filter_title" class="form-label">Title</label>
+                <select name="filter_title" id="filter_title" class="form-select">
+                    <option value="">All</option> 
+                    {% for key, value in title %}
+                        <option value="{{ key }}" {% if key == filter_title %} selected {% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-2">
+                <label for="filter_contract" class="form-label">Contract Type</label>
+                <select name="filter_contract" id="filter_contract" class="form-select">
+                    <option value="">All</option> 
+                    {% for key, value in contract %}
+                        <option value="{{ key }}" {% if key == filter_contract %} selected {% endif %}>
+                            {{ value }} 
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-2">
+                <label for="filter_status" class="form-label">Status</label>
+                <select name="filter_status" id="filter_status" class="form-select">
+                    <option value="">All</option> 
+                    {% for key, value in STAFFSTATUS %}
+                        <option value="{{ key }}" {% if key == filter_status %} selected {% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-2">
+                <label for="filter_gender" class="form-label">Gender</label>
+                <select name="filter_gender" id="filter_gender" class="form-select">
+                    <option value="">All</option> 
+                    {% for key, value in GENDER %}
+                        <option value="{{ key }}" {% if key == filter_gender %} selected {% endif %}>
+                            {{ value }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div> 
+        </div>
+        <div class="col-md-4 mt-4">
+            <button type="submit" class="btn btn-success btn-sm">Apply</button>
+            <a class="btn btn-outline-secondary btn-sm" href="{% url 'allstaff' %}">Reset</a>
+        </div>
+    </form>
+</div>
 
 <h2>Filtered Results</h2>
 <ul>

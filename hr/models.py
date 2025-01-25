@@ -1,3 +1,4 @@
+from venv import logger
 from django.db import models # type: ignore
 from datetime import datetime, timezone
 from hr.choices import *
@@ -8,6 +9,8 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
+from django.contrib import messages
+
 
 
 
@@ -56,6 +59,12 @@ class Employee(models.Model):
     
     def __str__(self):
         return f"{self.staffno} {self.title} {self.fname or ''} {self.lname or ''}".strip()
+    
+    def calculate_age(self):
+        if self.dob:
+            today = datetime.today()
+            return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
+        return None
 
 
 
@@ -370,22 +379,78 @@ class Celebration(models.Model):
     created = models.DateTimeField(auto_now_add=True) 
     
     
-class RenewalHistory(models.Model):
+class RenewalHistorys(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
-    renewal_date = models.DateField()
-    staff_category = models.CharField(max_length=120)
-    job_title = models.CharField(max_length=120)
+    effective_date = models.DateField()
+    end_date = models.DateField(blank=True,null=True)
+    prev_staff_category = models.CharField(max_length=120,blank=True,null=True)
+    new_staff_category = models.CharField(max_length=120,blank=True,null=True)
+    prev_job_title = models.CharField(max_length=120,blank=True,null=True)
+    new_job_title = models.CharField(max_length=120,blank=True,null=True)
+    prev_position = models.CharField(max_length=120,blank=True,null=True)
+    new_position = models.CharField(max_length=120,blank=True,null=True)
     is_approved = models.BooleanField(default=False)
+    is_disapproved = models.BooleanField(default=False)
     approved_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_renewals')
 
     def __str__(self):
-        return f"Renewal for {self.staffno} on {self.renewal_date}"
+        return f"Renewal for {self.staffno} from {self.start_date} to {self.end_date}"
     
-@receiver(post_save, sender=RenewalHistory)
-def update_company_info_on_approval(sender, instance, **kwargs):
-    if instance.is_approved:
-        company_info = CompanyInformation.objects.filter(staffno=instance.staffno).first()
-        if company_info:
-            company_info.job_title = instance.job_title
-            company_info.staff_cat = instance.staff_category
-            company_info.save()
+@receiver(post_save, sender=RenewalHistorys)
+def update_company_info_on_approval_or_disapproval(sender, instance, **kwargs):
+    company_info = CompanyInformation.objects.filter(staffno=instance.staffno).first()
+    if not company_info:
+        messages.error(f"No company information found for staff {instance.staffno}")
+    else:
+        if instance.is_approved:
+            if company_info:
+                company_info.job_title = instance.new_job_title
+                company_info.staff_cat = instance.new_staff_category
+                company_info.rank = instance.new_position
+                company_info.doe = instance.end_date
+                company_info.save()
+        elif instance.is_disapproved:
+            if company_info:
+                company_info.job_title = instance.prev_job_title
+                company_info.staff_cat = instance.prev_staff_category
+                company_info.rank = instance.prev_position
+                company_info.save()
+            
+
+class PromotionHistory(models.Model):
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
+    effective_date = models.DateField()
+    end_date = models.DateField()
+    prev_staff_category = models.CharField(max_length=120,blank=True,null=True)
+    new_staff_category = models.CharField(max_length=120,blank=True,null=True)
+    prev_job_title = models.CharField(max_length=120,blank=True,null=True)
+    new_job_title = models.CharField(max_length=120,blank=True,null=True)
+    prev_position = models.CharField(max_length=120,blank=True,null=True)
+    new_position = models.CharField(max_length=120,blank=True,null=True)
+    is_approved = models.BooleanField(default=False)
+    is_disapproved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_promotions')
+
+    def __str__(self):
+        return f"Promotion for {self.staffno} from {self.prev_staff_category} to {self.new_staff_category}"
+    
+@receiver(post_save, sender=PromotionHistory)
+def update_company_info_on_approval_or_disapproval(sender, instance, **kwargs):
+    company_info = CompanyInformation.objects.filter(staffno=instance.staffno).first()
+    if not company_info:
+        messages.error(f"No company information found for staff {instance.staffno}")
+    else:
+        if instance.is_approved:
+            if company_info:
+                company_info.job_title = instance.new_job_title
+                company_info.staff_cat = instance.new_staff_category
+                company_info.rank = instance.new_position
+                company_info.doe = instance.end_date
+                company_info.save()
+        elif instance.is_disapproved:
+            if company_info:
+                company_info.job_title = instance.prev_job_title
+                company_info.staff_cat = instance.prev_staff_category
+                company_info.rank = instance.prev_position
+                company_info.save()        
+    
