@@ -872,23 +872,33 @@ def bulk_upload(request):
                             # Continue processing if it's a new employee
                             # Handle Bank instance
                             bank_short_name = row.get('bank_name')
-                            bank_instance, created = Bank.objects.get_or_create(bank_short_name=bank_short_name)
+                            bank_instance = None
+                            if bank_short_name:
+                                bank_instance, created = Bank.objects.get_or_create(bank_short_name=bank_short_name)
                             
                             # Handle BankBranch instance
                             branch_name = row.get('bank_branch')
-                            branch_instance, created = BankBranch.objects.get_or_create(branch_name=branch_name, bank_code=bank_instance)
+                            branch_instance = None
+                            if branch_name and bank_instance:
+                                branch_instance, created = BankBranch.objects.get_or_create(branch_name=branch_name, bank_code=bank_instance)
                             
                             # Handle Staff Category instance
                             category_name = row.get('staff_cat')
-                            staff_category_instance, created = StaffCategory.objects.get_or_create(category_name=category_name)
+                            staff_category_instance = None
+                            if category_name:
+                                staff_category_instance, created = StaffCategory.objects.get_or_create(category_name=category_name)
                             
                             # Handle Contract instance
                             contract_type = row.get('contract')
-                            contract_instance, created = Contract.objects.get_or_create(contract_type=contract_type)
+                            contract_instance = None
+                            if contract_type:
+                                contract_instance, created = Contract.objects.get_or_create(contract_type=contract_type)
                             
                             # Handle School/Faculty instance
                             sch_fac_name = row.get('sch_fac_dir')
-                            sch_fac_instance, created = School_Faculty.objects.get_or_create(sch_fac_name=sch_fac_name)
+                            sch_fac_instance = None
+                            if sch_fac_name:
+                                sch_fac_instance, created = School_Faculty.objects.get_or_create(sch_fac_name=sch_fac_name)
                             
                             # Process Directorate if available
                             direct_name = row.get('directorate')
@@ -898,7 +908,9 @@ def bulk_upload(request):
                             
                             # Handle Department instance
                             dept_long_name = row.get('dept')
-                            dept_long_instance, created = Department.objects.get_or_create(dept_long_name=dept_long_name, sch_fac=sch_fac_instance)
+                            dept_long_instance = None
+                            if dept_long_name:
+                                dept_long_instance, created = Department.objects.get_or_create(dept_long_name=dept_long_name, sch_fac=sch_fac_instance)
                             
                             print("Starting Company Info")
                             # Process CompanyInformation data if present in CSV
