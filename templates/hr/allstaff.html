@@ -65,11 +65,11 @@
                                         <td>
                                             <p class="fw-normal mb-1">{{ company_data.job_title }}</p>
                                             {% if company_data.dept and company_data.directorate %}
-                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }} - {{ company_data.directorate.direct_name }}</p>
+                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }} - {{ company_data.directorate }}</p>
                                             {% elif company_data.dept %}
                                                 <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }}</p>
                                             {% elif company_data.directorate %}
-                                                <p class="text-muted mb-0">{{ company_data.directorate.direct_name }}</p>
+                                                <p class="text-muted mb-0">{{ company_data.directorate }}</p>
                                             {% endif %}
                                         </td>
                                         <td>{{ company_data.staff_cat }}</td>

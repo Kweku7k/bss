@@ -196,7 +196,7 @@
                             <option value="">Select Bank Name</option>
                             {% if bank_list %} 
                                 {% for bn in bank_list %}
-                                    <option value="{{ bn.bank_long_name }}" {% if bn == company_info.bank_name %} selected {% endif %}>{{ bn.bank_short_name }}</option>
+                                    <option value="{{ bn }}" {% if bn.bank_short_name == company_info.bank_name %} selected {% endif %}>{{ bn }}</option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -213,7 +213,7 @@
                             <option value="" >Select Bank Branch</option>
                             {% if bank_branches %}
                                 {% for bb in bank_branches %}
-                                    <option value="{{ bb.branch_name }}" {% if bb == company_info.bank_branch %} selected {% endif %}> {{ bb.branch_name }}</option>
+                                    <option value="{{ bb }}" {% if bb.branch_name == company_info.bank_branch %} selected {% endif %}> {{ bb }}</option>
                                 {% endfor %}
                             {% endif %}
                         </select>

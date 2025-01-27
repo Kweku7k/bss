@@ -497,6 +497,7 @@ def test(request):
     filter_gender = None
     filter_department = None
     filter_jobtitle = None
+    filter_directorate = None
 
     # Initial filter container
     filters = Q()
@@ -511,6 +512,7 @@ def test(request):
         filter_gender = request.POST.get('filter_gender')
         filter_department = request.POST.get('filter_department')
         filter_jobtitle = request.POST.get('filter_jobtitle')
+        filter_directorate = request.POST.get('filter_directorate')
 
         # Filter by Staff Category
         if filter_staffcategory:
@@ -525,7 +527,7 @@ def test(request):
             qualification_filter = Q(heq=filter_qualification) | Q(staff_school__certification=filter_qualification)
             filters &= qualification_filter
 
-        # Filter by Job Title
+        # Filter by Title
         if filter_title:
             filters &= Q(title=filter_title)
 
@@ -545,9 +547,15 @@ def test(request):
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
 
-        # Filter by Job Title (again)
+        # Filter by Job Title
         if filter_jobtitle:
             company_info = CompanyInformation.objects.filter(job_title=filter_jobtitle)
+            company_staffno = {company.staffno_id for company in company_info}
+            filters &= Q(staffno__in=company_staffno)
+            
+        # Filter by Directorate
+        if filter_directorate:
+            company_info = CompanyInformation.objects.filter(directorate=filter_directorate)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
 
@@ -573,6 +581,7 @@ def test(request):
         'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
         'department': [(q.id, q.dept_long_name) for q in Department.objects.all()],
         'jobtitle': [(q.job_title, q.job_title) for q in JobTitle.objects.all()],
+        'directorate': [(q.direct_name, q.direct_name) for q in Directorate.objects.all()],
         # The filters being used for rendering in the template
         'filter_staffcategory': filter_staffcategory,
         'filter_qualification': filter_qualification,
@@ -582,6 +591,7 @@ def test(request):
         'filter_gender': filter_gender,
         'filter_department': filter_department,
         'filter_jobtitle': filter_jobtitle,
+        'filter_directorate': filter_directorate,
     }
 
     # Render the page
@@ -742,17 +752,15 @@ def edit_company_info(request,staffno):
     school_faculty = School_Faculty.objects.all()
     directorate = Directorate.objects.all()
     bank_list = Bank.objects.all()
+    bankbranches = BankBranch.objects.all()
     dept = Department.objects.all()
     jobtitle = JobTitle.objects.all()
     
     
-    # Filter bank branches and department based on the selected bank and school from the database
-    # bankbranches = BankBranch.objects.filter(bank_code_id=company_info.bank_name_id) if company_info.bank_name_id else BankBranch.objects.none()
+    
     departments = Department.objects.filter(sch_fac_id=company_info.sch_fac_dir_id) if company_info.sch_fac_dir_id else Department.objects.none()
 
-    # Pass the selected bank and branch, school/faculty and department IDs to the template
-    # selected_bank_id = company_info.bank_name_id
-    # selected_branch_id = company_info.bank_branch_id
+    
     selected_sch_fac_id = company_info.sch_fac_dir_id
     selected_dept_id = company_info.dept_id
     
@@ -792,9 +800,7 @@ def edit_company_info(request,staffno):
                'departments':departments,
                'dept':dept,
                'bank_list': bank_list,
-                # 'bank_branches': bankbranches,
-                # 'selected_bank_id': selected_bank_id,
-                # 'selected_branch_id': selected_branch_id,
+                'bank_branches': bankbranches,
                 'selected_sch_fac_id': selected_sch_fac_id,
                 'selected_dept_id': selected_dept_id,
                 'jobtitle':jobtitle,

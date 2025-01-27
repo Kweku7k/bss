@@ -109,7 +109,20 @@
                             {% endfor %}
                         </select>
                     </div>
+
+                    <div class="col-2">
+                        <label for="filter_directorate" class="form-label">Directorate</label>
+                        <select name="filter_directorate" id="filter_directorate" class="form-select">
+                            <option value="">All</option> 
+                            {% for key, value in directorate %}
+                                <option value="{{ key }}" {% if key == filter_directorate %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
+
                 <div class="col-md-4 mt-4">
                     <button type="submit" class="btn btn-success btn-sm">Apply</button>
                     <a class="btn btn-outline-secondary btn-sm" href="{% url 'test' %}">Reset</a>
@@ -154,11 +167,11 @@
                                         <td>
                                             <p class="fw-normal mb-1">{{ company_data.job_title }}</p>
                                             {% if company_data.dept and company_data.directorate %}
-                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }} - {{ company_data.directorate.direct_name }}</p>
+                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }} - {{ company_data.directorate }}</p>
                                             {% elif company_data.dept %}
                                                 <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }}</p>
                                             {% elif company_data.directorate %}
-                                                <p class="text-muted mb-0">{{ company_data.directorate.direct_name }}</p>
+                                                <p class="text-muted mb-0">{{ company_data.directorate }}</p>
                                             {% endif %}
                                         </td>
                                         <td>{{ company_data.staff_cat }}</td>
