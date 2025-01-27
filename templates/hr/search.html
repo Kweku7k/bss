@@ -42,11 +42,11 @@
                                             {% for company_data in company_info %}
                                                 {% if staff.staffno == company_data.staffno_id %}
                                                     {% if company_data.dept and company_data.directorate %}
-                                                        <p class="fw-normal mb-1">{{ company_data.dept.dept_long_name }} / {{ company_data.directorate.direct_name }}</p>
+                                                        <p class="fw-normal mb-1">{{ company_data.dept }} / {{ company_data.directorate }}</p>
                                                     {% elif company_data.dept %}
-                                                        <p class="fw-normal mb-1">{{ company_data.dept.dept_long_name }}</p>
+                                                        <p class="fw-normal mb-1">{{ company_data.dept }}</p>
                                                     {% elif company_data.directorate %}
-                                                        <p class="fw-normal mb-1">{{ company_data.directorate.direct_name }}</p>
+                                                        <p class="fw-normal mb-1">{{ company_data.directorate }}</p>
                                                     {% endif %}
                                                 {% endif %}
                                             {% endfor %}

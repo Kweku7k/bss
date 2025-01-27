@@ -24,7 +24,7 @@ urlpatterns = [
     path('edit_company_info/<str:staffno>', views.edit_company_info,name="edit-company-info"),
     # path('delete_company_info/<str:staffno>', views.delete_company_info,name="delete-company-info"),
     path('get_bank_branches/<str:bank_name>/', views.get_bank_branches, name='get_bank_branches'),
-    path('get_departments/<int:sch_fac_id>/', views.get_departments, name='get_departments'),
+    path('get_departments/<str:sch_name>/', views.get_departments, name='get_departments'),
     path('upload/', views.bulk_upload, name='bulk_upload'),
     path('download-sample-csv/', views.download_csv, name='download_sample_csv'),
     

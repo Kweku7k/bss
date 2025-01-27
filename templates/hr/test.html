@@ -17,7 +17,7 @@
                     <label class="form-label" style="font-weight:bold;">Filter by:</label>
                 </div>
                 <div class="row mb-2">
-                    <div class="col-2">
+                    <div class="col-3">
                         <label for="filter_staffcategory" class="form-label">Staff Category</label>
                         <select name="filter_staffcategory" id="filter_staffcategory" class="form-select">
                             <option value="">All</option> 
@@ -28,64 +28,32 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-2">
-                        <label for="filter_qualification" class="form-label">Qualification</label>
-                        <select name="filter_qualification" id="filter_qualification" class="form-select">
+
+                    <div class="col-3">
+                        <label for="filter_school_faculty" class="form-label">School/Faculty</label>
+                        <select name="filter_school_faculty" id="filter_school_faculty" class="form-select">
                             <option value="">All</option> 
-                            {% for key, value in qualification %}
-                                <option value="{{ key }}" {% if key == filter_qualification %} selected {% endif %}>
+                            {% for key, value in school_faculty %}
+                                <option value="{{ key }}" {% if key == filter_school_faculty %} selected {% endif %}>
                                     {{ value }}
                                 </option>
                             {% endfor %}
                         </select>
                     </div>
                     
-                    <div class="col-2">
-                        <label for="filter_title" class="form-label">Title</label>
-                        <select name="filter_title" id="filter_title" class="form-select">
+                    <div class="col-3">
+                        <label for="filter_directorate" class="form-label">Directorate</label>
+                        <select name="filter_directorate" id="filter_directorate" class="form-select">
                             <option value="">All</option> 
-                            {% for key, value in title %}
-                                <option value="{{ key }}" {% if key == filter_title %} selected {% endif %}>
-                                    {{ value }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <label for="filter_contract" class="form-label">Contract Type</label>
-                        <select name="filter_contract" id="filter_contract" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in contract %}
-                                <option value="{{ key }}" {% if key == filter_contract %} selected {% endif %}>
-                                    {{ value }} 
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <label for="filter_status" class="form-label">Status</label>
-                        <select name="filter_status" id="filter_status" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in STAFFSTATUS %}
-                                <option value="{{ key }}" {% if key == filter_status %} selected {% endif %}>
-                                    {{ value }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-2">
-                        <label for="filter_gender" class="form-label">Gender</label>
-                        <select name="filter_gender" id="filter_gender" class="form-select">
-                            <option value="">All</option> 
-                            {% for key, value in GENDER %}
-                                <option value="{{ key }}" {% if key == filter_gender %} selected {% endif %}>
+                            {% for key, value in directorate %}
+                                <option value="{{ key }}" {% if key == filter_directorate %} selected {% endif %}>
                                     {{ value }}
                                 </option>
                             {% endfor %}
                         </select>
                     </div>
 
-                    <div class="col-2">
+                    <div class="col-3">
                         <label for="filter_department" class="form-label">Department</label>
                         <select name="filter_department" id="filter_department" class="form-select">
                             <option value="">All</option> 
@@ -97,8 +65,7 @@
                         </select>
                     </div>
 
-
-                    <div class="col-2">
+                    <div class="col-3">
                         <label for="filter_jobtitle" class="form-label">Job Title</label>
                         <select name="filter_jobtitle" id="filter_jobtitle" class="form-select">
                             <option value="">All</option> 
@@ -110,12 +77,57 @@
                         </select>
                     </div>
 
-                    <div class="col-2">
-                        <label for="filter_directorate" class="form-label">Directorate</label>
-                        <select name="filter_directorate" id="filter_directorate" class="form-select">
+                    <div class="col-3">
+                        <label for="filter_qualification" class="form-label">Qualification</label>
+                        <select name="filter_qualification" id="filter_qualification" class="form-select">
                             <option value="">All</option> 
-                            {% for key, value in directorate %}
-                                <option value="{{ key }}" {% if key == filter_directorate %} selected {% endif %}>
+                            {% for key, value in qualification %}
+                                <option value="{{ key }}" {% if key == filter_qualification %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-3">
+                        <label for="filter_title" class="form-label">Title</label>
+                        <select name="filter_title" id="filter_title" class="form-select">
+                            <option value="">All</option> 
+                            {% for key, value in title %}
+                                <option value="{{ key }}" {% if key == filter_title %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <label for="filter_contract" class="form-label">Contract Type</label>
+                        <select name="filter_contract" id="filter_contract" class="form-select">
+                            <option value="">All</option> 
+                            {% for key, value in contract %}
+                                <option value="{{ key }}" {% if key == filter_contract %} selected {% endif %}>
+                                    {{ value }} 
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <label for="filter_status" class="form-label">Status</label>
+                        <select name="filter_status" id="filter_status" class="form-select">
+                            <option value="">All</option> 
+                            {% for key, value in STAFFSTATUS %}
+                                <option value="{{ key }}" {% if key == filter_status %} selected {% endif %}>
+                                    {{ value }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-3">
+                        <label for="filter_gender" class="form-label">Gender</label>
+                        <select name="filter_gender" id="filter_gender" class="form-select">
+                            <option value="">All</option> 
+                            {% for key, value in GENDER %}
+                                <option value="{{ key }}" {% if key == filter_gender %} selected {% endif %}>
                                     {{ value }}
                                 </option>
                             {% endfor %}
@@ -167,9 +179,9 @@
                                         <td>
                                             <p class="fw-normal mb-1">{{ company_data.job_title }}</p>
                                             {% if company_data.dept and company_data.directorate %}
-                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }} - {{ company_data.directorate }}</p>
+                                                <p class="text-muted mb-0">{{ company_data.dept }} - {{ company_data.directorate }}</p>
                                             {% elif company_data.dept %}
-                                                <p class="text-muted mb-0">{{ company_data.dept.dept_long_name }}</p>
+                                                <p class="text-muted mb-0">{{ company_data.dept }}</p>
                                             {% elif company_data.directorate %}
                                                 <p class="text-muted mb-0">{{ company_data.directorate }}</p>
                                             {% endif %}

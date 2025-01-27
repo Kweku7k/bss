@@ -498,6 +498,7 @@ def test(request):
     filter_department = None
     filter_jobtitle = None
     filter_directorate = None
+    filter_school_faculty = None
 
     # Initial filter container
     filters = Q()
@@ -513,6 +514,7 @@ def test(request):
         filter_department = request.POST.get('filter_department')
         filter_jobtitle = request.POST.get('filter_jobtitle')
         filter_directorate = request.POST.get('filter_directorate')
+        filter_school_faculty = request.POST.get('filter_school_faculty')
 
         # Filter by Staff Category
         if filter_staffcategory:
@@ -543,7 +545,7 @@ def test(request):
 
         # Filter by Department
         if filter_department:
-            company_info = CompanyInformation.objects.filter(dept_id=filter_department)
+            company_info = CompanyInformation.objects.filter(dept=filter_department)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
 
@@ -556,6 +558,12 @@ def test(request):
         # Filter by Directorate
         if filter_directorate:
             company_info = CompanyInformation.objects.filter(directorate=filter_directorate)
+            company_staffno = {company.staffno_id for company in company_info}
+            filters &= Q(staffno__in=company_staffno)
+            
+        # Filter by School/Faculty
+        if filter_school_faculty:
+            company_info = CompanyInformation.objects.filter(sch_fac_dir=filter_school_faculty)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
 
@@ -579,9 +587,10 @@ def test(request):
         'contract': [(q.contract_type, q.contract_type) for q in Contract.objects.all()],
         'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
         'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
-        'department': [(q.id, q.dept_long_name) for q in Department.objects.all()],
+        'department': [(q.dept_long_name, q.dept_long_name) for q in Department.objects.all()],
         'jobtitle': [(q.job_title, q.job_title) for q in JobTitle.objects.all()],
         'directorate': [(q.direct_name, q.direct_name) for q in Directorate.objects.all()],
+        'school_faculty': [(q.sch_fac_name, q.sch_fac_name) for q in School_Faculty.objects.all()],
         # The filters being used for rendering in the template
         'filter_staffcategory': filter_staffcategory,
         'filter_qualification': filter_qualification,
@@ -592,6 +601,7 @@ def test(request):
         'filter_department': filter_department,
         'filter_jobtitle': filter_jobtitle,
         'filter_directorate': filter_directorate,
+        'filter_school_faculty': filter_school_faculty,
     }
 
     # Render the page
@@ -668,16 +678,28 @@ def newstaff(request):
 
 def get_bank_branches(request, bank_name):
     try:
-        bank = Bank.objects.get(bank_long_name=bank_name)  # Find bank by name
+        bank = Bank.objects.get(bank_short_name=bank_name)  # Find bank by name
         branches = BankBranch.objects.filter(bank_code=bank)  # Get branches associated with this bank
         branch_data = [{"branch_name": branch.branch_name} for branch in branches]
         return JsonResponse({"branches": branch_data})
     except Bank.DoesNotExist:
         return JsonResponse({"branches": []}, status=404)
 
-def get_departments(request, sch_fac_id):
-    departments = Department.objects.filter(sch_fac_id=sch_fac_id).values('id', 'dept_long_name')
-    return JsonResponse({'departments': list(departments)})
+
+def get_departments(request, sch_name):
+    try:
+        school_faculty = School_Faculty.objects.get(sch_fac_name=sch_name)  
+        departments = Department.objects.filter(sch_fac=school_faculty) # Get departments associated with this school/faculty
+        department_data = [{"dept_long_name": dept.dept_long_name} for dept in departments]
+        return JsonResponse({"departments": department_data})
+    except School_Faculty.DoesNotExist:
+        return JsonResponse({"departments": []}, status=404)
+    
+    
+    
+# def get_departments(request, sch_fac_id):
+#     departments = Department.objects.filter(sch_fac_id=sch_fac_id).values('id', 'dept_long_name')
+#     return JsonResponse({'departments': list(departments)})
 
 def company_info(request,staffno):
     submitted = False
@@ -687,12 +709,11 @@ def company_info(request,staffno):
     contract = Contract.objects.all()
     # company_info_count = company_infos.count()
     campus = Campus.objects.all()
-    department = Department.objects.all()
     school_faculty = School_Faculty.objects.all()
     directorate = Directorate.objects.all()
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
-    dept = Department.objects.all()
+    departments = Department.objects.all()
     jobtitle = JobTitle.objects.all()
     
     
@@ -719,25 +740,24 @@ def company_info(request,staffno):
         if 'submitted' in request.GET:
             submitted = True
     context = {
-               'form':form,
-               'submitted':submitted,
-               'company_infos':company_infos,
-               'staff':staff,
-               'staffcategory':staffcategory,
-               'contract':contract,
-               'campus':campus,
-               'department':department,
-               'bank_list':bank_list,
-               'bankbranches':bankbranches,
-               'school_faculty':school_faculty,
-               'directorate':directorate,
-               'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
-               'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
-               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
-               'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
-               'dept':dept,
-               'jobtitle':jobtitle,
-            }
+        'form':form,
+        'submitted':submitted,
+        'company_infos':company_infos,
+        'staff':staff,
+        'staffcategory':staffcategory,
+        'contract':contract,
+        'campus':campus,
+        'bank_list':bank_list,
+        'bankbranches':bankbranches,
+        'school_faculty':school_faculty,
+        'directorate':directorate,
+        'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
+        'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
+        'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
+        'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
+        'departments':departments,
+        'jobtitle':jobtitle,
+    }
     return render(request,'hr/company_info.html',context)
 
 
@@ -753,16 +773,9 @@ def edit_company_info(request,staffno):
     directorate = Directorate.objects.all()
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
-    dept = Department.objects.all()
+    departments = Department.objects.all()
     jobtitle = JobTitle.objects.all()
-    
-    
-    
-    departments = Department.objects.filter(sch_fac_id=company_info.sch_fac_dir_id) if company_info.sch_fac_dir_id else Department.objects.none()
 
-    
-    selected_sch_fac_id = company_info.sch_fac_dir_id
-    selected_dept_id = company_info.dept_id
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
@@ -798,11 +811,8 @@ def edit_company_info(request,staffno):
                'school_faculty':school_faculty,
                'directorate':directorate,
                'departments':departments,
-               'dept':dept,
                'bank_list': bank_list,
                 'bank_branches': bankbranches,
-                'selected_sch_fac_id': selected_sch_fac_id,
-                'selected_dept_id': selected_dept_id,
                 'jobtitle':jobtitle,
             }
 

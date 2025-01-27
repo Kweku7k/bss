@@ -94,8 +94,7 @@
                             <option value="" disabled selected>N/A</option>
                             {% if school_faculty %} 
                                 {% for sch_fac in school_faculty %}
-                                    <option value="{{ sch_fac.id }}"
-                                    {% if sch_fac.id == company_info.sch_fac_dir_id %} selected {% endif %}> {{ sch_fac.sch_fac_name }} </option>
+                                    <option value="{{ sch_fac }}" {% if sch_fac.sch_fac_name == company_info.sch_fac_dir %} selected {% endif %}> {{ sch_fac }} </option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -106,9 +105,7 @@
                             <option value="" disabled selected>N/A</option>
                             {% if departments %}
                                 {% for dept in departments %}
-                                    <option value="{{ dept.id }}"
-                                    {% if dept.id == company_info.dept_id %} selected {% endif %}
-                                    > {{ dept.dept_long_name }} </option>
+                                    <option value="{{ dept }}" {% if dept.dept_long_name == company_info.dept %} selected {% endif %}> {{ dept }} </option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -125,28 +122,7 @@
                         </select>
                     </div>
 
-                    {% comment %} <div class="col-md-4">
-                        <label for="sch_fac_dir" class="form-label">School/Faculty or Directorate</label>
-                        <select id="sch_fac_dir" name="sch_fac_dir" class="form-select">
-                            <option value="" disabled selected>Select Type</option>
-                            <option value="directorate">Directorate</option>
-                            <option value="school_faculty">School/Faculty</option>
-                        </select>
-                    </div>
                     
-                    <div class="col-md-4">
-                        <label for="specific_select" class="form-label">Select</label>
-                        <select id="specific_select" name="specific_select" class="form-select">
-                            <option value="" disabled selected>Select Option</option>
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label for="dept" class="form-label">Department</label>
-                        <select id="dept" name="dept" class="form-select">
-                            <option value="" disabled selected>Select Department</option>
-                        </select>
-                    </div> {% endcomment %}
                     <div class="col-md-4">
                         <label for="rank" class="form-label">Designation/Rank</label>
                         <input type="text" class="form-control" id="rank" name="rank" value="{{ company_info.rank }}">
@@ -175,13 +151,10 @@
                     <div class="col-md-4">
                         <label for="cost_center" class="form-label">Cost Center</label>
                         <select id="cost_center" name="cost_center" class="form-select" >
-                            <option value="" disabled selected>Select</option>
-                            {% if dept %} 
-                                {% for dt in dept %}
-                                    <option value="{{ dt.id }}"
-                                    {% if dt.id == company_info.dept_id %} selected {% endif %}
-                                    
-                                    > {{ dt.dept_long_name }} </option>
+                            <option value="" selected>Select</option>
+                            {% if departments %} 
+                                {% for dt in departments %}
+                                    <option value="{{ dt }}" {% if dt.dept_long_name == company_info.cost_center %} selected {% endif %} > {{ dt }} </option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -284,7 +257,7 @@
 
 
 
-    // Populate bank branch bbased on selected bank name 
+    // Populate bank branch based on selected bank name 
 
     document.addEventListener('DOMContentLoaded', function () {
         const bankNameSelect = document.getElementById('bank_name');
@@ -325,20 +298,20 @@
     
         // Event listener for school/faculty selection
         schoolFacultySelect.addEventListener('change', function() {
-            const schFacId = this.value;
+            const schFacName = this.value;
     
             // Clear current department options
             departmentSelect.innerHTML = '<option value="" disabled selected>Select Department</option>';
     
             // Fetch departments based on the selected school/faculty
-            if (schFacId) {
-                fetch(`/get_departments/${schFacId}/`)  // Adjust this URL to match your route
+            if (schFacName) {
+                fetch(`/get_departments/${schFacName}/`)  // Adjust this URL to match your route
                 .then(response => response.json())
                 .then(data => {
                     if (data.departments.length > 0) {
                         data.departments.forEach(dept => {
                             const option = document.createElement('option');
-                            option.value = dept.id;
+                            option.value = dept.dept_long_name;
                             option.text = dept.dept_long_name;
                             departmentSelect.appendChild(option);
                         });
