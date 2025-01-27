@@ -119,9 +119,7 @@
                             <option value=""  selected>N/A</option>
                             {% if directorate %}
                                 {% for dir in directorate %}
-                                <option value="{{ dir.id }}"
-                                {% if dir.id == company_info.directorate_id %} selected {% endif %}
-                                > {{ dir.direct_name }} </option>
+                                <option value="{{ dir }}" {% if dir.direct_name == company_info.directorate %} selected {% endif %}> {{ dir }} </option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -194,13 +192,11 @@
 
                     <div class="col-md-4">
                         <label for="bank_name" class="form-label">Bank Name</label>
-                        <select id="bank_name" name="bank_name" class="form-select" required>
-                            <option value="" disabled>Select Bank Name</option>
+                        <select id="bank_name" name="bank_name" class="form-select">
+                            <option value="">Select Bank Name</option>
                             {% if bank_list %} 
                                 {% for bn in bank_list %}
-                                    <option value="{{ bn.id }}" 
-                                    {% if bn.id == selected_bank_id %} selected {% endif %}
-                                    >{{ bn.bank_short_name }}</option>
+                                    <option value="{{ bn.bank_long_name }}" {% if bn == company_info.bank_name %} selected {% endif %}>{{ bn.bank_short_name }}</option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -213,13 +209,11 @@
                     
                     <div class="col-md-4">
                         <label for="bank_branch" class="form-label">Bank Branch</label>
-                        <select id="bank_branch" name="bank_branch" class="form-select" required>
-                            <option value="" disabled>Select Bank Branch</option>
+                        <select id="bank_branch" name="bank_branch" class="form-select">
+                            <option value="" >Select Bank Branch</option>
                             {% if bank_branches %}
                                 {% for bb in bank_branches %}
-                                    <option value="{{ bb.id }}"
-                                    {% if bb.id == selected_branch_id %} selected {% endif %}
-                                    >{{ bb.branch_name }}</option>
+                                    <option value="{{ bb.branch_name }}" {% if bb == company_info.bank_branch %} selected {% endif %}> {{ bb.branch_name }}</option>
                                 {% endfor %}
                             {% endif %}
                         </select>
@@ -298,20 +292,20 @@
     
         // Event listener for bank selection
         bankNameSelect.addEventListener('change', function() {
-            const bankId = this.value;
+            const bankName = this.value;  // Get the selected bank name
     
             // Clear current branch options
             branchSelect.innerHTML = '<option value="" disabled selected>Select Bank Branch</option>';
     
             // Fetch branches based on the selected bank
-            if (bankId) {
-                fetch(`/get_bank_branches/${bankId}/`)  // Adjust this URL to match your route
+            if (bankName) {
+                fetch(`/get_bank_branches/${bankName}/`)  // Adjust this URL to match your route
                 .then(response => response.json())
                 .then(data => {
                     if (data.branches.length > 0) {
                         data.branches.forEach(branch => {
                             const option = document.createElement('option');
-                            option.value = branch.id;
+                            option.value = branch.branch_name;  // Use branch name as the value
                             option.text = branch.branch_name;
                             branchSelect.appendChild(option);
                         });
@@ -321,6 +315,7 @@
             }
         });
     });
+    
 
 
     // Populate Department based on selected School or Faculty 
