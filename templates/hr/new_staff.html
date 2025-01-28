@@ -5,12 +5,13 @@
 <div class=" mt-4">
     <div class="card shadow-sm">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <h5 class="mb-3 text-primary"><strong>Staff Personal Information</strong></h5>
+            <div class="d-flex justify-content-between align-items-center my-3">
+                <h5 class="mb-3 text-dark"><strong>Personnel Particulars</strong></h5>
                 {% if staff.staff_pix %}
                 <img src="{{ staff.staff_pix.url }}" class="img-fluid" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover;">
                 {% endif %}
             </div>
+
             <form action="" method="POST" enctype="multipart/form-data"> 
                 {% csrf_token %}
                 <div class="row g-3 mb-4">
@@ -99,7 +100,7 @@
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
-                            <label for="dob">Date of Birth</label>
+                            <label for="dob">Date of Birth (Age {{ staff.calculate_age }})</label>
                             <input type="date" class="form-control" id="dob" name="dob" required
                                 {% if staff %} value="{{ staff.dob|date:"Y-m-d" }}" {% else %} value="" {% endif %}>
                         </div>
@@ -107,7 +108,7 @@
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="m_status">Marital Status</label>
-                            <select name="m_status" id="m_status" class="form-select" required>
+                            <select name="m_status" id="m_status" class="form-select">
                                 <option value="" disabled selected>N/A</option>
                                 {% for key,value in MARITALSTATUS %}
                                     <option value="{{ key }}"
@@ -268,9 +269,12 @@
                     </div>
                                         
                 </div> 
+
+                <h5 class="mb-3 text-dark"><strong>Personnel Particulars</strong></h5>
+
                             
 
-                <h5 class="mb-3 text-primary"><strong>Educational Background</strong></h5>
+                <h5 class="mb-3 text-dark"><strong>Educational Background</strong></h5>
                 <div class="row g-3 mb-4">
                     <div class="col-md-4">
                         <div class="form-group">
@@ -398,8 +402,8 @@
                                     
 
                 <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" value="Add" class="btn btn-success me-2">Submit</button>
-                    <a href="{% url 'newstaff' %}" class="btn btn-info">Cancel</a>
+                    <a href="{% url 'newstaff' %}" class="btn btn-danger me-2">Cancel</a>
+                    <button type="submit" value="Add" class="btn btn-success">Submit</button>
                 </div>              
             </form>
         </div>

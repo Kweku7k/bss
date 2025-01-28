@@ -92,6 +92,11 @@ class CompanyInformation(models.Model):
     bank_branch = models.CharField('Bank Branch',max_length=100,blank=True,null=True)
     ssn_con = models.CharField('SSN Contributor',max_length=10,blank=True,null=True)
     pf_con = models.CharField('PF Contributor',max_length=10,blank=True,null=True)
+    
+    pte = models.CharField('Point of Entry', max_length=100, blank=True, null=True)
+    probation = models.CharField('Probation Period', max_length=100, blank=True, null=True)
+    acc_name = models.CharField('Account Name', max_length=100, blank=True, null=True)
+    
    
     
     def __str__(self):
