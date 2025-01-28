@@ -217,8 +217,8 @@
                 </div> 
 
                 <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" value="Add" class="btn btn-success me-2">Add</button>
-                    <a href="{% url 'company-info' staff.staffno %}" class="btn btn-info">Cancel</a>
+                    <a href="{% url 'company-info' staff.staffno %}" class="btn btn-danger me-2">Cancel</a>
+                    <input type="submit" value="{% if company_info %}Update{% else %}Submit{% endif %}" class="btn btn-sm btn-success">
                 </div>
             </form>
         </div>

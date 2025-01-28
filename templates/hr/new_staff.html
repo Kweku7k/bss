@@ -383,27 +383,11 @@
                         <input type="file" class="form-control" id="staff_pix" name="staff_pix" aria-label="staff_pix" aria-describedby="staff_pix" {% if staff %} value="{{ staff.staff_pix }}" {% else %} {% endif %}>
                     </div>
                 </div>
-                
-
-                                    {% comment %} <div class="col-md-6">
-                                        <select name="active_status"  class="form-select">
-                                            <option selected="true" disabled="disabled"></option>
-                                            {% for key,value in STAFFSTATUS %}
-                                                <option value="{{ key }}"
-                                                {% if key == staff.active_status %}
-                                                    selected
-                                                {% endif %}
-                                                >{{ value }}</option>
-                                                {% endfor %}
-                                        </select>
-                                        <label for="active_status">Employee Status</label>
-                                    </div> {% endcomment %}
-
                                     
 
                 <div class="d-flex justify-content-end mt-4">
                     <a href="{% url 'newstaff' %}" class="btn btn-danger me-2">Cancel</a>
-                    <button type="submit" value="Add" class="btn btn-success">Submit</button>
+                    <input type="submit" value="{% if staff %}Update{% else %}Submit{% endif %}" class="btn btn-sm btn-success">
                 </div>              
             </form>
         </div>
