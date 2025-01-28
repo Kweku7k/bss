@@ -2222,3 +2222,11 @@ def disapprove_promotion(request, promotion_id):
         return redirect('staff-details', staffno=promotion.staffno.staffno)
 
     return redirect('landing')
+
+
+# payroll information from company info model 
+def payroll_details(request, staffno):
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    context = {'staff':staff,'company_info':company_info,}
+    return render(request, 'hr/payrol.html', context)

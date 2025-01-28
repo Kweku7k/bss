@@ -195,7 +195,7 @@
                     <div class="col-md-4">
                         <label for="bank_branch" class="form-label">Bank Branch</label>
                         <select id="bank_branch" name="bank_branch" class="form-select">
-                            <option value="" >Select Bank Branch</option>
+                            <option value="">Select Bank Branch</option>
                             {% if bank_branches %}
                                 {% for bb in bank_branches %}
                                     <option value="{{ bb }}" {% if bb.branch_name == company_info.bank_branch %} selected {% endif %}> {{ bb }}</option>

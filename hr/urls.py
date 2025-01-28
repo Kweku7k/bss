@@ -105,4 +105,8 @@ urlpatterns = [
     path('promotion/<str:staffno>/', views.add_promotion_history, name='promotion-history'),
     path('promotion/approve/<int:promotion_id>/', views.approve_promotion, name='approve-promotion'),
     path('promotion/disapprove/<int:promotion_id>/', views.disapprove_promotion, name='disapprove-promotion'),
+    
+    
+    # payroll url
+    path('payroll/<str:staffno>', views.payroll_details, name="payroll-details"),
 ]

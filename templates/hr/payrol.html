@@ -1,0 +1,75 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow-lg border-0 rounded-lg" style="max-width: 500px; width: 100%;">
+        
+        <div class="card-header ">
+            <h5><strong>Payroll Information</strong></h5>
+        </div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+
+            <!-- Employee Details -->
+            <div class="text-center my-3">
+                {% if staff.staff_pix %}
+                <img src="{{ staff.staff_pix.url }}" class="rounded-circle img-thumbnail shadow mb-3" alt="Staff Picture" style="width: 80px; height: 80px;">
+                {% endif %}
+                <h5 class="fw-bold">{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</h5>
+                <p class="text-muted">Staff Number: {{ staff.staffno }}</p>
+            </div>
+
+            <!-- Payroll Details -->
+            <div class="mb-4">
+                <h6 class="text-primary fw-bold">Earnings</h6>
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td>Basic Salary</td>
+                            <td class="text-end">{{ company_info.salary }}</td>
+                        </tr>
+                        <tr>
+                            <td>Allowances</td>
+                            <td class="text-end">{{ company_info.allowances }}</td>
+                        </tr>
+                        <tr>
+                            <td>Bonus</td>
+                            <td class="text-end">{{ company_info.bonus }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Deductions -->
+            <div class="mb-4">
+                <h6 class="text-danger fw-bold">Deductions</h6>
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td>SSN Contribution</td>
+                            <td class="text-end">{{ company_info.ssn_con }}</td>
+                        </tr>
+                        <tr>
+                            <td>PF Contribution</td>
+                            <td class="text-end">{{ company_info.pf_con }}</td>
+                        </tr>
+                        <tr>
+                            <td>Other Deductions</td>
+                            <td class="text-end">{{ company_info.other_deductions }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Total Payable -->
+            <div class="text-center border-top pt-3">
+                <h4 class="text-success fw-bold">Total Payable: ₵{{ company_info.salary|floatformat:2 }}</h4>
+                <p class="text-muted fst-italic">This is a system-generated payslip.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
