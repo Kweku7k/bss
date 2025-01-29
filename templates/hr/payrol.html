@@ -2,11 +2,12 @@
 {% load static %}
 {% block content %}
 
-<div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="card shadow-lg border-0 rounded-lg" style="max-width: 500px; width: 100%;">
+<div class="d-flex justify-content-center align-items-center">
+    <div class="card shadow-lg border-0 rounded-lg" style="max-width: 600px; width: 100%;">
         
-        <div class="card-header ">
+        <div class="card-header d-flex justify-content-between align-items-center">
             <h5><strong>Payroll Information</strong></h5>
+            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Back</a>
         </div>
 
         <!-- Card Body -->
@@ -21,9 +22,58 @@
                 <p class="text-muted">Staff Number: {{ staff.staffno }}</p>
             </div>
 
+
+            <!-- Company Details -->
+            <div class="mb-4">
+                <h6 class="text-dark fw-bold">Company Information</h6>
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td>Deptartment</td>
+                            {% if company_info.dept and company_info.directorate %}
+                                <td class="text-end">{{ company_info.dept }} / {{ company_info.directorate}}</td>
+                            {% elif  company_data.dept %}
+                                <td class="text-end">{{ company_info.dept }} / {{ company_info.directorate}}</td>
+                            {% elif company_info.directorate %}
+                                <td class="text-end">{{ company_info.dept }} / {{ company_info.directorate}}</td>
+                            {% endif %}
+                        </tr>
+                        <tr>
+                            <td>Job Title</td>
+                            <td class="text-end">{{ company_info.job_title }}</td>
+                        </tr>
+                        <tr>
+                            <td>SS No.</td>
+                            <td class="text-end">{{ staff.ssnitno }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <!-- Payroll Details -->
             <div class="mb-4">
-                <h6 class="text-primary fw-bold">Earnings</h6>
+                <h6 class="text-primary fw-bold">Financial Details</h6>
+                <table class="table table-borderless">
+                    <tbody>
+                        <tr>
+                            <td>Bank</td>
+                            <td class="text-end">{{ company_info.bank_name }}</td>
+                        </tr>
+                        <tr>
+                            <td>Bank Branch</td>
+                            <td class="text-end">{{ company_info.bank_branch }}</td>
+                        </tr>
+                        <tr>
+                            <td>Bank A/C No:</td>
+                            <td class="text-end">{{ company_info.accno }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Payroll Details -->
+            <div class="mb-4">
+                <h6 class="text-success fw-bold">Earnings</h6>
                 <table class="table table-borderless">
                     <tbody>
                         <tr>
@@ -33,10 +83,6 @@
                         <tr>
                             <td>Allowances</td>
                             <td class="text-end">{{ company_info.allowances }}</td>
-                        </tr>
-                        <tr>
-                            <td>Bonus</td>
-                            <td class="text-end">{{ company_info.bonus }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -54,10 +100,6 @@
                         <tr>
                             <td>PF Contribution</td>
                             <td class="text-end">{{ company_info.pf_con }}</td>
-                        </tr>
-                        <tr>
-                            <td>Other Deductions</td>
-                            <td class="text-end">{{ company_info.other_deductions }}</td>
                         </tr>
                     </tbody>
                 </table>

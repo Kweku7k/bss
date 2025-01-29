@@ -30,6 +30,8 @@ from django.core.paginator import Paginator
 from hr.decorators import role_required
 from django.db.models.functions import Concat
 from django.db.models import F, Value, CharField
+from datetime import date
+from datetime import timedelta
 
 
 
@@ -488,6 +490,25 @@ def test(request):
     company_info = CompanyInformation.objects.all()
     staff_school = Staff_School.objects.all()
     
+    
+    AGE_CLASSIFICATIONS = {
+        "child": (0, 12),
+        "teen": (13, 19),
+        "young_adult": (20, 35),
+        "middle_adult": (36, 60),
+        "senior_adult": (61, 100),
+        "elderly": (101, 300)
+    }
+    
+    AGE_LABELS = {
+        "child": "Child (0-12)",
+        "teen": "Teen (13-19)",
+        "young_adult": "Young Adult (20-35)",
+        "middle_adult": "Middle Aged (36-60)",
+        "senior_adult": "Senior Adult (61-100)",
+        "elderly": "Elderly (101+)"
+    }
+    
     # Initialize filter variables
     filter_staffcategory = None
     filter_qualification = None
@@ -499,6 +520,9 @@ def test(request):
     filter_jobtitle = None
     filter_directorate = None
     filter_school_faculty = None
+    filter_age = None
+    filter_renewal = None
+    filter_promotion = None
 
     # Initial filter container
     filters = Q()
@@ -515,6 +539,9 @@ def test(request):
         filter_jobtitle = request.POST.get('filter_jobtitle')
         filter_directorate = request.POST.get('filter_directorate')
         filter_school_faculty = request.POST.get('filter_school_faculty')
+        filter_age = request.POST.get('filter_age')
+        filter_renewal = request.POST.get('filter_renewal')
+        filter_promotion = request.POST.get('filter_promotion')
 
         # Filter by Staff Category
         if filter_staffcategory:
@@ -566,6 +593,25 @@ def test(request):
             company_info = CompanyInformation.objects.filter(sch_fac_dir=filter_school_faculty)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
+            
+        # Filter by Age
+        if filter_age:
+            age_range = AGE_CLASSIFICATIONS.get(filter_age)
+            if age_range:
+                current_date = date.today()
+                start_date = current_date - timedelta(days=age_range[1] * 365)
+                end_date = current_date - timedelta(days=age_range[0] * 365)
+                filters &= Q(dob__range=(start_date, end_date))
+                
+        # Filter by Renewal History
+        if filter_renewal == "true":
+            renewal_staffno = {renewal.staffno_id for renewal in RenewalHistorys.objects.all()}
+            filters &= Q(staffno__in=renewal_staffno)
+            
+        # Filter by Promotion History
+        if filter_promotion == "true":
+            promotion_staffno = {promotion.staffno_id for promotion in PromotionHistory.objects.all()}
+            filters &= Q(staffno__in=promotion_staffno)
 
         # Apply filters to the staff queryset
         staffs = staffs.filter(filters).distinct()  # Ensure distinct entries
@@ -591,6 +637,7 @@ def test(request):
         'jobtitle': [(q.job_title, q.job_title) for q in JobTitle.objects.all()],
         'directorate': [(q.direct_name, q.direct_name) for q in Directorate.objects.all()],
         'school_faculty': [(q.sch_fac_name, q.sch_fac_name) for q in School_Faculty.objects.all()],
+        'age_classifications': AGE_LABELS,
         # The filters being used for rendering in the template
         'filter_staffcategory': filter_staffcategory,
         'filter_qualification': filter_qualification,
@@ -602,6 +649,10 @@ def test(request):
         'filter_jobtitle': filter_jobtitle,
         'filter_directorate': filter_directorate,
         'filter_school_faculty': filter_school_faculty,
+        'filter_age': filter_age,
+        'filter_renewal': filter_renewal,
+        'filter_promotion': filter_promotion,
+        'renewal_staffno': {renewal.staffno_id for renewal in RenewalHistorys.objects.all()},
     }
 
     # Render the page
@@ -1290,7 +1341,7 @@ def medical_transaction(request, staffno):
     # Add the staff name to the list
     staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"  # Update field names as per your Employee model
     final_bene_list = list(bene_list) + [(staff.staffno, staff_fullname)]
-    pprint.pprint(final_bene_list)
+    # pprint.pprint(final_bene_list)
 
     
     if not medical_entitlement:

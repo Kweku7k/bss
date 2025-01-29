@@ -21,3 +21,9 @@ class MedicalEntitlement(models.Model):
         # Sum the days taken by this staff member
         amount_spent = Medical.objects.filter(staffno=staff, staff_cat=self.staff_cat).aggregate(models.Sum('treatment_cost'))['treatment_cost__sum'] or 0
         return amount_spent
+    
+    # def get_surcharge(self, staff):
+    #     # Sum the days taken by this staff member
+    #     amount_spent = Medical.objects.filter(staffno=staff, staff_cat=self.staff_cat).aggregate(models.Sum('treatment_cost'))['treatment_cost__sum'] or 0
+    #     surcharge = amount_spent - self.entitlement
+    #     return surcharge

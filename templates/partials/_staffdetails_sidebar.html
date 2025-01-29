@@ -1,9 +1,9 @@
 <div class=" sidebar bg-info-light pt-4">
         <div class="card-header text-center mb-2">
           {% if staff.staff_pix %}
-              <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 150px; width: 150px; object-fit: cover;"> 
+            <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
           {% else %}
-              <p>No image available</p>
+            <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
           {% endif %}
           
           <br />
