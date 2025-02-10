@@ -1,226 +1,250 @@
-{% extends "base.html" %}
+{% comment %} {% extends "base.html" %} {% endcomment %}
+{% include "partials/_topnav.html" %} 
 {% load static %}
 
-{% block content %}
-<div class="mt-4">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <h5 class="mb-3 text-primary"><strong>Company Information for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
-                {% if staff.staff_pix %}
-                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
-                {% endif %}
-            </div>
-            <form action="" method="POST" enctype="multipart/form-data"> 
-                {% csrf_token %}
-                <div class="row g-3 mb-4">
-                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-                    <div class="col-md-4">
-                        <label for="job_title" class="form-label">Job Title</label>
-                        <select id="job_title" name="job_title" class="form-select" required>
-                            <option value="" selected>N/A</option>
-                            {% if jobtitle %} 
-                                {% for jt in jobtitle %}
-                                    <option value="{{ jt.job_title }}" {% if jt.job_title == company_info.job_title %} selected {% endif %}> {{ jt.job_title }} </option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
 
-                    {% comment %} <div class="col-md-4">
-                        <label for="job_description" class="form-label">Job Description</label>
-                        <input type="text" class="form-control" id="job_description" name="job_description" value="{{ company_info.job_description }}">
-                    </div> {% endcomment %}
-                    <div class="col-md-4">
-                        <label for="staff_cat" class="form-label">Staff Category</label>
-                        <select id="staff_cat" name="staff_cat" class="form-select" required>
-                            <option value="" disabled selected>N/A</option>
-                            {% if staffcategory %} 
-                                {% for sc in staffcategory %}
-                                    <option value="{{ sc.category_name }}"
-                                    {% if sc.category_name == company_info.staff_cat %} selected {% endif %}
-                                    
-                                    > {{ sc.category_name }} </option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
+    <div class="col-md-8">
+        <div class="mt-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h5 class="mb-3 text-primary"><strong>Company Information for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        {% if staff.staff_pix %}
+                        <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                        {% endif %}
                     </div>
-                    <div class="col-md-4">
-                        <label for="contract" class="form-label">Contract Type</label>
-                        <select id="contract" name="contract" class="form-select" required>
-                            <option value="" disabled selected>N/A</option>
-                            {% if contract %} 
-                                {% for ct in contract %}
-                                    <option value="{{ ct.contract_type }}"
-                                    {% if ct.contract_type == company_info.contract %} selected {% endif %}
+                    <form action="" method="POST" enctype="multipart/form-data"> 
+                        {% csrf_token %}
+                        <div class="row g-3 mb-4">
+                            <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+                            <div class="col-md-4">
+                                <label for="job_title" class="form-label">Job Title</label>
+                                <select id="job_title" name="job_title" class="form-select" required>
+                                    <option value="" selected>N/A</option>
+                                    {% if jobtitle %} 
+                                        {% for jt in jobtitle %}
+                                            <option value="{{ jt.job_title }}" {% if jt.job_title == company_info.job_title %} selected {% endif %}> {{ jt.job_title }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                            {% comment %} <div class="col-md-4">
+                                <label for="job_description" class="form-label">Job Description</label>
+                                <input type="text" class="form-control" id="job_description" name="job_description" value="{{ company_info.job_description }}">
+                            </div> {% endcomment %}
+                            <div class="col-md-4">
+                                <label for="staff_cat" class="form-label">Staff Category</label>
+                                <select id="staff_cat" name="staff_cat" class="form-select" required>
+                                    <option value="" disabled selected>N/A</option>
+                                    {% if staffcategory %} 
+                                        {% for sc in staffcategory %}
+                                            <option value="{{ sc.category_name }}"
+                                            {% if sc.category_name == company_info.staff_cat %} selected {% endif %}
+                                            
+                                            > {{ sc.category_name }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="contract" class="form-label">Contract Type</label>
+                                <select id="contract" name="contract" class="form-select" required>
+                                    <option value="" disabled selected>N/A</option>
+                                    {% if contract %} 
+                                        {% for ct in contract %}
+                                            <option value="{{ ct.contract_type }}"
+                                            {% if ct.contract_type == company_info.contract %} selected {% endif %}
+                                            
+                                            > {{ ct.contract_type }} </option>
+                                        {% endfor %}
+                                    {% endif %}
                                     
-                                    > {{ ct.contract_type }} </option>
-                                {% endfor %}
-                            {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="active_status" class="form-label">Employee Status</label>
+                                <select id="active_status" name="active_status" class="form-select" required>
+                                    <option value="" disabled selected>N/A</option>
+                                    {% for key, value in STAFFSTATUS %}
+                                    <option value="{{ key }}" {% if key == company_info.active_status %} selected {% endif %}>{{ value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="doa" class="form-label">Date of Appointment</label>
+                                <input type="date" class="form-control" id="doa" name="doa" value="{{ company_info.doa|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="doe" class="form-label">Date of Expiration
+                                    <span id="duration" class="text-danger"></span>
+                                </label>
+                                <input type="date" class="form-control" id="doe" name="doe" value="{{ company_info.doe|date:'Y-m-d' }}" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="renewal" class="form-label">Confirmation Date</label>
+                                <input type="date" class="form-control" id="renewal" name="renewal" value="{{ company_info.renewal|date:'Y-m-d' }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="probation" class="form-label">Probatinary Period (if applicable)</label>
+                                <input type="date" class="form-control" id="probation" name="probation" value="{{ company_info.probation|date:'Y-m-d' }}">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="sch_fac_dir" class="form-label">School/Faculty</label>
+                                <select id="sch_fac_dir" name="sch_fac_dir" class="form-select">
+                                    <option value="" disabled selected>N/A</option>
+                                    {% if school_faculty %} 
+                                        {% for sch_fac in school_faculty %}
+                                            <option value="{{ sch_fac }}" {% if sch_fac.sch_fac_name == company_info.sch_fac_dir %} selected {% endif %}> {{ sch_fac }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="dept" class="form-label">Department</label>
+                                <select id="dept" name="dept" class="form-select">
+                                    <option value="" disabled selected>N/A</option>
+                                    {% if departments %}
+                                        {% for dept in departments %}
+                                            <option value="{{ dept }}" {% if dept.dept_long_name == company_info.dept %} selected {% endif %}> {{ dept }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="directorate" class="form-label">Directorate</label>
+                                <select id="directorate" name="directorate" class="form-select">
+                                    <option value=""  selected>N/A</option>
+                                    {% if directorate %}
+                                        {% for dir in directorate %}
+                                        <option value="{{ dir }}" {% if dir.direct_name == company_info.directorate %} selected {% endif %}> {{ dir }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+
                             
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="active_status" class="form-label">Employee Status</label>
-                        <select id="active_status" name="active_status" class="form-select" required>
-                            <option value="" disabled selected>N/A</option>
-                            {% for key, value in STAFFSTATUS %}
-                            <option value="{{ key }}" {% if key == company_info.active_status %} selected {% endif %}>{{ value }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="doa" class="form-label">Date of Appointment</label>
-                        <input type="date" class="form-control" id="doa" name="doa" value="{{ company_info.doa|date:'Y-m-d' }}" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="doe" class="form-label">Date of Expiration
-                            <span id="duration" class="text-danger"></span>
-                        </label>
-                        <input type="date" class="form-control" id="doe" name="doe" value="{{ company_info.doe|date:'Y-m-d' }}" required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="renewal" class="form-label">Confirmation Date</label>
-                        <input type="date" class="form-control" id="renewal" name="renewal" value="{{ company_info.renewal|date:'Y-m-d' }}">
-                    </div>
+                            <div class="col-md-4">
+                                <label for="rank" class="form-label">Designation/Rank</label>
+                                <input type="text" class="form-control" id="rank" name="rank" value="{{ company_info.rank }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="campus" class="form-label">Campus</label>
+                                <select id="campus" name="campus" class="form-select">
+                                    <option value="" disabled selected>Select Campus</option>
+                                    {% for camp in campus %}
+                                    <option value="{{ camp }}" {% if camp.campus_name == company_info.campus %} selected {% endif %}>{{ camp }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" value="{{ company_info.city }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="email" class="form-label">Official Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ company_info.email }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="salary" class="form-label">Salary Scale</label>
+                                <input type="text" class="form-control" id="salary" name="salary" value="{{ company_info.salary }}">
+                            </div>
 
-                    <div class="col-md-4">
-                        <label for="probation" class="form-label">Probatinary Period</label>
-                        <input type="date" class="form-control" id="probation" name="probation" value="{{ company_info.probation|date:'Y-m-d' }}">
-                    </div>
+                            <div class="col-md-4">
+                                <label for="pte" class="form-label">Point of Entry in Salary Scale</label>
+                                <input type="text" class="form-control" id="pte" name="pte" value="{{ company_info.pte }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="cost_center" class="form-label">Cost Center</label>
+                                <select id="cost_center" name="cost_center" class="form-select" >
+                                    <option value="" selected>Select</option>
+                                    {% if departments %} 
+                                        {% for dt in departments %}
+                                            <option value="{{ dt }}" {% if dt.dept_long_name == company_info.cost_center %} selected {% endif %} > {{ dt }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <h5 class="mb-3 text-primary"><strong>Bank Information</strong></h5>
+                        <div class="row g-3">
 
-                    <div class="col-md-4">
-                        <label for="sch_fac_dir" class="form-label">School/Faculty</label>
-                        <select id="sch_fac_dir" name="sch_fac_dir" class="form-select">
-                            <option value="" disabled selected>N/A</option>
-                            {% if school_faculty %} 
-                                {% for sch_fac in school_faculty %}
-                                    <option value="{{ sch_fac }}" {% if sch_fac.sch_fac_name == company_info.sch_fac_dir %} selected {% endif %}> {{ sch_fac }} </option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="dept" class="form-label">Department</label>
-                        <select id="dept" name="dept" class="form-select">
-                            <option value="" disabled selected>N/A</option>
-                            {% if departments %}
-                                {% for dept in departments %}
-                                    <option value="{{ dept }}" {% if dept.dept_long_name == company_info.dept %} selected {% endif %}> {{ dept }} </option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="directorate" class="form-label">Directorate</label>
-                        <select id="directorate" name="directorate" class="form-select">
-                            <option value=""  selected>N/A</option>
-                            {% if directorate %}
-                                {% for dir in directorate %}
-                                <option value="{{ dir }}" {% if dir.direct_name == company_info.directorate %} selected {% endif %}> {{ dir }} </option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
+                            <div class="col-md-4">
+                                <label for="bank_name" class="form-label">Bank Name</label>
+                                <select id="bank_name" name="bank_name" class="form-select">
+                                    <option value="">Select Bank Name</option>
+                                    {% if bank_list %} 
+                                        {% for bn in bank_list %}
+                                            <option value="{{ bn }}" {% if bn.bank_short_name == company_info.bank_name %} selected {% endif %}>{{ bn }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
 
-                    
-                    <div class="col-md-4">
-                        <label for="rank" class="form-label">Designation/Rank</label>
-                        <input type="text" class="form-control" id="rank" name="rank" value="{{ company_info.rank }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="campus" class="form-label">Campus</label>
-                        <select id="campus" name="campus" class="form-select">
-                            <option value="" disabled selected>Select Campus</option>
-                            {% for camp in campus %}
-                            <option value="{{ camp }}" {% if camp.campus_name == company_info.campus %} selected {% endif %}>{{ camp }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="city" class="form-label">City</label>
-                        <input type="text" class="form-control" id="city" name="city" value="{{ company_info.city }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="email" class="form-label">Official Email</label>
-                        <input type="email" class="form-control" id="email" name="email" value="{{ company_info.email }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="salary" class="form-label">Salary Scale</label>
-                        <input type="text" class="form-control" id="salary" name="salary" value="{{ company_info.salary }}">
-                    </div>
+                            <div class="col-md-4">
+                                <label for="accno" class="form-label">Account Number</label>
+                                <input type="text" class="form-control" id="accno" name="accno" value="{{ company_info.accno }}">
+                            </div>
 
-                    <div class="col-md-4">
-                        <label for="pte" class="form-label">Point of Entry in Salary Scale</label>
-                        <input type="text" class="form-control" id="pte" name="pte" value="{{ company_info.pte }}">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="cost_center" class="form-label">Cost Center</label>
-                        <select id="cost_center" name="cost_center" class="form-select" >
-                            <option value="" selected>Select</option>
-                            {% if departments %} 
-                                {% for dt in departments %}
-                                    <option value="{{ dt }}" {% if dt.dept_long_name == company_info.cost_center %} selected {% endif %} > {{ dt }} </option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
+                            <div class="col-md-4">
+                                <label for="acc_name" class="form-label">Account Name</label>
+                                <input type="text" class="form-control" id="acc_name" name="acc_name" value="{{ company_info.acc_name }}">
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="bank_branch" class="form-label">Bank Branch</label>
+                                <select id="bank_branch" name="bank_branch" class="form-select">
+                                    <option value="">Select Bank Branch</option>
+                                    {% if bank_branches %}
+                                        {% for bb in bank_branches %}
+                                            <option value="{{ bb }}" {% if bb.branch_name == company_info.bank_branch %} selected {% endif %}> {{ bb }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            
+                            
+                            <div class="col-md-4">
+                                <label for="ssn_con" class="form-check-label">SSN Contribution</label>
+                                <input type="checkbox" class="form-check-input" role="switch" id="ssn_con" name="ssn_con" value="yes" {% if company_info.ssn_con %} checked {% endif %}>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="pf_con" class="form-check-label">Provident Fund Contribution</label>
+                                <input type="checkbox" class="form-check-input" id="pf_con" name="pf_con" value="yes" {% if company_info.pf_con %} checked {% endif %}>
+                            </div>
+                            
+                        </div> 
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <a href="{% url 'company-info' staff.staffno %}" class="btn btn-danger me-2">Cancel</a>
+                            <input type="submit" value="{% if company_info %}Update{% else %}Submit{% endif %}" class="btn btn-sm btn-success">
+                        </div>
+                    </form>
                 </div>
-                <h5 class="mb-3 text-primary"><strong>Bank Information</strong></h5>
-                <div class="row g-3">
-
-                    <div class="col-md-4">
-                        <label for="bank_name" class="form-label">Bank Name</label>
-                        <select id="bank_name" name="bank_name" class="form-select">
-                            <option value="">Select Bank Name</option>
-                            {% if bank_list %} 
-                                {% for bn in bank_list %}
-                                    <option value="{{ bn }}" {% if bn.bank_short_name == company_info.bank_name %} selected {% endif %}>{{ bn }}</option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label for="accno" class="form-label">Account Number</label>
-                        <input type="text" class="form-control" id="accno" name="accno" value="{{ company_info.accno }}">
-                    </div>
-
-                    <div class="col-md-4">
-                        <label for="acc_name" class="form-label">Account Name</label>
-                        <input type="text" class="form-control" id="acc_name" name="acc_name" value="{{ company_info.acc_name }}">
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label for="bank_branch" class="form-label">Bank Branch</label>
-                        <select id="bank_branch" name="bank_branch" class="form-select">
-                            <option value="">Select Bank Branch</option>
-                            {% if bank_branches %}
-                                {% for bb in bank_branches %}
-                                    <option value="{{ bb }}" {% if bb.branch_name == company_info.bank_branch %} selected {% endif %}> {{ bb }}</option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div>
-                    
-                    
-                    <div class="col-md-4">
-                        <label for="ssn_con" class="form-check-label">SSN Contribution</label>
-                        <input type="checkbox" class="form-check-input" role="switch" id="ssn_con" name="ssn_con" value="yes" {% if company_info.ssn_con %} checked {% endif %}>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="pf_con" class="form-check-label">Provident Fund Contribution</label>
-                        <input type="checkbox" class="form-check-input" id="pf_con" name="pf_con" value="yes" {% if company_info.pf_con %} checked {% endif %}>
-                    </div>
-                    
-                </div> 
-
-                <div class="d-flex justify-content-end mt-4">
-                    <a href="{% url 'company-info' staff.staffno %}" class="btn btn-danger me-2">Cancel</a>
-                    <input type="submit" value="{% if company_info %}Update{% else %}Submit{% endif %}" class="btn btn-sm btn-success">
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -338,4 +362,4 @@
 
 
 
-{% endblock %}
+{% comment %} {% endblock %} {% endcomment %}

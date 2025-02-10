@@ -126,10 +126,10 @@ def logoutUser(request):
 def landing(request):
     staffs = Employee.objects.order_by('lname').filter()
     active = CompanyInformation.objects.filter(active_status__exact='Active')
-    leave = CompanyInformation.objects.filter(active_status__exact='Leave')
+    inactive = CompanyInformation.objects.filter(active_status__exact='Inactive')
     staff_count = staffs.count()
     ative_count = active.count()
-    leave_count = leave.count()
+    inactive_count = inactive.count()
     
     today = timezone.now().date()
     expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
@@ -143,10 +143,10 @@ def landing(request):
     context = {
         'staffs':staffs,
         'active':active,
-        'leave':leave,
+        'inactive':inactive,
         'staff_count':staff_count,
         'ative_count':ative_count,
-        'leave_count':leave_count,
+        'inactive_count':inactive_count,
         'expiring_soon':expiring_soon,
         'notification_count':notification_count,
         'pending_renewals':pending_renewals,
@@ -268,7 +268,7 @@ def edit_staff(request,staffno):
                }
 
     # context = {'form':form,'staffs':staffs,'staff_count':staff_count,'staff':staff}
-    return render(request, 'hr/new_staff.html', context)
+    return render(request, 'hr/edit_new_staff.html', context)
 
 
 # Write a filtering query set for 
@@ -278,6 +278,7 @@ def edit_staff(request,staffno):
 @role_required(['superadmin'])
 def allstaff(request): 
     search_query = request.POST.get('search', '')
+    status_filter = request.GET.get("status", None)
     filters = Q()
 
     if search_query:
@@ -287,6 +288,9 @@ def allstaff(request):
             Q(staffno__icontains=search_query) | 
             Q(middlenames__icontains=search_query)
         )
+        
+    if status_filter:
+        filters &= Q(companyinformation__active_status=status_filter)
 
     # Filtered queryset
     staffs = Employee.objects.filter(filters).order_by('fname')
@@ -303,6 +307,7 @@ def allstaff(request):
         'staff_count': staff_count,
         'company_info': company_info,
         'search_query': search_query,
+        'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
     }
 
     return render(request, 'hr/allstaff.html', context)
@@ -509,6 +514,10 @@ def test(request):
         "elderly": "Elderly (101+)"
     }
     
+    # Custom minimum age
+    min_age = request.GET.get("min_age")
+    max_age = request.GET.get("max_age")
+    
     # Initialize filter variables
     filter_staffcategory = None
     filter_qualification = None
@@ -594,14 +603,47 @@ def test(request):
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
             
-        # Filter by Age
-        if filter_age:
-            age_range = AGE_CLASSIFICATIONS.get(filter_age)
-            if age_range:
-                current_date = date.today()
-                start_date = current_date - timedelta(days=age_range[1] * 365)
-                end_date = current_date - timedelta(days=age_range[0] * 365)
-                filters &= Q(dob__range=(start_date, end_date))
+        # # Filter by Age
+        # if filter_age:
+        #     age_range = AGE_CLASSIFICATIONS.get(filter_age)
+        #     if age_range:
+        #         current_date = date.today()
+        #         start_date = current_date - timedelta(days=age_range[1] * 365)
+        #         end_date = current_date - timedelta(days=age_range[0] * 365)
+        #         filters &= Q(dob__range=(start_date, end_date))
+        
+        # # Apply custom age range filter
+        # if filter_age == "custom" and min_age and max_age:
+        #     min_age = int(min_age)
+        #     max_age = int(max_age)
+        #     if 0 <= min_age <= 999 and 0 <= max_age <= 999:
+        #         current_date = date.today()
+        #         start_date = current_date - timedelta(days=max_age * 365)
+        #         end_date = current_date - timedelta(days=min_age * 365)
+        #         filters &= Q(dob__range=(start_date, end_date))
+                
+        # ✅ Prioritize Custom Age first
+        if filter_age == "custom" and min_age and max_age:
+            try:
+                min_age = int(min_age)
+                max_age = int(max_age)
+
+                if 0 <= min_age <= 999 and 0 <= max_age <= 999:
+                    current_date = date.today()
+                    start_date = current_date - timedelta(days=max_age * 365)
+                    end_date = current_date - timedelta(days=min_age * 365)
+                    filters &= Q(dob__range=(start_date, end_date))
+            except ValueError:
+                pass  # Ignore invalid inputs
+
+        # ✅ If no custom age is used, apply predefined filters
+        elif filter_age and filter_age in AGE_CLASSIFICATIONS:
+            age_range = AGE_CLASSIFICATIONS[filter_age]
+            current_date = date.today()
+            start_date = current_date - timedelta(days=age_range[1] * 365)
+            end_date = current_date - timedelta(days=age_range[0] * 365)
+            filters &= Q(dob__range=(start_date, end_date))
+
                 
         # Filter by Renewal History
         if filter_renewal == "true":
@@ -650,6 +692,8 @@ def test(request):
         'filter_directorate': filter_directorate,
         'filter_school_faculty': filter_school_faculty,
         'filter_age': filter_age,
+        'min_age': min_age,
+        'max_age': max_age,
         'filter_renewal': filter_renewal,
         'filter_promotion': filter_promotion,
         'renewal_staffno': {renewal.staffno_id for renewal in RenewalHistorys.objects.all()},

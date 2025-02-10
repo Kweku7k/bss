@@ -1,133 +1,157 @@
-{% extends "base.html" %}
+{% comment %} {% extends "base.html" %} {% endcomment %}
+{% include "partials/_topnav.html" %} 
 {% load static %}
-{% block content %}
 
-<div class="mt-4">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <h5 class="mb-3 text-primary"><strong>Educational Background for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
-                {% if staff.staff_pix %}
-                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
-                {% endif %}
-            </div>
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-            <h6><b> Highest Education Background</b></h6>
-            <div class="mb-1">
-                <div class="row">
-                    <div class="mb-4">
-                        {% if staff %}
-                            <p class="mb-0"><b>{{ staff.heq }} in {{ staff.study_area }}  </b></p>
-                            <p class="mb-0">Completed {{ staff.institution }} in {{ staff.completion_year }}</p>
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
+
+    <div class="col-md-8">
+        <div class="mt-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h5 class="mb-3 text-primary"><strong>Educational Background for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        {% if staff.staff_pix %}
+                        <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
                         {% endif %}
                     </div>
-                </div>
-            </div>
 
-
-
-            
-            <h6><b> Other Education Background</b></h6>
-            <div class="mb-4">
-                {% if educations %}
-                <div class="row">
-                    {% for edu in educations %}
-                    <div class="col-6 col-md-4 mb-2">
-                        <div class="card p-3">
-                            <div class="w-100 d-flex justify-content-between align-items-start mb-1">
-                                <div class="flex-grow-1 me-2">
-                                    <p class="mb-0"><b>{{ edu.certification }}</b></p>
-                                    <h6 class="mb-0 text-truncate" style="width: 100px;">{{ edu.prog_studied }}</h6>
-                                    <p class="mb-0">{{ edu.start_date }} - {{ edu.finish_date }}</p>
-                                    <p class="mb-0">{{ edu.school_code }} </p>
-                                </div>
-                                <div class="d-flex">
-                                    <a class="btn btn-sm btn-info bi-pencil-square me-2" href="{% url 'edit-education' edu.id staff.staffno %}"></a>
-                                    <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-education' edu.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ edu.prog_studied }}?');"></a>
-                                </div>
+                    <h6><b> Highest Education Background</b></h6>
+                    <div class="mb-1">
+                        <div class="row">
+                            <div class="mb-4">
+                                {% if staff %}
+                                    <p class="mb-0"><b>{{ staff.heq }} in {{ staff.study_area }}  </b></p>
+                                    <p class="mb-0">Completed {{ staff.institution }} in {{ staff.completion_year }}</p>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
-                </div>
-                {% else %}
-                <p>No Education Background added yet.</p>
-                {% endif %}
-            </div>
-
-            <br/>
 
 
-            <h6><b>Add New Education Background </b></h6>
-            <form action="" method="POST" enctype="multipart/form-data"> 
-                {% csrf_token %}
-                <div class="row g-3 mb-4">
-                    {% comment %} <div class="col-md-4">
-                        <label for="staffno" class="form-label">Staff Number</label>
-                    </div> {% endcomment %}
-                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
-                    <div class="col-md-4">
-                        <label class="form-label" for="certification">Educational Qualification</label>
-                        <select name="certification" id="certification" class="form-select" required>
-                            <option selected="true" disabled="disabled">-----Select------</option>
-                            {% for qual in qualification %}
-                            <option value="{{ qual }}"
-                            {% if qual.qual_abbr == education.certification %}
-                            selected
-                            {% endif %}
-                            >{{ qual }}</option>
+                    
+                    <h6><b> Other Education Background</b></h6>
+                    <div class="mb-4">
+                        {% if educations %}
+                        <div class="row">
+                            {% for edu in educations %}
+                            <div class="col-6 col-md-4 mb-2">
+                                <div class="card p-3">
+                                    <div class="w-100 d-flex justify-content-between align-items-start mb-1">
+                                        <div class="flex-grow-1 me-2">
+                                            <p class="mb-0"><b>{{ edu.certification }}</b></p>
+                                            <h6 class="mb-0 text-truncate" style="width: 100px;">{{ edu.prog_studied }}</h6>
+                                            <p class="mb-0">{{ edu.start_date }} - {{ edu.finish_date }}</p>
+                                            <p class="mb-0">{{ edu.school_code }} </p>
+                                        </div>
+                                        <div class="d-flex">
+                                            <a class="btn btn-sm btn-info bi-pencil-square me-2" href="{% url 'edit-education' edu.id staff.staffno %}"></a>
+                                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-education' edu.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ edu.prog_studied }}?');"></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             {% endfor %}
-                        </select>
+                        </div>
+                        {% else %}
+                        <p>No Education Background added yet.</p>
+                        {% endif %}
                     </div>
-                    <div class="col-md-4">
-                        <label for="prog_studied" class="form-label">Area of study </label>
-                        <input type="text" name="prog_studied" class="form-control" {% if education %} value="{{ education.prog_studied }}" {% else %} value="" {% endif %} required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="start_date" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" name="start_date" {% if education %} value="{{ education.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="finish_date" class="form-label">End Date</label>
-                        <input type="date" class="form-control" name="finish_date" {% if education %} value="{{ education.finish_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <label for="school_code" class="form-label">Institution of Study </label>
-                        <input type="text" name="school_code" class="form-control" {% if education %} value="{{ education.school_code }}" {% else %} value="" {% endif %} required>
-                    </div>
-                    
 
-                    {% comment %} <div class="col-md-4">
-                        <label for="school_code" class="form-label">Institution of Study</label>
-                        <select name="school_code" class="form-select" required>
-                            <option value="" disabled selected>Select Institution</option>
-                            {% if school_list %} 
-                                {% for school in school_list %}
-                                    <option value="{{ school.id }}"
-                                    {% if school.id == pkno %} selected {% endif %}
-                                    
-                                    > {{ school.school_name }} </option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
-                    </div> {% endcomment %}
-                    
-                    
-                   
-                </div>
+                    <br/>
 
-                <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" class="btn btn-info me-2">Add</button>
-                    <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+
+                    <h6><b>Add New Education Background </b></h6>
+                    <form action="" method="POST" enctype="multipart/form-data"> 
+                        {% csrf_token %}
+                        <div class="row g-3 mb-4">
+                            {% comment %} <div class="col-md-4">
+                                <label for="staffno" class="form-label">Staff Number</label>
+                            </div> {% endcomment %}
+                            <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+                            <div class="col-md-4">
+                                <label class="form-label" for="certification">Educational Qualification</label>
+                                <select name="certification" id="certification" class="form-select" required>
+                                    <option selected="true" disabled="disabled">-----Select------</option>
+                                    {% for qual in qualification %}
+                                    <option value="{{ qual }}"
+                                    {% if qual.qual_abbr == education.certification %}
+                                    selected
+                                    {% endif %}
+                                    >{{ qual }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="prog_studied" class="form-label">Area of study </label>
+                                <input type="text" name="prog_studied" class="form-control" {% if education %} value="{{ education.prog_studied }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" {% if education %} value="{{ education.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="finish_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="finish_date" {% if education %} value="{{ education.finish_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="school_code" class="form-label">Institution of Study </label>
+                                <input type="text" name="school_code" class="form-control" {% if education %} value="{{ education.school_code }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            
+
+                            {% comment %} <div class="col-md-4">
+                                <label for="school_code" class="form-label">Institution of Study</label>
+                                <select name="school_code" class="form-select" required>
+                                    <option value="" disabled selected>Select Institution</option>
+                                    {% if school_list %} 
+                                        {% for school in school_list %}
+                                            <option value="{{ school.id }}"
+                                            {% if school.id == pkno %} selected {% endif %}
+                                            
+                                            > {{ school.school_name }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div> {% endcomment %}
+                            
+                            
+                        
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-info me-2">Add</button>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                        </div>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 
 
-{% endblock %}
+{% comment %} {% endblock %} {% endcomment %}

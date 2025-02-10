@@ -1,120 +1,144 @@
-{% extends "base.html" %}
+{% comment %} {% extends "base.html" %} {% endcomment %}
+{% include "partials/_topnav.html" %} 
 {% load static %}
-{% block content %}
 
-<div class="container mt-4">
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center mt-3">
-                <h5 class="my-3 text-primary"><strong>Leave Details for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
-                {% if staff.staff_pix %}
-                <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
-                {% endif %}
-            </div>
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-            <h5><b>Leave Entitlement</b></h5>
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
 
-            <!-- Display leave entitlement -->
-            <div class="mb-5">
-                <div class="col-lg-5 col-md-12 mb-2">
-                    <div class="card p-3">
-                        <p><strong>Staff Category:</strong> {{ company_info.staff_cat }}</p>
-                        <p><strong>Entitled Days:</strong> {{ leave_entitlement.entitlement }}</p>
-                        <p><strong>Leave Balance:</strong> {{ remaining_days }}</p>
+    <div class="col-md-8">
+        <div class="mt-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h5 class="my-3 text-primary"><strong>Leave Details for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        {% if staff.staff_pix %}
+                        <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                        {% endif %}
                     </div>
+
+                    <h5><b>Leave Entitlement</b></h5>
+
+                    <!-- Display leave entitlement -->
+                    <div class="mb-5">
+                        <div class="col-lg-5 col-md-12 mb-2">
+                            <div class="card p-3">
+                                <p><strong>Staff Category:</strong> {{ company_info.staff_cat }}</p>
+                                <p><strong>Entitled Days:</strong> {{ leave_entitlement.entitlement }}</p>
+                                <p><strong>Leave Balance:</strong> {{ remaining_days }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <h5><b>Leave transactions {{leave_trans_count}}</b></h5>
+
+                    <!-- Check if there are any leave transactions -->
+                    {% if leave_transactions %}
+                        <table class="table table-striped mb-5">
+                            <thead>
+                                <tr>
+                                    <th>Leave Type</th>
+                                    <th>Description</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Days</th>
+                                    <th>Academic Year</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in leave_transactions %}
+                                <tr>
+                                    <td>{{ transaction.leave_type }}</td>
+                                    <td>{{ transaction.reason }}</td>
+                                    <td>{{ transaction.start_date }}</td>
+                                    <td>{{ transaction.end_date }}</td>
+                                    <td>{{ transaction.days_taken }}</td>
+                                    <td>{{ transaction.academic_year }}</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No leave transactions for this staff.</p>
+                    {% endif %}
+
+
+                    <!-- Leave Request Form -->
+                    <h5><b>Leave Request</b></h5>
+                    <form action="" method="POST" enctype="multipart/form-data"> 
+                        {% csrf_token %}
+                        <div class="row g-3 mb-4">
+                            
+                            <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+                            <input type="text" name="staff_cat" class="form-control" value="{{ company_info.staff_cat }}" readonly hidden>
+
+                            <div class="col-md-4">
+                                <label class="form-label" for="academic_year">Academic Year</label>
+                                <select name="academic_year" id="academic_year" class="form-select" required>
+                                    <option selected="true" disabled="disabled">-----Select------</option>
+                                    {% for year in academic_years %}
+                                    <option value="{{ year }}" {% if year.academic_year == leave_transaction.academic_year %} selected{% endif %} >{{ year }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label" for="leave_type">Type of Leave</label>
+                                <select name="leave_type" id="leave_type" class="form-select" required>
+                                    <option selected="true" disabled="disabled">----Select----</option>
+                                    {% for key, value in LEAVE_TYPE %}
+                                    <option value="{{ key }}" {% if key == leave_transaction.leave_type %} selected {% endif %}>
+                                        {{ value }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" name="start_date" id="start_date" {% if leave_transaction %} value="{{ leave_transaction.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="finish_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="end_date" id="end_date" {% if leave_transaction %} value="{{ leave_transaction.end_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="days_taken" class="form-label">Days Taken </label>
+                                <input type="text" name="days_taken" id="days_taken" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.days_taken }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="reason" class="form-label">Reason</label>
+                                <textarea name="reason" class="form-control">{% if leave_transaction %}{{ leave_transaction.reason }}{% endif %}</textarea>
+                            </div>        
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-info me-2">Add</button>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                        </div>
+                    </form>
                 </div>
             </div>
-
-
-            <h5><b>Leave transactions {{leave_trans_count}}</b></h5>
-
-            <!-- Check if there are any leave transactions -->
-            {% if leave_transactions %}
-                <table class="table table-striped mb-5">
-                    <thead>
-                        <tr>
-                            <th>Leave Type</th>
-                            <th>Description</th>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Days</th>
-                            <th>Academic Year</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for transaction in leave_transactions %}
-                        <tr>
-                            <td>{{ transaction.leave_type }}</td>
-                            <td>{{ transaction.reason }}</td>
-                            <td>{{ transaction.start_date }}</td>
-                            <td>{{ transaction.end_date }}</td>
-                            <td>{{ transaction.days_taken }}</td>
-                            <td>{{ transaction.academic_year }}</td>
-                            <td class="text-end">
-                                <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>No leave transactions for this staff.</p>
-            {% endif %}
-
-
-            <!-- Leave Request Form -->
-            <h5><b>Leave Request</b></h5>
-            <form action="" method="POST" enctype="multipart/form-data"> 
-                {% csrf_token %}
-                <div class="row g-3 mb-4">
-                    
-                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
-
-                    <input type="text" name="staff_cat" class="form-control" value="{{ company_info.staff_cat }}" readonly hidden>
-
-                    <div class="col-md-4">
-                        <label class="form-label" for="academic_year">Academic Year</label>
-                        <select name="academic_year" id="academic_year" class="form-select" required>
-                            <option selected="true" disabled="disabled">-----Select------</option>
-                            {% for year in academic_years %}
-                            <option value="{{ year }}" {% if year.academic_year == leave_transaction.academic_year %} selected{% endif %} >{{ year }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label" for="leave_type">Type of Leave</label>
-                        <select name="leave_type" id="leave_type" class="form-select" required>
-                            <option selected="true" disabled="disabled">----Select----</option>
-                            {% for key, value in LEAVE_TYPE %}
-                            <option value="{{ key }}" {% if key == leave_transaction.leave_type %} selected {% endif %}>
-                                {{ value }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="start_date" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" name="start_date" id="start_date" {% if leave_transaction %} value="{{ leave_transaction.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="finish_date" class="form-label">End Date</label>
-                        <input type="date" class="form-control" name="end_date" id="end_date" {% if leave_transaction %} value="{{ leave_transaction.end_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="days_taken" class="form-label">Days Taken </label>
-                        <input type="text" name="days_taken" id="days_taken" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.days_taken }}" {% else %} value="" {% endif %} required>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="reason" class="form-label">Reason</label>
-                        <textarea name="reason" class="form-control">{% if leave_transaction %}{{ leave_transaction.reason }}{% endif %}</textarea>
-                    </div>        
-                </div>
-
-                <div class="d-flex justify-content-end mt-4">
-                    <button type="submit" class="btn btn-info me-2">Add</button>
-                    <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
-                </div>
-            </form>
         </div>
     </div>
 </div>
@@ -145,4 +169,4 @@
     document.getElementById("end_date").addEventListener("change", calculateDaysTaken);
 </script>
 
-{% endblock %}
+{% comment %} {% endblock %} {% endcomment %}

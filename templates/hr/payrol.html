@@ -1,117 +1,141 @@
-{% extends "base.html" %} 
+{% comment %} {% extends "base.html" %}  {% endcomment %}
+{% include "partials/_topnav.html" %} 
 {% load static %}
-{% block content %}
 
-<div class="d-flex justify-content-center align-items-center">
-    <div class="card shadow-lg border-0 rounded-lg" style="max-width: 600px; width: 100%;">
-        
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5><strong>Payroll Information</strong></h5>
-            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Back</a>
-        </div>
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-        <!-- Card Body -->
-        <div class="card-body">
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
 
-            <!-- Employee Details -->
-            <div class="text-center my-3">
-                {% if staff.staff_pix %}
-                <img src="{{ staff.staff_pix.url }}" class="rounded-circle img-thumbnail shadow mb-3" alt="Staff Picture" style="width: 80px; height: 80px;">
-                {% endif %}
-                <h5 class="fw-bold">{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</h5>
-                <p class="text-muted">Staff Number: {{ staff.staffno }}</p>
-            </div>
+    <div class="col-md-8">
+        <div class="d-flex justify-content-center align-items-center mt-5">
+            <div class="card shadow-lg border-0 rounded-lg" style="max-width: 600px; width: 100%;">
+                
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><strong>Payroll Information</strong></h5>
+                    <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Back</a>
+                </div>
+
+                <!-- Card Body -->
+                <div class="card-body">
+
+                    <!-- Employee Details -->
+                    <div class="text-center my-3">
+                        {% if staff.staff_pix %}
+                        <img src="{{ staff.staff_pix.url }}" class="rounded-circle img-thumbnail shadow mb-3" alt="Staff Picture" style="width: 80px; height: 80px;">
+                        {% endif %}
+                        <h5 class="fw-bold">{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</h5>
+                        <p class="text-muted">Staff Number: {{ staff.staffno }}</p>
+                    </div>
 
 
-            <!-- Company Details -->
-            <div class="mb-4">
-                <h6 class="text-dark fw-bold">Company Information</h6>
-                <table class="table table-borderless">
-                    <tbody>
-                        <tr>
-                            <td>Deptartment</td>
-                            {% if company_info.dept and company_info.directorate %}
-                                <td class="text-end">{{ company_info.dept }} / {{ company_info.directorate}}</td>
-                            {% elif  company_data.dept %}
-                                <td class="text-end">{{ company_info.dept }} / {{ company_info.directorate}}</td>
-                            {% elif company_info.directorate %}
-                                <td class="text-end">{{ company_info.dept }} / {{ company_info.directorate}}</td>
-                            {% endif %}
-                        </tr>
-                        <tr>
-                            <td>Job Title</td>
-                            <td class="text-end">{{ company_info.job_title }}</td>
-                        </tr>
-                        <tr>
-                            <td>SS No.</td>
-                            <td class="text-end">{{ staff.ssnitno }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                    <!-- Company Details -->
+                    <div class="mb-4">
+                        <h6 class="text-dark fw-bold">Company Information</h6>
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td>Deptartment</td>
+                                    {% if company_info.dept and company_info.directorate %}
+                                        <td class="text-end">{{ company_info.dept }} / {{ company_info.directorate}}</td>
+                                    {% elif  company_info.dept %}
+                                        <td class="text-end">{{ company_info.dept }}</td>
+                                    {% elif company_info.directorate %}
+                                        <td class="text-end">{{ company_info.directorate}}</td>
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    <td>Job Title</td>
+                                    <td class="text-end">{{ company_info.job_title }}</td>
+                                </tr>
+                                <tr>
+                                    <td>SS No.</td>
+                                    <td class="text-end">{{ staff.ssnitno }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Payroll Details -->
-            <div class="mb-4">
-                <h6 class="text-primary fw-bold">Financial Details</h6>
-                <table class="table table-borderless">
-                    <tbody>
-                        <tr>
-                            <td>Bank</td>
-                            <td class="text-end">{{ company_info.bank_name }}</td>
-                        </tr>
-                        <tr>
-                            <td>Bank Branch</td>
-                            <td class="text-end">{{ company_info.bank_branch }}</td>
-                        </tr>
-                        <tr>
-                            <td>Bank A/C No:</td>
-                            <td class="text-end">{{ company_info.accno }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                    <!-- Payroll Details -->
+                    <div class="mb-4">
+                        <h6 class="text-primary fw-bold">Financial Details</h6>
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td>Bank</td>
+                                    <td class="text-end">{{ company_info.bank_name }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bank Branch</td>
+                                    <td class="text-end">{{ company_info.bank_branch }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bank A/C No:</td>
+                                    <td class="text-end">{{ company_info.accno }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Payroll Details -->
-            <div class="mb-4">
-                <h6 class="text-success fw-bold">Earnings</h6>
-                <table class="table table-borderless">
-                    <tbody>
-                        <tr>
-                            <td>Basic Salary</td>
-                            <td class="text-end">{{ company_info.salary }}</td>
-                        </tr>
-                        <tr>
-                            <td>Allowances</td>
-                            <td class="text-end">{{ company_info.allowances }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                    <!-- Payroll Details -->
+                    <div class="mb-4">
+                        <h6 class="text-success fw-bold">Earnings</h6>
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td>Basic Salary</td>
+                                    <td class="text-end">{{ company_info.salary }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Allowances</td>
+                                    <td class="text-end">{{ company_info.allowances }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Deductions -->
-            <div class="mb-4">
-                <h6 class="text-danger fw-bold">Deductions</h6>
-                <table class="table table-borderless">
-                    <tbody>
-                        <tr>
-                            <td>SSN Contribution</td>
-                            <td class="text-end">{{ company_info.ssn_con }}</td>
-                        </tr>
-                        <tr>
-                            <td>PF Contribution</td>
-                            <td class="text-end">{{ company_info.pf_con }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                    <!-- Deductions -->
+                    <div class="mb-4">
+                        <h6 class="text-danger fw-bold">Deductions</h6>
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td>SSN Contribution</td>
+                                    <td class="text-end">{{ company_info.ssn_con }}</td>
+                                </tr>
+                                <tr>
+                                    <td>PF Contribution</td>
+                                    <td class="text-end">{{ company_info.pf_con }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Total Payable -->
-            <div class="text-center border-top pt-3">
-                <h4 class="text-success fw-bold">Total Payable: ₵{{ company_info.salary|floatformat:2 }}</h4>
-                <p class="text-muted fst-italic">This is a system-generated payslip.</p>
+                    <!-- Total Payable -->
+                    <div class="text-center border-top pt-3">
+                        <h4 class="text-success fw-bold">Total Payable: ₵{{ company_info.salary|floatformat:2 }}</h4>
+                        <p class="text-muted fst-italic">This is a system-generated payslip.</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-{% endblock %}
+{% comment %} {% endblock %} {% endcomment %}

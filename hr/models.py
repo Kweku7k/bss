@@ -94,7 +94,7 @@ class CompanyInformation(models.Model):
     pf_con = models.CharField('PF Contributor',max_length=10,blank=True,null=True)
     
     pte = models.CharField('Point of Entry', max_length=100, blank=True, null=True)
-    probation = models.CharField('Probation Period', max_length=100, blank=True, null=True)
+    probation = models.DateField('Probation Period', max_length=100, blank=True, null=True)
     acc_name = models.CharField('Account Name', max_length=100, blank=True, null=True)
     
    
