@@ -1,0 +1,8 @@
+bcrypt 
+Django 
+django-admin 
+django-otp 
+django-two-factor-auth 
+email_validator
+psycopg2-binary
+uwsgi
