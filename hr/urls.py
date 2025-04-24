@@ -7,6 +7,7 @@ from . import views
 
 urlpatterns = [
     path('', views.landing,name="landing"),
+    path('logs/', views.view_logs, name='logs'),
     path('login', views.index,name="login"),
     path('account/2fa/', include(tf_urls, namespace='two_factor')),
     path('register', views.register,name="register"),

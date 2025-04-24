@@ -40,7 +40,7 @@ from datetime import timedelta
 
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('activity')
 
 def parse_date(date_str):
     if not date_str:
@@ -50,6 +50,27 @@ def parse_date(date_str):
     except ValueError:
         raise ValueError(f"Invalid date format: {date_str}. Expected format is YYYY-MM-DD.")
 
+
+@login_required
+def view_logs(request):
+    log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'activity.log')
+    logs = []
+
+    if os.path.exists(log_file_path):
+        with open(log_file_path, 'r') as f:
+            for line in f.readlines():
+                parts = line.strip().split(' ', 3)
+                if len(parts) == 4:
+                    date = parts[0]
+                    time = parts[1]
+                    level = parts[2]
+                    message = parts[3]
+                    logs.append({
+                        'datetime': f"{date} {time}",
+                        'level': level,
+                        'message': message,
+                    })
+    return render(request, 'hr/logs.html', {'logs': logs})
 
 
 def index(request):
@@ -61,6 +82,7 @@ def index(request):
             # if user.approval:
             login(request, user)
             messages.success(request, f"Login  Successful. Welcome Back {user.username}")
+            logger.info(f"Login Successful: {user.username}")
             return redirect('landing')
         else:
             messages.error(request, "Invalid login credentials." )
@@ -118,6 +140,8 @@ def register(request):
 
 
 def logoutUser(request):
+    username = request.user.username
+    logger.info(f"Logout Successful: {username}")
     logout(request)
     return redirect('login')
     
@@ -226,19 +250,23 @@ def edit_staff(request,staffno):
     staff = Employee.objects.get(pk=staffno)
     form = EmployeeForm(request.POST or None,request.FILES or None,instance=staff)
     if request.method == 'POST':
-        # form = EmployeeForm(request.POST, instance=staff)
         if form.is_valid():
-            fname = form.cleaned_data['fname']
-            lname = form.cleaned_data['lname']
-            
-            print("Form was submitted successfully")
-            form.save()
-            full_name = f"{fname} {lname}"
-            messages.success(request, f"Staff data for {full_name} has been updated successfully")
+            if form.has_changed():
+                fname = form.cleaned_data['fname']
+                lname = form.cleaned_data['lname']
+
+                print("Form was submitted successfully")
+                form.save()
+                full_name = f"{fname} {lname}"
+                messages.success(request, f"Staff data for {full_name} has been updated successfully")
+                logger.info(f"Staff data updated for {full_name} by {request.user.username}")
+            else: 
+                messages.warning(request, "No changes were made to the staff record.")
             return redirect('staff-details', staffno)
         else:
             print(form.errors)
             messages.error(request, "Form submission failed. Please check the form for errors.")
+            logger.error(f"Failed to update staff data for staff #{staffno}. Errors: {form.errors}")
     else:
         form = EmployeeForm
         if 'submitted' in request.GET:
@@ -1161,9 +1189,7 @@ def bulk_upload(request):
                 if errors:
                     error_message = "</p><p>".join(errors)
                     messages.error(request, f"Errors occurred during upload:\n{error_message}")
-                    logger.error(f"Upload Errors:\n{error_message}")
             except Exception as e:
-                logger.error(f"Error processing file: {e}")
                 messages.error(request, f"Error processing file: {e}")
         
     else:
@@ -1265,6 +1291,8 @@ def leave_transaction(request, staffno):
     company_info = get_object_or_404(CompanyInformation, staffno=staff)   
     leave_entitlement = LeaveEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
     leave_transactions = Staff_Leave.objects.filter(staffno__exact=staffno)
+    # fetch already taken leave dates and send them to the template
+    taken_dates = Staff_Leave.objects.filter(staffno__exact=staffno).values_list('start_date', 'end_date')
     leave_trans_count = leave_transactions.count()
     academic_years = AcademicYear.objects.all()
 
@@ -1310,7 +1338,7 @@ def leave_transaction(request, staffno):
         form = LeaveTransactionForm()
         if 'submitted' in request.GET:
             submitted = True
-
+    print(taken_dates)
     return render(request, 'hr/leave.html', {
         'staff': staff,
         'staff_cat': company_info.staff_cat,
@@ -1323,6 +1351,7 @@ def leave_transaction(request, staffno):
         'leave_trans_count':leave_trans_count,
         'remaining_days': remaining_days,
         'academic_years': academic_years,
+        'taken_dates': taken_dates,
     })
     
 def edit_leave_transaction(request, staffno, lt_id):

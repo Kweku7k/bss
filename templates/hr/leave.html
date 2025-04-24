@@ -6,13 +6,13 @@
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     {% for message in messages %}
     <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
-          <div class="toast-header text-white bg-{{ message.tags }}">
-            <strong class="me-auto">{{ message.tags|title }}</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-          </div>
-          <div class="toast-body text-white">
+        <div class="toast-header text-white bg-{{ message.tags }}">
+        <strong class="me-auto">{{ message.tags|title }}</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body text-white">
             {{ message }}
-          </div>
+        </div>
     </div>
     {% endfor %}
 </div>
@@ -29,8 +29,11 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mt-3">
                         <h5 class="my-3 text-primary"><strong>Leave Details for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        
                         {% if staff.staff_pix %}
-                        <img src="{{ staff.staff_pix.url }}" class="img-fluid rounded-circle" alt="Staff Picture" style="width: 100px; height: 100px; border-radius: 50%;">
+                            <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
+                        {% else %}
+                            <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
                         {% endif %}
                     </div>
 
@@ -72,9 +75,9 @@
                                     <td>{{ transaction.end_date }}</td>
                                     <td>{{ transaction.days_taken }}</td>
                                     <td>{{ transaction.academic_year }}</td>
-                                    <td class="text-end">
+                                    {% comment %} <td class="text-end">
                                         <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a>
-                                    </td>
+                                    </td> {% endcomment %}
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -116,16 +119,19 @@
                             </div>
                             <div class="col-md-2">
                                 <label for="start_date" class="form-label">Start Date</label>
-                                <input type="date" class="form-control" name="start_date" id="start_date" {% if leave_transaction %} value="{{ leave_transaction.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                                <input type="date" class="form-control" name="start_date" id="start_date" {% if leave_transaction %} value="{{ leave_transaction.start_date|date:"Y-m-d" }}" {% endif %} required>
                             </div>
+                            
                             <div class="col-md-2">
-                                <label for="finish_date" class="form-label">End Date</label>
-                                <input type="date" class="form-control" name="end_date" id="end_date" {% if leave_transaction %} value="{{ leave_transaction.end_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" class="form-control" name="end_date" id="end_date" {% if leave_transaction %} value="{{ leave_transaction.end_date|date:"Y-m-d" }}" {% endif %} required>
                             </div>
+                            
                             <div class="col-md-2">
-                                <label for="days_taken" class="form-label">Days Taken </label>
-                                <input type="text" name="days_taken" id="days_taken" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.days_taken }}" {% else %} value="" {% endif %} required>
+                                <label for="days_taken" class="form-label">Days Taken</label>
+                                <input type="text" name="days_taken" id="days_taken" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.days_taken }}" {% endif %} required readonly>
                             </div>
+                            
                             <div class="col-md-4">
                                 <label for="reason" class="form-label">Reason</label>
                                 <textarea name="reason" class="form-control">{% if leave_transaction %}{{ leave_transaction.reason }}{% endif %}</textarea>
@@ -145,7 +151,7 @@
 
 
 
-<script>
+{% comment %} <script>
     // Function to calculate the number of days between two dates
     function calculateDaysTaken() {
         const startDate = new Date(document.getElementById("start_date").value);
@@ -167,6 +173,59 @@
     // Add event listeners to the date inputs to trigger the calculation
     document.getElementById("start_date").addEventListener("change", calculateDaysTaken);
     document.getElementById("end_date").addEventListener("change", calculateDaysTaken);
+</script> {% endcomment %}
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const startDateInput = document.getElementById("start_date");
+    const endDateInput = document.getElementById("end_date");
+    const daysTakenInput = document.getElementById("days_taken");
+
+    // Leave dates already chosen (This should come dynamically from Django)
+    const takenDates = JSON.parse('{{ taken_dates|safe }}');  // Example: ["2025-02-12", "2025-02-15"]
+
+    function isWeekend(date) {
+        const day = date.getDay();
+        return day === 6 || day === 0; // Saturday or Sunday
+    }
+
+    function disableInvalidDates(input) {
+        input.addEventListener("input", function () {
+            const selectedDate = new Date(this.value);
+            if (isWeekend(selectedDate) || takenDates.includes(this.value)) {
+                alert("Weekends and taken dates are not allowed.");
+                this.value = "";
+            }
+        });
+    }
+
+    disableInvalidDates(startDateInput);
+    disableInvalidDates(endDateInput);
+
+    function calculateDaysTaken() {
+        if (!startDateInput.value || !endDateInput.value) return;
+
+        let start = new Date(startDateInput.value);
+        let end = new Date(endDateInput.value);
+        let leaveDays = 0;
+
+        while (start <= end) {
+            let dateStr = start.toISOString().split("T")[0]; // Convert to YYYY-MM-DD
+            if (!isWeekend(start) && !takenDates.includes(dateStr)) {
+                leaveDays++;
+            }
+            start.setDate(start.getDate() + 1);
+        }
+
+        daysTakenInput.value = leaveDays;
+    }
+
+    startDateInput.addEventListener("change", calculateDaysTaken);
+    endDateInput.addEventListener("change", calculateDaysTaken);
+});
 </script>
+
 
 {% comment %} {% endblock %} {% endcomment %}

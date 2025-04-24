@@ -6,3 +6,4 @@ django-two-factor-auth
 email_validator
 psycopg2-binary
 uwsgi
+phonenumbers

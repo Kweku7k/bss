@@ -27,7 +27,11 @@
                                     <tr class="clickable-row" onclick="window.location='{% url 'staff-details' staff.staffno %}'">
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="{{ staff.staff_pix.url }}" alt="Avatar" style="width: 45px; height: 45px" class="rounded-circle" />
+                                                {% if staff.staff_pix %}
+                                                    <img src="{{ staff.staff_pix.url }}" alt="Avatar" style="width: 45px; height: 45px" class="rounded-circle" />
+                                                {% else %}
+                                                    <img src="/media/images/fav.png" alt="Avatar" style="width: 45px; height: 45px" class="rounded-circle" />
+                                                {% endif %} 
                                                 <div class="ms-3">
                                                     <p class="fw-bold mb-1">{{ staff.title }} {{ staff.fname }} {{ staff.lname }}</p>
                                                     {% for company_data in company_info %}
