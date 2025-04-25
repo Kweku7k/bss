@@ -110,4 +110,11 @@ urlpatterns = [
     
     # payroll url
     path('payroll/<str:staffno>', views.payroll_details, name="payroll-details"),
+    path('settings/<str:staffno>', views.staff_settings, name="staff-settings"),
+    path('staff/<str:staffno>/mark-dormant/', views.mark_dormant, name='mark-dormant'),  
+    
+    # Roles and permission
+    path('groups/', views.create_groups, name='create-groups'),
+
+    
 ]

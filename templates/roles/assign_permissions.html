@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<form method="POST">
+    {% csrf_token %}
+    <h5>Assign Permissions to {{ group.name }}</h5>
+    {% for perm in permissions %}
+        <div>
+            <label>
+                <input type="checkbox" name="permissions" value="{{ perm.id }}"
+                    {% if perm in assigned %} checked {% endif %}>
+                {{ perm.name }}
+            </label>
+        </div>
+    {% endfor %}
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>
+
+
+{% endblock %}

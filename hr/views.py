@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse # type: ignore
 from .models import *
+from django.contrib.auth.models import Group, User, Permission
 from setup.models import *
 from leave.models import *
 from medical.models import *
@@ -13,10 +14,6 @@ from django.db import connection # type: ignore
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from django_otp.plugins.otp_totp.models import TOTPDevice
-from two_factor.utils import default_device
 import csv
 from django.db import transaction
 from django.utils import timezone
@@ -148,7 +145,8 @@ def logoutUser(request):
 
 @login_required(login_url='login')
 def landing(request):
-    staffs = Employee.objects.order_by('lname').filter()
+    # staffs = Employee.objects.order_by('lname').filter()
+    staffs = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
     active = CompanyInformation.objects.filter(active_status__exact='Active')
     inactive = CompanyInformation.objects.filter(active_status__exact='Inactive')
     staff_count = staffs.count()
@@ -234,12 +232,14 @@ def deletestaff(request,staffno):
     return render(request, 'delete.html',{'obj':staff1,'staff':staff})
 
 
+@login_required
 def staff_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     schools = School.objects.order_by('school_name')
     company_info = CompanyInformation.objects.get(staffno=staff)
     return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
+@login_required
 def edit_staff(request,staffno):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter() 
@@ -259,7 +259,7 @@ def edit_staff(request,staffno):
                 form.save()
                 full_name = f"{fname} {lname}"
                 messages.success(request, f"Staff data for {full_name} has been updated successfully")
-                logger.info(f"Staff data updated for {full_name} by {request.user.username}")
+                logger.info(f"Personal information updated for {full_name} by {request.user.username}")
             else: 
                 messages.warning(request, "No changes were made to the staff record.")
             return redirect('staff-details', staffno)
@@ -316,12 +316,12 @@ def allstaff(request):
             Q(staffno__icontains=search_query) | 
             Q(middlenames__icontains=search_query)
         )
-        
+    
     if status_filter:
         filters &= Q(companyinformation__active_status=status_filter)
 
     # Filtered queryset
-    staffs = Employee.objects.filter(filters).order_by('fname')
+    staffs = Employee.objects.filter(filters).exclude(companyinformation__active_status='Dormant').order_by('fname')
     staff_count = staffs.count()
     company_info = CompanyInformation.objects.all()
 
@@ -340,182 +340,7 @@ def allstaff(request):
 
     return render(request, 'hr/allstaff.html', context)
   
-  
-# def allstaff(request): 
-#     staffs = Employee.objects.order_by('fname')
-#     staff_count = staffs.count()
-#     company_info = CompanyInformation.objects.all()
-#     qualification = Qualification.objects.all()
-#     staff_school = Staff_School.objects.all()
-#     department = Department.objects.all()
-    
-   
-#     filters = Q()
-        
-#     if request.method == 'POST':
-#         filter_staffcategory = request.POST.get('filter_staffcategory')
-#         filter_qualification = request.POST.get('filter_qualification')
-#         filter_title = request.POST.get('filter_title')
-#         filter_contract = request.POST.get('filter_contract')
-#         filter_status = request.POST.get('filter_status')
-#         filter_gender = request.POST.get('filter_gender')
-#         filter_department = request.POST.get('filter_department')
-#         search_query = request.POST.get('search')
-        
-#         # Initial queryset for filtering
-#         staffs = Employee.objects.all()
-#         company_info = CompanyInformation.objects.all()
-#         staff_school = Staff_School.objects.all()        
-        
-#         # Search functionality
-#         if search_query:
-#             filters &= Q(fname__icontains=search_query) | Q(lname__icontains=search_query) | Q(staffno__icontains=search_query) | Q(middlenames__icontains=search_query)
-        
-#         #Filter by Staff Category
-#         if filter_staffcategory:
-#             filters &= Q(companyinformation__staff_cat=filter_staffcategory)
-        
-#         # Filter by Contract
-#         if filter_contract:
-#             filters &= Q(companyinformation__contract=filter_contract)
-            
-#         if filter_qualification:
-#             qualification_filter = Q(heq=filter_qualification) | Q(staff_school__certification=filter_qualification)
-#             filters &= qualification_filter
-        
-#         # qualifications_from_employees = Employee.objects.values_list('heq', flat=True).distinct()
-#         # qualifications_from_staff_school = Staff_School.objects.values_list('certification', flat=True).distinct() 
-#         # qualification_set = set(qualifications_from_employees) | set(qualifications_from_staff_school)
-  
-        
-#         # Filter by title
-#         if filter_title:
-#             filters &= Q(title=filter_title)
-            
-#         # Filter by title
-#         if filter_gender:
-#             filters &= Q(gender=filter_gender)
-            
-#         # Filter by Staff Staus
-#         if filter_status:
-#             company_info = CompanyInformation.objects.filter(active_status=filter_status)
-#             company_staffno = {company.staffno_id for company in company_info}
-#             filters &= Q(staffno__in=company_staffno)
-            
-#         # Filter by Department
-#         if filter_department:
-#             company_info = CompanyInformation.objects.filter(dept_id=filter_department)  # Use dept_id
-#             company_staffno = {company.staffno_id for company in company_info}
-#             filters &= Q(staffno__in=company_staffno)
-                    
-#         staffs = staffs.filter(filters).distinct()        
-        
-#         # Pagination on initial load
-#         paginator = Paginator(staffs, 10)
-#         page_number = request.GET.get('page')
-#         page_obj = paginator.get_page(page_number)
-        
-#         context = {
-#             'staffs': page_obj,
-#             'staff_school': staff_school,
-#             'staff_count': staff_count,
-#             'staffcategory': [(q.category_name, q.category_name) for q in StaffCategory.objects.all()],
-#             'company_info': company_info,
-#             'qualification': [(q.qual_abbr, q.qual_abbr) for q in Qualification.objects.all()],
-#             'title': [(q.title_abbr, q.title_abbr) for q in Title.objects.all()],
-#             'contract': [(q.contract_type, q.contract_type) for q in Contract.objects.all()],
-#             'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
-#             'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
-#             'department': [(q.id, q.dept_long_name) for q in Department.objects.all()],
-#             'filter_staffcategory': filter_staffcategory,
-#             'filter_qualification': filter_qualification,
-#             'filter_title': filter_title,
-#             'filter_contract': filter_contract,
-#             'filter_status': filter_status,
-#             'filter_gender': filter_gender,
-#             'filter_department': filter_department,
-#             'search_query': search_query,
-#         }
-#         return render(request, 'hr/allstaff.html', context)
-#     else:
-#         # Pagination on initial load
-#         paginator = Paginator(staffs, 10)
-#         page_number = request.GET.get('page')
-#         page_obj = paginator.get_page(page_number)
-        
-#     context = {
-#         'staffs': page_obj,
-#         'staff_school': staff_school,
-#         'staff_count': staff_count,
-#         'staffcategory': [(q.category_name, q.category_name) for q in StaffCategory.objects.all()],
-#         'company_info': company_info,
-#         'qualification': [(q.qual_abbr, q.qual_abbr) for q in Qualification.objects.all()],
-#         'title': [(q.title_abbr, q.title_abbr) for q in Title.objects.all()],
-#         'contract': [(q.contract_type, q.contract_type) for q in Contract.objects.all()],
-#         'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
-#         'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
-#         'department': [(q.id, q.dept_long_name) for q in Department.objects.all()],
-#     }
-#     return render(request, 'hr/allstaff.html', context)
-    
-# @login_required
-# def filter_staff(request):
-#     staffs = Employee.objects.all()
-#     # company_info = CompanyInformation.objects.all()
-#     filters = Q()  # Initialize an empty Q object for dynamic filtering
-
-#     # Get all Employee and CompanyInformation fields
-#     employee_fields = [field.name for field in Employee._meta.get_fields()]
-#     company_info_fields = [field.name for field in CompanyInformation._meta.get_fields()]
-
-#     # Choices for dropdowns (static options for known fields)
-#     gender_choices = ChoicesGender.objects.all()
-#     status_choices = ChoicesStaffStatus.objects.all()
-#     staff_category_choices = StaffCategory.objects.all()
-
-#     # Prepare dictionaries for easy lookup in templates
-#     gender_dict = {choice.name: choice.name for choice in gender_choices}
-#     status_dict = {choice.name: choice.name for choice in status_choices}
-#     staff_category_dict = {choice.category_name: choice.category_name for choice in staff_category_choices}
-
-#     if request.method == 'POST':
-#         # Process the form data dynamically
-#         for key, value in request.POST.items():
-#             if value:  # Only process fields with values
-#                 if key in employee_fields:
-#                     filters &= Q(**{key: value})
-#                 elif key in company_info_fields:
-#                     filters &= Q(companyinformation__**{key: value})
-
-#         # Apply filters dynamically to the queryset
-#         staffs = Employee.objects.filter(filters).distinct()
-
-#         # Pagination
-#         paginator = Paginator(staffs, 3)  # Show 10 staffs per page
-#         page_number = request.GET.get('page')
-#         page_obj = paginator.get_page(page_number)
-
-#     else:
-#         # Pagination on initial load
-#         paginator = Paginator(staffs, 3)  # Show 10 staffs per page
-#         page_number = request.GET.get('page')
-#         page_obj = paginator.get_page(page_number)
-
-#     # Context for rendering the filter form and results
-#     context = {
-#         'staffs': page_obj,  # Use the page object for pagination
-#         'fields': {
-#             'employee': employee_fields,
-#             'company_info': company_info_fields,
-#         },
-#         'gender_choices': gender_dict,
-#         'status_choices': status_dict,
-#         'staff_category_choices': staff_category_dict,
-#     }
-
-#     return render(request, 'hr/filter_staff.html', context)
-
-
+@login_required
 @role_required(['superadmin'])
 def test(request): 
     # Initial querysets for staff, company info, and school
@@ -731,7 +556,7 @@ def test(request):
     return render(request, 'hr/test.html', context)
 
 
-
+@login_required
 def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter()
@@ -761,6 +586,7 @@ def newstaff(request):
                 url = reverse('company-info', kwargs={'staffno': str(staff_number)})
                 full_name = f"{fname} {lname}"
                 messages.success(request, f"The details for staff member {full_name} have been successfully created in the system")
+                logger.info(f"New staff created: {full_name} by {request.user.username}")
                 print(url)
                 return HttpResponseRedirect(url)
         else:
@@ -794,10 +620,6 @@ def newstaff(request):
             }
     return render(request,'hr/new_staff.html',context)
 
-# function for fetch bank branch using bank id
-# def get_bank_branches(request, bank_id):
-#     branches = BankBranch.objects.filter(bank_code_id=bank_id).values('id', 'branch_name')
-#     return JsonResponse({'branches': list(branches)})
 
 def get_bank_branches(request, bank_name):
     try:
@@ -823,7 +645,7 @@ def get_departments(request, sch_name):
 # def get_departments(request, sch_fac_id):
 #     departments = Department.objects.filter(sch_fac_id=sch_fac_id).values('id', 'dept_long_name')
 #     return JsonResponse({'departments': list(departments)})
-
+@login_required
 def company_info(request,staffno):
     submitted = False
     company_infos = CompanyInformation.objects.filter(staffno__exact=staffno)    
@@ -853,7 +675,8 @@ def company_info(request,staffno):
             url = reverse('emp-relation', kwargs={'staffno': str(staff_number)})
             print(url)
             full_name = f"{staff.fname} {staff.lname}"
-            messages.success(request, f"Staff data for {full_name} has been updated successfully")
+            messages.success(request, f"Company information created for {full_name}")
+            logger.info(f"Company information created for {full_name} by {request.user.username}")
             return HttpResponseRedirect(url)
         else:
             print("form.errors")
@@ -883,7 +706,7 @@ def company_info(request,staffno):
     }
     return render(request,'hr/company_info.html',context)
 
-
+@login_required
 def edit_company_info(request,staffno):
     company_infos = CompanyInformation.objects.all()  
     company_info = CompanyInformation.objects.get(staffno__exact=staffno)
@@ -903,9 +726,14 @@ def edit_company_info(request,staffno):
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
         if form.is_valid():
-            form.save()
-            full_name = f"{staff.fname} {staff.lname}"
-            messages.success(request, f"Staff data for {full_name} has been updated successfully")
+            if form.has_changed():
+                print("Form was submitted successfully")
+                form.save()
+                full_name = f"{staff.fname} {staff.lname}"
+                messages.success(request, f"Company information for {full_name} has been updated successfully")
+                logger.info(f"Company information updated for {full_name} by {request.user.username}")
+            else:
+                messages.warning(request, "No changes were made to the company information.")
             return redirect('staff-details', staffno=staffno)
         else:
             print("form.errors")
@@ -943,6 +771,7 @@ def edit_company_info(request,staffno):
 
 ############### EMPLOYEE RELATIONSHIP ###############
 
+@login_required
 def emp_relation(request,staffno):
     submitted = False
     emp_relations = Kith.objects.filter(staffno__exact=staffno)
@@ -962,7 +791,8 @@ def emp_relation(request,staffno):
                 emp_relation.staffno = staff
                 emp_relation.save()
                 full_name = f"{staff.fname} {staff.lname}"
-                messages.success(request, f"Beneficiaries for {full_name} has been updated successfully")
+                messages.success(request, f"Beneficiaries for {full_name} has been created successfully")
+                logger.info(f"Beneficiaries added for {full_name} by {request.user.username}")
                 return redirect('emp-relation', staffno)
     else:
         form = KithForm
@@ -980,7 +810,7 @@ def emp_relation(request,staffno):
             }
     return render(request,'hr/emp_relation.html',context)
 
-
+@login_required
 def edit_emp_relation(request,staffno,emp_id):
     emp_relations = Kith.objects.filter(staffno__exact=staffno)  
     emp_relation = Kith.objects.get(pk=emp_id)
@@ -991,9 +821,11 @@ def edit_emp_relation(request,staffno,emp_id):
     if request.method == 'POST':
         form = KithForm(request.POST, instance=emp_relation)
         if form.is_valid():
-            form.save()
-            full_name = f"{staff.fname} {staff.lname}"
-            messages.success(request, f"Staff data for {full_name} has been updated successfully")
+            if form.has_changed():
+                form.save()
+                full_name = f"{staff.fname} {staff.lname}"
+                messages.success(request, f"Employee Beneficiaries for {full_name} has been updated successfully")
+                logger.info(f"Employee Beneficiaries updated for {full_name} by {request.user.username}")
             return redirect('emp-relation', staffno=staffno)
         
     context = {
@@ -1009,11 +841,14 @@ def edit_emp_relation(request,staffno,emp_id):
 
     return render(request, 'hr/emp_relation.html', context)
 
+@login_required
 def delete_emp_relation(request,emp_id,staffno):
     emp_relation = Kith.objects.get(pk=emp_id)
+    staff = Employee.objects.get(pk=staffno)
     if request.method == 'GET':
        emp_relation.delete()
        messages.success(request, ("Beneficiary deleted successfully"))
+       logger.info(f"Beneficiary deleted for {staff.fname} by {request.user.username}")
        
     return redirect('emp-relation', staffno)
 
@@ -1022,6 +857,7 @@ def delete_emp_relation(request,emp_id,staffno):
 
 
 # Write a function for bulk upload csv format
+@login_required
 def bulk_upload(request):
     if request.method == 'POST':
         form = CSVUploadForm(request.POST, request.FILES)
@@ -1181,6 +1017,7 @@ def bulk_upload(request):
                 # Report success and any errors
                 if success_count:
                     messages.success(request, f'Successfully uploaded {success_count} records.')
+                    logger.info(f"Successfully uploaded {success_count} records by {request.user.username}")
                 
                 if duplicates:
                     duplicate_message = ', '.join(duplicates)
@@ -1207,6 +1044,7 @@ def download_csv(request):
 
 
 ####### EDUCATIONAL BACKGROUND #################
+@login_required
 def education(request,staffno):
     submitted = False
     educations = Staff_School.objects.filter(staffno__exact=staffno)
@@ -1224,7 +1062,8 @@ def education(request,staffno):
             education.staffno = staff
             education.save()
             full_name = f"{staff.fname} {staff.lname}"
-            messages.success(request, f"Staff data for {full_name} has been updated successfully")
+            messages.success(request, f"Educational Background for {full_name} has been created successfully")
+            logger.info(f"Educational Background for {full_name} has been created successfully by {request.user.username}")
             return redirect('education', staffno)
     else:
         form = StaffSchoolForm
@@ -1242,6 +1081,7 @@ def education(request,staffno):
     return render(request,'hr/education.html',context)
 
 
+@login_required
 def edit_education(request,staffno,edu_id):
     educations = Staff_School.objects.filter(staffno__exact=staffno)  
     education = Staff_School.objects.get(pk=edu_id)
@@ -1256,7 +1096,11 @@ def edit_education(request,staffno,edu_id):
     if request.method == 'POST':
         form = StaffSchoolForm(request.POST, instance=education)
         if form.is_valid():
-            form.save()
+            if form.has_changed():
+                form.save()
+                full_name = f"{staff.fname} {staff.lname}"
+                messages.success(request, f"Educational Background for {full_name} has been updated successfully")
+                logger.info(f"Educational Background updated for {full_name} by {request.user.username}")            
             return redirect('education', staffno=staffno)
         
     context = {
@@ -1275,16 +1119,22 @@ def edit_education(request,staffno,edu_id):
 
     return render(request, 'hr/education.html', context)
 
+@login_required
 def delete_education(request,edu_id,staffno):
     education = Staff_School.objects.get(pk=edu_id)
+    staff = Employee.objects.get(pk=staffno)
     if request.method == 'GET':
-       education.delete()
+        full_name = f"{staff.fname} {staff.lname}"
+        messages.success(request, f"Educational Background for {full_name} has been deleted successfully")
+        logger.info(f"Educational Background deleted for {full_name} by {request.user.username}")
+        education.delete()
     return redirect('education', staffno)
 
 
 ######################################################################
 ### Staff leave transaction
 ######################################################################
+@login_required
 def leave_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno) 
@@ -1321,6 +1171,7 @@ def leave_transaction(request, staffno):
                     leave_transaction.save()
                     
                     messages.success(request, f'Leave transaction created successfully for {staff_fullname}.')
+                    logger.info(f'Leave transaction created successfully for {staff_fullname} by {request.user.username}')
                     return redirect('leave-transaction', staffno=staffno)
                 else:
                     messages.error(request, 'Insufficient leave balance to process this request. Please review the leave days entered')
@@ -1329,6 +1180,7 @@ def leave_transaction(request, staffno):
                 leave_transaction.save()
                 
                 messages.success(request, f'Leave transaction created successfully for {staff_fullname}. (Non-deductible leave)')
+                logger.info(f'Leave transaction created successfully for {staff_fullname} by {request.user.username} (Non-deductible leave)')
                 return redirect('leave-transaction', staffno=staffno)
         else:
             print(form.errors)
@@ -1354,6 +1206,7 @@ def leave_transaction(request, staffno):
         'taken_dates': taken_dates,
     })
     
+@login_required
 def edit_leave_transaction(request, staffno, lt_id):
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
@@ -1372,8 +1225,10 @@ def edit_leave_transaction(request, staffno, lt_id):
             days_taken = int(form.cleaned_data['days_taken'])
             
             if remaining_days >= days_taken:
-                form.save()
-                messages.success(request, f'Leave transaction updated successfully for {staff_fullname}.')
+                if form.has_changed():
+                    form.save()
+                    messages.success(request, f'Leave transaction updated successfully for {staff_fullname}.')
+                    logger.info(f'Leave transaction updated successfully for {staff_fullname} by {request.user.username}')
                 return redirect('leave-transaction', staffno=staffno)
             else:
                 messages.error(request, 'Insufficient leave balance to process this request. Please review the leave days entered')
@@ -1398,6 +1253,7 @@ def edit_leave_transaction(request, staffno, lt_id):
 ######################################################################
 ### Staff Medical views
 ######################################################################
+@login_required
 def medical_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -1440,6 +1296,7 @@ def medical_transaction(request, staffno):
                 medical_transaction.save()
 
                 messages.success(request, f'Medical transaction created successfully  {staff_fullname}.')
+                logger.info(f'Medical transaction created successfully for {staff_fullname} by {request.user.username}')
                 return redirect('medical-transaction', staffno=staffno)
             else:
                 messages.error(request, 'Insufficient Medical balance to process this request. Please review the treatment cost entered')
@@ -1472,6 +1329,7 @@ def medical_transaction(request, staffno):
     return render(request, 'hr/medical.html', context)
 
 
+@login_required
 def edit_medical_transaction(request, staffno, med_id):
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
@@ -1527,6 +1385,7 @@ def edit_medical_transaction(request, staffno, med_id):
 ######################################################################
 ### Staff education views
 ######################################################################
+@login_required
 def staff_education(request,staffno):
     submitted = False
     school_list = School.objects.order_by('school_name')
@@ -1544,6 +1403,7 @@ def staff_education(request,staffno):
     context = {'HEQ':ChoicesHEQ.objects.all().values_list("name","name"),'form':form,'schools':schools,'staff':staff,'school_list':school_list,'submitted':submitted}
     return render(request,'hr/staff_education.html',context)
 
+@login_required
 def edit_staff_education(request,sch_id,staffno):
     school_list = School.objects.order_by('school_name')
     staff = Employee.objects.get(pk=staffno)
@@ -1562,6 +1422,7 @@ def edit_staff_education(request,sch_id,staffno):
     context = {'HEQ':HEQ,'form':form,'schools':schools,'sch_count':sch_count,'school':school,'staff':staff,'school_list':school_list,'pkno':pkno}
     return render(request, 'hr/staff_education.html', context)    
     
+@login_required
 def delete_staff_education(request,sch_id,staffno):
     school = Staff_School.objects.get(pk=sch_id)
     school = school.school_code
@@ -1574,6 +1435,7 @@ def delete_staff_education(request,sch_id,staffno):
 ######################################################################
 ### Staff Previous Work
 ######################################################################
+@login_required
 def prev_work(request,staffno):
     submitted = False
     company_list = Prev_Company.objects.order_by('start_date')
@@ -1593,6 +1455,7 @@ def prev_work(request,staffno):
     context = {'form':form,'companys':companys,'staff':staff,'company_list':company_list,'submitted':submitted}
     return render(request,'hr/prev_work.html',context)
 
+@login_required
 def edit_prev_work(request,coy_id,staffno):
     company_list = Prev_Company.objects.order_by('coy_name')
     staff = Employee.objects.get(pk=staffno)
@@ -1611,7 +1474,7 @@ def edit_prev_work(request,coy_id,staffno):
     context = {'form':form,'companys':companys,'coy_count':coy_count,'company':company,'staff':staff,'company_list':company_list}
     return render(request, 'hr/prev_work.html', context)
 
-
+@login_required
 def delete_prev_work(request,coy_id,staffno):
     company = Prev_Company.objects.get(pk=coy_id)
     # company = company.coy_name
@@ -1620,62 +1483,6 @@ def delete_prev_work(request,coy_id,staffno):
        return redirect('prev-work', staffno)
     return render(request, 'delete.html',{'obj':company.coy_name})
 
-######################################################################
-### End of Staff Previous Work
-######################################################################
-
-######################################################################
-### Staff Dependants
-######################################################################
-# def dependants(request,staffno):
-#     submitted = False
-#     dependant_list = Kith.objects.order_by('kith_dob')
-#     staff = Employee.objects.get(pk=staffno)
-#     dependants = Kith.objects.order_by('kith_dob').filter(staffno__exact=staffno)
-#     if request.method == 'POST':
-#         form = KithForm(request.POST)
-#         if form.is_valid(): 
-#             form.save()
-#             return redirect('dependants', staffno)
-#         else:
-#             print(form.errors)
-#     else:
-#         form = KithForm
-#         if 'submitted' in request.GET:
-#             submitted = True
-#     context = {'form':form,'dependants':dependants,'staff':staff,'dependant_list':dependant_list,'submitted':submitted,'GENDER':ChoicesGender.objects.all().values_list("name","name"),'DEPENDANTS':ChoicesDependants.objects.all().values_list("name","name")}
-#     return render(request,'hr/dependants.html',context)
-
-# def edit_dependants(request,dep_id,staffno):
-#     dependant_list = Kith.objects.order_by('kith_dob')
-#     staff = Employee.objects.get(pk=staffno)
-#     dependants = Kith.objects.order_by('kith_dob').filter(staffno__exact=staffno)
-#     coy_count = dependants.count()
-#     dependant = Kith.objects.get(pk=dep_id)
-#     pkno = dependant.id
-#     form = KithForm(request.POST or None,instance=dependant)
-
-#     if request.method == 'POST':
-#         form = KithForm(request.POST, instance=dependant)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('dependants', staffno)
-
-#     context = {'pkno':pkno,'form':form,'dependants':dependants,'coy_count':coy_count,'dependant':dependant,'staff':staff,'dependant_list':dependant_list,'GENDER':GENDER,'DEPENDANTS':DEPENDANTS}
-#     return render(request, 'hr/dependants.html', context)
-
-
-# def delete_dependants(request,dep_id,staffno):
-#     dependant = Kith.objects.get(pk=dep_id)
-#     # dependant = dependant.coy_name
-#     if request.method == 'POST':
-#        dependant.delete()
-#        return redirect('dependants', staffno)
-#     return render(request, 'delete.html',{'obj':dependant})
-
-######################################################################
-### End of Staff Dependants
-######################################################################
 
 ######################################################################
 ### Staff Residential Address
@@ -2196,6 +2003,7 @@ def delete_celebration(request,bno,staffno):
 ######################################################################
 
 # View for adding a new renewal history
+@login_required
 @role_required(['admin', 'superadmin'])
 def add_renewal_history(request, staffno):
     submitted = False
@@ -2215,6 +2023,7 @@ def add_renewal_history(request, staffno):
             renewal.is_approved = False
             renewal.save()
             messages.success(request, "New renewal history added successfully, waiting approval.")
+            logger.info(f"New renewal history added for {staff.staffno} by {request.user.username}.")
             return redirect('renewal-history', staffno)
         else:
             messages.error(request, "Form is not valid. Please check the data.")            
@@ -2250,6 +2059,7 @@ def approve_renewal(request, renewal_id):
         renewal.save()
         
         messages.success(request, f"Renewal for {renewal.staffno} has been approved.")
+        logger.info(f"Renewal for {renewal.staffno} has been approved by {request.user.username}.")
         return redirect('staff-details', staffno=renewal.staffno.staffno)
 
     return redirect('landing')
@@ -2267,12 +2077,14 @@ def disapprove_renewal(request, renewal_id):
         renewal.save()
 
         messages.success(request, f"Renewal for {renewal.staffno} has been rejected.")
+        logger.info(f"Renewal for {renewal.staffno} has been rejected by {request.user.username}.")
         return redirect('staff-details', staffno=renewal.staffno.staffno)
 
     return redirect('landing')
 
 
 # View for adding new promotion history
+@login_required
 @role_required(['admin', 'superadmin'])
 def add_promotion_history(request, staffno):
     submitted = False
@@ -2292,6 +2104,7 @@ def add_promotion_history(request, staffno):
             promotion.is_approved = False
             promotion.save()
             messages.success(request, "New promotion history added successfully, waiting approval.")
+            logger.info(f"New promotion history added for {staff.staffno} by {request.user.username}.")
             return redirect('promotion-history', staffno)
         else:
             messages.error(request, "Form is not valid. Please check the data.")
@@ -2326,6 +2139,7 @@ def approve_promotion(request, promotion_id):
         promotion.save()
 
         messages.success(request, f"Promotion for {promotion.staffno} has been approved.")
+        logger.info(f"Promotion for {promotion.staffno} has been approved by {request.user.username}.")
         return redirect('staff-details', staffno=promotion.staffno.staffno)
 
     return redirect('landing')
@@ -2343,14 +2157,108 @@ def disapprove_promotion(request, promotion_id):
         promotion.save()
 
         messages.success(request, f"Promotion for {promotion.staffno} has been rejected.")
+        logger.info(f"Promotion for {promotion.staffno} has been rejected by {request.user.username}.")
         return redirect('staff-details', staffno=promotion.staffno.staffno)
 
     return redirect('landing')
 
 
 # payroll information from company info model 
+@login_required
 def payroll_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
     context = {'staff':staff,'company_info':company_info,}
     return render(request, 'hr/payrol.html', context)
+
+
+@login_required
+def staff_settings(request, staffno):
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    
+    context = {
+        'staff': staff,
+        'company_info':company_info,    
+    }
+    return render(request, 'hr/staff_settings.html', context)
+        
+@login_required
+def mark_dormant(request, staffno):
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    full_name = f"{staff.title} {staff.fname} {staff.lname}"
+    print(company_info.active_status)
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'dormant':
+            company_info.active_status = 'Dormant'
+            messages.success(request, f"{full_name} marked as Dormant.")
+            logger.info(f"{request.user.username} marked {full_name} as Dormant.")
+        elif action == 'reactivate':
+            company_info.active_status = 'Active'
+            messages.success(request, f"{full_name} reactivated.")
+            logger.info(f"{request.user.username} reactivated {full_name}.")
+
+        company_info.save()
+
+    return redirect('staff-settings', staffno=staffno)
+
+
+# Groups and Permissions
+@login_required
+@role_required(['superadmin'])
+def create_groups(request):
+    groups = Group.objects.all()
+    permissions = Permission.objects.all()
+
+    if request.method == 'POST':
+        group_name = request.POST.get('group_name')
+        if group_name:
+            Group.objects.create(name=group_name)
+            messages.success(request, 'Group created successfully.')
+            return redirect('manage-groups')
+
+    return render(request, 'roles/create_group.html', {
+        'groups': groups,
+        'permissions': permissions,
+    })
+    
+
+@login_required
+@role_required(['superadmin'])
+def assign_permissions(request, group_id):
+    group = Group.objects.get(id=group_id)
+    permissions = Permission.objects.all()
+
+    if request.method == 'POST':
+        selected_perms = request.POST.getlist('permissions')
+        group.permissions.set(selected_perms)
+        messages.success(request, 'Permissions updated.')
+        return redirect('manage-groups')
+
+    return render(request, 'roles/assign_permissions.html', {
+        'group': group,
+        'permissions': permissions,
+        'assigned': group.permissions.all()
+    })
+    
+@login_required
+@role_required(['superadmin'])
+def assign_user_to_group(request, user_id):
+    user = User.objects.get(id=user_id)
+    groups = Group.objects.all()
+
+    if request.method == 'POST':
+        selected_groups = request.POST.getlist('groups')
+        user.groups.set(selected_groups)
+        messages.success(request, 'User group updated.')
+        return redirect('user-list')
+
+    return render(request, 'permissions/assign_user_to_group.html', {
+        'user': user,
+        'groups': groups,
+        'assigned': user.groups.all()
+    })

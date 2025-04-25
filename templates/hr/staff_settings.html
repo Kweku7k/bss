@@ -1,0 +1,62 @@
+{% include "partials/_topnav.html" %} 
+{% load static %}
+
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
+
+    <div class="col-md-8">
+        <div class="container mt-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h5 class="my-3 text-primary"><strong>Advance Settings for for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        
+                        {% if staff.staff_pix %}
+                            <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
+                        {% else %}
+                            <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <h6>🟢 Current Status:</h6>
+                        <span>{{ company_info.active_status }}</span>
+                    </div>
+        
+                    <!-- Action to Change Status -->
+                    <form method="POST" action="{% url 'mark-dormant' staff.staffno %}">
+                        {% csrf_token %}
+                        {% if company_info.active_status != 'Dormant' %}
+                            <button type="submit" name="action" value="dormant" class="btn btn-danger btn-md" onclick="return confirm('Are you sure you want to mark this {{ staff.title}} {{ staff.fname}} {{ staff.lname}} {{ staff.staffno}} as dormant?')">
+                                Mark as Dormant
+                            </button>
+                        {% else %}
+                            <button type="submit" name="action" value="reactivate" class="btn btn-success btn-md" onclick="return confirm('Are you sure you want to reactivate this staff?')">
+                                Reactivate Staff
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
