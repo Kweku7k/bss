@@ -2216,49 +2216,52 @@ def create_groups(request):
 
     if request.method == 'POST':
         group_name = request.POST.get('group_name')
+        print(group_name)
         if group_name:
             Group.objects.create(name=group_name)
             messages.success(request, 'Group created successfully.')
-            return redirect('manage-groups')
+            return redirect('create-groups')
 
     return render(request, 'roles/create_group.html', {
         'groups': groups,
         'permissions': permissions,
     })
     
-
 @login_required
 @role_required(['superadmin'])
-def assign_permissions(request, group_id):
+def assign_permissions_to_group(request, group_id):
     group = Group.objects.get(id=group_id)
     permissions = Permission.objects.all()
 
     if request.method == 'POST':
-        selected_perms = request.POST.getlist('permissions')
-        group.permissions.set(selected_perms)
-        messages.success(request, 'Permissions updated.')
-        return redirect('manage-groups')
+        selected_permissions = request.POST.getlist('permissions')  # List of permission ids
+        group.permissions.set(selected_permissions)  # Set new permissions
+        messages.success(request, 'Permissions assigned successfully.')
+        return redirect('create-groups')  # Go back to group management
 
     return render(request, 'roles/assign_permissions.html', {
         'group': group,
         'permissions': permissions,
-        'assigned': group.permissions.all()
     })
     
 @login_required
 @role_required(['superadmin'])
-def assign_user_to_group(request, user_id):
-    user = User.objects.get(id=user_id)
+def assign_user_to_group(request):
+    users = User.objects.all()
     groups = Group.objects.all()
 
     if request.method == 'POST':
-        selected_groups = request.POST.getlist('groups')
-        user.groups.set(selected_groups)
-        messages.success(request, 'User group updated.')
-        return redirect('user-list')
+        user_id = request.POST.get('user_id')
+        group_id = request.POST.get('group_id')
 
-    return render(request, 'permissions/assign_user_to_group.html', {
-        'user': user,
+        user = User.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+
+        user.groups.add(group)  # Add user to group
+        messages.success(request, 'User assigned to group successfully.')
+        return redirect('assign-user-group')  # Adjust as needed
+
+    return render(request, 'roles/assign_user_group.html', {
+        'users': users,
         'groups': groups,
-        'assigned': user.groups.all()
     })

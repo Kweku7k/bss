@@ -3,8 +3,6 @@
 {% block content %}
 <div class="container mt-4">
     <h2>Create a New Group</h2>
-    <p>Fill in the details below to create a new group.</p>
-
 
     <form method="POST" action="{% url 'create-groups' %}">
         {% csrf_token %}
@@ -12,6 +10,18 @@
         <input type="text" name="group_name" class="form-control" required>
         <button type="submit" class="btn btn-primary mt-2">Create Group</button>
     </form>
+
+    <hr>
+
+    <h3>All Groups</h3>
+    <ul>
+        {% for group in groups %}
+            <li>
+                {{ group.name }}
+                <a href="{% url 'assign-permissions' group.id %}" class="btn btn-sm btn-warning">Assign Permissions</a>
+            </li>
+        {% endfor %}
+    </ul>
 
 </div>
 

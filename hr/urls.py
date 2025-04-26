@@ -114,7 +114,10 @@ urlpatterns = [
     path('staff/<str:staffno>/mark-dormant/', views.mark_dormant, name='mark-dormant'),  
     
     # Roles and permission
-    path('groups/', views.create_groups, name='create-groups'),
+    path('create_groups/', views.create_groups, name='create-groups'),
+    path('groups/<int:group_id>/assign-permissions/', views.assign_permissions_to_group, name='assign-permissions'),
+    path('assign_user_group/', views.assign_user_to_group, name='assign-user-group'),
+
 
     
 ]

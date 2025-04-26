@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Assign User to Group</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label>Select User:</label>
+            <select name="user_id" class="form-control">
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Select Group:</label>
+            <select name="group_id" class="form-control">
+                {% for group in groups %}
+                    <option value="{{ group.id }}">{{ group.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Assign Group</button>
+    </form>
+</div>
+
+
+{% endblock %}
