@@ -6,17 +6,18 @@
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     {% for message in messages %}
     <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
-        <div class="toast-header text-white bg-{{ message.tags }}">
-        <strong class="me-auto">{{ message.tags|title }}</strong>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body text-white">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
             {{ message }}
-        </div>
+          </div>
     </div>
     {% endfor %}
 </div>
 {% endif %}
+
 
 <div class="row">
     <div class="col-md-3 mt-4">
@@ -75,9 +76,9 @@
                                     <td>{{ transaction.end_date }}</td>
                                     <td>{{ transaction.days_taken }}</td>
                                     <td>{{ transaction.academic_year }}</td>
-                                    {% comment %} <td class="text-end">
+                                    <td class="text-end">
                                         <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a>
-                                    </td> {% endcomment %}
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -129,7 +130,7 @@
                             
                             <div class="col-md-2">
                                 <label for="days_taken" class="form-label">Days Taken</label>
-                                <input type="text" name="days_taken" id="days_taken" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.days_taken }}" {% endif %} required readonly>
+                                <input type="text" name="days_taken" id="days_taken" class="form-control" {% if leave_transaction %} value="{{ leave_transaction.days_taken }}" {% endif %} required>
                             </div>
                             
                             <div class="col-md-4">

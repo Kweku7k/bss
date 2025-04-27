@@ -1,3 +1,6 @@
+{% load group_tags %}
+
+
 <style>
     .btn-circle {
         width: 40px;
@@ -14,6 +17,7 @@
 </style>
 
 
+{% if request.user|has_group:"superadmin" or request.user.is_superuser %}
 {% if pending_promotions %}
 <div class="col-lg-6 col-sm-6">
     <div class="card">
@@ -57,4 +61,5 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endif %}

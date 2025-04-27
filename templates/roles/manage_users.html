@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="mb-4">Manage Users</h2>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>#</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Current Group</th>
+                    <th>Assign New Group</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.groups.all %}
+                                    {% for group in user.groups.all %}
+                                        <span class="badge bg-info">{{ group.name }}</span>
+                                    {% empty %}
+                                        <span class="text-muted">No group</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">No group</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <select name="group_id" class="form-select">
+                                    <option value="">Select a Group</option>
+                                    {% for group in groups %}
+                                        <option value="{{ group.id }}">{{ group.name }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                            </td>
+                            <td>
+                                <button type="submit" class="btn btn-success btn-sm">Assign</button>
+                            </td>
+                        </form>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

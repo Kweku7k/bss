@@ -1,4 +1,5 @@
  {% load static %}
+ {% load group_tags %}
 
   <!-- ======= Sidebar ======= -->
   <aside id="sidebar" class="sidebar">
@@ -191,9 +192,16 @@
               <i class="bi bi-person-plus-fill"></i><span>Add New Employees</span>
             </a>
           </li>
+          {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
+            <li>
+              <a href="{% url 'bulk_upload' %}">
+                <i class="bi bi-person-plus-fill"></i><span>Bulk Upload</span>
+              </a>
+            </li>
+          {% endif %}
           <li>
-            <a href="{% url 'bulk_upload' %}">
-              <i class="bi bi-person-plus-fill"></i><span>Bulk Upload</span>
+            <a href="{% url 'dormant-staff' %}">
+              <i class="bi bi-person-plus-fill"></i><span>Dormant Staff</span>
             </a>
           </li>
         </ul>
@@ -268,11 +276,18 @@
                   <i class="bi bi-person"></i><span>Profile</span>
                 </a>
             </li>
-            <li>
-                <a href="{% url 'logs' %}">
-                    <i class="bi bi-circle"></i><span>Logs</span>
-                </a>       
-            </li>
+            {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
+              <li class="nav-item">
+                <a class="nav-link collapsed" href="{% url 'manage-users' %}">
+                  <i class="bi bi-person"></i><span>Manage Users</span>
+                </a>
+              </li>
+              <li>
+                  <a href="{% url 'logs' %}">
+                      <i class="bi bi-circle"></i><span>Logs</span>
+                  </a>       
+              </li>
+            {% endif %}
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{% url 'logout' %}">
                   <i class="bi bi-box-arrow-in-right"></i><span>Logout</span>

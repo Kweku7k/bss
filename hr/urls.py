@@ -16,6 +16,7 @@ urlpatterns = [
     path('search', views.search,name="search"),
     path('newstaff', views.newstaff,name="newstaff"),
     path('allstaff', views.allstaff,name="allstaff"),
+    path('dormant_staff', views.dormant_staff,name="dormant-staff"),
     path('edit_staff/<str:staffno>', views.edit_staff,name="edit-staff"),
     path('delete_staff/<str:staffno>', views.deletestaff,name="delete-staff"),
     path('staff_details/<str:staffno>', views.staff_details,name="staff-details"),
@@ -117,6 +118,8 @@ urlpatterns = [
     path('create_groups/', views.create_groups, name='create-groups'),
     path('groups/<int:group_id>/assign-permissions/', views.assign_permissions_to_group, name='assign-permissions'),
     path('assign_user_group/', views.assign_user_to_group, name='assign-user-group'),
+    path('manage_users/', views.manage_users, name='manage-users'),
+    
 
 
     path('user/approve/<int:user_id>/', views.approve_user, name='approve-user'),

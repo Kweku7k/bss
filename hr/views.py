@@ -70,6 +70,32 @@ def view_logs(request):
     return render(request, 'hr/logs.html', {'logs': logs})
 
 
+def register(request):
+    form = RegistrationForm()
+    
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        print("Form has been received", form)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            email = form.cleaned_data.get('email')
+            if User.objects.filter(email=email).exists():
+                messages.error(request, "Oops, Email address already exists. Please use another email.")
+                return redirect('register')
+            form.save()
+            messages.success(request, f"Account Creation for {username} has been successful")  
+            return redirect('login')
+        else:
+            for field in form:
+                for error in field.errors:
+                    messages.error(request, f"{error}")
+            print(form.errors)
+            return redirect('register')
+    
+    context = {'form': form}
+    print(context)
+    return render(request, 'authentication/register.html', context)
+
 def index(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -124,25 +150,6 @@ def user_password(request):
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'hr/password.html', {'form': form})
-
-def register(request):
-    form = RegistrationForm()
-    
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f"Account Creation for {username} has been successful")  
-            return redirect('login')
-        else:
-            messages.error(request, f" Oops, Error in creating account. {form.errors}")
-            print(form.errors)
-            return redirect('register')
-    
-    context = {'form': form}
-    print(context)
-    return render(request, 'authentication/register.html', context)
 
 
 def logoutUser(request):
@@ -251,6 +258,7 @@ def staff_details(request, staffno):
     return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
 @login_required
+@role_required(['superadmin'])
 def edit_staff(request,staffno):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter() 
@@ -314,7 +322,6 @@ def edit_staff(request,staffno):
 
 
 @login_required
-@role_required(['superadmin'])
 def allstaff(request): 
     search_query = request.POST.get('search', '')
     status_filter = request.GET.get("status", None)
@@ -350,9 +357,29 @@ def allstaff(request):
     }
 
     return render(request, 'hr/allstaff.html', context)
+
+
+@login_required
+def dormant_staff(request): 
+    staffs = Employee.objects.filter(companyinformation__active_status='Dormant').order_by('lname')
+    staff_count = staffs.count()
+    company_info = CompanyInformation.objects.all()
+        
+    # Pagination
+    paginator = Paginator(staffs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'staffs': page_obj,
+        'staff_count': staff_count,
+        'company_info': company_info,
+    }
+
+    return render(request, 'hr/dormant_staff.html', context)
   
 @login_required
-@role_required(['superadmin'])
+# @role_required(['superadmin'])
 def test(request): 
     # Initial querysets for staff, company info, and school
     staffs = Employee.objects.all()
@@ -568,6 +595,7 @@ def test(request):
 
 
 @login_required
+@role_required(['superadmin'])
 def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter()
@@ -652,11 +680,8 @@ def get_departments(request, sch_name):
         return JsonResponse({"departments": []}, status=404)
     
     
-    
-# def get_departments(request, sch_fac_id):
-#     departments = Department.objects.filter(sch_fac_id=sch_fac_id).values('id', 'dept_long_name')
-#     return JsonResponse({'departments': list(departments)})
 @login_required
+@role_required(['superadmin'])
 def company_info(request,staffno):
     submitted = False
     company_infos = CompanyInformation.objects.filter(staffno__exact=staffno)    
@@ -718,6 +743,7 @@ def company_info(request,staffno):
     return render(request,'hr/company_info.html',context)
 
 @login_required
+@role_required(['superadmin'])
 def edit_company_info(request,staffno):
     company_infos = CompanyInformation.objects.all()  
     company_info = CompanyInformation.objects.get(staffno__exact=staffno)
@@ -783,6 +809,7 @@ def edit_company_info(request,staffno):
 ############### EMPLOYEE RELATIONSHIP ###############
 
 @login_required
+@role_required(['superadmin'])
 def emp_relation(request,staffno):
     submitted = False
     emp_relations = Kith.objects.filter(staffno__exact=staffno)
@@ -822,6 +849,7 @@ def emp_relation(request,staffno):
     return render(request,'hr/emp_relation.html',context)
 
 @login_required
+@role_required(['superadmin'])
 def edit_emp_relation(request,staffno,emp_id):
     emp_relations = Kith.objects.filter(staffno__exact=staffno)  
     emp_relation = Kith.objects.get(pk=emp_id)
@@ -853,6 +881,7 @@ def edit_emp_relation(request,staffno,emp_id):
     return render(request, 'hr/emp_relation.html', context)
 
 @login_required
+@role_required(['superadmin'])
 def delete_emp_relation(request,emp_id,staffno):
     emp_relation = Kith.objects.get(pk=emp_id)
     staff = Employee.objects.get(pk=staffno)
@@ -869,6 +898,7 @@ def delete_emp_relation(request,emp_id,staffno):
 
 # Write a function for bulk upload csv format
 @login_required
+@role_required(['superadmin'])
 def bulk_upload(request):
     if request.method == 'POST':
         form = CSVUploadForm(request.POST, request.FILES)
@@ -1056,6 +1086,7 @@ def download_csv(request):
 
 ####### EDUCATIONAL BACKGROUND #################
 @login_required
+@role_required(['superadmin'])
 def education(request,staffno):
     submitted = False
     educations = Staff_School.objects.filter(staffno__exact=staffno)
@@ -1093,6 +1124,7 @@ def education(request,staffno):
 
 
 @login_required
+@role_required(['superadmin'])
 def edit_education(request,staffno,edu_id):
     educations = Staff_School.objects.filter(staffno__exact=staffno)  
     education = Staff_School.objects.get(pk=edu_id)
@@ -1131,6 +1163,7 @@ def edit_education(request,staffno,edu_id):
     return render(request, 'hr/education.html', context)
 
 @login_required
+@role_required(['superadmin'])
 def delete_education(request,edu_id,staffno):
     education = Staff_School.objects.get(pk=edu_id)
     staff = Employee.objects.get(pk=staffno)
@@ -1146,6 +1179,7 @@ def delete_education(request,edu_id,staffno):
 ### Staff leave transaction
 ######################################################################
 @login_required
+@role_required(['superadmin'])
 def leave_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno) 
@@ -1265,6 +1299,7 @@ def edit_leave_transaction(request, staffno, lt_id):
 ### Staff Medical views
 ######################################################################
 @login_required
+@role_required(['superadmin'])
 def medical_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -2015,7 +2050,7 @@ def delete_celebration(request,bno,staffno):
 
 # View for adding a new renewal history
 @login_required
-@role_required(['admin', 'superadmin'])
+@role_required(['superadmin'])
 def add_renewal_history(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -2096,7 +2131,7 @@ def disapprove_renewal(request, renewal_id):
 
 # View for adding new promotion history
 @login_required
-@role_required(['admin', 'superadmin'])
+@role_required(['superadmin'])
 def add_promotion_history(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -2176,6 +2211,7 @@ def disapprove_promotion(request, promotion_id):
 
 # payroll information from company info model 
 @login_required
+@role_required(['superadmin'])
 def payroll_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
@@ -2184,6 +2220,7 @@ def payroll_details(request, staffno):
 
 
 @login_required
+@role_required(['superadmin'])
 def staff_settings(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
@@ -2242,7 +2279,6 @@ def create_groups(request):
 @role_required(['superadmin'])
 def assign_permissions_to_group(request, group_id):
     group = Group.objects.get(id=group_id)
-    # permissions = Permission.objects.get(codename="change_user")
     permissions = Permission.objects.all()
 
     if request.method == 'POST':
@@ -2280,6 +2316,34 @@ def assign_user_to_group(request):
     
 
 @login_required
+@role_required(['superadmin'])
+def manage_users(request):
+    users = User.objects.all()
+    groups = Group.objects.all()
+
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        group_id = request.POST.get('group_id')
+        
+        if not group_id:
+            messages.error(request, "Please select a valid group before assigning.")
+            return redirect('manage-users')
+
+        user = User.objects.get(id=user_id)
+        group = Group.objects.get(id=group_id)
+        user.groups.add(group)
+        messages.success(request, f"{user.username} has been assigned to {group.name} successfully.")
+        logger.info(f"{user.username} has been assigned to {group.name} by {request.user.username}.")
+        return redirect('manage-users')
+
+    return render(request, 'roles/manage_users.html', {
+        'users': users,
+        'groups': groups,
+    })
+
+
+@login_required
+@role_required(['superadmin'])
 def approve_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     user.approval = True
@@ -2290,11 +2354,8 @@ def approve_user(request, user_id):
 
 
 @login_required
+@role_required(['superadmin'])
 def disapprove_user(request, user_id):
-    # if not request.user.is_superuser:
-    #     messages.error(request, "Unauthorized Access")
-    #     return redirect('landing')
-
     user = get_object_or_404(User, id=user_id)
     user.delete()
     messages.success(request, f"User {user.username} has been disapproved!")

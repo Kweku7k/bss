@@ -33,7 +33,6 @@
 </head>
 
 <body>
-
   <main>
     <div class="container">
 
@@ -53,43 +52,27 @@
       {% endfor %}
    </div>
 {% endif %}
-      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-            
-              <div class="justify-content-center py-4">
-                <!-- <a href="index.html" class="logo d-flex align-items-center w-auto">
-                  <img src="../assets/img/logo.png" alt=""> 
-                  <span class="d-none d-lg-block">NiceAdmin</span> </a> -->
-				  
-                <h3>CENTRAL UNIVERSITY</h3>
-				  <h4>Business Support System</h4>
-              </div><!-- End Logo -->
+<div class="container">
 
-              <div class="card mb-3 card-sm">
+  <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center">
+          <div class="text-center justify-content-center py-4">
+            <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="100%">
+            <h4><b>Human Resource Support System</b></h4>
+          </div><!-- End Logo -->
 
-                <div class="card-body">
+          <div class="card mb-3">
 
-                  <div class="pt-1 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
-                    <p class="text-center small">Enter your personal details to create account</p>
-                  </div>
+            <div class="card-body">
 
+              <div class="pt-4 pb-2">
+                <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
+                <p class="text-center small">Kindly fill in the form below</p>
+              </div>
                   <form method="POST" class="row g-3 needs-validation">
                     {% csrf_token %}
-
-                    <div class="col-12">
-                      {{ form.username.label_tag }}
-                      {{ form.username }}
-                      {% if form.username.errors %}
-                          <div class="alert alert-danger">
-                              {% for error in form.username.errors %}
-                                  <p>{{ error }}</p>
-                              {% endfor %}
-                          </div>
-                      {% endif %}
-                  </div>
                     
                     <div class="col-12">
                         {{ form.username.label }}
@@ -162,9 +145,6 @@
 
                 </div>
               </div>
-
-               
-
             </div>
           </div>
         </div>
