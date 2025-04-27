@@ -78,6 +78,18 @@
 
                   <form method="POST" class="row g-3 needs-validation">
                     {% csrf_token %}
+
+                    <div class="col-12">
+                      {{ form.username.label_tag }}
+                      {{ form.username }}
+                      {% if form.username.errors %}
+                          <div class="alert alert-danger">
+                              {% for error in form.username.errors %}
+                                  <p>{{ error }}</p>
+                              {% endfor %}
+                          </div>
+                      {% endif %}
+                  </div>
                     
                     <div class="col-12">
                         {{ form.username.label }}

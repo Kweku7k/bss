@@ -1,0 +1,62 @@
+{% load group_tags %}
+
+<style>
+    .btn-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        padding: 8px;
+        font-size: 16px;
+        line-height: 1.25;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+
+{% if request.user|has_group:"superadmin" or request.user.is_superuser %}
+    {% if pending_users %}
+        <div class="col-lg-6 col-sm-6">
+            <div class="card" >
+                <div class="card-body">
+                    <h5 class="pt-3 mb-1 text-black text-center"><strong>Pending User Approvals</strong></h5>
+                    <p class="text-center text-muted mb-4">Contract renewals awaiting your approval</p>
+                    <div>
+                        {% for user in pending_users %}
+                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                                <!-- Status indicator (Pending approval) -->
+                                <div style="background-color: #000; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;"></div>
+                                
+                                <!-- Staff name link -->
+                                <a href="#" style="text-decoration: none; color: inherit; flex-grow: 1;">{{ user.email }}</a>
+
+                                <!-- Approve button -->
+                                <form method="post" action="{% url 'approve-user' user.id %}" style="margin-left: 8px; display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success btn-circle" onclick="return confirm('Do you really want to approve {{ user.email }}?');" title="Approve">
+                                        ✅
+                                    </button>
+                                </form>
+
+                                <!-- Disapprove button -->
+                                <form method="post" action="{% url 'disapprove-user' user.id %}" style="margin-left: 8px; display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger btn-circle" onclick="return confirm('Do you really want to disapprove {{ user.email }}?');" title="Disapprove">
+                                        ❌
+                                    </button>
+                                </form>
+
+                            </div>
+                        {% empty %}
+                            <div class="text-center text-muted">
+                                No pending user approval.
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}

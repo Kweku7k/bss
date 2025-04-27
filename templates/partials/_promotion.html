@@ -42,7 +42,7 @@
                         <!-- Disapprove button -->
                         <form method="post" action="{% url 'disapprove-promotion' promotion.id %}" style="margin-left: 8px; display: inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn btn-info btn-circle" onclick="return confirm('Do you really want to disapprove the promotion for {{ promotion.staffno.fname }} {{ promotion.staffno.lname }}?');" title="Disapprove">
+                            <button type="submit" class="btn btn-danger btn-circle" onclick="return confirm('Do you really want to disapprove the promotion for {{ promotion.staffno.fname }} {{ promotion.staffno.lname }}?');" title="Disapprove">
                                 ❌
                             </button>
                         </form>

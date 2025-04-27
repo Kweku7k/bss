@@ -119,5 +119,6 @@ urlpatterns = [
     path('assign_user_group/', views.assign_user_to_group, name='assign-user-group'),
 
 
-    
+    path('user/approve/<int:user_id>/', views.approve_user, name='approve-user'),
+    path('user/disapprove/<int:user_id>/', views.disapprove_user, name='disapprove-user')
 ]

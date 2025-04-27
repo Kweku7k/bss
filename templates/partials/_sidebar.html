@@ -268,13 +268,11 @@
                   <i class="bi bi-person"></i><span>Profile</span>
                 </a>
             </li>
-            {% if 'superadmin' in user_groups %}
-              <li>
-                  <a href="{% url 'logs' %}">
-                      <i class="bi bi-circle"></i><span>Logs</span>
-                  </a>       
-              </li>
-            {% endif %}
+            <li>
+                <a href="{% url 'logs' %}">
+                    <i class="bi bi-circle"></i><span>Logs</span>
+                </a>       
+            </li>
             <li class="nav-item">
                 <a class="nav-link collapsed" href="{% url 'logout' %}">
                   <i class="bi bi-box-arrow-in-right"></i><span>Logout</span>

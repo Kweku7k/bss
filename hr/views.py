@@ -72,20 +72,29 @@ def view_logs(request):
 
 def index(request):
     if request.method == 'POST':
-        username = request.POST.get('username')
+        email = request.POST.get('email')
         password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            # if user.approval:
-            login(request, user)
-            messages.success(request, f"Login  Successful. Welcome Back {user.username}")
-            logger.info(f"Login Successful: {user.username}")
-            return redirect('landing')
-        else:
-            messages.error(request, "Invalid login credentials." )
+
+        try:
+            user_username = User.objects.get(email=email)
+            user = authenticate(request, username=user_username.username, password=password)
+            print("Trying to Login", user)
+            if user is not None:
+                # Check if the user is not approve and redirect
+                if not user.approval:
+                    messages.error(request, "Your account is not approved yet. Please contact the administrator.")
+                    return render(request, 'authentication/waiting_approval.html')
+                login(request, user)
+                messages.success(request, f"Login Successful. Welcome Back {user.username}")
+                return redirect('landing')
+            else:
+                messages.error(request, "Invalid login credentials.")
+                return redirect('login')
+        except User.DoesNotExist:
+            messages.error(request, "Email not found.")
             return redirect('login')
-    
-    return render(request, 'authentication/login.html',{})
+
+    return render(request, 'authentication/login.html', {})
 
 def user_profile(request):
     if request.method == 'POST':
@@ -158,6 +167,7 @@ def landing(request):
     sixty_and_above = Employee.objects.filter(dob__lte=today - timedelta(days=60*365))  # Approximates 60 years
     pending_renewals = RenewalHistorys.objects.filter(is_approved=False, is_disapproved=False)
     pending_promotions = PromotionHistory.objects.filter(is_approved=False, is_disapproved=False)
+    pending_users = User.objects.filter(approval=False)
     
     
     notification_count = ( expiring_soon.count() + sixty_and_above.count() + pending_renewals.count() + pending_promotions.count() )
@@ -174,6 +184,7 @@ def landing(request):
         'pending_renewals':pending_renewals,
         'sixty_and_above':sixty_and_above,
         'pending_promotions':pending_promotions,
+        'pending_users':pending_users,
     }
     
     return render(request,'hr/landing_page.html', context)
@@ -2231,13 +2242,14 @@ def create_groups(request):
 @role_required(['superadmin'])
 def assign_permissions_to_group(request, group_id):
     group = Group.objects.get(id=group_id)
+    # permissions = Permission.objects.get(codename="change_user")
     permissions = Permission.objects.all()
 
     if request.method == 'POST':
-        selected_permissions = request.POST.getlist('permissions')  # List of permission ids
-        group.permissions.set(selected_permissions)  # Set new permissions
+        selected_permissions = request.POST.getlist('permissions', ) 
+        group.permissions.set(selected_permissions)
         messages.success(request, 'Permissions assigned successfully.')
-        return redirect('create-groups')  # Go back to group management
+        return redirect('create-groups')
 
     return render(request, 'roles/assign_permissions.html', {
         'group': group,
@@ -2265,3 +2277,26 @@ def assign_user_to_group(request):
         'users': users,
         'groups': groups,
     })
+    
+
+@login_required
+def approve_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.approval = True
+    user.save()
+    messages.success(request, f"User {user.username} has been approved!")
+    logger.info(f"User {user.username} has been approved by {request.user.username}.")
+    return redirect('assign-user-group')
+
+
+@login_required
+def disapprove_user(request, user_id):
+    # if not request.user.is_superuser:
+    #     messages.error(request, "Unauthorized Access")
+    #     return redirect('landing')
+
+    user = get_object_or_404(User, id=user_id)
+    user.delete()
+    messages.success(request, f"User {user.username} has been disapproved!")
+    logger.info(f"User {user.username} has been disapproved by {request.user.username}.")
+    return redirect('landing')

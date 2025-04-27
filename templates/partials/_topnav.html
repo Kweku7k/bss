@@ -126,8 +126,8 @@
                     <li class="notification-item">
                         <i class="bi bi-clock-history text-info"></i>
                         <div>
-                            <a href="{% url 'staff-details' renewal.staffno %}" style="text-decoration: none; color: inherit;">
-                                <p>Renewal pending approval for {{ renewal.staff.fname }} {{ renewal.staff.lname }}</p>
+                            <a href="{% url 'staff-details' renewal.staffno.staffno %}" style="text-decoration: none; color: inherit;">
+                                <p>Renewal pending approval for {{ renewal.staffno.fname }} {{ renewal.staffno.lname }}</p>
                             </a>
                         </div>
                     </li>

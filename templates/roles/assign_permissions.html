@@ -7,15 +7,15 @@
         {% csrf_token %}
         
         <div class="form-group">
-            {% for permission in permissions %}
+            {% comment %} {% for permission in permissions %} {% endcomment %}
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="permissions" value="{{ permission.id }}"
                         {% if permission in group.permissions.all %}checked{% endif %}>
                     <label class="form-check-label">
-                        {{ permission.name }}
+                        {{ permissions.name }}
                     </label>
                 </div>
-            {% endfor %}
+            {% comment %} {% endfor %} {% endcomment %}
         </div>
 
         <button type="submit" class="btn btn-primary mt-3">Save Permissions</button>
