@@ -52,6 +52,13 @@ class DepartmentForm(ModelForm):
     class Meta:
         model = Department
         fields = '__all__'
+        
+        
+class UnitForm(ModelForm):
+    class Meta:
+        model = Unit
+        fields = '__all__'
+        exclude = ['updated','created']
 
 class HospitalForm(ModelForm):
     class Meta:
@@ -82,5 +89,24 @@ class JobTitleForm(ModelForm):
 class AcademicYearForm(ModelForm):
     class Meta:
         model = AcademicYear
+        fields = '__all__'
+        exclude = ['updated','created']
+        
+        
+class IncomeTypeForm(ModelForm):
+    class Meta:
+        model = IncomeType
+        fields = '__all__'
+        exclude = ['updated','created']
+
+class DeductionTypeForm(ModelForm):
+    class Meta:
+        model = DeductionType
+        fields = '__all__'
+        exclude = ['updated','created']
+        
+class SalaryScaleForm(ModelForm):
+    class Meta:
+        model = SalaryScale
         fields = '__all__'
         exclude = ['updated','created']

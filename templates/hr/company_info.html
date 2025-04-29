@@ -53,10 +53,6 @@
                                 </select>
                             </div>
 
-                            {% comment %} <div class="col-md-4">
-                                <label for="job_description" class="form-label">Job Description</label>
-                                <input type="text" class="form-control" id="job_description" name="job_description" value="{{ company_info.job_description }}">
-                            </div> {% endcomment %}
                             <div class="col-md-4">
                                 <label for="staff_cat" class="form-label">Staff Category</label>
                                 <select id="staff_cat" name="staff_cat" class="form-select" required>
@@ -138,6 +134,17 @@
                                 </select>
                             </div>
                             <div class="col-md-4">
+                                <label for="dept_unit" class="form-label">Department Unit</label>
+                                <select id="dept_unit" name="dept_unit" class="form-select">
+                                    <option value="" disabled selected>N/A</option>
+                                    {% if units %}
+                                        {% for unit in units %}
+                                            <option value="{{ unit }}" {% if unit.unit_name == company_info.dept_unit %} selected {% endif %}> {{ unit }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
                                 <label for="directorate" class="form-label">Directorate</label>
                                 <select id="directorate" name="directorate" class="form-select">
                                     <option value=""  selected>N/A</option>
@@ -148,8 +155,18 @@
                                     {% endif %}
                                 </select>
                             </div>
-
-                            
+                            <div class="col-md-4">
+                                <label for="directorate_unit" class="form-label">Directorate Unit</label>
+                                <select id="directorate_unit" name="directorate_unit" class="form-select">
+                                    <option value="" disabled selected>N/A</option>
+                                    {% if units %}
+                                        {% for unit in units %}
+                                            <option value="{{ unit }}" {% if unit.unit_name == company_info.directorate_unit %} selected {% endif %}> {{ unit }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                    
                             <div class="col-md-4">
                                 <label for="rank" class="form-label">Designation/Rank</label>
                                 <input type="text" class="form-control" id="rank" name="rank" value="{{ company_info.rank }}">
@@ -172,14 +189,19 @@
                                 <input type="email" class="form-control" id="email" name="email" value="{{ company_info.email }}">
                             </div>
                             <div class="col-md-4">
-                                <label for="salary" class="form-label">Salary Scale</label>
+                                <label for="salary" class="form-label">Basic Salary</label>
                                 <input type="text" class="form-control" id="salary" name="salary" value="{{ company_info.salary }}">
                             </div>
-
                             <div class="col-md-4">
-                                <label for="pte" class="form-label">Point of Entry in Salary Scale</label>
-                                <input type="text" class="form-control" id="pte" name="pte" value="{{ company_info.pte }}">
+                                <label for="pte" class="form-label">Salary Scale</label>
+                                <select id="pte" name="pte" class="form-select">
+                                    <option value="" disabled selected>Select a Salary Scale</option>
+                                    {% for ss in salary_scales %}
+                                    <option value="{{ ss }}" {% if ss.name == company_info.pte %} selected {% endif %}>{{ ss }}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
+
                             <div class="col-md-4">
                                 <label for="cost_center" class="form-label">Cost Center</label>
                                 <select id="cost_center" name="cost_center" class="form-select" >
@@ -321,6 +343,11 @@
                             option.text = branch.branch_name;
                             branchSelect.appendChild(option);
                         });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.text = 'No branches available';
+                        branchSelect.appendChild(option);
                     }
                 })
                 .catch(error => console.error('Error fetching branches:', error));
@@ -354,9 +381,87 @@
                             option.text = dept.dept_long_name;
                             departmentSelect.appendChild(option);
                         });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.text = 'No departments available';
+                        departmentSelect.appendChild(option);
                     }
                 })
                 .catch(error => console.error('Error fetching departments:', error));
+            }
+        });
+    });
+
+    // Populate Department Unit based on selected Department
+    document.addEventListener('DOMContentLoaded', function () {
+        const departmentSelect = document.getElementById('dept');
+        const unitSelect = document.getElementById('dept_unit');
+    
+        // Event listener for department selection
+        departmentSelect.addEventListener('change', function() {
+            const deptName = this.value;
+    
+            // Clear current unit options
+            unitSelect.innerHTML = '<option value="" disabled selected>Select Unit</option>';
+    
+            // Fetch units based on the selected department
+            if (deptName) {
+                fetch(`/get_units_by_department/${deptName}/`)  // Adjust this URL to match your route
+                .then(response => response.json())
+                .then(data => {
+                    if (data.units.length > 0) {
+                        data.units.forEach(unit => {
+                            const option = document.createElement('option');
+                            option.value = unit.unit_name;
+                            option.text = unit.unit_name;
+                            unitSelect.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.text = 'No units available';
+                        unitSelect.appendChild(option);
+                    }
+                })
+                .catch(error => console.error('Error fetching units:', error));
+            }
+        });
+    });
+
+
+    // Populate Directorate unit based on selected Directorate
+    document.addEventListener('DOMContentLoaded', function () {
+        const directorateSelect = document.getElementById('directorate');
+        const unitSelect = document.getElementById('directorate_unit');
+    
+        // Event listener for directorate selection
+        directorateSelect.addEventListener('change', function() {
+            const dirName = this.value;
+    
+            // Clear current unit options
+            unitSelect.innerHTML = '<option value="" disabled selected>Select Unit</option>';
+    
+            // Fetch units based on the selected directorate
+            if (dirName) {
+                fetch(`/get_units_by_directorate/${dirName}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.units.length > 0) {
+                        data.units.forEach(unit => {
+                            const option = document.createElement('option');
+                            option.value = unit.unit_name;
+                            option.text = unit.unit_name;
+                            unitSelect.appendChild(option);
+                        });
+                    } else {
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.text = 'No units available';
+                        unitSelect.appendChild(option);
+                    }
+                })
+                .catch(error => console.error('Error fetching units:', error));
             }
         });
     });

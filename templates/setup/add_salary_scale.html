@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Salary Scale</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name" class="col-form-label">Salary Scale</label>
+                        <input type="text" name="name" class="form-control" {% if salary_scale %} value="{{ salary_scale.name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-salary-scale' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4">
+            <div class="card-header text-center">
+                <h5><strong>Salary Scale Count: {{ salary_scale_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if salary_scales %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Salary Scale</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for ss in salary_scales %}
+                    <tr>
+                        <td>{{ ss.name }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-salary-scale' ss.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-salary-scale' ss.id %}" onclick="return confirm('Do you really want to delete the data for {{ ss.name }}?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5 class="pt-2">No Salary Scale Available.</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

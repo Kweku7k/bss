@@ -84,7 +84,9 @@ class CompanyInformation(models.Model):
     email = models.CharField('Official Email',max_length=50,blank=True,null=True)
     sch_fac_dir = models.CharField('School Faculty',max_length=150,blank=True,null=True)
     dept = models.CharField('Department',max_length=100,blank=True,null=True)
+    dept_unit = models.CharField('Department Unit', max_length=100, blank=True, null=True)
     directorate = models.CharField('Directorate',max_length=100,blank=True,null=True)
+    directorate_unit = models.CharField('Directorate Unit',max_length=100,blank=True,null=True)
     salary = models.CharField('Salary',max_length=50,blank=True,null=True)
     cost_center = models.CharField('Cost Center',max_length=100,blank=True,null=True)
     bank_name = models.CharField('Bank Name',max_length=100,blank=True,null=True)
@@ -461,3 +463,41 @@ def update_company_info_on_approval_or_disapproval(sender, instance, **kwargs):
                 company_info.rank = instance.prev_position
                 company_info.save()        
     
+    
+    
+    
+class StaffIncome(models.Model):
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
+    income_type = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    percentage_of_basic = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    start_month = models.DateField()
+    end_month = models.DateField()
+    created = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.income_type} - {self.staffno}"
+    
+    
+class StaffDeduction(models.Model):
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
+    deduction_type = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    percentage_of_basic = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    start_month = models.DateField()
+    end_month = models.DateField()
+    created = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.deduction_type} - {self.staffno}"
+    
+    
+class Payroll(models.Model):
+    staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE)
+    month = models.DateField()
+    gross_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total_income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total_deduction = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    net_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    cost_center = models.CharField('Cost Center', max_length=100, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.staffno} - {self.month}"

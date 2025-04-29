@@ -39,6 +39,10 @@ urlpatterns = [
     path('dept', views.add_dept,name="add-dept"),
     path('edit_dept/<int:dept_id>', views.edit_dept,name="edit-dept"),
     path('delete_dept/<int:dept_id>', views.delete_dept,name="delete-dept"),
+    
+    path('unit', views.add_unit,name="add-unit"),
+    path('edit_unit/<int:unit_id>', views.edit_unit,name="edit-unit"),
+    path('delete_unit/<int:unit_id>', views.delete_unit,name="delete-unit"),
 
     path('hosp', views.add_hosp,name="add-hosp"),
     path('edit_hosp/<int:hosp_id>', views.edit_hosp,name="edit-hosp"),
@@ -59,6 +63,18 @@ urlpatterns = [
     path('academic_year', views.academic_year, name="academic-year"),
     path('edit_academic_year/<int:ay_id>', views.edit_academic_year, name="edit-academic-year"),
     path('delete_academic_year/<int:ay_id>', views.delete_academic_year, name="delete-academic-year"),
+    
+    path('salary_scale', views.salary_scale, name="add-salary-scale"),
+    path('edit_salary_scale/<int:ss_id>', views.edit_salary_scale, name="edit-salary-scale"),
+    path('delete_salary_scale/<int:ss_id>', views.delete_salary_scale, name="delete-salary-scale"),
+    
+    path('income_type', views.add_income_type, name="add-income-type"),
+    path('edit_income_type/<int:it_id>', views.edit_income_type, name="edit-income-type"),
+    path('delete_income_type/<int:it_id>', views.delete_income_type, name="delete-income-type"),
+    
+    path('deduction_type', views.add_deduction_type, name="add-deduction-type"),
+    path('edit_deduction_type/<int:dt_id>', views.edit_deduction_type, name="edit-deduction-type"),
+    path('delete_deduction_type/<int:dt_id>', views.delete_deduction_type, name="delete-deduction-type"),
     
     path('choices_hpq/', views.generic_model_crud, {'model_class': ChoicesHPQ, 'model_name': 'Professional Qualifications', 'template_name': 'setup/generic.html'}, name='choices-hpq'),
     path('choices_region/', views.generic_model_crud, {'model_class': ChoicesRegion, 'model_name': 'Region', 'template_name': 'setup/generic.html'}, name='choices-region'),

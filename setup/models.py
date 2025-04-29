@@ -61,7 +61,8 @@ class Directorate(models.Model):
     direct_name = models.CharField('Directorate',max_length=250,blank=False,null=False)
     def __str__(self):
         return self.direct_name
-
+    
+    
 class School_Faculty(models.Model):
     sch_fac_name = models.CharField('School/Faculty',max_length=250,blank=False,null=False)
     def __str__(self):
@@ -74,6 +75,16 @@ class Department(models.Model):
     dept_notes = models.TextField('Notes',blank=True,null=True)
     def __str__(self):
         return self.dept_long_name
+    
+    
+class Unit(models.Model):
+    unit_name = models.CharField('Name of Unit', max_length=250, blank=False, null=False)
+    unit_short_name = models.CharField('Short Name', max_length=50, blank=True, null=True)
+    directorate = models.ForeignKey(Directorate, on_delete=models.CASCADE, blank=True, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, blank=True, null=True)
+    def __str__(self):
+        return self.unit_name
+
 
 class BankBranch(models.Model):
     branch_name = models.CharField('Name of Branch',max_length=250,blank=False,null=False)
@@ -113,3 +124,23 @@ class AcademicYear(models.Model):
     def __str__(self):
         return self.academic_year
     
+    
+    
+class IncomeType(models.Model):
+    name = models.CharField(max_length=100, blank=False,null=False)
+
+    def __str__(self):
+        return self.name
+    
+class DeductionType(models.Model):
+    name = models.CharField(max_length=100, blank=False,null=False)
+
+    def __str__(self):
+        return self.name
+
+
+
+class SalaryScale(models.Model):
+    name = models.CharField(max_length=100, blank=False,null=False)
+    def __str__(self):
+        return self.name

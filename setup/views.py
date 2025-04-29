@@ -408,6 +408,7 @@ def add_dept(request):
                 return redirect('add-dept')
             else:
                 form.save()
+                messages.success(request, f'{dept_long_name} Department added successfully.')
                 return HttpResponseRedirect('dept?submitted=True')
     else:
         form = DepartmentForm
@@ -438,6 +439,94 @@ def edit_dept(request, dept_id):
     context = {'form':form,'depts':depts,'dept_count':dept_count,'dept':dept, 'schools':schools}
     return render(request, 'setup/add_dept.html', context)
 ########### END OF DEPARTMENT VIEWS ################
+
+
+########### UNITS VIEWS ################
+def add_unit(request):
+    submitted = False
+    units = Unit.objects.order_by('-id')
+    unit_count = units.count()
+    departments = Department.objects.all()
+    directorates = Directorate.objects.all()
+    
+    if request.method == 'POST':
+        form = UnitForm(request.POST)
+        if form.is_valid():
+            # Check if the unit already exists
+            unit_name = form.cleaned_data.get('unit_name')
+            department = form.cleaned_data.get('department')
+            directorate = form.cleaned_data.get('directorate')
+            
+            if department and directorate:
+                messages.error(request, f'Please select either Department or Directorate, not both.')
+                return redirect('add-unit')
+            elif not department and not directorate:
+                messages.error(request, f'Please select either Department or Directorate.')
+                return redirect('add-unit')
+            else:
+                if Unit.objects.filter(unit_name=unit_name, department=department, directorate=directorate).exists():
+                    messages.error(request, f'{unit_name} Unit already exists.')
+                    return redirect('add-unit')
+                else:
+                    form.save()
+                    messages.success(request, f'{unit_name} Unit added successfully.')
+                    return HttpResponseRedirect('unit?submitted=True')
+    else:
+        form = UnitForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    return render(request, 'setup/add_unit.html', {'form':form, 'submitted':submitted, 'units':units, 'unit_count':unit_count, 'departments':departments, 'directorates':directorates})
+
+
+def delete_unit(request, unit_id):
+    unit = Unit.objects.get(pk=unit_id)
+    if request.method == 'GET':
+       unit.delete()
+    return redirect('add-unit')
+
+
+def edit_unit(request, unit_id):
+    units = Unit.objects.order_by('-id')
+    unit_count = units.count()
+    departments = Department.objects.all()
+    directorates = Directorate.objects.all()
+    unit = Unit.objects.get(pk=unit_id)
+
+    if request.method == 'POST':
+        form = UnitForm(request.POST, instance=unit)
+        if form.is_valid():
+            unit_name = form.cleaned_data.get('unit_name')
+            department = form.cleaned_data.get('department')
+            directorate = form.cleaned_data.get('directorate')
+
+            if department and directorate:
+                messages.error(request, "A unit can't belong to both a department and a directorate.")
+                return redirect('add-unit')
+            elif not department and not directorate:
+                messages.error(request, "A unit must belong to either a department or a directorate.")
+                return redirect('add-unit')
+            else:
+                # Check if another unit with the same name, dept/directorate already exists
+                if Unit.objects.filter(unit_name=unit_name, department=department, directorate=directorate).exists():
+                    messages.error(request, f'{unit_name} Unit already exists.')
+                else:
+                    form.save()
+                    messages.success(request, f' {unit_name} Unit updated successfully.')
+                    return redirect('unit')
+    else:
+        form = UnitForm(instance=unit)
+
+    return render(request, 'setup/add_unit.html', {
+        'form': form,
+        'unit': unit,
+        'units': units,
+        'unit_count': unit_count,
+        'departments': departments,
+        'directorates': directorates
+    })
+
+
 
 ########### HOSPITAL VIEWS ################
 def add_hosp(request):
@@ -648,11 +737,15 @@ def add_jobtitle(request):
         form = JobTitleForm(request.POST)
         print(form)
         if form.is_valid(): 
-            form.save()
-            print("Form validated successfully")
-            print("Form validated successfully")
-            return HttpResponseRedirect('jobtitle')
-            # return redirect('add-jobtitle')
+            staff_cat = form.cleaned_data.get('staff_cat')
+            job_title = form.cleaned_data.get('job_title')
+            # Check if the job title already exists for the selected staff category
+            if JobTitle.objects.filter(staff_cat=staff_cat, job_title=job_title).exists():
+                messages.error(request, f'{job_title} Job Title already exists for {staff_cat}.')
+                return redirect('add-jobtitle')
+            else:
+                form.save()
+                return HttpResponseRedirect('jobtitle?submitted=True')
     else:
         form = JobTitleForm
         if 'submitted' in request.GET:
@@ -682,6 +775,147 @@ def edit_jobtitle(request, jobtitle_id):
     context = {'form':form,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'jobtitle':jobtitle,'STAFFLEVEL':STAFFLEVEL, 'staffcategorys':staffcategorys}
     return render(request, 'setup/add_jobtitle.html', context)
 ########### END OF STAFF RANK VIEWS ################
+
+########### INCOME TYPE ##############
+def add_income_type(request):
+    submitted = False
+    income_types = IncomeType.objects.order_by('-id')
+    income_count = income_types.count()
+    if request.method == 'POST':
+        form = IncomeTypeForm(request.POST)
+        if form.is_valid():
+            income = form.cleaned_data.get('name')
+            
+            # Check if the income type already exists
+            if IncomeType.objects.filter(name=income).exists():
+                messages.error(request, f'Income type {income} already exists.')
+                return redirect('add-income-type')
+            else:
+                form.save()
+                return HttpResponseRedirect('income_type?submitted=True')
+    else:
+        form = IncomeTypeForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    context = {'form':form,'submitted':submitted,'income_types':income_types,'income_count':income_count}
+    return render(request, 'setup/add_income_type.html', context)
+
+def delete_income_type(request, it_id):
+    income = IncomeType.objects.get(pk=it_id)
+    if request.method == 'GET':
+       income.delete()
+    return redirect('add-income-type')
+
+def edit_income_type(request, it_id):
+    income_types = IncomeType.objects.order_by('-id')
+    income_count = income_types.count()
+    income = IncomeType.objects.get(pk=it_id)
+    form = IncomeTypeForm(instance=income)
+
+    if request.method == 'POST':
+        form = IncomeTypeForm(request.POST, instance=income)
+        if form.is_valid():
+            form.save()
+            return redirect('add-income-type')
+
+    context = {'form':form,'income_types':income_types,'income_count':income_count,'income':income}
+    return render(request, 'setup/add_income_type.html', context)
+
+
+########### DEDUCTION TYPE ################
+def add_deduction_type(request):
+    submitted = False
+    deduction_types = DeductionType.objects.order_by('-id')
+    deduction_count = deduction_types.count()
+    if request.method == 'POST':
+        form = DeductionTypeForm(request.POST)
+        if form.is_valid():
+            deduction = form.cleaned_data.get('name')
+            
+            # Check if the deduction type already exists
+            if DeductionType.objects.filter(name=deduction).exists():
+                messages.error(request, f'Deduction type {deduction} already exists.')
+                return redirect('add-deduction-type')
+            else:
+                form.save()
+                return HttpResponseRedirect('deduction_type?submitted=True')
+    else:
+        form = DeductionTypeForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    context = {'form':form,'submitted':submitted,'deduction_types':deduction_types,'deduction_count':deduction_count}
+    return render(request, 'setup/add_deduction_type.html', context)
+
+def delete_deduction_type(request, dt_id):
+    deduction = DeductionType.objects.get(pk=dt_id)
+    if request.method == 'GET':
+       deduction.delete()
+    return redirect('add-deduction-type')
+
+def edit_deduction_type(request, dt_id):
+    deduction_types = DeductionType.objects.order_by('-id')
+    deduction_count = deduction_types.count()
+    deduction = DeductionType.objects.get(pk=dt_id)
+    form = DeductionTypeForm(instance=deduction)
+
+    if request.method == 'POST':
+        form = DeductionTypeForm(request.POST, instance=deduction)
+        if form.is_valid():
+            form.save()
+            return redirect('add-deduction-type')
+
+    context = {'form':form,'deduction_types':deduction_types,'deduction_count':deduction_count,'deduction':deduction}
+    return render(request, 'setup/add_deduction_type.html', context)
+
+
+########### SALARY SCALE ################
+def salary_scale(request):
+    submitted = False
+    salary_scales = SalaryScale.objects.order_by('-id')
+    salary_scale_count = salary_scales.count()
+    if request.method == 'POST':
+        form = SalaryScaleForm(request.POST)
+        if form.is_valid():
+            # Check if the salary scale already exists
+            salary_scale = form.cleaned_data.get('name')
+            if SalaryScale.objects.filter(name=salary_scale).exists():
+                messages.error(request, f'Salary scale {salary_scale} already exists.')
+                return redirect('add-salary-scale')
+            else:
+                form.save()
+                return HttpResponseRedirect('salary_scale?submitted=True')
+    else:
+        form = SalaryScaleForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    context = {'form':form,'submitted':submitted,'salary_scales':salary_scales,'salary_scale_count':salary_scale_count}
+    return render(request, 'setup/add_salary_scale.html', context)
+
+def delete_salary_scale(request, ss_id):
+    salary_scale = SalaryScale.objects.get(pk=ss_id)
+    if request.method == 'GET':
+       salary_scale.delete()
+    return redirect('add-salary-scale')
+
+
+def edit_salary_scale(request, ss_id):
+    salary_scales = SalaryScale.objects.order_by('-id')
+    salary_scale_count = salary_scales.count()
+    salary_scale = SalaryScale.objects.get(pk=ss_id)
+    form = SalaryScaleForm(instance=salary_scale)
+
+    if request.method == 'POST':
+        form = SalaryScaleForm(request.POST, instance=salary_scale)
+        if form.is_valid():
+            form.save()
+            return redirect('add-salary-scale')
+
+    context = {'form':form,'salary_scales':salary_scales,'salary_scale_count':salary_scale_count,'salary_scale':salary_scale}
+    return render(request, 'setup/add_salary_scale.html', context)
+
 
 ########### DYNAMIC CHOICE VIEWS ################
 

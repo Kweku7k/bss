@@ -665,6 +665,7 @@ def get_bank_branches(request, bank_name):
         bank = Bank.objects.get(bank_short_name=bank_name)  # Find bank by name
         branches = BankBranch.objects.filter(bank_code=bank)  # Get branches associated with this bank
         branch_data = [{"branch_name": branch.branch_name} for branch in branches]
+        print("Branch Data", branch_data)
         return JsonResponse({"branches": branch_data})
     except Bank.DoesNotExist:
         return JsonResponse({"branches": []}, status=404)
@@ -675,9 +676,32 @@ def get_departments(request, sch_name):
         school_faculty = School_Faculty.objects.get(sch_fac_name=sch_name)  
         departments = Department.objects.filter(sch_fac=school_faculty) # Get departments associated with this school/faculty
         department_data = [{"dept_long_name": dept.dept_long_name} for dept in departments]
+        print("Department Data", department_data)
         return JsonResponse({"departments": department_data})
     except School_Faculty.DoesNotExist:
         return JsonResponse({"departments": []}, status=404)
+    
+
+def get_units_by_directorate(request, directorate_name):
+    try:
+        directorate = Directorate.objects.get(direct_name=directorate_name)
+        units = Unit.objects.filter(directorate=directorate)
+        unit_data = [{"unit_name": unit.unit_name} for unit in units]
+        print(unit_data)
+        return JsonResponse({"units": unit_data})
+    except Directorate.DoesNotExist:
+        return JsonResponse({"units": []}, status=404)
+    
+def get_units_by_department(request, dept_name):
+    try:
+        department = Department.objects.get(dept_long_name=dept_name)
+        units = Unit.objects.filter(department=department)
+        unit_data = [{"unit_name": unit.unit_name} for unit in units]
+        return JsonResponse({"units": unit_data})
+    except Department.DoesNotExist:
+        return JsonResponse({"units": []}, status=404)
+
+
     
     
 @login_required
@@ -688,7 +712,6 @@ def company_info(request,staffno):
     staff = Employee.objects.get(pk=staffno)
     staffcategory = StaffCategory.objects.all()
     contract = Contract.objects.all()
-    # company_info_count = company_infos.count()
     campus = Campus.objects.all()
     school_faculty = School_Faculty.objects.all()
     directorate = Directorate.objects.all()
@@ -696,6 +719,8 @@ def company_info(request,staffno):
     bankbranches = BankBranch.objects.all()
     departments = Department.objects.all()
     jobtitle = JobTitle.objects.all()
+    units = Unit.objects.all()
+    salary_scales = SalaryScale.objects.all()
     
     
     if request.method == 'POST':
@@ -739,6 +764,8 @@ def company_info(request,staffno):
         'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
         'departments':departments,
         'jobtitle':jobtitle,
+        'units':units,
+        'salary_scales':salary_scales,
     }
     return render(request,'hr/company_info.html',context)
 
@@ -758,6 +785,7 @@ def edit_company_info(request,staffno):
     bankbranches = BankBranch.objects.all()
     departments = Department.objects.all()
     jobtitle = JobTitle.objects.all()
+    salary_scales = SalaryScale.objects.all()
 
     
     if request.method == 'POST':
@@ -802,6 +830,7 @@ def edit_company_info(request,staffno):
                'bank_list': bank_list,
                 'bank_branches': bankbranches,
                 'jobtitle':jobtitle,
+                'salary_scales':salary_scales,
             }
 
     return render(request, 'hr/company_info.html', context)

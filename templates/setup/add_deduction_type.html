@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Deduction Type</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="name" class="col-form-label">Deduction Type</label>
+                        <input type="text" name="name" class="form-control" {% if deduction %} value="{{ deduction.name }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-deduction-type' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4">
+            <div class="card-header text-center">
+                <h5><strong>Deduction Count: {{ deduction_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if deduction_types %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Deduction Type</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for dt in deduction_types %}
+                    <tr>
+                        <td>{{ dt.name }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-deduction-type' dt.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-deduction-type' dt.id %}" onclick="return confirm('Do you really want to delete the data for {{ dt.name }}?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5 class="pt-2">No Deduction Type Available.</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

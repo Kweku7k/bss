@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Unit</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="directorate" class="col-form-label">Directorate</label>
+                        <select name="directorate" class="form-control"> 
+                          <option selected="true" value="" disabled="disabled">--Select--</option>
+                          {% if directorates %}
+                                {% for dir in directorates %}
+                                    <option value="{{ dir.id }}" {% if unit.directorate_id == dir.id %} selected {% endif %}>{{ dir.direct_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="department" class="col-form-label">Department</label>
+                        <select name="department" class="form-control"> 
+                          <option selected="true" value="" disabled="disabled">--Select--</option>
+                          {% if departments %}
+                                {% for dept in departments %}
+                                    <option value="{{ dept.id }}" {% if unit.department_id == dept.id %} selected {% endif %}>{{ dept.dept_long_name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                      </select>
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="unit_name" class="col-form-label">Unit Name</label>
+                        <input type="text" name="unit_name" class="form-control" {% if unit %} value="{{ unit.unit_name }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="unit_short_name" class="col-form-label">Unit Short Name</label>
+                        <textarea name="unit_short_name" class="form-control">{% if unit %} {{ unit.unit_short_name }} {% endif %}</textarea>
+                    </div>
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-unit' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-lg">
+            <div class="card-header text-center">
+                <h5><strong>Number of Unit: {{ unit_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if units %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Directorate</th>
+                        <th>Department</th>
+                        <th>Unit Name</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for unit in units %}
+                    <tr>
+                        <td>{{ unit.directorate }}</td>
+                        <td>{{ unit.department }}</td>
+                        <td>{{ unit.unit_name }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-unit' unit.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-unit' unit.id %}" onclick="return confirm('Do you really want to delete the data for {{ unit.unit_name }}?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add More Unit</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
