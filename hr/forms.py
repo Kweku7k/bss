@@ -141,3 +141,23 @@ class PromotionHistoryForm(ModelForm):
         model = PromotionHistory
         fields = '__all__'
         exclude = ['updated', 'created']
+        
+        
+class StaffIncomeForm(ModelForm):
+    class Meta:
+        model = StaffIncome
+        fields = '__all__'
+        exclude = ['updated', 'created']
+        
+        
+class StaffDeductionForm(ModelForm):
+    class Meta:
+        model = StaffDeduction
+        fields = '__all__'
+        exclude = ['updated', 'created']
+        
+class PayrollForm(ModelForm):
+    class Meta:
+        model = Payroll
+        fields = '__all__'
+        exclude = ['updated', 'created']

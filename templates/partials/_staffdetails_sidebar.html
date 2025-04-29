@@ -74,6 +74,20 @@
           </li>
 
           <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'create-staff-income' staff.staffno %}">
+              <i class="bi bi-circle"></i>
+              <span>Staff Income</span>
+            </a>
+          </li>
+
+          {% comment %} <li class="nav-item">
+            <a class="nav-link collapsed" href="{% url 'payroll-details' staff.staffno %}">
+              <i class="bi bi-circle"></i>
+              <span>Staff Deduction</span>
+            </a>
+          </li> {% endcomment %}
+
+          <li class="nav-item">
             <a class="nav-link collapsed" href="{% url 'staff-settings' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Advance Settings</span>

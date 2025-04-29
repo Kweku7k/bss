@@ -2390,3 +2390,82 @@ def disapprove_user(request, user_id):
     messages.success(request, f"User {user.username} has been disapproved!")
     logger.info(f"User {user.username} has been disapproved by {request.user.username}.")
     return redirect('landing')
+
+
+
+@login_required
+@role_required(['superadmin'])
+def create_staff_income(request, staffno):
+    submitted = False
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_income_count = staff_incomes.count()
+    income_type = IncomeType.objects.all()
+    
+    if request.method == 'POST':
+        form = StaffIncomeForm(request.POST)
+        if form.is_valid():
+            # print all form data
+            print(form.cleaned_data)
+            amount = form.cleaned_data.get('amount')
+            percentage_of_basic = form.cleaned_data.get('percentage_of_basic')
+            
+            staff_income = form.save(commit=False)
+                
+            if amount and percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic, not both.")
+                return redirect('create-staff-income', staffno)
+            elif not amount and not percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic.")
+                return redirect('create-staff-income', staffno)
+            else:
+                staff_income.staffno = staff
+                staff_income.save()
+                print("Saving Income:", staff_income)
+                messages.success(request, "Staff income added successfully.")
+                return redirect('create-staff-income', staffno)
+        else:
+            print("Form Errors:", form.errors) 
+    else:
+        form = StaffIncomeForm()
+        if 'submitted' in request.GET:
+            submitted = True
+    context = {'form':form,'staff_incomes':staff_incomes,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_type':income_type}
+    return render(request, 'hr/staff_income.html', context)
+
+
+def edit_staff_income(request, staffno, income_id):
+    submitted = False
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_income = StaffIncome.objects.get(pk=income_id)
+    staff_income_count = staff_incomes.count()
+    income_type = IncomeType.objects.all()
+
+    
+    if request.methods == 'POST':
+        form = StaffIncomeForm(request.POST, instance=staff_income)
+        if form.is_valid():
+            amount = form.cleaned_data.get('amount')
+            percentage_of_basic = form.cleaned_data.get('percentage_of_basic')
+            
+            if amount and percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic, not both.")
+                return redirect('create-staff-income', staffno)
+            elif not amount and not percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic.")
+                return redirect('create-staff-income', staffno)
+            else:
+                form.save()
+                messages.success(request, "Staff income updated successfully.")
+                return redirect('create-staff-income', staffno)
+    else:
+        form = StaffIncomeForm(instance=staff_income)
+        if 'submitted' in request.GET:
+            submitted = True
+    
+    context = {'form':form,'staff_incomes':staff_incomes,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_type':income_type}
+    
+    return render(request, 'hr/staff_income.html', context)

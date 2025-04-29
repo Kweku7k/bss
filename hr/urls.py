@@ -121,9 +121,17 @@ urlpatterns = [
     path('groups/<int:group_id>/assign-permissions/', views.assign_permissions_to_group, name='assign-permissions'),
     path('assign_user_group/', views.assign_user_to_group, name='assign-user-group'),
     path('manage_users/', views.manage_users, name='manage-users'),
-    
 
 
     path('user/approve/<int:user_id>/', views.approve_user, name='approve-user'),
-    path('user/disapprove/<int:user_id>/', views.disapprove_user, name='disapprove-user')
+    path('user/disapprove/<int:user_id>/', views.disapprove_user, name='disapprove-user'),
+    
+    path('create_staff_income/<str:staffno>', views.create_staff_income, name='create-staff-income'),
+    path('edit_staff_income/<str:staffno>/<int:income_id>', views.edit_staff_income, name='edit-staff-income'),
+    # path('delete_staff_income/<str:staffno>/<int:income_id>', views.delete_staff_income, name='delete-staff-income'),
+
+    # path('create_staff_deduction/<str:staffno>', views.create_staff_deduction, name='create-staff-deduction'),
+    # path('edit_staff_deduction/<str:staffno>/<int:deduction_id>', views.edit_staff_deduction, name='edit-staff-deduction'),
+    # path('delete_staff_deduction/<str:staffno>/<int:deduction_id>', views.delete_staff_deduction, name='delete-staff-deduction'),
+
 ]
