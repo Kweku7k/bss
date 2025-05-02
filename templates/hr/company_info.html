@@ -86,9 +86,11 @@
                                 <label for="active_status" class="form-label">Employee Status</label>
                                 <select id="active_status" name="active_status" class="form-select" required>
                                     <option value="" disabled selected>N/A</option>
-                                    {% for key, value in STAFFSTATUS %}
-                                    <option value="{{ key }}" {% if key == company_info.active_status %} selected {% endif %}>{{ value }}</option>
-                                    {% endfor %}
+                                    {% if STAFFSTATUS %}
+                                        {% for key, value in STAFFSTATUS %}
+                                        <option value="{{ key }}" {% if key == company_info.active_status %} selected {% endif %}>{{ value }}</option>
+                                        {% endfor %}
+                                    {% endif %}
                                 </select>
                             </div>
                             <div class="col-md-4">
@@ -138,8 +140,8 @@
                                 <select id="dept_unit" name="dept_unit" class="form-select">
                                     <option value="" disabled selected>N/A</option>
                                     {% if units %}
-                                        {% for unit in units %}
-                                            <option value="{{ unit }}" {% if unit.unit_name == company_info.dept_unit %} selected {% endif %}> {{ unit }} </option>
+                                        {% for uni in units %}
+                                            <option value="{{ uni }}" {% if uni.unit_name == company_info.dept_unit %} selected {% endif %}> {{ uni }} </option>
                                         {% endfor %}
                                     {% endif %}
                                 </select>
@@ -196,9 +198,11 @@
                                 <label for="pte" class="form-label">Salary Scale</label>
                                 <select id="pte" name="pte" class="form-select">
                                     <option value="" disabled selected>Select a Salary Scale</option>
-                                    {% for ss in salary_scales %}
-                                    <option value="{{ ss }}" {% if ss.name == company_info.pte %} selected {% endif %}>{{ ss }}</option>
-                                    {% endfor %}
+                                    {% if salary_scales %}
+                                        {% for ss in salary_scales %}
+                                        <option value="{{ ss }}" {% if ss.name == company_info.pte %} selected {% endif %}>{{ ss }}</option>
+                                        {% endfor %}
+                                    {% endif %}
                                 </select>
                             </div>
 
@@ -206,9 +210,9 @@
                                 <label for="cost_center" class="form-label">Cost Center</label>
                                 <select id="cost_center" name="cost_center" class="form-select" >
                                     <option value="" selected>Select</option>
-                                    {% if departments %} 
-                                        {% for dt in departments %}
-                                            <option value="{{ dt }}" {% if dt.dept_long_name == company_info.cost_center %} selected {% endif %} > {{ dt }} </option>
+                                    {% if COSTCENTERS %} 
+                                        {% for key, value in COSTCENTERS %}
+                                            <option value="{{ key }}" {% if key == company_info.pte %} selected {% endif %}>{{ value }}</option>
                                         {% endfor %}
                                     {% endif %}
                                 </select>

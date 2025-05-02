@@ -130,8 +130,8 @@ urlpatterns = [
     path('edit_staff_income/<str:staffno>/<int:income_id>', views.edit_staff_income, name='edit-staff-income'),
     # path('delete_staff_income/<str:staffno>/<int:income_id>', views.delete_staff_income, name='delete-staff-income'),
 
-    # path('create_staff_deduction/<str:staffno>', views.create_staff_deduction, name='create-staff-deduction'),
-    # path('edit_staff_deduction/<str:staffno>/<int:deduction_id>', views.edit_staff_deduction, name='edit-staff-deduction'),
+    path('create_staff_deduction/<str:staffno>', views.create_staff_deduction, name='create-staff-deduction'),
+    path('edit_staff_deduction/<str:staffno>/<int:deduction_id>', views.edit_staff_deduction, name='edit-staff-deduction'),
     # path('delete_staff_deduction/<str:staffno>/<int:deduction_id>', views.delete_staff_deduction, name='delete-staff-deduction'),
 
 ]

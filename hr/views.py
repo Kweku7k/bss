@@ -1,3 +1,5 @@
+from decimal import Decimal
+import json
 from math import e
 import pprint
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
@@ -766,6 +768,7 @@ def company_info(request,staffno):
         'jobtitle':jobtitle,
         'units':units,
         'salary_scales':salary_scales,
+        'COSTCENTERS': departments.values_list('dept_long_name', 'dept_long_name').union(directorate.values_list('direct_name', 'direct_name')),
     }
     return render(request,'hr/company_info.html',context)
 
@@ -785,8 +788,8 @@ def edit_company_info(request,staffno):
     bankbranches = BankBranch.objects.all()
     departments = Department.objects.all()
     jobtitle = JobTitle.objects.all()
+    units = Unit.objects.all()
     salary_scales = SalaryScale.objects.all()
-
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
@@ -831,6 +834,8 @@ def edit_company_info(request,staffno):
                 'bank_branches': bankbranches,
                 'jobtitle':jobtitle,
                 'salary_scales':salary_scales,
+                'units':units,
+                'COSTCENTERS': departments.values_list('dept_long_name', 'dept_long_name').union(directorate.values_list('direct_name', 'direct_name')),
             }
 
     return render(request, 'hr/company_info.html', context)
@@ -994,8 +999,7 @@ def bulk_upload(request):
                                 }
                             )
                             
-                            # print(f"Employee: {employee}")
-                            print(f"Created")
+                            print(f"Uploading data for {employee.fname} {employee.lname} {employee.staffno} ")
                             
                             # If employee already exists, add to duplicates and skip
                             if not created:
@@ -1045,6 +1049,21 @@ def bulk_upload(request):
                             dept_long_instance = None
                             if dept_long_name:
                                 dept_long_instance, created = Department.objects.get_or_create(dept_long_name=dept_long_name, sch_fac=sch_fac_instance)
+                                
+                            
+                            # Handle Department Unit instance
+                            unit_name = row.get('dept_unit')
+                            dept_unit_instance = None
+                            if unit_name:
+                                dept_unit_instance, created = Unit.objects.get_or_create(unit_name=unit_name, department=dept_long_instance)
+                            
+                            
+                            # Handle Directorate Unit instance
+                            unit_name = row.get('directorate_unit')
+                            direct_unit_instance = None
+                            if unit_name:
+                                direct_unit_instance, created = Unit.objects.get_or_create(unit_name=unit_name, directorate=direct_instance)
+                            
                             
                             print("Starting Company Info")
                             # Process CompanyInformation data if present in CSV
@@ -1066,6 +1085,8 @@ def bulk_upload(request):
                                     'sch_fac_dir': sch_fac_instance,
                                     'directorate': direct_instance,
                                     'dept': dept_long_instance,
+                                    'dept_unit': dept_unit_instance,
+                                    'directorate_unit': direct_unit_instance,
                                     'salary': row.get('salary', ''),
                                     'cost_center': dept_long_instance,
                                     'bank_name': bank_instance,
@@ -1075,6 +1096,7 @@ def bulk_upload(request):
                                     'pf_con': row.get('pf_con', ''),
                                 }
                             )
+                            print("Company Info Done for ", company_info.staffno)
                             # print(f"Company Information: {company_info}")
                             success_count += 1
                         except Exception as row_error:
@@ -2238,16 +2260,6 @@ def disapprove_promotion(request, promotion_id):
     return redirect('landing')
 
 
-# payroll information from company info model 
-@login_required
-@role_required(['superadmin'])
-def payroll_details(request, staffno):
-    staff = Employee.objects.get(pk=staffno)
-    company_info = CompanyInformation.objects.get(staffno=staff)
-    context = {'staff':staff,'company_info':company_info,}
-    return render(request, 'hr/payrol.html', context)
-
-
 @login_required
 @role_required(['superadmin'])
 def staff_settings(request, staffno):
@@ -2393,6 +2405,7 @@ def disapprove_user(request, user_id):
 
 
 
+############ STAFF INCOME #############
 @login_required
 @role_required(['superadmin'])
 def create_staff_income(request, staffno):
@@ -2401,18 +2414,15 @@ def create_staff_income(request, staffno):
     company_info = CompanyInformation.objects.get(staffno=staff)
     staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('-start_month')
     staff_income_count = staff_incomes.count()
-    income_type = IncomeType.objects.all()
+    income_types = IncomeType.objects.all()
     
     if request.method == 'POST':
         form = StaffIncomeForm(request.POST)
         if form.is_valid():
-            # print all form data
-            print(form.cleaned_data)
             amount = form.cleaned_data.get('amount')
             percentage_of_basic = form.cleaned_data.get('percentage_of_basic')
-            
-            staff_income = form.save(commit=False)
-                
+            print("Cleaned Data", form.cleaned_data)
+                            
             if amount and percentage_of_basic:
                 messages.error(request, "Please provide either amount or percentage on basic, not both.")
                 return redirect('create-staff-income', staffno)
@@ -2420,9 +2430,7 @@ def create_staff_income(request, staffno):
                 messages.error(request, "Please provide either amount or percentage on basic.")
                 return redirect('create-staff-income', staffno)
             else:
-                staff_income.staffno = staff
-                staff_income.save()
-                print("Saving Income:", staff_income)
+                form.save()
                 messages.success(request, "Staff income added successfully.")
                 return redirect('create-staff-income', staffno)
         else:
@@ -2431,7 +2439,7 @@ def create_staff_income(request, staffno):
         form = StaffIncomeForm()
         if 'submitted' in request.GET:
             submitted = True
-    context = {'form':form,'staff_incomes':staff_incomes,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_type':income_type}
+    context = {'form':form,'staff_incomes':staff_incomes,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_types':income_types}
     return render(request, 'hr/staff_income.html', context)
 
 
@@ -2442,7 +2450,7 @@ def edit_staff_income(request, staffno, income_id):
     staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('-start_month')
     staff_income = StaffIncome.objects.get(pk=income_id)
     staff_income_count = staff_incomes.count()
-    income_type = IncomeType.objects.all()
+    income_types = IncomeType.objects.all()
 
     
     if request.methods == 'POST':
@@ -2466,6 +2474,206 @@ def edit_staff_income(request, staffno, income_id):
         if 'submitted' in request.GET:
             submitted = True
     
-    context = {'form':form,'staff_incomes':staff_incomes,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_type':income_type}
+    context = {'form':form,'staff_incomes':staff_incomes,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_types':income_types}
     
     return render(request, 'hr/staff_income.html', context)
+
+
+
+############ STAFF DEDUCTIONS #############
+@login_required
+@role_required(['superadmin'])
+def create_staff_deduction(request, staffno):
+    submitted = False
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    staff_deductions = StaffDeduction.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_deduction_count = staff_deductions.count()
+    deduction_types = DeductionType.objects.all()
+    
+    if request.method == 'POST':
+        form = StaffDeductionForm(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data.get('amount')
+            percentage_of_basic = form.cleaned_data.get('percentage_of_basic')
+            print("Cleaned Data", form.cleaned_data)
+                            
+            if amount and percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic, not both.")
+                return redirect('create-staff-deduction', staffno)
+            elif not amount and not percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic.")
+                return redirect('create-staff-deduction', staffno)
+            else:
+                form.save()
+                messages.success(request, "Staff deductions added successfully.")
+                return redirect('create-staff-deduction', staffno)
+        else:
+            print("Form Errors:", form.errors) 
+    else:
+        form = StaffDeductionForm()
+        if 'submitted' in request.GET:
+            submitted = True
+    context = {'form':form,'staff_deductions':staff_deductions,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_deduction_count':staff_deduction_count, 'deduction_types':deduction_types}
+    return render(request, 'hr/staff_deductions.html', context)
+
+
+@login_required
+@role_required(['superadmin'])
+def edit_staff_deduction(request, staffno, deduction_id):
+    submitted = False
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    staff_deductions = StaffDeduction.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_deduction = StaffDeduction.objects.get(pk=deduction_id)
+    staff_deduction_count = staff_deductions.count()
+    deduction_types = DeductionType.objects.all()
+    
+    if request.methods == 'POST':
+        form = StaffDeductionForm(request.POST, instance=staff_deduction)
+        if form.is_valid():
+            amount = form.cleaned_data.get('amount')
+            percentage_of_basic = form.cleaned_data.get('percentage_of_basic')
+            
+            if amount and percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic, not both.")
+                return redirect('create-staff-deduction', staffno)
+            elif not amount and not percentage_of_basic:
+                messages.error(request, "Please provide either amount or percentage on basic.")
+                return redirect('create-staff-deduction', staffno)
+            else:
+                form.save()
+                messages.success(request, "Staff deduction updated successfully.")
+                return redirect('create-staff-deduction', staffno)
+    else:
+        form = StaffDeductionForm(instance=staff_deduction)
+        if 'submitted' in request.GET:
+            submitted = True
+    
+    context = {'form':form,'staff_deductions':staff_deductions,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_deduction_count':staff_deduction_count, 'deduction_types':deduction_types}
+    
+    return render(request, 'hr/staff_deductions.html', context)
+
+
+
+
+########## GENERATE PAYROLL INFORMATION ###############
+
+
+
+
+# payroll information from company info model 
+# @login_required
+# @role_required(['superadmin'])
+# def payroll_details(request, staffno):
+#     staff = Employee.objects.get(pk=staffno)
+#     company_info = CompanyInformation.objects.get(staffno=staff)
+#     context = {'staff':staff,'company_info':company_info,}
+#     return render(request, 'hr/payrol.html', context)
+
+
+
+
+@login_required
+@role_required(['superadmin'])
+def generate_payroll(staff, current_month):
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    basic_salary = company_info.salary
+
+    # Convert current_month string (e.g., "2025-04") into a date object
+    current_month_date = date.fromisoformat(current_month + "-01")
+
+    incomes = StaffIncome.objects.filter(
+        staff=staff,
+        start_month__lte=current_month_date,
+        end_month__gte=current_month_date
+    )
+
+    deductions = StaffDeduction.objects.filter(
+        staff=staff,
+        start_month__lte=current_month_date,
+        end_month__gte=current_month_date
+    )
+
+    total_income = 0
+    for income in incomes:
+        if income.amount:
+            total_income += income.amount
+        elif income.percentage_of_basic:
+            total_income += (income.percentage_of_basic / 100) * basic_salary
+
+    total_deduction = 0
+    for deduction in deductions:
+        if deduction.amount:
+            total_deduction += deduction.amount
+        elif deduction.percentage_of_basic:
+            total_deduction += (deduction.percentage_of_basic / 100) * basic_salary
+
+    gross_salary = basic_salary + total_income
+    net_salary = gross_salary - total_deduction
+
+    Payroll.objects.create(
+        staff=staff,
+        month=current_month_date,
+        gross_salary=gross_salary,
+        total_income=total_income,
+        total_deduction=total_deduction,
+        net_salary=net_salary,
+        cost_center=staff.cost_center
+    )
+
+
+
+@login_required
+@role_required(['superadmin'])
+def payroll_details(request, staffno):
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+
+    selected_month = request.GET.get("month")  # format: "2025-04"
+    payroll_data = {}
+
+    if selected_month:
+        current_month_date = date.fromisoformat(selected_month + "-01")
+        
+        basic_salary = Decimal(company_info.salary)
+
+        incomes = StaffIncome.objects.filter(
+            staffno=staff,
+            start_month__year__lte=current_month_date.year,
+            start_month__month__lte=current_month_date.month,
+            end_month__year__gte=current_month_date.year,
+            end_month__month__gte=current_month_date.month,
+        )
+
+        deductions = StaffDeduction.objects.filter(
+            staffno=staff,
+            start_month__year__lte=current_month_date.year,
+            start_month__month__lte=current_month_date.month,
+            end_month__year__gte=current_month_date.year,
+            end_month__month__gte=current_month_date.month,
+        )
+
+        total_income = sum(i.amount if i.amount else (i.percentage_of_basic / 100) * basic_salary for i in incomes)
+        total_deduction = sum(d.amount if d.amount else (d.percentage_of_basic / 100) * basic_salary for d in deductions)
+
+        gross_salary = basic_salary + total_income
+        net_salary = gross_salary - total_deduction
+
+        payroll_data = {
+            "month": selected_month,
+            "basic_salary": basic_salary,
+            "total_income": total_income,
+            "total_deduction": total_deduction,
+            "gross_salary": gross_salary,
+            "net_salary": net_salary,
+            "incomes": incomes,
+            "deductions": deductions
+        }
+
+    context = {
+        'staff': staff,
+        'company_info': company_info,
+        'payroll_data': payroll_data,
+    }
+    return render(request, 'hr/payrol.html', context)

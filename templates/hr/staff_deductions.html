@@ -29,7 +29,7 @@
                 <div class="card-body">
 
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <h5 class="my-3 text-primary"><strong>Income for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        <h5 class="my-3 text-primary"><strong>Deductions for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
                         
                         {% if staff.staff_pix %}
                             <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
@@ -38,32 +38,32 @@
                         {% endif %}
                     </div>
                  
-                    <h5><b>Staff Income {{staff_income_count}}</b></h5>
+                    <h5><b>Staff Deductions {{staff_deduction_count}}</b></h5>
 
                     <!-- Check if there are any leave transactions -->
-                    {% if staff_incomes %}
+                    {% if staff_deductions %}
                         <table class="table table-striped mb-5">
                             <thead>
                                 <tr>
-                                    <th>Income Type</th>
+                                    <th>Deduction Type</th>
                                     <th>Amount/Percentage (Ghc)</th>
                                     <th>Start Month</th>
                                     <th>End Month</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for si in staff_incomes %}
+                                {% for sd in staff_deductions %}
                                 <tr>
-                                    <td>{{ si.income_type }}</td>
+                                    <td>{{ sd.deduction_type }}</td>
                                     <td>
-                                        {% if si.amount %}
-                                            {{ si.amount }}
-                                        {% elif si.percentage_of_basic %}
-                                            {{ si.percentage_of_basic }}%
+                                        {% if sd.amount %}
+                                            {{ sd.amount }}
+                                        {% elif sd.percentage_of_basic %}
+                                            {{ sd.percentage_of_basic }}%
                                         {% endif %}
                                     </td>
-                                    <td>{{ si.start_month }}</td>
-                                    <td>{{ si.end_month }}</td>
+                                    <td>{{ sd.start_month }}</td>
+                                    <td>{{ sd.end_month }}</td>
                                     <td class="text-end">
                                         {% comment %} <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a> {% endcomment %}
                                     </td>
@@ -72,12 +72,12 @@
                             </tbody>
                         </table>
                     {% else %}
-                        <p>No income for this staff.</p>
+                        <p>No Deduction for this staff.</p>
                     {% endif %}
 
 
                     <!-- Leave Request Form -->
-                    <h5><b>Add Staff Income</b></h5>
+                    <h5><b>Add Staff Deductions</b></h5>
                     <form action="" method="POST" enctype="multipart/form-data"> 
                         {% csrf_token %}
                         <div class="row g-3 mb-4">
@@ -85,33 +85,33 @@
                             <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
                             <div class="col-md-4">
-                                <label class="form-label" for="income_type">Income Type</label>
-                                <select name="income_type" class="form-select" required>
+                                <label class="form-label" for="deduction_type">Deduction Type</label>
+                                <select name="deduction_type" class="form-select" required>
                                     <option selected="true" value="" disabled>-----Select------</option>
-                                    {% for it in income_types %}
-                                        <option value="{{ it }}" {% if it == staff_income.income_type %}selected{% endif %}>{{ it }}</option>
+                                    {% for dt in deduction_types %}
+                                        <option value="{{ dt }}" {% if dt == staff_deduction.deduction_type %}selected{% endif %}>{{ dt }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                     
                             <div class="col-md-4">
                                 <label for="amount" class="form-label">Amount (Ghc)</label>
-                                <input type="number" class="form-control" name="amount" {% if staff_income %} value="{{ staff_income.amount }}" {% endif %}>
+                                <input type="number" class="form-control" name="amount" {% if staff_deduction %} value="{{ staff_deduction.amount }}" {% endif %}>
                             </div>
 
                             <div class="col-md-4">
                                 <label for="percentage_of_basic" class="form-label">Percentrage on Basic(%)</label>
-                                <input type="number" class="form-control" name="percentage_of_basic" {% if staff_income %} value="{{ staff_income.percentage_of_basic }}" {% endif %}>
+                                <input type="number" class="form-control" name="percentage_of_basic" {% if staff_deduction %} value="{{ staff_deduction.percentage_of_basic }}" {% endif %}>
                             </div>
 
                             <div class="col-md-2">
                                 <label for="start_month" class="form-label">Start Month</label>
-                                <input type="date" class="form-control" name="start_month" {% if staff_income %} value="{{ staff_income.start_month|date:"Y-m-d" }}" {% endif %} required>
+                                <input type="date" class="form-control" name="start_month" {% if staff_deduction %} value="{{ staff_deduction.start_month|date:"Y-m-d" }}" {% endif %} required>
                             </div>
                             
                             <div class="col-md-2">
                                 <label for="end_month" class="form-label">End Month</label>
-                                <input type="date" class="form-control" name="end_month" {% if staff_income %} value="{{ staff_income.end_month|date:"Y-m-d" }}" {% endif %} required>
+                                <input type="date" class="form-control" name="end_month" {% if staff_deduction %} value="{{ staff_deduction.end_month|date:"Y-m-d" }}" {% endif %} required>
                             </div>
                   
                         </div>
