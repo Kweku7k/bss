@@ -785,13 +785,16 @@ def add_income_type(request):
         form = IncomeTypeForm(request.POST)
         if form.is_valid():
             income = form.cleaned_data.get('name')
+            is_taxable = form.cleaned_data.get('taxable')
             
             # Check if the income type already exists
             if IncomeType.objects.filter(name=income).exists():
                 messages.error(request, f'Income type {income} already exists.')
                 return redirect('add-income-type')
             else:
-                form.save()
+                income_type = form.save(commit=False)  
+                income_type.is_taxable = is_taxable
+                income_type.save()
                 return HttpResponseRedirect('income_type?submitted=True')
     else:
         form = IncomeTypeForm
@@ -916,6 +919,109 @@ def edit_salary_scale(request, ss_id):
     context = {'form':form,'salary_scales':salary_scales,'salary_scale_count':salary_scale_count,'salary_scale':salary_scale}
     return render(request, 'setup/add_salary_scale.html', context)
 
+
+
+########## TAX BAND ##############
+def add_tax_band(request):
+    submitted = False
+    tax_bands = TaxBand.objects.order_by('-id')
+    tax_band_count = tax_bands.count()
+    if request.method == 'POST':
+        form = TaxBandForm(request.POST)
+        if form.is_valid():
+            
+            lower_limit = form.cleaned_data.get('lower_limit')
+            upper_limit = form.cleaned_data.get('upper_limit')
+
+            # Check for overlap
+            overlap_exists = TaxBand.objects.filter(lower_limit__lt=upper_limit,upper_limit__gt=lower_limit).exists()
+            
+            if overlap_exists:
+                messages.error(request, 'Tax band overlaps with an existing tax band.')
+                return redirect('add-tax-band')
+            elif TaxBand.objects.filter(lower_limit=lower_limit, upper_limit=upper_limit ).exists():
+                messages.error(request, f'Tax band for {lower_limit} - {upper_limit} already exists.')
+                return redirect('add-tax-band')
+            else:
+                form.save()
+                return HttpResponseRedirect('tax_band?submitted=True')
+            
+        else:
+            print(form.errors)
+    else:
+        form = TaxBandForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    context = {'form':form,'submitted':submitted,'tax_bands':tax_bands,'tax_band_count':tax_band_count}
+    return render(request, 'setup/add_tax_band.html', context)
+
+
+def delete_tax_band(request, tb_id):
+    tax_band = TaxBand.objects.get(pk=tb_id)
+    if request.method == 'GET':
+       tax_band.delete()
+    return redirect('add-tax-band')
+
+
+def edit_tax_band(request, tb_id):
+    tax_bands = TaxBand.objects.order_by('-id')
+    tax_band_count = tax_bands.count()
+    tax_band = TaxBand.objects.get(pk=tb_id)
+
+    if request.method == 'POST':
+        form = TaxBandForm(request.POST, instance=tax_band)
+        if form.is_valid():
+            form.save()
+            return redirect('add-tax-band')
+
+    context = {'form':form,'tax_bands':tax_bands,'tax_band_count':tax_band_count,'tax_band':tax_band}
+    return render(request, 'setup/add_tax_band.html', context)
+
+
+
+########## ContributionRate ##############
+def add_contribution_rate(request):
+    submitted = False
+    contribution_rates = ContributionRate.objects.order_by('-id')
+    contribution_rate_count = contribution_rates.count()
+    contribution_type = ChoicesContribution.objects.all()
+    
+    
+    if request.method == 'POST':
+        form = ContributionRateForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect('contribution_rate?submitted=True')
+    else:
+        form = ContributionRateForm
+        if 'submitted' in request.GET:
+            submitted = True
+            
+            
+    context = {'form':form,'submitted':submitted,'contribution_rates':contribution_rates,'contribution_rate_count':contribution_rate_count,'contribution_type':contribution_type, 'contribution_type':contribution_type}
+    return render(request, 'setup/add_contribution_rate.html', context)
+    
+
+def delete_contribution(request, contrib_id):
+    contribution_rate = ContributionRate.objects.get(pk=contrib_id)
+    if request.method == 'GET':
+        contribution_rate.delete()
+    return redirect('add-contribution-rate')
+
+def edit_contribution(request, contrib_id):
+    contribution_rates = ContributionRate.objects.order_by('-id')
+    contribution_rate_count = contribution_rates.count()
+    contribution_rate = ContributionRate.objects.get(pk=contrib_id)
+    
+    if request.method == 'POST':
+        form = ContributionRateForm(request.POST, instance=contribution_rate)
+        if form.is_valid():
+            form.save()
+            return redirect('add-contribution-rate')
+        
+    context = {'form':form,'contribution_rates':contribution_rates,'contribution_rate_count':contribution_rate_count,'contribution_rate':contribution_rate}
+    return render(request, 'setup/add_contribution_rate.html', context)
 
 ########### DYNAMIC CHOICE VIEWS ################
 

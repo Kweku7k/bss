@@ -110,3 +110,17 @@ class SalaryScaleForm(ModelForm):
         model = SalaryScale
         fields = '__all__'
         exclude = ['updated','created']
+        
+        
+class ContributionRateForm(ModelForm):
+    class Meta:
+        model = ContributionRate
+        fields = '__all__'
+        exclude = ['updated','created']
+        
+        
+class TaxBandForm(ModelForm):
+    class Meta:
+        model = TaxBand
+        fields = '__all__'
+        exclude = ['updated','created']

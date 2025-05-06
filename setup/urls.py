@@ -75,6 +75,16 @@ urlpatterns = [
     path('deduction_type', views.add_deduction_type, name="add-deduction-type"),
     path('edit_deduction_type/<int:dt_id>', views.edit_deduction_type, name="edit-deduction-type"),
     path('delete_deduction_type/<int:dt_id>', views.delete_deduction_type, name="delete-deduction-type"),
+        
+    path('contribution_rate', views.add_contribution_rate, name="add-contribution-rate"),
+    path('edit_contribution/<int:contrib_id>', views.edit_contribution, name="edit-contribution"),
+    path('delete_contribution/<int:contrib_id>', views.delete_contribution, name="delete-contribution"),
+    
+    # Tax Band
+    path('tax_band', views.add_tax_band, name="add-tax-band"),
+    path('edit_tax_band/<int:tb_id>', views.edit_tax_band, name="edit-tax-band"),
+    path('delete_tax_band/<int:tb_id>', views.delete_tax_band, name="delete-tax-band"),
+    
     
     path('choices_hpq/', views.generic_model_crud, {'model_class': ChoicesHPQ, 'model_name': 'Professional Qualifications', 'template_name': 'setup/generic.html'}, name='choices-hpq'),
     path('choices_region/', views.generic_model_crud, {'model_class': ChoicesRegion, 'model_name': 'Region', 'template_name': 'setup/generic.html'}, name='choices-region'),
@@ -91,4 +101,6 @@ urlpatterns = [
     path('choices_staff_status', views.generic_model_crud, {'model_class': ChoicesStaffStatus, 'model_name': 'Staff Status', 'template_name': 'setup/generic.html'}, name='choices-staff-status'),
     path('choices_medical_treatment', views.generic_model_crud, {'model_class': ChoicesMedicalTreatment, 'model_name': 'Nature of Treatment', 'template_name': 'setup/generic.html'}, name='choices-medical-treatment'),
     path('choices_medical_payment_type', views.generic_model_crud, {'model_class': ChoicesMedicalType, 'model_name': 'Medical Payment Type', 'template_name': 'setup/generic.html'}, name='choices-medical-payment-type'),
+    path('choices_contribution', views.generic_model_crud, {'model_class': ChoicesContribution, 'model_name': 'Contribution', 'template_name': 'setup/generic.html'}, name='choices-contribution'),
+    
 ]

@@ -1,3 +1,4 @@
+from decimal import Decimal
 from venv import logger
 from django.db import models # type: ignore
 from datetime import datetime, timezone
@@ -87,13 +88,14 @@ class CompanyInformation(models.Model):
     dept_unit = models.CharField('Department Unit', max_length=100, blank=True, null=True)
     directorate = models.CharField('Directorate',max_length=100,blank=True,null=True)
     directorate_unit = models.CharField('Directorate Unit',max_length=100,blank=True,null=True)
-    salary = models.CharField('Salary',max_length=50,blank=True,null=True)
+    salary = models.CharField('Basic Salary',max_length=50,blank=True,null=True)
+    basic_entitled_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
     cost_center = models.CharField('Cost Center',max_length=100,blank=True,null=True)
     bank_name = models.CharField('Bank Name',max_length=100,blank=True,null=True)
     accno = models.CharField('Account Number',max_length=50,blank=True,null=True)
     bank_branch = models.CharField('Bank Branch',max_length=100,blank=True,null=True)
-    ssn_con = models.CharField('SSN Contributor',max_length=10,blank=True,null=True)
-    pf_con = models.CharField('PF Contributor',max_length=10,blank=True,null=True)
+    ssn_con = models.BooleanField(default=False)
+    pf_con = models.BooleanField(default=False)
     
     pte = models.CharField('Point of Entry', max_length=100, blank=True, null=True)
     probation = models.DateField('Probation Period', max_length=100, blank=True, null=True)
@@ -197,6 +199,9 @@ class ChoicesMedicalTreatment(models.Model):
     name = models.CharField(max_length=100, unique=True)
     
 class ChoicesMedicalType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    
+class ChoicesContribution(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
 class ProfessionalBody(models.Model):
@@ -473,6 +478,8 @@ class StaffIncome(models.Model):
     percentage_of_basic = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     start_month = models.DateField()
     end_month = models.DateField()
+    income_entitlement = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    income_description = models.TextField(max_length=300, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.income_type} - {self.staffno}"
@@ -493,11 +500,85 @@ class StaffDeduction(models.Model):
 class Payroll(models.Model):
     staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE)
     month = models.DateField()
-    gross_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    basic_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total_income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    gross_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    income_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    other_deductions = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ssf = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    pf_employee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    pf_employer = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total_deduction = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     net_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     cost_center = models.CharField('Cost Center', max_length=100, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.staffno} - {self.month}"
+    
+    # def get_settings(self):
+    #     return ContributionRate.objects.latest('created')
+
+    # def get_tax_bands(self):
+    #     return TaxBand.objects.all().order_by('lower_limit')
+
+    # def get_gross_income(self):
+    #     company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
+    #     basic_salary = Decimal(company_info.salary) if company_info else Decimal("0.00")
+    #     selected_month = self.month
+
+    #     incomes = StaffIncome.objects.filter(staffno=self.staffno,start_month__year__lte=selected_month.year,start_month__month__lte=selected_month.month,end_month__year__gte=selected_month.year,end_month__month__gte=selected_month.month,)
+
+    #     total_income = Decimal("0.00")
+    #     for i in incomes:
+    #         if i.amount:
+    #             total_income += Decimal(i.amount)
+    #         elif i.percentage_of_basic:
+    #             total_income += (Decimal(i.percentage_of_basic) / 100) * basic_salary
+
+    #     return total_income + basic_salary
+
+    # def get_ssnit_contribution(self):
+    #     company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
+    #     if not company_info:
+    #         return Decimal("0.00")
+    #     settings = self.get_settings()
+    #     return round(Decimal(company_info.salary) * Decimal(settings.employee_ssnit_rate) / 100, 2)
+
+    # def get_pf_contribution(self):
+    #     company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
+    #     if not company_info:
+    #         return Decimal("0.00")
+    #     settings = self.get_settings()
+    #     return round(Decimal(company_info.salary) * Decimal(settings.employee_pf_rate) / 100, 2)
+
+    # def get_taxable_income(self):
+    #     return self.get_gross_income() - self.get_ssnit_contribution()
+
+    # def get_income_tax(self):
+    #     taxable = float(self.get_taxable_income())
+    #     tax = 0
+    #     for band in self.get_tax_bands():
+    #         if taxable <= band.lower_limit:
+    #             continue
+    #         lower = float(band.lower_limit)
+    #         upper = float(band.upper_limit) if band.upper_limit else taxable
+    #         rate = float(band.rate)
+            
+    #         band_range = min(taxable, upper) - lower
+    #         if band_range > 0:
+    #             tax += band_range * rate
+    #     return round(tax, 2)
+
+    # def get_total_deductions(self):
+    #     selected_month = self.month
+    #     deductions = StaffDeduction.objects.filter(staffno=self.staffno,start_month__year__lte=selected_month.year,start_month__month__lte=selected_month.month,end_month__year__gte=selected_month.year,end_month__month__gte=selected_month.month, )
+    #     total_other_deductions = sum([Decimal(d.amount) for d in deductions])
+    #     return sum([
+    #         self.get_ssnit_contribution(),
+    #         self.get_pf_contribution(),
+    #         Decimal(self.get_income_tax()),
+    #         total_other_deductions
+    #     ])
+
+    # def get_net_salary(self):
+    #     return round(self.get_gross_income() - self.get_total_deductions(), 2)

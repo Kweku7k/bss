@@ -1,0 +1,46 @@
+{% load static %}
+{% include "partials/_newsidebar.html" %}
+{% include "partials/_newtopnav.html" %}
+
+<!-- Begin Page Content -->
+<div class="container-fluid">
+
+    <!-- Toast for success or error messages -->
+   {% if messages %}
+   <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      {% for message in messages %}
+         <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+            <div class="toast-header text-white bg-{{ message.tags }}">
+               <strong class="me-auto">{{ message.tags|title }}</strong>
+               <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-white">
+               {{ message }}
+            </div>
+         </div>
+      {% endfor %}
+   </div>
+{% endif %}
+
+{% block content %}
+
+{% endblock  %}
+
+{% include "partials/_newfooter.html" %}
+</div>
+<!-- /.container-fluid -->
+
+
+<script>
+   // Wait until the DOM is fully loaded
+   document.addEventListener('DOMContentLoaded', function () {
+      // Loop through and show all the toasts for each message
+      {% for message in messages %}
+         const toastEl{{ forloop.counter }} = document.getElementById('toast{{ forloop.counter }}');
+         if (toastEl{{ forloop.counter }}) {
+            const toast{{ forloop.counter }} = new bootstrap.Toast(toastEl{{ forloop.counter }});
+            toast{{ forloop.counter }}.show();
+         }
+      {% endfor %}
+   });
+</script>

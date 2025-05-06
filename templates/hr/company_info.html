@@ -98,10 +98,9 @@
                                 <input type="date" class="form-control" id="doa" name="doa" value="{{ company_info.doa|date:'Y-m-d' }}" required>
                             </div>
                             <div class="col-md-4">
-                                <label for="doe" class="form-label">Date of Expiration
-                                    <span id="duration" class="text-danger"></span>
-                                </label>
+                                <label for="doe" class="form-label">Date of Expiration</label>
                                 <input type="date" class="form-control" id="doe" name="doe" value="{{ company_info.doe|date:'Y-m-d' }}" required>
+                                <span id="duration" class="text-danger"></span>
                             </div>
                             <div class="col-md-4">
                                 <label for="renewal" class="form-label">Confirmation Date</label>
@@ -194,6 +193,13 @@
                                 <label for="salary" class="form-label">Basic Salary</label>
                                 <input type="text" class="form-control" id="salary" name="salary" value="{{ company_info.salary }}">
                             </div>
+
+                            <div class="col-md-4">
+                                <label for="basic_entitled_percentage" class="form-label">Basic Entitlements (%)</label>
+                                <input type="number" class="form-control" name="basic_entitled_percentage" max="100" min="0"step="0.01"value="{{ company_info.basic_entitled_percentage }}">
+                            </div>
+                            
+
                             <div class="col-md-4">
                                 <label for="pte" class="form-label">Salary Scale</label>
                                 <select id="pte" name="pte" class="form-select">
@@ -258,11 +264,11 @@
                             
                             <div class="col-md-4">
                                 <label for="ssn_con" class="form-check-label">SSN Contribution</label>
-                                <input type="checkbox" class="form-check-input" role="switch" id="ssn_con" name="ssn_con" value="yes" {% if company_info.ssn_con %} checked {% endif %}>
+                                <input type="checkbox" class="form-check-input" role="switch" id="ssn_con" name="ssn_con" value="TRUE" {% if company_info.ssn_con %} checked {% endif %}>
                             </div>
                             <div class="col-md-4">
                                 <label for="pf_con" class="form-check-label">Provident Fund Contribution</label>
-                                <input type="checkbox" class="form-check-input" id="pf_con" name="pf_con" value="yes" {% if company_info.pf_con %} checked {% endif %}>
+                                <input type="checkbox" class="form-check-input" id="pf_con" name="pf_con" value="TRUE" {% if company_info.pf_con %} checked {% endif %}>
                             </div>
                             
                         </div> 
@@ -469,6 +475,14 @@
             }
         });
     });
+
+    document.querySelector('input[name="basic_entitled_percentage"]').addEventListener('input', function () {
+        if (parseFloat(this.value) > 100) {
+            alert("Percentage cannot exceed 100.");
+            this.value = 100;
+        }
+    });
+        
 
 </script>
 

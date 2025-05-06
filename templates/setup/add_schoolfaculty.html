@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "newdash.html" %}
 {% load static %}
 
 {% block content %}
@@ -39,8 +39,8 @@
                     <tr>
                         <td>{{ sch.sch_fac_name }}</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-school' sch.id %}"></a>
-                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-school' sch.id %}" onclick="return confirm('Do you really want to delete the data for {{ sch.sch_fac_name }}?');"></a>
+                            <a class="btn btn-sm btn-info" href="{% url 'edit-school' sch.id %}"><i class="fas fa-fw fa-pen"></i></a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'delete-school' sch.id %}" onclick="return confirm('Do you really want to delete the data for {{ sch.sch_fac_name }}?');"><i class="fas fa-fw fa-trash"></i></a>
                         </td>
                     </tr>
                     {% endfor %}

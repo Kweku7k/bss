@@ -128,6 +128,8 @@ class AcademicYear(models.Model):
     
 class IncomeType(models.Model):
     name = models.CharField(max_length=100, blank=False,null=False)
+    taxable = models.BooleanField(default=False)
+    tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -138,9 +140,27 @@ class DeductionType(models.Model):
     def __str__(self):
         return self.name
 
-
-
 class SalaryScale(models.Model):
     name = models.CharField(max_length=100, blank=False,null=False)
     def __str__(self):
         return self.name
+    
+    
+class ContributionRate(models.Model):
+    employee_ssnit_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, blank=True, null=True)
+    employer_ssnit_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, blank=True, null=True)
+    employee_pf_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, blank=True, null=True)
+    employer_pf_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.created.strftime("%Y-%m-%d")
+    
+    
+class TaxBand(models.Model):
+    lower_limit = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    upper_limit = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    rate = models.DecimalField(max_digits=5, decimal_places=2, help_text="e.g. 17.5% = 0.175")
+
+    def __str__(self):
+        return f"{self.lower_limit} - {self.upper_limit} @ {self.rate * 100:.1f}%"

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "newdash.html" %}
 {% load static %}
 
 {% block content %}
@@ -57,8 +57,8 @@
                         <td>{{ bankbranch.branch_name }}</td>
                         <td>{{ bankbranch.branch_location }}</td>
                         <td>
-                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-bankbranch' bankbranch.id bankbranch.bank_code_id %}"></a>
-                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-bankbranch' bankbranch.id %}" onclick="return confirm('Do you really want to delete the data for {{ bankbranch.bank_code }}: {{ bankbranch.branch_name }}?');"></a>
+                            <a class="btn btn-sm btn-info" href="{% url 'edit-bankbranch' bankbranch.id bankbranch.bank_code_id %}"><i class="fas fa-fw fa-pen"></i></a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'delete-bankbranch' bankbranch.id %}" onclick="return confirm('Do you really want to delete the data for {{ bankbranch.bank_code }}: {{ bankbranch.branch_name }}?');"><i class="fas fa-fw fa-trash"></i></a>
                         </td>
                     </tr>
                     {% endfor %}

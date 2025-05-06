@@ -133,5 +133,9 @@ urlpatterns = [
     path('create_staff_deduction/<str:staffno>', views.create_staff_deduction, name='create-staff-deduction'),
     path('edit_staff_deduction/<str:staffno>/<int:deduction_id>', views.edit_staff_deduction, name='edit-staff-deduction'),
     # path('delete_staff_deduction/<str:staffno>/<int:deduction_id>', views.delete_staff_deduction, name='delete-staff-deduction'),
+    
+    
+    
+    path('new_dash/', views.new_landing, name='new-dash'),
 
 ]

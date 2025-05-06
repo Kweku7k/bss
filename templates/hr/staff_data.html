@@ -1,5 +1,7 @@
 {% load static %} 
-{% include "partials/_topnav.html" %} 
+{% include "partials/_staffdetails_newsidebar.html" %} 
+{% include "partials/_newtopnav.html" %} 
+
 
 
   {% if messages %}
@@ -19,19 +21,21 @@
   {% endif %}
 
   <div class="row">
-    <div class="col-md-3 mt-5">
-      {% include "partials/_staffdetails_sidebar.html" %} 
-    </div>
+    {% comment %} <div class="col-md-3 mt-5">
+      {% include "partials/_staffdetails_newsidebar.html" %} 
+    </div> {% endcomment %}
   
-    <div class="col-md-8">
+    <div class="col-md-12">
       <div class="card pt-3 mt-5 p-4" style="background-color: white; border: none; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
-        <div class="card-header mb-4 d-flex justify-content-end align-items-center">
+        <div class=" mb-4 d-flex justify-content-end align-items-center">
           <img src="/static/img/Central-Uni-logo.png" alt="Logo" style="width: 200px; height: auto; object-fit: contain;">
         </div>
         <div class="card-body">
-          <div class="row mb-3">
+          <div>
             <h5 class="mb-3">Detailed Overview of <b> {{ staff.title }} {{ staff.fname }} {{ staff.lname }} {{ staff.middlenames }}</b></h5>
-
+          </div>
+          
+          <div class="row mb-3">
             <!-- Staff details -->
             <div class="col-md-6 mb-3">
               <strong>Staff Number:</strong>

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "newdash.html" %}
 {% load static %}
 
 {% block content %}
@@ -71,8 +71,8 @@
                         <td>{{ unit.department }}</td>
                         <td>{{ unit.unit_name }}</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-unit' unit.id %}"></a>
-                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-unit' unit.id %}" onclick="return confirm('Do you really want to delete the data for {{ unit.unit_name }}?');"></a>
+                            <a class="btn btn-sm btn-info" href="{% url 'edit-unit' unit.id %}"><i class="fas fa-fw fa-pen"></i></a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'delete-unit' unit.id %}" onclick="return confirm('Do you really want to delete the data for {{ unit.unit_name }}?');"><i class="fas fa-fw fa-trash"></i></a>
                         </td>
                     </tr>
                     {% endfor %}

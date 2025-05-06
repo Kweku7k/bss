@@ -1,0 +1,88 @@
+{% extends "newdash.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Tax Band</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="lower_limit" class="col-form-label">Lower Limit (Ghc)</label>
+                        <input type="text" name="lower_limit" class="form-control" {% if tax_band %} value="{{ tax_band.lower_limit }}" {% else %} value="" {% endif %} required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="upper_limit" class="col-form-label">Upper Limit (Ghc)</label>
+                        <input type="text" name="upper_limit" class="form-control" {% if tax_band %} value="{{ tax_band.upper_limit }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rate" class="col-form-label">Rate (%)</label>
+                        <input type="number" name="rate" class="form-control" max="100" min="0" step="0.01" value="{{ tax_band.rate|default:'' }}" required>
+                    </div>
+            
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-tax-band' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4">
+            <div class="card-header text-center">
+                <h5><strong>Tax Band Count: {{ tax_band_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if tax_bands %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Lower Limit (Ghc)</th>
+                        <th>Upper Limit (Ghc)</th>
+                        <th>Rate (%)</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for tb in tax_bands %}
+                    <tr>
+                        <td>{{ tb.lower_limit }}</td>
+                        <td>{{ tb.upper_limit }}</td>
+                        <td>{{ tb.rate }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info" href="{% url 'edit-tax-band' tb.id %}"><i class="fas fa-fw fa-pen"></i></a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'delete-tax-band' tb.id %}" onclick="return confirm('Do you really want to delete the data for {{ tb.lower_limit }} - {{ tb.upper_limit }}?');"><i class="fas fa-fw fa-trash"></i></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5 class="pt-2">No Tax Band Available.</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<script>
+    function clampInput(selector) {
+        document.querySelector(selector).addEventListener('input', function () {
+            let val = parseFloat(this.value);
+            if (val > 100) {
+                alert("Value cannot exceed 100.");
+                this.value = 100;
+            } else if (val < 0) {
+                this.value = 0;
+            }
+        });
+    }
+    
+    clampInput('input[name="rate"]');
+</script>
+    

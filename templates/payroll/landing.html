@@ -1,0 +1,153 @@
+{% extends "newdash.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+    .main-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+    
+    .main-cards a {
+      text-decoration: none;
+    }
+    
+    .dashboard-item {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      color: #000;
+      margin: 0;
+      box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+      margin-bottom: 2vh;
+    }
+    
+    .dashboard-item-text {
+      margin: 0;
+      color: #000;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    
+    .dashboard-item-smalltext {
+      font-size: 16px;
+    }
+  </style>
+
+  
+<section class="section">
+    <div class="row">
+      <div class="col-lg-12 col-12">
+          <div class="main-cards">
+            <a href="{% url 'add-school'%}">
+              <div class="dashboard-item">
+                  <h6 class="text-black dashboard-item-smalltext">School & Faculty</h6>
+                  <div class="d-flex align-items-center">
+                      <div class="card-icon rounded-circle">
+                          <i class="bi bi-person"></i>
+                      </div>
+                      <div class="ps-3">
+                          <h4 class="dashboard-item-text">{{ sch_fac_count }}</h4>
+                      </div>
+                  </div>
+              </div>
+            </a>
+            <a href="{% url 'add-dept' %}">
+              <div class="dashboard-item">
+                  <h6 class="text-black dashboard-item-smalltext">Department</h6>
+                  <div class="d-flex align-items-center">
+                      <div class="card-icon rounded-circle">
+                          <i class="bi bi-person"></i>
+                      </div>
+                      <div class="ps-3">
+                          <h4 class="dashboard-item-text">{{ dept_count }}</h4>
+                      </div>
+                  </div>
+              </div>
+            </a>
+            <a href="{% url 'add-directorate'%}">
+              <div class="dashboard-item">
+                  <h6 class="dashboard-item-smalltext text-black">Directorate</h6>
+                  <div class="d-flex align-items-center">
+                      <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                          <i class="bi bi-person"></i>
+                      </div>
+                      <div class="ps-3">
+                          <h4 class="dashboard-item-text">{{ directorate_count }}</h4>
+                      </div>
+                  </div>
+              </div>
+            </a>
+            <a href="{% url 'add-unit'%}">
+                <div class="dashboard-item">
+                    <h6 class="dashboard-item-smalltext text-black">Unit</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h4 class="dashboard-item-text">{{ unit_count }}</h4>
+                        </div>
+                    </div>
+                </div>
+              </a>
+              <a href="{% url 'add-staffcategory'%}">
+                <div class="dashboard-item">
+                    <h6 class="dashboard-item-smalltext text-black">Staff Category</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h4 class="dashboard-item-text">{{ staff_category }}</h4>
+                        </div>
+                    </div>
+                </div>
+              </a>
+              <a href="{% url 'add-bank'%}">
+                <div class="dashboard-item">
+                    <h6 class="dashboard-item-smalltext text-black">Bank</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h4 class="dashboard-item-text">{{ bank_count }}</h4>
+                        </div>
+                    </div>
+                </div>
+              </a>
+              <a href="{% url 'add-bankbranch'%}">
+                <div class="dashboard-item">
+                    <h6 class="dashboard-item-smalltext text-black">Bank Branch</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h4 class="dashboard-item-text">{{ bank_branch_count }}</h4>
+                        </div>
+                    </div>
+                </div>
+              </a>
+                <a href="{% url 'add-tax-band'%}">
+                    <div class="dashboard-item">
+                        <h6 class="dashboard-item-smalltext text-black">Tax Band</h6>
+                        <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="bi bi-person"></i>
+                            </div>
+                            <div class="ps-3">
+                                <h4 class="dashboard-item-text">{{ tax_band_count }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+          </div>    
+      </div>
+  </div>
+</section>
+
+{% endblock  %}

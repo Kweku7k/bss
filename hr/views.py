@@ -4,7 +4,9 @@ from math import e
 import pprint
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse # type: ignore
+from django.urls import reverse
+
+from hr.payroll_helper import PayrollCalculator # type: ignore
 from .models import *
 from django.contrib.auth.models import Group, User, Permission
 from setup.models import *
@@ -730,9 +732,13 @@ def company_info(request,staffno):
         # print(form)
         print("form has been recieved")
         if form.is_valid(): 
+            ssn_con = form.cleaned_data.get('ssn_con')
+            pf_con = form.cleaned_data.get('pf_con')
             print("form was submitted successfully")
             company_info = form.save(commit=False)
             company_info.staffno = staff 
+            company_info.ssn_con = ssn_con
+            company_info.pf_con = pf_con
             company_info.save()
             staff_number = staff.pk  
             url = reverse('emp-relation', kwargs={'staffno': str(staff_number)})
@@ -2629,14 +2635,12 @@ def generate_payroll(staff, current_month):
 def payroll_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
-
     selected_month = request.GET.get("month")  # format: "2025-04"
     payroll_data = {}
 
     if selected_month:
-        current_month_date = date.fromisoformat(selected_month + "-01")
-        
-        basic_salary = Decimal(company_info.salary)
+        current_month_date = date.fromisoformat(selected_month)
+        payroll = PayrollCalculator(staffno=staff, month=current_month_date)
 
         incomes = StaffIncome.objects.filter(
             staffno=staff,
@@ -2645,7 +2649,7 @@ def payroll_details(request, staffno):
             end_month__year__gte=current_month_date.year,
             end_month__month__gte=current_month_date.month,
         )
-
+        
         deductions = StaffDeduction.objects.filter(
             staffno=staff,
             start_month__year__lte=current_month_date.year,
@@ -2654,21 +2658,21 @@ def payroll_details(request, staffno):
             end_month__month__gte=current_month_date.month,
         )
 
-        total_income = sum(i.amount if i.amount else (i.percentage_of_basic / 100) * basic_salary for i in incomes)
-        total_deduction = sum(d.amount if d.amount else (d.percentage_of_basic / 100) * basic_salary for d in deductions)
-
-        gross_salary = basic_salary + total_income
-        net_salary = gross_salary - total_deduction
-
         payroll_data = {
-            "month": selected_month,
-            "basic_salary": basic_salary,
-            "total_income": total_income,
-            "total_deduction": total_deduction,
-            "gross_salary": gross_salary,
-            "net_salary": net_salary,
+            "month": current_month_date.strftime("%B %Y"),
+            "basic_salary": company_info.salary,
+            "total_income": payroll.get_gross_income() - Decimal(company_info.salary),
+            "gross_salary": payroll.get_gross_income(),
+            "pf_employee": payroll.get_pf_contribution(),
+            "income_tax": payroll.get_income_tax(),
+            "total_deduction": payroll.get_total_deductions(),
+            "net_salary": payroll.get_net_salary(),
+            "taxable_income": payroll.get_taxable_income(),
             "incomes": incomes,
-            "deductions": deductions
+            "deductions": deductions,
+            "ssf_employee": payroll.get_ssnit_contribution(),
+            "employer_ssf": payroll.get_employer_ssnit_contribution(),
+            "employer_pf": payroll.get_employer_pf_contribution(),
         }
 
     context = {
@@ -2677,3 +2681,27 @@ def payroll_details(request, staffno):
         'payroll_data': payroll_data,
     }
     return render(request, 'hr/payrol.html', context)
+
+
+def new_landing(request):
+    sch_fac_count = School_Faculty.objects.all().count()
+    dept_count = Department.objects.all().count()
+    directorate_count = Directorate.objects.all().count()
+    unit_count = Unit.objects.all().count()
+    staff_category = StaffCategory.objects.all().count()
+    bank_count = Bank.objects.all().count()
+    bank_branch_count = BankBranch.objects.all().count()
+    tax_band_count = TaxBand.objects.all().count()
+    
+    
+    context = {
+        "sch_fac_count":sch_fac_count,
+        "dept_count":dept_count,
+        "directorate_count":directorate_count,
+        "unit_count":unit_count,    
+        "staff_category":staff_category,
+        "bank_count":bank_count,
+        "bank_branch_count":bank_branch_count,
+        "tax_band_count":tax_band_count,
+    }
+    return render(request, 'payroll/landing.html', context)
