@@ -43,11 +43,11 @@
                         <tr>
                             <td>{{ record.name }}</td>
                             <td class="text-end">
-                                <a class="btn btn-sm btn-info bi-pencil-square" href="?edit_id={{ record.id }}"></a>
+                                <a class="btn btn-sm btn-info" href="?edit_id={{ record.id }}"><i class="fas fa-fw fa-pen"></i></a>
                                 <form method="POST" action="" style="display:inline;" onsubmit="return confirm('Do you really want to delete the data for {{ record.name }}?');">
                                     {% csrf_token %}
                                     <input type="hidden" name="delete_id" value="{{ record.id }}">
-                                    <button type="submit" class="btn btn-sm btn-danger bi-trash text-end"></button>
+                                    <button type="submit" class="btn btn-sm btn-danger text-end"><i class="fas fa-fw fa-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
