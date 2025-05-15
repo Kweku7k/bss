@@ -1,6 +1,6 @@
 {% load static %} 
-{% include "partials/_staffdetails_newsidebar.html" %} 
-{% include "partials/_newtopnav.html" %} 
+{% comment %} {% include "partials/_staffdetails_sidebar.html" %}  {% endcomment %}
+{% include "partials/_topnav.html" %} 
 
 
 
@@ -21,11 +21,11 @@
   {% endif %}
 
   <div class="row">
-    {% comment %} <div class="col-md-3 mt-5">
-      {% include "partials/_staffdetails_newsidebar.html" %} 
-    </div> {% endcomment %}
+    <div class="col-md-3 mt-5">
+      {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
   
-    <div class="col-md-12">
+    <div class="col-md-9">
       <div class="card pt-3 mt-5 p-4" style="background-color: white; border: none; box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);">
         <div class=" mb-4 d-flex justify-content-end align-items-center">
           <img src="/static/img/Central-Uni-logo.png" alt="Logo" style="width: 200px; height: auto; object-fit: contain;">

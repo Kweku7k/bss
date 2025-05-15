@@ -1,5 +1,6 @@
+{% extends "base.html" %} 
 {% load static %}
-{% include "partials/_newsidebar.html" %}
+{% comment %} {% include "partials/_newsidebar.html" %} {% endcomment %}
 {% include "partials/_newtopnav.html" %}
 
 <!-- Begin Page Content -->
@@ -7,26 +8,26 @@
 
     <!-- Toast for success or error messages -->
    {% if messages %}
-   <div class="toast-container position-fixed bottom-0 end-0 p-3">
-      {% for message in messages %}
-         <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
-            <div class="toast-header text-white bg-{{ message.tags }}">
-               <strong class="me-auto">{{ message.tags|title }}</strong>
-               <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      <div class="toast-container position-fixed bottom-0 end-0 p-3">
+         {% for message in messages %}
+            <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+               <div class="toast-header text-white bg-{{ message.tags }}">
+                  <strong class="me-auto">{{ message.tags|title }}</strong>
+                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+               </div>
+               <div class="toast-body text-white">
+                  {{ message }}
+               </div>
             </div>
-            <div class="toast-body text-white">
-               {{ message }}
-            </div>
-         </div>
-      {% endfor %}
-   </div>
-{% endif %}
+         {% endfor %}
+      </div>
+   {% endif %}
 
 {% block content %}
 
 {% endblock  %}
 
-{% include "partials/_newfooter.html" %}
+{% include "partials/_footer.html" %}
 </div>
 <!-- /.container-fluid -->
 

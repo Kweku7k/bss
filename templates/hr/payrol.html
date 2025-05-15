@@ -1,5 +1,5 @@
-{% include "partials/_staffdetails_newsidebar.html" %}
-{% include "partials/_newtopnav.html" %} 
+{% comment %} {% include "partials/_staffdetails_sidebar.html" %} {% endcomment %}
+{% include "partials/_topnav.html" %} 
 {% load static %}
 
 {% if messages %}
@@ -18,7 +18,14 @@
 </div>
 {% endif %}
 
-<div class="container mt-3 py-5 ">
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
+
+    <div class="col-md-8 mt-3 py-5 ">
+
+{% comment %} <div class="container mt-3 py-5 "> {% endcomment %}
 
     <div class="card shadow border-0 mb-4 p-3">
         <div class="card-body">
