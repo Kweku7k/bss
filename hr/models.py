@@ -89,7 +89,7 @@ class CompanyInformation(models.Model):
     directorate = models.CharField('Directorate',max_length=100,blank=True,null=True)
     directorate_unit = models.CharField('Directorate Unit',max_length=100,blank=True,null=True)
     salary = models.CharField('Basic Salary',max_length=50,blank=True,null=True)
-    basic_entitled_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    basic_entitled_percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, default=100)
     cost_center = models.CharField('Cost Center',max_length=100,blank=True,null=True)
     bank_name = models.CharField('Bank Name',max_length=100,blank=True,null=True)
     accno = models.CharField('Account Number',max_length=50,blank=True,null=True)

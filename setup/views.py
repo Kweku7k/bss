@@ -924,27 +924,13 @@ def edit_salary_scale(request, ss_id):
 ########## TAX BAND ##############
 def add_tax_band(request):
     submitted = False
-    tax_bands = TaxBand.objects.order_by('-id')
+    tax_bands = TaxBand.objects.order_by('id')
     tax_band_count = tax_bands.count()
     if request.method == 'POST':
         form = TaxBandForm(request.POST)
         if form.is_valid():
-            
-            lower_limit = form.cleaned_data.get('lower_limit')
-            upper_limit = form.cleaned_data.get('upper_limit')
-
-            # Check for overlap
-            overlap_exists = TaxBand.objects.filter(lower_limit__lt=upper_limit,upper_limit__gt=lower_limit).exists()
-            
-            if overlap_exists:
-                messages.error(request, 'Tax band overlaps with an existing tax band.')
-                return redirect('add-tax-band')
-            elif TaxBand.objects.filter(lower_limit=lower_limit, upper_limit=upper_limit ).exists():
-                messages.error(request, f'Tax band for {lower_limit} - {upper_limit} already exists.')
-                return redirect('add-tax-band')
-            else:
-                form.save()
-                return HttpResponseRedirect('tax_band?submitted=True')
+            form.save()
+            return HttpResponseRedirect('tax_band?submitted=True')
             
         else:
             print(form.errors)
@@ -965,7 +951,8 @@ def delete_tax_band(request, tb_id):
 
 
 def edit_tax_band(request, tb_id):
-    tax_bands = TaxBand.objects.order_by('-id')
+    submitted = False
+    tax_bands = TaxBand.objects.order_by('id')
     tax_band_count = tax_bands.count()
     tax_band = TaxBand.objects.get(pk=tb_id)
 
@@ -974,8 +961,13 @@ def edit_tax_band(request, tb_id):
         if form.is_valid():
             form.save()
             return redirect('add-tax-band')
+        
+    else:
+        form = TaxBandForm(instance=tax_band)
+        if 'submitted' in request.GET:
+            submitted = True
 
-    context = {'form':form,'tax_bands':tax_bands,'tax_band_count':tax_band_count,'tax_band':tax_band}
+    context = {'form':form,'submitted':submitted,'tax_bands':tax_bands,'tax_band_count':tax_band_count,'tax_band':tax_band}
     return render(request, 'setup/add_tax_band.html', context)
 
 

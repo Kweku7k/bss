@@ -17,7 +17,7 @@
                             <option value="">---Select Bank---</option>
                             {% if banks %}
                                 {% for bank in banks %}
-                                    <option value="{{ bank.id }}" {% if bankbranch.bank_code_id == bank.id %} selected {% endif %}>{{ bank.bank_long_name }}</option>
+                                    <option value="{{ bank.id }}" {% if bankbranch.bank_code_id == bank.id %} selected {% endif %}>{{ bank.bank_short_name }}</option>
                                 {% endfor %}
                             {% endif %}
                         </select>

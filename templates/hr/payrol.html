@@ -160,6 +160,12 @@
                         <td class="text-end">{{ payroll_data.withholding_tax }}</td>
                     </tr>
                     {% endif %}
+                    {% if payroll_data.withholding_rent_tax %}
+                    <tr>
+                        <td>Withholding Rent Tax</td>
+                        <td class="text-end">{{ payroll_data.withholding_rent_tax }}</td>
+                    </tr>
+                    {% endif %}
                     {% for deduction in payroll_data.deductions %}
                     <tr>
                         <td>{{ deduction.deduction_type }}</td>

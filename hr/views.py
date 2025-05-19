@@ -2652,8 +2652,8 @@ def payroll_details(request, staffno):
 
         payroll_data = {
             "month": current_month_date.strftime("%B %Y"),
-            "basic_salary": company_info.salary,
-            "total_income": payroll.get_gross_income() - Decimal(company_info.salary),
+            "basic_salary": payroll.get_entitled_basic_salary(),
+            "total_income": payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
             "gross_salary": payroll.get_gross_income(),
             "pf_employee": payroll.get_pf_contribution(),
             "income_tax": payroll.get_income_tax(),
@@ -2666,6 +2666,7 @@ def payroll_details(request, staffno):
             "employer_ssf": payroll.get_employer_ssnit_contribution(),
             "employer_pf": payroll.get_employer_pf_contribution(),
             "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
+            "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"]
         }
 
     context = {

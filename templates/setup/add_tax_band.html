@@ -13,18 +13,13 @@
                     {% csrf_token %}
 
                     <div class="form-group">
-                        <label for="lower_limit" class="col-form-label">Lower Limit (Ghc)</label>
-                        <input type="text" name="lower_limit" class="form-control" {% if tax_band %} value="{{ tax_band.lower_limit }}" {% else %} value="" {% endif %} required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="upper_limit" class="col-form-label">Upper Limit (Ghc)</label>
+                        <label for="upper_limit" class="col-form-label">Amount (Ghc)</label>
                         <input type="text" name="upper_limit" class="form-control" {% if tax_band %} value="{{ tax_band.upper_limit }}" {% else %} value="" {% endif %} required>
                     </div>
                     
                     <div class="form-group">
                         <label for="rate" class="col-form-label">Rate (%)</label>
-                        <input type="number" name="rate" class="form-control" max="100" min="0" step="0.01" value="{{ tax_band.rate|default:'' }}" required>
+                        <input type="number" name="rate" class="form-control" max="100" min="0" step="0.01" {% if tax_band %} value="{{ tax_band.rate|default:'' }}" {% else %} value="" {% endif %} required>
                     </div>
             
                     <hr>
@@ -43,14 +38,12 @@
                 {% if tax_bands %}
                 <table class="table table-sm table-hover">
                     <tr>
-                        <th>Lower Limit (Ghc)</th>
-                        <th>Upper Limit (Ghc)</th>
+                        <th>Amount (Ghc)</th>
                         <th>Rate (%)</th>
                         <th class="text-end">Action</th>
                     </tr>
                     {% for tb in tax_bands %}
                     <tr>
-                        <td>{{ tb.lower_limit }}</td>
                         <td>{{ tb.upper_limit }}</td>
                         <td>{{ tb.rate }}</td>
                         <td class="text-end">
