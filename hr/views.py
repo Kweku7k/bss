@@ -2459,7 +2459,7 @@ def edit_staff_income(request, staffno, income_id):
     income_types = IncomeType.objects.all()
 
     
-    if request.methods == 'POST':
+    if request.method == 'POST':
         form = StaffIncomeForm(request.POST, instance=staff_income)
         if form.is_valid():
             amount = form.cleaned_data.get('amount')
@@ -2480,7 +2480,7 @@ def edit_staff_income(request, staffno, income_id):
         if 'submitted' in request.GET:
             submitted = True
     
-    context = {'form':form,'staff_incomes':staff_incomes,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_types':income_types}
+    context = {'form':form,'staff_incomes':staff_incomes,'staff_income':staff_income, 'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_types':income_types}
     
     return render(request, 'hr/staff_income.html', context)
 
@@ -2641,14 +2641,6 @@ def payroll_details(request, staffno):
     if selected_month:
         current_month_date = date.fromisoformat(selected_month)
         payroll = PayrollCalculator(staffno=staff, month=current_month_date)
-
-        incomes = StaffIncome.objects.filter(
-            staffno=staff,
-            start_month__year__lte=current_month_date.year,
-            start_month__month__lte=current_month_date.month,
-            end_month__year__gte=current_month_date.year,
-            end_month__month__gte=current_month_date.month,
-        )
         
         deductions = StaffDeduction.objects.filter(
             staffno=staff,
@@ -2668,11 +2660,12 @@ def payroll_details(request, staffno):
             "total_deduction": payroll.get_total_deductions(),
             "net_salary": payroll.get_net_salary(),
             "taxable_income": payroll.get_taxable_income(),
-            "incomes": incomes,
+            "incomes": payroll.get_allowance_values()["incomes"],
             "deductions": deductions,
             "ssf_employee": payroll.get_ssnit_contribution(),
             "employer_ssf": payroll.get_employer_ssnit_contribution(),
             "employer_pf": payroll.get_employer_pf_contribution(),
+            "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
         }
 
     context = {

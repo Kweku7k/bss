@@ -478,11 +478,11 @@ class StaffIncome(models.Model):
     percentage_of_basic = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     start_month = models.DateField()
     end_month = models.DateField()
-    income_entitlement = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    income_entitlement = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=100)
     income_description = models.TextField(max_length=300, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     def __str__(self):
-        return f"{self.income_type} - {self.staffno}"
+        return f"{self.income_type} {self.staffno} {self.amount} {self.percentage_of_basic} {self.income_entitlement}"
     
     
 class StaffDeduction(models.Model):

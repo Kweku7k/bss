@@ -66,7 +66,9 @@
                                     <td>{{ si.start_month }}</td>
                                     <td>{{ si.end_month }}</td>
                                     <td class="text-end">
-                                        {% comment %} <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-leave-transaction' transaction.id staff.staffno %}"></a> {% endcomment %}
+                                        <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staff-income' staff.staffno si.id %}"></a>
+                                        {% comment %} <a class="btn btn-sm btn-info" href="{% url 'edit-school' sch.id %}"><i class="fas fa-fw fa-pen"></i></a> {% endcomment %}
+
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -90,7 +92,7 @@
                                 <select name="income_type" class="form-control" required>
                                     <option selected="true" value="" disabled>-----Select------</option>
                                     {% for it in income_types %}
-                                        <option value="{{ it }}" {% if it == staff_income.income_type %}selected{% endif %}>{{ it }}</option>
+                                        <option value="{{ it.name }}" {% if it.name == staff_income.income_type %}selected{% endif %}>{{ it.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -117,7 +119,7 @@
 
                             <div class="col-md-4 mb-3">
                                 <label for="income_entitlement" class="form-label">Income Entitlement (%)</label>
-                                <input type="number" class="form-control" name="income_entitlement" {% if staff_income %} value="{{ staff_income.income_entitlement }}" {% endif %}>
+                                <input type="number" class="form-control" name="income_entitlement" {% if staff_income %} value="{{ staff_income.income_entitlement }}" {% else %} value="100" {% endif %}>
                             </div>
 
                             <div class="col-md-4 mb-3">
