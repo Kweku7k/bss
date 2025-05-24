@@ -22,13 +22,11 @@ class PayrollCalculator:
         company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
         basic_salary = Decimal(company_info.salary) if company_info else Decimal("0.00")
         entitled_basic_salary = Decimal(basic_salary * (company_info.basic_entitled_percentage / 100))
-        print("Etitled Basic Salary: ", entitled_basic_salary)
+        print("Entitled Basic Salary: ", entitled_basic_salary)
         return entitled_basic_salary
     
     
     def get_allowance_values(self):
-        # company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
-        # basic_salary = Decimal(company_info.salary) if company_info else Decimal("0.00")
         basic_salary = self.get_entitled_basic_salary()
         selected_month = self.month
 
@@ -140,8 +138,20 @@ class PayrollCalculator:
         company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
         if not company_info.pf_con:
             return Decimal("0.00")
+        
         settings = self.get_settings()
-        extimated_pf = self.get_entitled_basic_salary() * (Decimal(settings.employee_pf_rate) / 100)
+        basic_salary = self.get_entitled_basic_salary()
+        
+        rent_amount = Decimal("0.00")
+        income_list = self.get_allowance_values()["incomes"]
+        
+        for income in income_list:
+            if income["income_type"].lower() == "rent":
+                rent_amount += Decimal(income["entitled_amount"])                
+                break
+            
+        total_base = basic_salary + rent_amount
+        extimated_pf = total_base * (Decimal(settings.employee_pf_rate) / 100)
         print("PF Value: ", extimated_pf)
         return round(extimated_pf, 2)
     
@@ -156,7 +166,10 @@ class PayrollCalculator:
         return round(extimated_pf, 2)
 
     def get_taxable_income(self):
-        return self.get_gross_income() - self.get_ssnit_contribution()["amount"]
+        taxable_pay = self.get_gross_income() - self.get_ssnit_contribution()["amount"] - self.get_pf_contribution()
+        print("Taxable Pay: ", taxable_pay)
+        return taxable_pay
+        
 
     def get_income_tax(self):
         income = self.get_taxable_income()  
@@ -200,7 +213,7 @@ class PayrollCalculator:
     
     def calculate_tax(self, income):
         bands = TaxBand.objects.order_by("id")
-        remaining_income = round(Decimal(income), 1)
+        remaining_income = round(Decimal(income), 2)
         total_tax = Decimal("0.00")
 
         for band in bands:
@@ -212,7 +225,7 @@ class PayrollCalculator:
             print("Rate: ", rate)
             taxable_amount = min(remaining_income, amount)
             print("Taxable Amount: ", taxable_amount)
-            tax = round(taxable_amount * rate, 1)
+            tax = round(taxable_amount * rate, 2)
             print("Tax on taxable amount: ", tax)
             total_tax += tax
             remaining_income -= taxable_amount

@@ -13,7 +13,7 @@
                     {% csrf_token %}
 
                     <div class="form-group">
-                        <label for="upper_limit" class="col-form-label">Amount (Ghc)</label>
+                        <label for="upper_limit" class="col-form-label">Income(Ghc)</label>
                         <input type="text" name="upper_limit" class="form-control" {% if tax_band %} value="{{ tax_band.upper_limit }}" {% else %} value="" {% endif %} required>
                     </div>
                     
@@ -38,14 +38,16 @@
                 {% if tax_bands %}
                 <table class="table table-sm table-hover">
                     <tr>
-                        <th>Amount (Ghc)</th>
+                        <th>Income (Ghc)</th>
                         <th>Rate (%)</th>
+                        <th>Monthly Tax (Ghc)</th>
                         <th class="text-end">Action</th>
                     </tr>
                     {% for tb in tax_bands %}
                     <tr>
                         <td>{{ tb.upper_limit }}</td>
                         <td>{{ tb.rate }}</td>
+                        <td>{{ tb.lower_limit }}</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-info" href="{% url 'edit-tax-band' tb.id %}"><i class="fas fa-fw fa-pen"></i></a>
                             <a class="btn btn-sm btn-danger" href="{% url 'delete-tax-band' tb.id %}" onclick="return confirm('Do you really want to delete the data for {{ tb.lower_limit }} - {{ tb.upper_limit }}?');"><i class="fas fa-fw fa-trash"></i></a>

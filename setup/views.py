@@ -929,6 +929,10 @@ def add_tax_band(request):
     if request.method == 'POST':
         form = TaxBandForm(request.POST)
         if form.is_valid():
+            rate = form.cleaned_data.get('rate')
+            upper_limit = form.cleaned_data.get('upper_limit')
+            lower_limit = (rate / 100) * upper_limit
+            form.instance.lower_limit = lower_limit
             form.save()
             return HttpResponseRedirect('tax_band?submitted=True')
             
@@ -959,6 +963,10 @@ def edit_tax_band(request, tb_id):
     if request.method == 'POST':
         form = TaxBandForm(request.POST, instance=tax_band)
         if form.is_valid():
+            rate = form.cleaned_data.get('rate')
+            upper_limit = form.cleaned_data.get('upper_limit')
+            lower_limit = round((rate / 100) * upper_limit, 2)
+            form.instance.lower_limit = lower_limit
             form.save()
             return redirect('add-tax-band')
         

@@ -2668,6 +2668,7 @@ def payroll_details(request, staffno):
             "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
             "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"]
         }
+        messages.success(request, f"Payslip for {staff.fname} has been generated")        
 
     context = {
         'staff': staff,
@@ -2675,6 +2676,63 @@ def payroll_details(request, staffno):
         'payroll_data': payroll_data,
     }
     return render(request, 'hr/payrol.html', context)
+
+
+
+@login_required
+@role_required(['superadmin'])
+def payroll_processing(request):
+    selected_month = request.GET.get("month")  # format: "2025-04"
+    all_payrolls = []
+
+    if selected_month:
+        current_month_date = date.fromisoformat(selected_month)
+        staff_list = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
+
+        for staff in staff_list:
+            company_info = CompanyInformation.objects.filter(staffno=staff).first()
+            if not company_info:
+                continue  # skip if company info is missing
+
+            payroll = PayrollCalculator(staffno=staff, month=current_month_date)
+            deductions = StaffDeduction.objects.filter(
+                staffno=staff,
+                start_month__year__lte=current_month_date.year,
+                start_month__month__lte=current_month_date.month,
+                end_month__year__gte=current_month_date.year,
+                end_month__month__gte=current_month_date.month,
+            )
+
+            payroll_data = {
+                "staff": staff,
+                "company_info": company_info,
+                "month": current_month_date.strftime("%B %Y"),
+                "basic_salary": payroll.get_entitled_basic_salary(),
+                "total_income": payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
+                "gross_salary": payroll.get_gross_income(),
+                "pf_employee": payroll.get_pf_contribution(),
+                "income_tax": payroll.get_income_tax(),
+                "total_deduction": payroll.get_total_deductions(),
+                "net_salary": payroll.get_net_salary(),
+                "taxable_income": payroll.get_taxable_income(),
+                "incomes": payroll.get_allowance_values()["incomes"],
+                "deductions": deductions,
+                "ssf_employee": payroll.get_ssnit_contribution(),
+                "employer_ssf": payroll.get_employer_ssnit_contribution(),
+                "employer_pf": payroll.get_employer_pf_contribution(),
+                "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
+                "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"]
+            }
+
+            all_payrolls.append(payroll_data)
+            
+        messages.success(request, f"All Staff Payslips for {selected_month} has been generated succesfully")
+    context = {
+        "payrolls": all_payrolls,
+        "selected_month": selected_month
+    }
+
+    return render(request, "hr/payroll_processing.html", context)
 
 
 def new_landing(request):

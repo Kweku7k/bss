@@ -113,6 +113,7 @@ urlpatterns = [
     
     # payroll url
     path('payroll/<str:staffno>', views.payroll_details, name="payroll-details"),
+    path("payroll/processing/", views.payroll_processing, name="payroll-processing"),
     path('settings/<str:staffno>', views.staff_settings, name="staff-settings"),
     path('staff/<str:staffno>/mark-dormant/', views.mark_dormant, name='mark-dormant'),  
     
