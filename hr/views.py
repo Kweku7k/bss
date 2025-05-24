@@ -2431,6 +2431,8 @@ def create_staff_income(request, staffno):
                             
             if amount and percentage_of_basic:
                 messages.error(request, "Please provide either amount or percentage on basic, not both.")
+                messages.error(request, "Form is not valid. Please check the data.")
+                
                 return redirect('create-staff-income', staffno)
             elif not amount and not percentage_of_basic:
                 messages.error(request, "Please provide either amount or percentage on basic.")
@@ -2655,18 +2657,19 @@ def payroll_details(request, staffno):
             "basic_salary": payroll.get_entitled_basic_salary(),
             "total_income": payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
             "gross_salary": payroll.get_gross_income(),
-            "pf_employee": payroll.get_pf_contribution(),
             "income_tax": payroll.get_income_tax(),
             "total_deduction": payroll.get_total_deductions(),
             "net_salary": payroll.get_net_salary(),
             "taxable_income": payroll.get_taxable_income(),
             "incomes": payroll.get_allowance_values()["incomes"],
             "deductions": deductions,
+            "pf_employee": payroll.get_pf_contribution(),
             "ssf_employee": payroll.get_ssnit_contribution(),
             "employer_ssf": payroll.get_employer_ssnit_contribution(),
             "employer_pf": payroll.get_employer_pf_contribution(),
             "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
-            "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"]
+            "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"],
+            "benefits_in_kind": payroll.get_benefits_in_kind()["benefit_in_kind"],
         }
         messages.success(request, f"Payslip for {staff.fname} has been generated")        
 
@@ -2721,7 +2724,8 @@ def payroll_processing(request):
                 "employer_ssf": payroll.get_employer_ssnit_contribution(),
                 "employer_pf": payroll.get_employer_pf_contribution(),
                 "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
-                "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"]
+                "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"],
+                "benefits_in_kind": payroll.get_benefits_in_kind()["benefit_in_kind"],
             }
 
             all_payrolls.append(payroll_data)

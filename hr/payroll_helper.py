@@ -23,7 +23,7 @@ class PayrollCalculator:
         basic_salary = Decimal(company_info.salary) if company_info else Decimal("0.00")
         entitled_basic_salary = Decimal(basic_salary * (company_info.basic_entitled_percentage / 100))
         print("Entitled Basic Salary: ", entitled_basic_salary)
-        return entitled_basic_salary
+        return round(entitled_basic_salary, 2)
     
     
     def get_allowance_values(self):
@@ -42,10 +42,13 @@ class PayrollCalculator:
         total_entitled = Decimal("0.00")
 
         for income in incomes:
+            percentage_on_basic = Decimal("0.00")
+            
             if income.amount:
                 entitled = income.amount * (income.income_entitlement / 100)
             elif income.percentage_of_basic:
-                base_amount = (income.percentage_of_basic / 100) * basic_salary
+                percentage_on_basic = Decimal(income.percentage_of_basic)
+                base_amount = (percentage_on_basic / 100) * basic_salary
                 entitled = base_amount * (income.income_entitlement / 100)
             else:
                 entitled = Decimal("0.00")
@@ -53,6 +56,7 @@ class PayrollCalculator:
             entitlement_list.append({
                 "income_type": income.income_type,
                 "entitled_amount": round(entitled, 2),
+                "percentage_on_basic": percentage_on_basic,
             })
             
             total_entitled += entitled
@@ -137,9 +141,10 @@ class PayrollCalculator:
     def get_pf_contribution(self):
         company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
         if not company_info.pf_con:
-            return Decimal("0.00")
+            return {"amount": Decimal("0.00"), "rate": None}
         
         settings = self.get_settings()
+        rate = Decimal(settings.employee_pf_rate)
         basic_salary = self.get_entitled_basic_salary()
         
         rent_amount = Decimal("0.00")
@@ -151,9 +156,9 @@ class PayrollCalculator:
                 break
             
         total_base = basic_salary + rent_amount
-        extimated_pf = total_base * (Decimal(settings.employee_pf_rate) / 100)
+        extimated_pf = total_base * (rate / 100)
         print("PF Value: ", extimated_pf)
-        return round(extimated_pf, 2)
+        return {"amount": round(extimated_pf, 2), "rate": rate}
     
     
     def get_employer_pf_contribution(self):
@@ -165,10 +170,11 @@ class PayrollCalculator:
         print("Employer PF Value: ", extimated_pf)
         return round(extimated_pf, 2)
 
+
     def get_taxable_income(self):
-        taxable_pay = self.get_gross_income() - self.get_ssnit_contribution()["amount"] - self.get_pf_contribution()
+        taxable_pay = self.get_entitled_basic_salary() + self.get_miscellaneous_and_benefit_in_kind() - self.get_ssnit_contribution()["amount"] - self.get_pf_contribution()["amount"]
         print("Taxable Pay: ", taxable_pay)
-        return taxable_pay
+        return round(taxable_pay, 2)
         
 
     def get_income_tax(self):
@@ -203,7 +209,7 @@ class PayrollCalculator:
 
         
         print("Total Deductions: ", total_deduction)
-        sum_of_total_deduction = sum([self.get_ssnit_contribution()["amount"],self.get_tax_for_taxable_income()["total_tax"],self.get_pf_contribution(),Decimal(self.get_income_tax()["tax"]),total_deduction])
+        sum_of_total_deduction = sum([self.get_ssnit_contribution()["amount"],self.get_tax_for_taxable_income()["total_tax"],self.get_pf_contribution()["amount"],Decimal(self.get_income_tax()["tax"]),total_deduction])
         print("Sum of Total Deduction: ", sum_of_total_deduction)
         return round(sum_of_total_deduction, 2)
 
@@ -233,3 +239,52 @@ class PayrollCalculator:
             print("Total Tax: ", total_tax)
 
         return round(total_tax, 2)
+    
+    
+    
+    def get_benefits_in_kind(self):
+        income_list = self.get_allowance_values()["incomes"]
+        
+        benefit_rent_rate = Decimal("49.36")
+        benefit_fuel_rate = Decimal("13.97")
+        
+        rent_amount = Decimal("0.00")
+        fuel_amount = Decimal("0.00")
+        
+        for income in income_list:
+            income_type = income["income_type"].lower()
+            amount = Decimal(income["entitled_amount"])
+            
+            if income_type == "rent":
+                rent_amount += amount
+            elif income_type == "fuel":
+                fuel_amount += amount
+        
+        rent_bik = (rent_amount * benefit_rent_rate) / 100
+        fuel_bik = (fuel_amount * benefit_fuel_rate) / 100
+        total_bik = rent_bik + fuel_bik
+
+        benefit_in_kind_list = {
+            "rent_bik": round(rent_bik, 2),
+            "fuel_bik": round(fuel_bik, 2),
+            "total_bik": round(total_bik, 2)
+        }
+
+        print("Benefit in Kind:", benefit_in_kind_list)
+        return {"benefit_in_kind": benefit_in_kind_list}
+    
+    
+    def get_miscellaneous_and_benefit_in_kind(self):
+        income_list = self.get_allowance_values()["incomes"]
+        benefit_in_kind = self.get_benefits_in_kind()["benefit_in_kind"]
+        miscellaneous = Decimal("0.00")
+        
+        for income in income_list:
+            if income["income_type"].lower() == "miscellaneous":
+                miscellaneous = Decimal(income["entitled_amount"])
+                break
+            
+        total_miscellaneous_and_bik = miscellaneous + benefit_in_kind["total_bik"]
+        print("Total Miscellaneous and Benefit in Kind: ", total_miscellaneous_and_bik)
+        
+        return round(total_miscellaneous_and_bik, 2)

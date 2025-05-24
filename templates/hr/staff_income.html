@@ -99,7 +99,7 @@
                     
                             <div class="col-md-4 mb-3">
                                 <label for="amount" class="form-label">Amount (Ghc)</label>
-                                <input type="number" class="form-control" name="amount" {% if staff_income %} value="{{ staff_income.amount }}" {% endif %}>
+                                <input type="number" step="0.01" class="form-control" name="amount" {% if staff_income %} value="{{ staff_income.amount }}" {% endif %}>
                             </div>
 
                             <div class="col-md-4 mb-3">
