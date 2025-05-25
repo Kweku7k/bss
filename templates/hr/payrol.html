@@ -37,24 +37,28 @@
             {% endif %}
           </div>
 
-          
-          <div class="row mb-2">
-            <div class="col-5">
-              <div class="mb-4">
-                  <form method="get">
-                      <div class="input-group">
-                          <label class="input-group-text" for="month">Select Month:</label>
-                          <input class="form-control" type="date" name="month" id="month" required>
-                          <button type="submit" class="btn btn-primary">View Payroll</button>
-                      </div>
-                  </form>
-              </div>
+          <div class="row mb-4 align-items-end justify-content-between">
+            <div class="col-md-6">
+                <h4 class="mb-3 fw-bold">📅 Process Monthly Payslip</h4>
+                <form method="get" id="payrollForm">
+                    <div class="input-group">
+                        <label class="input-group-text" for="month">Select Month:</label>
+                        <input class="form-control" type="date" name="month" id="month" required>
+                        <button type="submit" class="btn btn-success" id="processBtn">
+                            <span id="btnText">Process Payslips</span>
+                            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="col-md-3 text-end">
+                <button onclick="window.print()" class="btn btn-outline-secondary mt-4">
+                    🖨️ Print Payslip
+                </button>
             </div>
           </div>
 
-          <button onclick="window.print()" class="btn btn-outline-secondary text-end mb-3">
-            🖨️ Print Payslip
-          </button>
           
           <hr/>
             <div class="row">
@@ -134,24 +138,28 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% if payroll_data.income_tax %}
+                            {% if payroll_data.income_tax and payroll_data.income_tax.tax %}
                             <tr>
                                 <td>Income Tax</td>
                                 <td class="text-end">{{ payroll_data.income_tax.tax }}</td>
                             </tr>
                             {% endif %}
-                            {% if payroll_data.ssf_employee %}
+
+                            {% if payroll_data.ssf_employee and payroll_data.ssf_employee.amount and payroll_data.ssf_employee.rate %}
                             <tr>
                                 <td>Social Security ({{ payroll_data.ssf_employee.rate }}%)</td>
                                 <td class="text-end">{{ payroll_data.ssf_employee.amount }}</td>
                             </tr>
                             {% endif %}
-                            {% if payroll_data.pf_employee %}
+
+                            {% if payroll_data.pf_employee and payroll_data.pf_employee.rate and payroll_data.pf_employee.amount %}
                             <tr>
                                 <td>PF Employee ({{ payroll_data.pf_employee.rate }}%)</td>
                                 <td class="text-end">{{ payroll_data.pf_employee.amount }}</td>
                             </tr>
                             {% endif %}
+
+                        
                             {% if payroll_data.withholding_tax %}
                             <tr>
                                 <td>Withholding Tax</td>
@@ -243,3 +251,33 @@
     </div>
 
 </div>
+
+
+
+
+<!-- Include Bootstrap JS and Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+   // Loop through and show all the toasts for each message
+   {% for message in messages %}
+      const toastEl{{ forloop.counter }} = document.getElementById('toast{{ forloop.counter }}');
+      const toast{{ forloop.counter }} = new bootstrap.Toast(toastEl{{ forloop.counter }});
+      toast{{ forloop.counter }}.show();
+   {% endfor %}
+</script>
+
+<script>
+    document.getElementById('payrollForm').addEventListener('submit', function() {
+        const btn = document.getElementById('processBtn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btnText');
+        
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        btnText.textContent = 'Processing...';
+    });
+</script>
+
+{% include "partials/_footer.html" %}
