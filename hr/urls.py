@@ -135,7 +135,8 @@ urlpatterns = [
     path('edit_staff_deduction/<str:staffno>/<int:deduction_id>', views.edit_staff_deduction, name='edit-staff-deduction'),
     # path('delete_staff_deduction/<str:staffno>/<int:deduction_id>', views.delete_staff_deduction, name='delete-staff-deduction'),
     
-    
+    path('payroll/register/', views.payroll_register, name='payroll-register'),
+    path('payroll/bank_sheet/', views.payroll_bank_sheet, name='payroll-bank-sheet'),
     
     path('new_dash/', views.new_landing, name='new-dash'),
 

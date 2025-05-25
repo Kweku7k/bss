@@ -27,6 +27,10 @@
                         <input type="text" name="branch_name" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_name }}" {% else %} value="" {% endif %} required>
                     </div>
                     <div class="form-group">
+                        <label for="sort_code" class="col-form-label">Branch Sort Code</label>
+                        <input type="text" name="sort_code" class="form-control" {% if bankbranch %} value="{{ bankbranch.sort_code }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    <div class="form-group">
                         <label for="branch_location" class="col-form-label">Location</label>
                         <input type="text" name="branch_location" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_location }}" {% else %} value="" {% endif %} required>
                     </div>
@@ -47,15 +51,15 @@
                 <table class="table table-sm table-hover">
                     <tr>
                         <th>Bank</th>
-                        <th>Name of Branch</th>
-                        <th>Location</th>
+                        <th>Branch</th>
+                        <th>Sort Code</th>
                         <th>Action</th>
                     </tr>
                     {% for bankbranch in bankbranchs %}
                     <tr>
                         <td>{{ bankbranch.bank_code }}</td>
                         <td>{{ bankbranch.branch_name }}</td>
-                        <td>{{ bankbranch.branch_location }}</td>
+                        <td>{{ bankbranch.sort_code }}</td>
                         <td>
                             <a class="btn btn-sm btn-info" href="{% url 'edit-bankbranch' bankbranch.id bankbranch.bank_code_id %}"><i class="fas fa-fw fa-pen"></i></a>
                             <a class="btn btn-sm btn-danger" href="{% url 'delete-bankbranch' bankbranch.id %}" onclick="return confirm('Do you really want to delete the data for {{ bankbranch.bank_code }}: {{ bankbranch.branch_name }}?');"><i class="fas fa-fw fa-trash"></i></a>

@@ -11,13 +11,13 @@
             <div class="card-body">
                 <form action="" method="POST">
                     {% csrf_token %}
-                    <div class="form-group">
+                    {% comment %} <div class="form-group">
                         <label for="bank_long_name" class="col-form-label">Name of Bank</label>
-                        <input type="text" name="bank_long_name" class="form-control" {% if bank %} value="{{ bank.bank_long_name }}" {% else %} value="" {% endif %} required>
-                    </div>
+                        <input type="text" name="bank_long_name" class="form-control" {% if bank %} value="{{ bank.bank_long_name }}" {% else %} value="" {% endif %}>
+                    </div> {% endcomment %}
                     <div class="form-group">
-                        <label for="bank_short_name" class="col-form-label">Short Name of Bank</label>
-                        <input type="text" name="bank_short_name" class="form-control" {% if bank %} value="{{ bank.bank_short_name }}" {% else %} value="" {% endif %}>
+                        <label for="bank_short_name" class="col-form-label">Name of Bank</label>
+                        <input type="text" name="bank_short_name" class="form-control" {% if bank %} value="{{ bank.bank_short_name }}" {% else %} value="" {% endif %} required>
                     </div>
                     <div class="form-group">
                         <label for="bank_notes" class="col-form-label">Notes</label>
@@ -40,14 +40,13 @@
                 <table class="table table-sm table-hover">
                     <tr>
                         <th>Name of Bank</th>
-                        <th>Short Name</th>
-                        <th>Action</th>
+                        <th class="text-end">Action</th>
                     </tr>
                     {% for bank in banks %}
                     <tr>
-                        <td>{{ bank.bank_long_name }}</td>
+                        {% comment %} <td>{{ bank.bank_long_name }}</td> {% endcomment %}
                         <td>{{ bank.bank_short_name }}</td>
-                        <td>
+                        <td class="text-end">
                             <a class="btn btn-sm btn-info" href="{% url 'edit-bank' bank.id %}"><i class="fas fa-fw fa-pen"></i></a>
                             <a class="btn btn-sm btn-danger" href="{% url 'delete-bank' bank.id %}" onclick="return confirm('Do you really want to delete the data for {{ bank.bank_long_name }}?');"><i class="fas fa-fw fa-trash"></i></a>
                         </td>

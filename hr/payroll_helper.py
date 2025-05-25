@@ -186,7 +186,7 @@ class PayrollCalculator:
         return {"tax": total_income_tax}
 
 
-    def get_total_deductions(self):
+    def get_deductions(self):
         basic_salary = self.get_entitled_basic_salary()
         selected_month = self.month
         
@@ -198,20 +198,39 @@ class PayrollCalculator:
             end_month__month__gte=selected_month.month,
         )
         
-        print("Staff Deductions: ", deductions)
-        
+        deduction_list = []
         total_deduction = Decimal("0.00")
-        for d in deductions:
-            if d.amount:
-                total_deduction += round(Decimal(d.amount), 2)
-            elif d.percentage_of_basic:
-                total_deduction += round((Decimal(d.percentage_of_basic) / 100) * basic_salary, 2)
-
         
-        print("Total Deductions: ", total_deduction)
+        for deduction in deductions:
+            percentage_on_basic = Decimal("0.00")
+            
+            if deduction.amount:
+                deductable = deduction.amount
+            elif deduction.percentage_of_basic:
+                percentage_on_basic = Decimal(deduction.percentage_of_basic)
+                base_amount = (percentage_on_basic / 100) * basic_salary
+                deductable = base_amount
+            else:
+                deductable = Decimal("0.00")
+
+            deduction_list.append({
+                "deduction_type": deduction.deduction_type,
+                "deductable_amount": round(deductable, 2),
+                "percentage_on_basic": percentage_on_basic,
+            })
+            
+            total_deduction += deductable
+        
+        print(f"Staff Deductions: {round(total_deduction, 2)}")
+        return {"deductions": deduction_list, "total_deduction": round(total_deduction, 2)}
+
+
+    def get_total_deductions(self):
+        total_deduction = Decimal(self.get_deductions()["total_deduction"])
         sum_of_total_deduction = sum([self.get_ssnit_contribution()["amount"],self.get_tax_for_taxable_income()["total_tax"],self.get_pf_contribution()["amount"],Decimal(self.get_income_tax()["tax"]),total_deduction])
         print("Sum of Total Deduction: ", sum_of_total_deduction)
         return round(sum_of_total_deduction, 2)
+
 
     def get_net_salary(self):
         return round(self.get_gross_income() - self.get_total_deductions(), 2)

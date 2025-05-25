@@ -1,0 +1,104 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+
+
+<div class="container mt-5">
+    {% if messages %}
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            {% for message in messages %}
+            <div id="toast{{ forloop.counter }}" class="toast show bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+                <div class="toast-header text-white bg-{{ message.tags }}">
+                    <strong class="me-auto">{{ message.tags|title }}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body text-white">
+                    {{ message }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row mb-4">
+                <div class="col-5">
+                    <h4 class="mb-3 fw-bold">📅 Process Bank Sheet</h4>
+                    <form method="get" id="payrollForm">
+                        <div class="input-group">
+                            <label class="input-group-text" for="month">Select Month:</label>
+                            <input class="form-control" type="date" name="month" id="month" required>
+                            <button type="submit" class="btn btn-success" id="processBtn">
+                                <span id="btnText">Prepare Bank Sheet</span>
+                                <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+
+            <div class="row mb-4 mt-5">
+                <div class="row mb-4 align-items-end justify-content-between">
+                    <div class="col-md-7 text-start">
+                        <h2 class="text-start">Bank Sheet</h2>
+                        {% if selected_month %}<p>For the month of {{ selected_month }}</p>{% endif %}
+                    </div>
+
+                    <div class="col-md-3 text-end">
+                        <a href="" class="btn btn-outline-secondary float-end" target="_blank">Download PDF</a>
+                    </div>
+                </div>
+
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Sort Code</th>
+                            <th>Account Number</th>
+                            <th>Account Name</th>
+                            <th>Narration</th>
+                            <th>Bank Name</th>
+                            <th>Amount</th>
+                            <th>Bank Branch</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if payrolls %}
+                    {% for payroll_data in payrolls %}
+                        <tr>
+                            <td>{{ payroll_data.sort_code }}</td>
+                            <td>{{ payroll_data.company_info.accno }}</td>
+                            <td>{{ payroll_data.company_info.acc_name }}</td>
+                            <td>Salary for {{ payroll_data.month }}</td>
+                            <td>{{ payroll_data.company_info.bank_name }}</td>
+                            <td>{{ payroll_data.net_salary }}</td>
+                            <td>{{ payroll_data.company_info.bank_branch }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No payroll records found.</td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>  
+
+
+<script>
+    document.getElementById('payrollForm').addEventListener('submit', function() {
+        const btn = document.getElementById('processBtn');
+        const spinner = document.getElementById('spinner');
+        const btnText = document.getElementById('btnText');
+        
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+        btnText.textContent = 'Processing...';
+    });
+</script>
+
+{% endblock %}

@@ -172,14 +172,11 @@
                                 <td class="text-end">{{ payroll_data.withholding_rent_tax }}</td>
                             </tr>
                             {% endif %}
+                            
                             {% for deduction in payroll_data.deductions %}
                             <tr>
-                                <td>{{ deduction.deduction_type }}</td>
-                                {% if deduction.percentage_of_basic %}
-                                    <td class="text-end">{{ deduction.percentage_of_basic }}%</td>
-                                {% else %}
-                                    <td class="text-end">{{ deduction.amount }}</td>
-                                {% endif %}
+                                <td>{{ deduction.deduction_type }} {% if deduction.percentage_on_basic %}({{ deduction.percentage_on_basic }}%){% endif %}</td>
+                                <td class="text-end">{{ deduction.deductable_amount }}</td>
                             </tr>
                             {% empty %}
                             <tr><td colspan="2">No deductions</td></tr>

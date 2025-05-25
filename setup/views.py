@@ -622,7 +622,7 @@ def edit_bank(request, bank_id):
 ########### BANK BRANCH VIEWS ################
 def add_bankbranch(request):
     submitted = False
-    banks = Bank.objects.order_by('bank_long_name')
+    banks = Bank.objects.order_by('bank_short_name')
     bankbranchs = BankBranch.objects.order_by('-id') 
     bankbranch_count = bankbranchs.count()
     if request.method == 'POST':
