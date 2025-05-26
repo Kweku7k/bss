@@ -2769,7 +2769,8 @@ def payroll_register(request):
     return render(request, 'hr/payroll_register.html', context)
 
 
-
+@login_required
+@role_required(['superadmin'])
 def payroll_bank_sheet(request):
     selected_month = request.GET.get("month")  # format: "2025-04"
     all_payrolls = []
