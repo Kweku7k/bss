@@ -102,7 +102,7 @@
 
                             <div class="col-md-4">
                                 <label for="percentage_of_basic" class="form-label">Percentrage on Basic(%)</label>
-                                <input type="number" class="form-control" name="percentage_of_basic" {% if staff_deduction %} value="{{ staff_deduction.percentage_of_basic }}" {% endif %}>
+                                <input type="number" class="form-control" name="percentage_of_basic" step="0.01" {% if staff_deduction %} value="{{ staff_deduction.percentage_of_basic }}" {% endif %}>
                             </div>
 
                             <div class="col-md-2">

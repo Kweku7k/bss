@@ -386,7 +386,7 @@ def dormant_staff(request):
 # @role_required(['superadmin'])
 def test(request): 
     # Initial querysets for staff, company info, and school
-    staffs = Employee.objects.all()
+    staffs = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
     company_info = CompanyInformation.objects.all()
     staff_school = Staff_School.objects.all()
     
@@ -2813,6 +2813,48 @@ def payroll_bank_sheet(request):
     }
     return render (request, 'hr/payroll_bank_sheet.html', context)
 
+
+@login_required
+@role_required(['superadmin'])
+def staff_salary_increment(request):
+    staff_categories = StaffCategory.objects.all()
+    staff_list = []
+    increment_percentage = None
+    
+    if request.method == 'POST':
+        staff_cat = request.POST.get('staff_cat')
+        increment_percentage = request.POST.get('increment_percentage')
+        selected_staff = request.POST.getlist('selected_staff')
+        
+        if staff_cat:
+            company_infos = CompanyInformation.objects.filter(staff_cat=staff_cat).exclude(active_status='Dormant').select_related('staffno')
+            staff_list = [info.staffno for info in company_infos]
+            
+            
+        if increment_percentage and selected_staff:
+            increment_percentage = Decimal(increment_percentage)
+            print("Selected Staff IDs:", selected_staff)
+
+            for staff_id in selected_staff:
+                staff = get_object_or_404(Employee, pk=staff_id) 
+                company_info = get_object_or_404(CompanyInformation, staffno=staff) 
+                current_salary = Decimal(company_info.salary)
+                increment_amount = current_salary * (increment_percentage / 100)
+                new_salary = round(current_salary + increment_amount, 2)
+                
+                company_info.salary = new_salary
+                company_info.save()
+                
+            messages.success(request, f"Salary increment of {increment_percentage}% for staff {selected_staff} applied successfully")
+            logger.info(f"Salary increment of {increment_percentage}% applied to selected staff {selected_staff} by {request.user.username}.")
+            return redirect('payroll-salary-increment')
+            
+    context = {
+        'staff_categories': staff_categories,
+        'staff_list': staff_list,
+        'increment_percentage': increment_percentage
+    }
+    return render(request, 'hr/staff_salary_increment.html', context)
 
 def new_landing(request):
     sch_fac_count = School_Faculty.objects.all().count()

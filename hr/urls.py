@@ -137,6 +137,7 @@ urlpatterns = [
     
     path('payroll/register/', views.payroll_register, name='payroll-register'),
     path('payroll/bank_sheet/', views.payroll_bank_sheet, name='payroll-bank-sheet'),
+    path('payroll/salary_increment/', views.staff_salary_increment, name='payroll-salary-increment'),
     
     path('new_dash/', views.new_landing, name='new-dash'),
 

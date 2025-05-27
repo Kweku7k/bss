@@ -11,8 +11,8 @@ class PayrollCalculator:
     def get_settings(self):
         return ContributionRate.objects.latest('created')
     
-    def get_taxable_income_tax(self):
-        return IncomeType.objects.filter(taxable=True)
+    def get_all_income_type(self):
+        return IncomeType.objects.all()
 
     def get_tax_bands(self):
         return TaxBand.objects.all().order_by('lower_limit')
@@ -80,39 +80,47 @@ class PayrollCalculator:
     
     def get_tax_for_taxable_income(self):
         income_list = self.get_allowance_values()["incomes"]
-        taxable_income_types = {i.name.lower(): i.tax_rate for i in self.get_taxable_income_tax()}
+        # all_income_types = self.get_all_income_type()
 
         total_tax = Decimal("0.00")
         rent_tax = Decimal("0.00")
-        tax_details = []
+        withholding_tax_rate = Decimal("10.00")
+        withholding_tax_details = []
         rent_tax_details = None
 
         for income in income_list:
             income_type = income["income_type"].lower()
             entitled = Decimal(income["entitled_amount"])
-
-            if income_type in taxable_income_types:
-                tax_rate = taxable_income_types[income_type]
-                tax_amount = entitled * (tax_rate / 100)
-
+            
+            # exclude rent, fuel, miscellaneous, and calculate withholding tax on the rest
+            if income_type not in ["rent", "fuel", "miscellaneous"]:
+                tax_amount = entitled * (withholding_tax_rate / 100)
+                
                 detail = {
                     "income_type": income["income_type"],
                     "entitled_amount": round(entitled, 2),
-                    "tax_rate": tax_rate,
+                    "tax_rate": withholding_tax_rate,
                     "tax_amount": round(tax_amount, 2),
                 }
+                
+                withholding_tax_details.append(detail)
+                total_tax += tax_amount
 
-                if income_type == "rent":
-                    rent_tax += tax_amount
-                    rent_tax_details = detail
-                else:
-                    tax_details.append(detail)
-                    total_tax += tax_amount
+            if income_type == "rent":
+                rent_tax_rate = Decimal("8.00")
+                tax_amount = entitled * (rent_tax_rate / 100)
+                rent_tax_details = {
+                    "income_type": income["income_type"],
+                    "entitled_amount": round(entitled, 2),
+                    "tax_rate": rent_tax_rate,
+                    "tax_amount": round(tax_amount, 2),
+                }
+                rent_tax = tax_amount
 
         return {
             "total_tax": round(total_tax, 2),
             "rent_tax": round(rent_tax, 2),
-            "tax_breakdown": tax_details,
+            "tax_breakdown": withholding_tax_details,
             "rent_tax_detail": rent_tax_details,
         }
     
@@ -263,24 +271,24 @@ class PayrollCalculator:
     
     def get_benefits_in_kind(self):
         income_list = self.get_allowance_values()["incomes"]
+        basic_salary = self.get_entitled_basic_salary()
+        miscellaneous_amount = Decimal("0.00")
         
-        benefit_rent_rate = Decimal("49.36")
-        benefit_fuel_rate = Decimal("13.97")
-        
-        rent_amount = Decimal("0.00")
-        fuel_amount = Decimal("0.00")
+        benefit_rent_rate = Decimal("7.50")
+        benefit_fuel_rate = Decimal("5.00")
         
         for income in income_list:
             income_type = income["income_type"].lower()
             amount = Decimal(income["entitled_amount"])
             
-            if income_type == "rent":
-                rent_amount += amount
-            elif income_type == "fuel":
-                fuel_amount += amount
+            if income_type == "miscellaneous":
+                miscellaneous_amount += amount
+                
+        total_cash_enuroment = basic_salary + miscellaneous_amount
+        print("Total Cash Enuroment: ", total_cash_enuroment)
         
-        rent_bik = (rent_amount * benefit_rent_rate) / 100
-        fuel_bik = (fuel_amount * benefit_fuel_rate) / 100
+        rent_bik = total_cash_enuroment * (benefit_rent_rate / 100)
+        fuel_bik = total_cash_enuroment * (benefit_fuel_rate / 100)
         total_bik = rent_bik + fuel_bik
 
         benefit_in_kind_list = {
