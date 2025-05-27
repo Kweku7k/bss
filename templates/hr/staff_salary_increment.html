@@ -60,13 +60,19 @@
                                 </div>
                             </div>
                         </div>
-
+                        
+                        
                         <div class="mb-3">
                             <label for="increment_percentage" class="form-label">Increment Percentage (%)</label>
                             <input type="number" step="0.1" min="0" class="form-control" id="increment_percentage" name="increment_percentage" value="{{ increment_percentage }}" required>
                         </div>
-
-                        <button type="submit" class="btn btn-success">Apply Increment</button>
+                        
+                        <button type="submit" class="btn btn-success" onclick="return validateForm()">Apply Increment</button>                    
+                        
+                        {% else %}
+                        <div class="alert alert-warning" role="alert">
+                            No staff available in this category. Please select a different category.
+                        </div>
                         {% endif %}
                     </form>
                 </div>
@@ -76,9 +82,25 @@
 </div>
 
 
-{% endblock %}
-
+                        
 <script>
+    function validateForm() {
+        var checkboxes = document.getElementsByName('selected_staff');
+        var isChecked = false;
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                isChecked = true;
+                break;
+            }
+        }
+        if (!isChecked) {
+            alert('Please select at least one staff member to apply the increment.');
+            return false;
+        }
+        return confirm('Are you sure you want to apply increment for the selected staff?');
+    }
+
+
     function clampInput(selector) {
         document.querySelector(selector).addEventListener('input', function () {
             let val = parseFloat(this.value);
@@ -93,3 +115,6 @@
     
     clampInput('input[name="increment_percentage"]');
 </script>
+
+
+{% endblock %}

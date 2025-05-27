@@ -129,3 +129,18 @@
 </div>
 
 
+<script>
+    function clampInput(selector) {
+        document.querySelector(selector).addEventListener('input', function () {
+            let val = parseFloat(this.value);
+            if (val > 100) {
+                alert("Value cannot exceed 100.");
+                this.value = 100;
+            } else if (val < 0) {
+                this.value = 0;
+            }
+        });
+    }
+    
+    clampInput('input[name="percentage_of_basic"]');
+</script>
