@@ -97,7 +97,7 @@
                     
                             <div class="col-md-4">
                                 <label for="amount" class="form-label">Amount (Ghc)</label>
-                                <input type="number" class="form-control" name="amount" {% if staff_deduction %} value="{{ staff_deduction.amount }}" {% endif %}>
+                                <input type="number" class="form-control" step="0.01" name="amount" {% if staff_deduction %} value="{{ staff_deduction.amount }}" {% endif %}>
                             </div>
 
                             <div class="col-md-4">

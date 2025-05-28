@@ -1,5 +1,3 @@
-# payroll_utils.py (your helper file)
-
 from decimal import Decimal
 from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType
 
@@ -235,7 +233,7 @@ class PayrollCalculator:
 
     def get_total_deductions(self):
         total_deduction = Decimal(self.get_deductions()["total_deduction"])
-        sum_of_total_deduction = sum([self.get_ssnit_contribution()["amount"],self.get_tax_for_taxable_income()["total_tax"],self.get_pf_contribution()["amount"],Decimal(self.get_income_tax()["tax"]),total_deduction])
+        sum_of_total_deduction = sum([self.get_ssnit_contribution()["amount"],self.get_tax_for_taxable_income()["rent_tax"],self.get_tax_for_taxable_income()["total_tax"],self.get_pf_contribution()["amount"],Decimal(self.get_income_tax()["tax"]),total_deduction])
         print("Sum of Total Deduction: ", sum_of_total_deduction)
         return round(sum_of_total_deduction, 2)
 
