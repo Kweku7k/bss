@@ -1,0 +1,130 @@
+{% include "partials/_topnav.html" %} 
+{% load static %}
+
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
+
+    <div class="col-md-8">
+        <div class="container mt-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h5 class="my-3 text-primary"><strong>Exits History for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        
+                        {% if staff.staff_pix %}
+                            <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
+                        {% else %}
+                            <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
+                        {% endif %}
+                    </div>
+                    
+                    <h5><b>Existing Exits {{exit_count}}</b></h5>
+
+                    <div class="mb-4">
+                        {% if exit_list %}
+                        <div class="row">
+                            {% for exit in exit_list %}
+                            <div class="col-6 col-md-4 mb-2">
+                                <div class="card p-3">
+                                    <div class="w-100 d-flex justify-content-between align-items-start mb-1">
+                                        <div class="flex-grow-1 me-2">
+                                            <h6 class="mb-0"><b>{{ exit.exit_type }}</b></h6>
+                                            <p class="mb-0">{{ exit.exit_date }}</p>
+                                            <p class="mb-0">{{ exit.exit_reason }}</p>
+                                            <p class="mb-0">{{ exit.approved_by }}</p>
+                                        </div>
+                                        
+                                        <!-- Display approval or disapprove status -->
+                                        <div class="ms-2">
+                                            {% if exit.is_approved %}
+                                                <span class="badge bg-success">Approved</span>
+                                            {% elif exit.is_disapproved %}
+                                                <span class="badge bg-danger">Declined</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Pending</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <p>No exit history found.</p>
+                        {% endif %}
+                    </div>
+                    <br/>
+
+                    <!-- Renewal Request Form -->
+                    <h5><b>Exit Request</b></h5>
+                    <form action="" method="POST" enctype="multipart/form-data"> 
+                        {% csrf_token %}
+                        <div class="row g-3 mb-4">
+                            <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+                            <div class="col-md-4">
+                                <label for="exit_type" class="form-label">Exit Type</label>
+                                <select name="exit_type" class="form-select" required>
+                                    <option value="" disabled selected>Select Relationship Type</option>
+                                    {% for key, value in EXITTYPE %}
+                                    <option value="{{ key }}" {% if key == renewal_list.exit_type %} selected {% endif %}>{{ value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="exit_date" class="form-label">Effective Date</label>
+                                <input type="date" class="form-control" name="exit_date" {% if renewal_list %} value="{{ renewal_list.exit_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="approved_by" class="form-label">Approved By</label>
+                                <select name="approved_by" id="approved_by" class="form-select" required>
+                                    <option selected="true" disabled="disabled">-----Select------</option>
+                                    {% for approver in approvers_list %}
+                                        <option value="{{ approver.id }}" {% if approver.id == renewal_list.approved_by.id %} selected{% endif %}>{{ approver.username }}</option>
+                                        {% comment %} <option value="{{ approver }}" {% if approver.id == renewal_list.approved_by %} selected{% endif %} >{{ approver }}</option> {% endcomment %}
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <label for="exit_reason" class="form-label">Exit Reason</label>
+                                <textarea class="form-control" name="exit_reason" rows="3" required>{% if renewal_list %}{{ renewal_list.exit_reason }}{% endif %}</textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="exit_notes" class="form-label">Comment</label>
+                                <textarea class="form-control" name="exit_notes" rows="3">{% if renewal_list %}{{ renewal_list.exit_notes }}{% endif %}</textarea>
+                            </div>
+                            
+
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-info me-2">Add</button>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% comment %} {% endblock %} {% endcomment %}

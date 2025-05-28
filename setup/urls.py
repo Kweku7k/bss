@@ -102,5 +102,6 @@ urlpatterns = [
     path('choices_medical_treatment', views.generic_model_crud, {'model_class': ChoicesMedicalTreatment, 'model_name': 'Nature of Treatment', 'template_name': 'setup/generic.html'}, name='choices-medical-treatment'),
     path('choices_medical_payment_type', views.generic_model_crud, {'model_class': ChoicesMedicalType, 'model_name': 'Medical Payment Type', 'template_name': 'setup/generic.html'}, name='choices-medical-payment-type'),
     path('choices_contribution', views.generic_model_crud, {'model_class': ChoicesContribution, 'model_name': 'Contribution', 'template_name': 'setup/generic.html'}, name='choices-contribution'),
+    path('choices_exit_type', views.generic_model_crud, {'model_class': ChoicesExitType, 'model_name': 'Exit Type', 'template_name': 'setup/generic.html'}, name='choices-exit-type'),
     
 ]

@@ -110,6 +110,10 @@ urlpatterns = [
     path('promotion/approve/<int:promotion_id>/', views.approve_promotion, name='approve-promotion'),
     path('promotion/disapprove/<int:promotion_id>/', views.disapprove_promotion, name='disapprove-promotion'),
     
+    path('exit/<str:staffno>', views.add_exit_history, name="exit-history"),
+    path('exit/approve/<int:exit_id>/', views.approve_exit, name='approve-exit'),
+    path('exit/disapprove/<int:exit_id>/', views.disapprove_exit, name='disapprove-exit'),
+    
     
     # payroll url
     path('payroll/<str:staffno>', views.payroll_details, name="payroll-details"),

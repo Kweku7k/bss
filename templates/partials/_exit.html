@@ -1,0 +1,65 @@
+{% load group_tags %}
+
+
+<style>
+    .btn-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        text-align: center;
+        padding: 8px;
+        font-size: 16px;
+        line-height: 1.25;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
+
+
+{% if request.user|has_group:"superadmin" or request.user.is_superuser %}
+{% if pending_exits %}
+<div class="col-lg-6 col-sm-6">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="pt-3 mb-1 text-black text-center"><strong>Pending Exits</strong></h5>
+            <p class="text-center text-muted mb-4">Staff Exits waitig approval</p>
+            <div>
+                {% for exit in pending_exits %}
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <!-- Status indicator (Pending approval) -->
+                        <div style="background-color: #000; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;"></div>
+                        
+                        <!-- Staff name link -->
+                        <a href="{% url 'staff-details' exit.staffno.staffno %}" style="text-decoration: none; color: inherit; flex-grow: 1;">
+                            {{ exit.staffno.title }} {{ exit.staffno.fname }} {{ exit.staffno.lname }} {{ exit.staffno.middlenames }}
+                        </a>
+
+                        <!-- Approve button -->
+                        <form method="post" action="{% url 'approve-exit' exit.id %}" style="margin-left: 8px; display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-circle" onclick="return confirm('Do you really want to approve the exit for {{ exit.staffno.fname }} {{ exit.staffno.lname }}?');" title="Approve">
+                                ✅
+                            </button>
+                        </form>
+
+                        <!-- Disapprove button -->
+                        <form method="post" action="{% url 'disapprove-exit' exit.id %}" style="margin-left: 8px; display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-circle" onclick="return confirm('Do you really want to disapprove the exit for {{ exit.staffno.fname }} {{ exit.staffno.lname }}?');" title="Disapprove">
+                                ❌
+                            </button>
+                        </form>
+
+                    </div>
+                {% empty %}
+                    <div class="text-center text-muted">
+                        No pending exit.
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}

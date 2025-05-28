@@ -152,6 +152,8 @@ class ChoicesLeaveType(models.Model):
     name = models.CharField(max_length=120, unique=True)  
     deductible = models.BooleanField(default=False)
 
+class ChoicesExitType(models.Model):
+    name = models.CharField(max_length=120, unique=True)
 
 class ChoicesDependants(models.Model):
     name = models.CharField(max_length=120, unique=True)
@@ -391,6 +393,41 @@ class Celebration(models.Model):
     cel_notes = models.TextField('Notes',blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True) 
+    
+    
+class Exits(models.Model):
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
+    exit_type = models.CharField('Exit Type',max_length=100,blank=True,null=True)
+    exit_date = models.DateField()
+    exit_reason = models.TextField('Reason for Exit',blank=True,null=True)
+    exit_notes = models.TextField('Notes',blank=True,null=True)
+    is_approved = models.BooleanField(default=False)
+    is_disapproved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_exits')
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.staffno} - {self.exit_type} on {self.exit_date}"
+    
+@receiver(post_save, sender=Exits)
+def update_company_info_on_approval_or_disapproval(sender, instance, **kwargs):
+    company_info = CompanyInformation.objects.filter(staffno=instance.staffno).first()
+    if not company_info:
+        messages.error(f"No company information found for staff {instance.staffno}")
+    else:
+        if instance.is_approved:
+            if company_info:
+                company_info.active_status = 'Dormant'
+                company_info.save()
+        elif instance.is_disapproved:
+            if company_info:
+                company_info.active_status = 'Active'
+                company_info.save()
+    
+    
+    
+    
     
     
 class RenewalHistorys(models.Model):

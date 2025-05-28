@@ -169,9 +169,11 @@ def landing(request):
     staffs = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
     active = CompanyInformation.objects.filter(active_status__exact='Active')
     inactive = CompanyInformation.objects.filter(active_status__exact='Inactive')
+    dormant = CompanyInformation.objects.filter(active_status__exact='Dormant')
     staff_count = staffs.count()
     ative_count = active.count()
     inactive_count = inactive.count()
+    dormant_count = dormant.count()
     
     today = timezone.now().date()
     expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
@@ -179,6 +181,7 @@ def landing(request):
     pending_renewals = RenewalHistorys.objects.filter(is_approved=False, is_disapproved=False)
     pending_promotions = PromotionHistory.objects.filter(is_approved=False, is_disapproved=False)
     pending_users = User.objects.filter(approval=False)
+    pending_exits = Exits.objects.filter(is_approved=False, is_disapproved=False)
     
     
     notification_count = ( expiring_soon.count() + sixty_and_above.count() + pending_renewals.count() + pending_promotions.count() )
@@ -187,15 +190,18 @@ def landing(request):
         'staffs':staffs,
         'active':active,
         'inactive':inactive,
+        'dormant':dormant,
         'staff_count':staff_count,
         'ative_count':ative_count,
         'inactive_count':inactive_count,
+        'dormant_count':dormant_count,
         'expiring_soon':expiring_soon,
         'notification_count':notification_count,
         'pending_renewals':pending_renewals,
         'sixty_and_above':sixty_and_above,
         'pending_promotions':pending_promotions,
         'pending_users':pending_users,
+        'pending_exits': pending_exits,
     }
     
     return render(request,'hr/landing_page.html', context)
@@ -2266,6 +2272,88 @@ def disapprove_promotion(request, promotion_id):
     return redirect('landing')
 
 
+
+@login_required
+@role_required(['superadmin'])
+def add_exit_history(request, staffno):
+    submitted = False
+    staff = get_object_or_404(Employee, pk=staffno)
+    company_info = get_object_or_404(CompanyInformation, staffno=staff)
+    exit_list = Exits.objects.filter(staffno=staff)
+    exit_count = exit_list.count()
+    approvers_list = User.objects.filter(groups__name='superadmin')
+
+    if request.method == 'POST':
+        form = ExitHistoryForm(request.POST)
+        if form.is_valid():
+            exit_history = form.save(commit=False)
+            exit_history.staffno = staff
+            exit_history.is_approved = False
+            exit_history.save()
+            messages.success(request, "New exit history added successfully, waiting approval.")
+            logger.info(f"New exit history added for {staff.staffno} by {request.user.username}.")
+            return redirect('exit-history', staffno)
+        else:
+            messages.error(request, "Form is not valid. Please check the data.")
+            print(form.errors)
+    else:
+        form = ExitHistoryForm()
+        if 'submitted' in request.GET:
+            submitted = True
+
+    context = {
+        'form': form,
+        'submitted': submitted,
+        'staff': staff,
+        'exit_list': exit_list,
+        'exit_count':exit_count,
+        'company_info':company_info,
+        'approvers_list':approvers_list,
+        'EXITTYPE': ChoicesExitType.objects.all().values_list("name", "name"),
+    }
+
+    return render(request, 'hr/exit.html', context)
+
+
+
+@login_required
+@role_required(['superadmin'])
+def approve_exit(request, exit_id):
+    exit_history = get_object_or_404(Exits, id=exit_id)
+
+    if request.method == 'POST':
+        # approval status directly
+        exit_history.is_approved = True
+        exit_history.approved_by = request.user
+        exit_history.save()
+
+        messages.success(request, f"Exit for {exit_history.staffno} has been approved.")
+        logger.info(f"Exit for {exit_history.staffno} has been approved by {request.user.username}.")
+        return redirect('staff-details', staffno=exit_history.staffno.staffno)
+
+    return redirect('landing')
+
+
+@login_required
+@role_required(['superadmin'])
+def disapprove_exit(request, exit_id):
+    exit_history = get_object_or_404(Exits, id=exit_id)
+
+    if request.method == 'POST':
+        # approval status directly
+        exit_history.is_disapproved = True
+        exit_history.approved_by = request.user
+        exit_history.save()
+
+        messages.success(request, f"Exit for {exit_history.staffno} has been rejected.")
+        logger.info(f"Exit for {exit_history.staffno} has been rejected by {request.user.username}.")
+        return redirect('staff-details', staffno=exit_history.staffno.staffno)
+
+    return redirect('landing')
+
+
+
+
 @login_required
 @role_required(['superadmin'])
 def staff_settings(request, staffno):
@@ -2566,20 +2654,6 @@ def edit_staff_deduction(request, staffno, deduction_id):
 
 
 ########## GENERATE PAYROLL INFORMATION ###############
-
-
-
-
-# payroll information from company info model 
-# @login_required
-# @role_required(['superadmin'])
-# def payroll_details(request, staffno):
-#     staff = Employee.objects.get(pk=staffno)
-#     company_info = CompanyInformation.objects.get(staffno=staff)
-#     context = {'staff':staff,'company_info':company_info,}
-#     return render(request, 'hr/payrol.html', context)
-
-
 
 
 @login_required

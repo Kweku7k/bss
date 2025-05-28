@@ -5,93 +5,149 @@
 <style>
   .main-cards {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-    margin: 10px 0;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 30px;
+    margin: 20px 0;
   }
   
   .main-cards a {
     text-decoration: none;
+    transition: transform 0.2s ease;
+  }
+
+  .main-cards a:hover {
+    transform: translateY(-5px);
   }
   
   .dashboard-item {
     background-color: #fff;
-    padding: 30px;
-    border-radius: 15px;
+    padding: 35px;
+    border-radius: 20px;
     color: #000;
     margin: 0;
-    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    box-shadow: rgba(149, 157, 165, 0.1) 0px 8px 24px;
     margin-bottom: 2vh;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+  }
+
+  .dashboard-item:hover {
+    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    background: linear-gradient(145deg, #ffffff, #f6f7f9);
   }
   
   .dashboard-item-text {
     margin: 0;
     color: #000;
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
   }
   
   .dashboard-item-smalltext {
     font-size: 16px;
+    color: #666;
+    margin-bottom: 15px;
+    font-weight: 500;
+  }
+
+  .card-icon {
+    background-color: #f8f9fa;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    margin-right: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .card-icon i {
+    font-size: 24px;
+    color: #992621;
+  }
+
+  .dashboard-item:hover .card-icon {
+    background-color: #992621;
+  }
+
+  .dashboard-item:hover .card-icon i {
+    color: #fff;
   }
 </style>
 
-    <section class="section">
-      <div class="row">
-        <div class="col-lg-12 col-12">
-            <div class="main-cards">
-              <a href="{% url 'allstaff'%}">
-                <div class="dashboard-item">
-                    <h6 class="text-black dashboard-item-smalltext">Total Employees</h6>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle">
-                            <i class="bi bi-person"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h4 class="dashboard-item-text">{{ staff_count }}</h4>
-                        </div>
-                    </div>
-                </div>
-              </a>
-              <a href="{% url 'allstaff' %}?status=Active">
-                <div class="dashboard-item">
-                    <h6 class="text-black dashboard-item-smalltext">Active Employees</h6>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle">
-                            <i class="bi bi-person"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h4 class="dashboard-item-text">{{ ative_count }}</h4>
-                        </div>
-                    </div>
-                </div>
-              </a>
-              <a href="{% url 'allstaff'%}?status=Inactive">
-                <div class="dashboard-item">
-                    <h6 class="dashboard-item-smalltext text-black">Inactive Employees</h6>
-                    <div class="d-flex align-items-center">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                            <i class="bi bi-person"></i>
-                        </div>
-                        <div class="ps-3">
-                            <h4 class="dashboard-item-text">{{ inactive_count }}</h4>
-                        </div>
-                    </div>
-                </div>
-              </a>
-  
-            </div>    
-        </div>
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12 col-12">
+      <div class="main-cards">
+        <a href="{% url 'allstaff'%}">
+          <div class="dashboard-item">
+              <h6 class="text-black dashboard-item-smalltext">Total Employees</h6>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle">
+                      <i class="bi bi-person"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h4 class="dashboard-item-text">{{ staff_count }}</h4>
+                  </div>
+              </div>
+          </div>
+        </a>
+        <a href="{% url 'allstaff' %}?status=Active">
+          <div class="dashboard-item">
+              <h6 class="text-black dashboard-item-smalltext">Active Employees</h6>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle">
+                      <i class="bi bi-person"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h4 class="dashboard-item-text">{{ ative_count }}</h4>
+                  </div>
+              </div>
+          </div>
+        </a>
+        <a href="{% url 'allstaff'%}?status=Inactive">
+          <div class="dashboard-item">
+              <h6 class="dashboard-item-smalltext text-black">Inactive Employees</h6>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-person"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h4 class="dashboard-item-text">{{ inactive_count }}</h4>
+                  </div>
+              </div>
+          </div>
+        </a>
+
+        <a href="{% url 'allstaff'%}?status=Dormant">
+          <div class="dashboard-item">
+              <h6 class="dashboard-item-smalltext text-black">Dormant Employees</h6>
+              <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                      <i class="bi bi-person"></i>
+                  </div>
+                  <div class="ps-3">
+                      <h4 class="dashboard-item-text">{{ dormant_count }}</h4>
+                  </div>
+              </div>
+          </div>
+        </a>
+
+      </div>    
     </div>
-      <div class="row">
-        {% include "partials/_socials.html" %}
-        {% include "partials/_retire.html" %}
-        {% include "partials/_promotion.html" %}
-        {% include "partials/_renewal.html" %}
-        {% include "partials/_pending_users.html" %}
-         
-      </div>
-    </section>
+  </div>
+
+  <div class="row">
+    {% include "partials/_socials.html" %}
+    {% include "partials/_retire.html" %}
+    {% include "partials/_promotion.html" %}
+    {% include "partials/_renewal.html" %}
+    {% include "partials/_pending_users.html" %}
+    {% include "partials/_exit.html" %}
+      
+  </div>
+</section>
 
 {% endblock %}
 
