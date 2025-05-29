@@ -44,9 +44,9 @@
                     <!-- Action to Change Status -->
                     <form method="POST" action="{% url 'mark-dormant' staff.staffno %}">
                         {% csrf_token %}
-                        {% if company_info.active_status != 'Dormant' %}
-                            <button type="submit" name="action" value="dormant" class="btn btn-danger btn-md" onclick="return confirm('Are you sure you want to mark this {{ staff.title}} {{ staff.fname}} {{ staff.lname}} {{ staff.staffno}} as dormant?')">
-                                Mark as Dormant
+                        {% if company_info.active_status != 'Inactive' %}
+                            <button type="submit" name="action" value="inactive" class="btn btn-danger btn-md" onclick="return confirm('Are you sure you want to mark this {{ staff.title}} {{ staff.fname}} {{ staff.lname}} {{ staff.staffno}} as Inactive?')">
+                                Mark as Inactive
                             </button>
                         {% else %}
                             <button type="submit" name="action" value="reactivate" class="btn btn-success btn-md" onclick="return confirm('Are you sure you want to reactivate this staff?')">

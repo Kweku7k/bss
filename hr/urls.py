@@ -33,7 +33,7 @@ urlpatterns = [
     path('upload/', views.bulk_upload, name='bulk_upload'),
     path('download-sample-csv/', views.download_csv, name='download_sample_csv'),
     
-    path('test', views.test,name="test"),
+    path('report', views.report,name="report"),
     
     path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),
     path('edit_emp_relation/<str:emp_id>/<str:staffno>', views.edit_emp_relation,name="edit-emp-relation"),

@@ -166,7 +166,8 @@ def logoutUser(request):
 @login_required(login_url='login')
 def landing(request):
     # staffs = Employee.objects.order_by('lname').filter()
-    staffs = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
+    staffs = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
+    company_info = CompanyInformation.objects.exclude(active_status='Inactive')
     active = CompanyInformation.objects.filter(active_status__exact='Active')
     inactive = CompanyInformation.objects.filter(active_status__exact='Inactive')
     dormant = CompanyInformation.objects.filter(active_status__exact='Dormant')
@@ -176,8 +177,8 @@ def landing(request):
     dormant_count = dormant.count()
     
     today = timezone.now().date()
-    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
-    sixty_and_above = Employee.objects.filter(dob__lte=today - timedelta(days=60*365))  # Approximates 60 years
+    expiring_soon = company_info.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
+    sixty_and_above = staffs.filter(dob__lte=today - timedelta(days=60*365))
     pending_renewals = RenewalHistorys.objects.filter(is_approved=False, is_disapproved=False)
     pending_promotions = PromotionHistory.objects.filter(is_approved=False, is_disapproved=False)
     pending_users = User.objects.filter(approval=False)
@@ -188,6 +189,7 @@ def landing(request):
 
     context = {
         'staffs':staffs,
+        'company_info':company_info,
         'active':active,
         'inactive':inactive,
         'dormant':dormant,
@@ -208,15 +210,15 @@ def landing(request):
 
 
 def topnav_view(request):
-    # Get all contracts expiring in the next month
+    company_info = CompanyInformation.objects.exclude(active_status='Inactive')    
     today = timezone.now().date()
-    expiring_soon = CompanyInformation.objects.filter(doe__lte=today + timedelta(days=30)).order_by('doe')
+    expiring_soon = company_info.filter(doe__lte=today + timedelta(days=30)).order_by('doe')
 
-    return render(request, 'partials/_topnav.html', {'expiring_soon': expiring_soon})
+    return render(request, 'partials/_topnav.html', {'expiring_soon': expiring_soon, 'company_info':company_info})
 
 def search(request):
     if request.method == 'POST' and 'search' in request.POST:
-        staffs = Employee.objects.all()
+        staffs = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('fname')
         company_info = CompanyInformation.objects.all()
         search_query = request.POST.get('search')
         if search_query:
@@ -349,7 +351,7 @@ def allstaff(request):
         filters &= Q(companyinformation__active_status=status_filter)
 
     # Filtered queryset
-    staffs = Employee.objects.filter(filters).exclude(companyinformation__active_status='Dormant').order_by('fname')
+    staffs = Employee.objects.filter(filters).exclude(companyinformation__active_status='Inactive').order_by('fname')
     staff_count = staffs.count()
     company_info = CompanyInformation.objects.all()
 
@@ -371,7 +373,7 @@ def allstaff(request):
 
 @login_required
 def dormant_staff(request): 
-    staffs = Employee.objects.filter(companyinformation__active_status='Dormant').order_by('lname')
+    staffs = Employee.objects.filter(companyinformation__active_status='Inactive').order_by('lname')
     staff_count = staffs.count()
     company_info = CompanyInformation.objects.all()
         
@@ -389,17 +391,15 @@ def dormant_staff(request):
     return render(request, 'hr/dormant_staff.html', context)
   
 @login_required
-# @role_required(['superadmin'])
-def test(request): 
-    # Initial querysets for staff, company info, and school
-    staffs = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
+@role_required(['superadmin'])
+def report(request): 
+    staffs = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
     company_info = CompanyInformation.objects.all()
     staff_school = Staff_School.objects.all()
     
-    
     AGE_CLASSIFICATIONS = {
         "child": (0, 12),
-        "teen": (13, 19),
+        "teen": (13, 19), 
         "young_adult": (20, 35),
         "middle_adult": (36, 60),
         "senior_adult": (61, 100),
@@ -409,7 +409,7 @@ def test(request):
     AGE_LABELS = {
         "child": "Child (0-12)",
         "teen": "Teen (13-19)",
-        "young_adult": "Young Adult (20-35)",
+        "young_adult": "Young Adult (20-35)", 
         "middle_adult": "Middle Aged (36-60)",
         "senior_adult": "Senior Adult (61-100)",
         "elderly": "Elderly (101+)"
@@ -438,90 +438,71 @@ def test(request):
     filters = Q()
 
     if request.method == 'POST':
-        # Retrieve filter values from POST request
-        filter_staffcategory = request.POST.get('filter_staffcategory')
-        filter_qualification = request.POST.get('filter_qualification')
-        filter_title = request.POST.get('filter_title')
-        filter_contract = request.POST.get('filter_contract')
-        filter_status = request.POST.get('filter_status')
-        filter_gender = request.POST.get('filter_gender')
-        filter_department = request.POST.get('filter_department')
-        filter_jobtitle = request.POST.get('filter_jobtitle')
-        filter_directorate = request.POST.get('filter_directorate')
-        filter_school_faculty = request.POST.get('filter_school_faculty')
+        # Retrieve filter values from POST request - getlist for multiple values
+        filter_staffcategory = request.POST.getlist('filter_staffcategory')
+        filter_qualification = request.POST.getlist('filter_qualification') 
+        filter_title = request.POST.getlist('filter_title')
+        filter_contract = request.POST.getlist('filter_contract')
+        filter_status = request.POST.getlist('filter_status')
+        filter_gender = request.POST.getlist('filter_gender')
+        filter_department = request.POST.getlist('filter_department')
+        filter_jobtitle = request.POST.getlist('filter_jobtitle')
+        filter_directorate = request.POST.getlist('filter_directorate')
+        filter_school_faculty = request.POST.getlist('filter_school_faculty')
         filter_age = request.POST.get('filter_age')
         filter_renewal = request.POST.get('filter_renewal')
         filter_promotion = request.POST.get('filter_promotion')
 
         # Filter by Staff Category
         if filter_staffcategory:
-            filters &= Q(companyinformation__staff_cat=filter_staffcategory)
+            filters &= Q(companyinformation__staff_cat__in=filter_staffcategory)
 
         # Filter by Contract Type
         if filter_contract:
-            filters &= Q(companyinformation__contract=filter_contract)
+            filters &= Q(companyinformation__contract__in=filter_contract)
 
         # Filter by Qualification
         if filter_qualification:
-            qualification_filter = Q(heq=filter_qualification) | Q(staff_school__certification=filter_qualification)
+            qualification_filter = Q(heq__in=filter_qualification) | Q(staff_school__certification__in=filter_qualification)
             filters &= qualification_filter
 
         # Filter by Title
         if filter_title:
-            filters &= Q(title=filter_title)
+            filters &= Q(title__in=filter_title)
 
         # Filter by Gender
         if filter_gender:
-            filters &= Q(gender=filter_gender)
+            filters &= Q(gender__in=filter_gender)
 
         # Filter by Status
         if filter_status:
-            company_info = CompanyInformation.objects.filter(active_status=filter_status)
+            company_info = CompanyInformation.objects.filter(active_status__in=filter_status)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
 
         # Filter by Department
         if filter_department:
-            company_info = CompanyInformation.objects.filter(dept=filter_department)
+            company_info = CompanyInformation.objects.filter(dept__in=filter_department)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
 
         # Filter by Job Title
         if filter_jobtitle:
-            company_info = CompanyInformation.objects.filter(job_title=filter_jobtitle)
+            company_info = CompanyInformation.objects.filter(job_title__in=filter_jobtitle)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
             
         # Filter by Directorate
         if filter_directorate:
-            company_info = CompanyInformation.objects.filter(directorate=filter_directorate)
+            company_info = CompanyInformation.objects.filter(directorate__in=filter_directorate)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
             
         # Filter by School/Faculty
         if filter_school_faculty:
-            company_info = CompanyInformation.objects.filter(sch_fac_dir=filter_school_faculty)
+            company_info = CompanyInformation.objects.filter(sch_fac_dir__in=filter_school_faculty)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
-            
-        # # Filter by Age
-        # if filter_age:
-        #     age_range = AGE_CLASSIFICATIONS.get(filter_age)
-        #     if age_range:
-        #         current_date = date.today()
-        #         start_date = current_date - timedelta(days=age_range[1] * 365)
-        #         end_date = current_date - timedelta(days=age_range[0] * 365)
-        #         filters &= Q(dob__range=(start_date, end_date))
-        
-        # # Apply custom age range filter
-        # if filter_age == "custom" and min_age and max_age:
-        #     min_age = int(min_age)
-        #     max_age = int(max_age)
-        #     if 0 <= min_age <= 999 and 0 <= max_age <= 999:
-        #         current_date = date.today()
-        #         start_date = current_date - timedelta(days=max_age * 365)
-        #         end_date = current_date - timedelta(days=min_age * 365)
-        #         filters &= Q(dob__range=(start_date, end_date))
                 
         # ✅ Prioritize Custom Age first
         if filter_age == "custom" and min_age and max_age:
@@ -544,7 +525,6 @@ def test(request):
             start_date = current_date - timedelta(days=age_range[1] * 365)
             end_date = current_date - timedelta(days=age_range[0] * 365)
             filters &= Q(dob__range=(start_date, end_date))
-
                 
         # Filter by Renewal History
         if filter_renewal == "true":
@@ -581,7 +561,7 @@ def test(request):
         'directorate': [(q.direct_name, q.direct_name) for q in Directorate.objects.all()],
         'school_faculty': [(q.sch_fac_name, q.sch_fac_name) for q in School_Faculty.objects.all()],
         'age_classifications': AGE_LABELS,
-        # The filters being used for rendering in the template
+        # The filters being used for rendering in the template 
         'filter_staffcategory': filter_staffcategory,
         'filter_qualification': filter_qualification,
         'filter_title': filter_title,
@@ -600,8 +580,7 @@ def test(request):
         'renewal_staffno': {renewal.staffno_id for renewal in RenewalHistorys.objects.all()},
     }
 
-    # Render the page
-    return render(request, 'hr/test.html', context)
+    return render(request, 'hr/report.html', context)
 
 
 @login_required
@@ -2376,10 +2355,10 @@ def mark_dormant(request, staffno):
     if request.method == 'POST':
         action = request.POST.get('action')
 
-        if action == 'dormant':
-            company_info.active_status = 'Dormant'
-            messages.success(request, f"{full_name} marked as Dormant.")
-            logger.info(f"{request.user.username} marked {full_name} as Dormant.")
+        if action == 'inactive':
+            company_info.active_status = 'Inactive'
+            messages.success(request, f"{full_name} marked as Inactive.")
+            logger.info(f"{request.user.username} marked {full_name} as Inactive.")
         elif action == 'reactivate':
             company_info.active_status = 'Active'
             messages.success(request, f"{full_name} reactivated.")
@@ -2575,7 +2554,6 @@ def edit_staff_income(request, staffno, income_id):
     return render(request, 'hr/staff_income.html', context)
 
 
-
 ############ STAFF DEDUCTIONS #############
 @login_required
 @role_required(['superadmin'])
@@ -2757,7 +2735,7 @@ def payroll_processing(request):
 
     if selected_month:
         current_month_date = date.fromisoformat(selected_month)
-        staff_list = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
+        staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
 
         for staff in staff_list:
             company_info = CompanyInformation.objects.filter(staffno=staff).first()
@@ -2807,7 +2785,7 @@ def payroll_register(request):
 
     if selected_month:
         current_month_date = date.fromisoformat(selected_month)
-        staff_list = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
+        staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
 
         for staff in staff_list:
             company_info = CompanyInformation.objects.filter(staffno=staff).first()
@@ -2851,7 +2829,7 @@ def payroll_bank_sheet(request):
 
     if selected_month:
         current_month_date = date.fromisoformat(selected_month)
-        staff_list = Employee.objects.exclude(companyinformation__active_status='Dormant').order_by('lname')
+        staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
 
         for staff in staff_list:
             company_info = CompanyInformation.objects.filter(staffno=staff).first()
@@ -2901,7 +2879,7 @@ def staff_salary_increment(request):
         selected_staff = request.POST.getlist('selected_staff')
         
         if staff_cat:
-            company_infos = CompanyInformation.objects.filter(staff_cat=staff_cat).exclude(active_status='Dormant').select_related('staffno')
+            company_infos = CompanyInformation.objects.filter(staff_cat=staff_cat).exclude(active_status='Inactive').select_related('staffno')
             staff_list = [info.staffno for info in company_infos]
             
             

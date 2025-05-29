@@ -271,6 +271,8 @@ class PayrollCalculator:
         income_list = self.get_allowance_values()["incomes"]
         basic_salary = self.get_entitled_basic_salary()
         miscellaneous_amount = Decimal("0.00")
+        has_rent = False
+        has_fuel = False
         
         benefit_rent_rate = Decimal("7.50")
         benefit_fuel_rate = Decimal("5.00")
@@ -281,12 +283,22 @@ class PayrollCalculator:
             
             if income_type == "miscellaneous":
                 miscellaneous_amount += amount
+            elif income_type == "rent":
+                has_rent = True
+            elif income_type == "fuel":
+                has_fuel = True
                 
         total_cash_enuroment = basic_salary + miscellaneous_amount
         print("Total Cash Enuroment: ", total_cash_enuroment)
         
-        rent_bik = total_cash_enuroment * (benefit_rent_rate / 100)
-        fuel_bik = total_cash_enuroment * (benefit_fuel_rate / 100)
+        rent_bik = Decimal("0.00")
+        fuel_bik = Decimal("0.00")
+        
+        if has_rent:
+            rent_bik = total_cash_enuroment * (benefit_rent_rate / 100)
+        if has_fuel:
+            fuel_bik = total_cash_enuroment * (benefit_fuel_rate / 100)
+            
         total_bik = rent_bik + fuel_bik
 
         benefit_in_kind_list = {

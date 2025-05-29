@@ -3,11 +3,11 @@
 
 
 <div class="row">
-    <div class="col-md-4 mt-5">
+    <div class="col-lg-3 mt-5">
       {% include "partials/_filter.html" %} 
     </div>
 
-    <div class="col-md-8 pt-3 mt-5">
+    <div class="col-lg-9 pt-3 mt-5">
         <div class="card pt-1">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-3 text-dark"><strong>Staff Count: {{ staff_count }}</strong></h5>
@@ -61,7 +61,7 @@
                                             </td>
                                             <td>{{ company_data.staff_cat }}</td>
                                             <td>
-                                                <span class="badge {% if company_data.active_status == 'Active' %}bg-success{% elif company_data.active_status == 'Inactive' %}bg-danger{% else %}bg-warning{% endif %} rounded-pill d-inline">
+                                                <span class="badge {% if company_data.active_status == 'Active' %}bg-success{% elif company_data.active_status == 'Inactive' %}bg-danger{% elif company_data.active_status == 'Dormant' %}bg-primary{% endif %} rounded-pill d-inline">
                                                     {{ company_data.active_status }}
                                                 </span>
                                             </td>

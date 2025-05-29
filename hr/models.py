@@ -418,15 +418,12 @@ def update_company_info_on_approval_or_disapproval(sender, instance, **kwargs):
     else:
         if instance.is_approved:
             if company_info:
-                company_info.active_status = 'Dormant'
+                company_info.active_status = 'Inactive'
                 company_info.save()
         elif instance.is_disapproved:
             if company_info:
                 company_info.active_status = 'Active'
                 company_info.save()
-    
-    
-    
     
     
     
