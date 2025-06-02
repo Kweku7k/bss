@@ -52,6 +52,10 @@ def parse_date(date_str):
         raise ValueError(f"Invalid date format: {date_str}. Expected format is YYYY-MM-DD.")
 
 
+def to_bool(val):
+    return str(val).strip().lower() in ['true', '1', 'yes']
+
+
 @login_required
 def view_logs(request):
     log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'activity.log')
@@ -111,11 +115,13 @@ def index(request):
             print("Trying to Login", user)
             if user is not None:
                 # Check if the user is not approve and redirect
-                if not user.approval:
+                if not user.approval and not user.is_superuser:
+                    logger.warning(f"Login attempt by unapproved user: {user.username}")
                     messages.error(request, "Your account is not approved yet. Please contact the administrator.")
                     return render(request, 'authentication/waiting_approval.html')
                 login(request, user)
                 messages.success(request, f"Login Successful. Welcome Back {user.username}")
+                logger.info(f"Login Successful: {user.username}")
                 return redirect('landing')
             else:
                 messages.error(request, "Invalid login credentials.")
@@ -356,7 +362,7 @@ def allstaff(request):
     company_info = CompanyInformation.objects.all()
 
     # Pagination
-    paginator = Paginator(staffs, 10)
+    paginator = Paginator(staffs, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -528,19 +534,19 @@ def report(request):
                 
         # Filter by Renewal History
         if filter_renewal == "true":
-            renewal_staffno = {renewal.staffno_id for renewal in RenewalHistorys.objects.all()}
+            renewal_staffno = {renewal.staffno_id for renewal in RenewalHistorys.objects.filter(is_approved=True, is_disapproved=False)}
             filters &= Q(staffno__in=renewal_staffno)
             
         # Filter by Promotion History
         if filter_promotion == "true":
-            promotion_staffno = {promotion.staffno_id for promotion in PromotionHistory.objects.all()}
+            promotion_staffno = {promotion.staffno_id for promotion in PromotionHistory.objects.filter(is_approved=True, is_disapproved=False)}
             filters &= Q(staffno__in=promotion_staffno)
 
         # Apply filters to the staff queryset
         staffs = staffs.filter(filters).distinct()  # Ensure distinct entries
 
     # Pagination setup
-    paginator = Paginator(staffs, 10)
+    paginator = Paginator(staffs, 30)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -1083,8 +1089,12 @@ def bulk_upload(request):
                                     'bank_name': bank_instance,
                                     'bank_branch': branch_instance, 
                                     'accno': row.get('accno', ''),
-                                    'ssn_con': row.get('ssn_con', ''),
-                                    'pf_con': row.get('pf_con', ''),
+                                    'ssn_con': to_bool(row.get('ssn_con', '')),
+                                    'pf_con': to_bool(row.get('pf_con', '')),
+                                    'acc_name': row.get('acc_name', ''),
+                                    'probation': parse_date(row.get('probation', None)),
+                                    'pte': row.get('pte', ''),
+                                    'basic_entitled_percentage': row.get('basic_entitled_percentage', ''),
                                 }
                             )
                             print("Company Info Done for ", company_info.staffno)
@@ -1093,6 +1103,7 @@ def bulk_upload(request):
                         except Exception as row_error:
                             transaction.savepoint_rollback(savepoint)
                             errors.append(f"Error in row {reader.line_num}: {row_error}")
+                            print(f"Error in row {reader.line_num}, column: {', '.join(row_error.args)}")                                                        
                             continue
                         finally:
                             transaction.savepoint_commit(savepoint)
@@ -1103,8 +1114,11 @@ def bulk_upload(request):
                     logger.info(f"Successfully uploaded {success_count} records by {request.user.username}")
                 
                 if duplicates:
-                    duplicate_message = ', '.join(duplicates)
-                    messages.warning(request, f'Duplicate entries found for the following staff members: {duplicate_message}')
+                    if len(duplicates) > 3:
+                        duplicate_message = f"{', '.join(duplicates[:3])} and {len(duplicates)-3} more"
+                    else:
+                        duplicate_message = ', '.join(duplicates)
+                    messages.warning(request, f'Skipped {len(duplicates)} duplicate entries including: {duplicate_message}')
                 
                 if errors:
                     error_message = "</p><p>".join(errors)
@@ -1123,7 +1137,6 @@ def download_csv(request):
     response = FileResponse(open(file_path, 'rb'), content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="sample_format.csv"'
     return response
-
 
 
 ####### EDUCATIONAL BACKGROUND #################

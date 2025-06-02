@@ -37,7 +37,7 @@ class Employee(models.Model):
     religion  = models.CharField('Religion',max_length=50,blank=True,null=True)
     denomination  = models.CharField('Denomination',max_length=50,blank=True,null=True)
     email_address= models.EmailField('Persoanl Email',max_length=50,blank=True,null=True)
-    active_phone = models.CharField('Active Phone No.',max_length=15,blank=True,null=True)
+    active_phone = models.CharField('Active Phone No.',max_length=30,blank=True,null=True)
     ssnitno = models.CharField('SSNIT No.',max_length=50,blank=True,null=True)
     idtype = models.CharField('ID Type',max_length=50,blank=True,null=True)
     gcardno = models.CharField('ID Card No.',max_length=50,blank=True,null=True)

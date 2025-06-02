@@ -212,6 +212,22 @@
                                     <td class="text-end">{{ payroll_data.benefits_in_kind.fuel_bik }}</td>
                                 </tr>
                                 {% endif %}
+
+                                {% if payroll_data.benefits_in_kind.vechile_bik %}
+                                <tr>
+                                    <td>Vechile Allowance</td>
+                                    <td class="text-end">{{ payroll_data.benefits_in_kind.vechile_bik }}</td>
+                                </tr>
+                                {% endif %}
+
+                                {% if payroll_data.benefits_in_kind.driver_bik %}
+                                <tr>
+                                    <td>Drivers Allowance</td>
+                                    <td class="text-end">{{ payroll_data.benefits_in_kind.driver_bik }}</td>
+                                </tr>
+                                {% endif %}
+
+                                
                             </tbody>
                         </table>
 

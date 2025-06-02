@@ -91,7 +91,7 @@ class PayrollCalculator:
             entitled = Decimal(income["entitled_amount"])
             
             # exclude rent, fuel, miscellaneous, and calculate withholding tax on the rest
-            if income_type not in ["rent", "fuel", "miscellaneous"]:
+            if income_type not in ["rent", "fuel", "miscellaneous", "transportation"]:
                 tax_amount = entitled * (withholding_tax_rate / 100)
                 
                 detail = {
@@ -273,9 +273,15 @@ class PayrollCalculator:
         miscellaneous_amount = Decimal("0.00")
         has_rent = False
         has_fuel = False
+        has_vechile = False
+        has_driver = False
         
-        benefit_rent_rate = Decimal("7.50")
-        benefit_fuel_rate = Decimal("5.00")
+        benefit_rent_rate = self.get_all_income_type().filter(name__iexact="rent").first().bik_rate or Decimal("7.50")
+        benefit_fuel_rate = self.get_all_income_type().filter(name__iexact="fuel").first().bik_rate or Decimal("5.00")
+        benefit_vechile_rate = self.get_all_income_type().filter(name__iexact="Official Car Use").first().bik_rate or Decimal("5.00")
+        benefit_driver_rate = self.get_all_income_type().filter(name__iexact="Drivers Allowance").first().bik_rate or Decimal("2.50")
+        
+        print("Benefit in Kind Rates: ", benefit_rent_rate, benefit_fuel_rate, benefit_vechile_rate, benefit_driver_rate)        
         
         for income in income_list:
             income_type = income["income_type"].lower()
@@ -287,23 +293,36 @@ class PayrollCalculator:
                 has_rent = True
             elif income_type == "fuel":
                 has_fuel = True
+            elif income_type == "official car use":
+                has_vechile = True
+            elif income_type == "drivers allowance":
+                has_driver = True
                 
         total_cash_enuroment = basic_salary + miscellaneous_amount
         print("Total Cash Enuroment: ", total_cash_enuroment)
         
         rent_bik = Decimal("0.00")
         fuel_bik = Decimal("0.00")
+        vechile_bik = Decimal("0.00")
+        driver_bik = Decimal("0.00")
+        
         
         if has_rent:
             rent_bik = total_cash_enuroment * (benefit_rent_rate / 100)
         if has_fuel:
-            fuel_bik = total_cash_enuroment * (benefit_fuel_rate / 100)
-            
-        total_bik = rent_bik + fuel_bik
+            fuel_bik = min(total_cash_enuroment * (benefit_fuel_rate / 100), Decimal("625.00"))  
+        if has_vechile:
+            vechile_bik = min(total_cash_enuroment * (benefit_vechile_rate / 100), Decimal("625.00"))
+        if has_driver:
+            driver_bik = min(total_cash_enuroment * (benefit_driver_rate / 100), Decimal("250.00"))
+                      
+        total_bik = rent_bik + fuel_bik + vechile_bik + driver_bik
 
         benefit_in_kind_list = {
             "rent_bik": round(rent_bik, 2),
             "fuel_bik": round(fuel_bik, 2),
+            "vechile_bik": round(vechile_bik, 2),
+            "driver_bik": round(driver_bik, 2),
             "total_bik": round(total_bik, 2)
         }
 
