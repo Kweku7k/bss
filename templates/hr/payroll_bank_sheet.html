@@ -1,6 +1,7 @@
 {% extends "base.html" %} 
 {% load static %}
 {% block content %}
+{% load custom_filters %}
 
 
 <div class="container mt-5">
@@ -23,16 +24,37 @@
     <div class="row">
         <div class="col-md-12">
             <div class="row mb-4">
-                <div class="col-5">
+                <div class="">
                     <h4 class="mb-3 fw-bold">📅 Process Bank Sheet</h4>
                     <form method="get" id="payrollForm">
-                        <div class="input-group">
-                            <label class="input-group-text" for="month">Select Month:</label>
-                            <input class="form-control" type="date" name="month" id="month" required>
-                            <button type="submit" class="btn btn-success" id="processBtn">
-                                <span id="btnText">Prepare Bank Sheet</span>
-                                <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                            </button>
+                        <div class="col-5">
+                            <div class="input-group">
+                                <label class="input-group-text" for="month">Select Month:</label>
+                                <input class="form-control" type="date" name="month" id="month" required>
+                                <button type="submit" class="btn btn-success" id="processBtn">
+                                    <span id="btnText">Prepare Bank Sheet</span>
+                                    <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h5>Other Filters</h5>
+
+                        <div class="row mb-2">
+                            <div class="col-md-4">           
+                                <div class="input-group mb-2">
+                                    <label class="input-group-text">Bank:</label>
+                                    <select class="form-control" name="bank">
+                                        <option value="">-- Choose Bank --</option>
+                                        {% for bank in banks %}
+                                            <option value="{{ bank.id }}" {% if bank.id|stringformat:"s" == selected_bank_id %}selected{% endif %}>
+                                                {{ bank.bank_short_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -54,26 +76,19 @@
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th>Sort Code</th>
-                            <th>Account Number</th>
-                            <th>Account Name</th>
-                            <th>Narration</th>
-                            <th>Bank Name</th>
-                            <th>Amount</th>
-                            <th>Bank Branch</th>
+                            {% for col in export_format %}
+                                <th>{{ column_labels|get_item:col }}</th>
+                            {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                     {% if payrolls %}
                     {% for payroll_data in payrolls %}
+                        
                         <tr>
-                            <td>{{ payroll_data.sort_code }}</td>
-                            <td>{{ payroll_data.company_info.accno }}</td>
-                            <td>{{ payroll_data.company_info.acc_name }}</td>
-                            <td>Salary for {{ payroll_data.month }}</td>
-                            <td>{{ payroll_data.company_info.bank_name }}</td>
-                            <td>{{ payroll_data.net_salary }}</td>
-                            <td>{{ payroll_data.company_info.bank_branch }}</td>
+                            {% for col in export_format %}
+                                <td>{{ payroll_data|get_item:col }}</td>
+                            {% endfor %}
                         </tr>
                         {% empty %}
                         <tr>

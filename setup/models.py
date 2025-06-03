@@ -23,9 +23,9 @@ class ProfBody(models.Model):
         return self.assoc_long_name
 
 class Bank(models.Model):
-    bank_long_name = models.CharField('Name of Bank',max_length=250,blank=False,null=False)
-    bank_short_name = models.CharField('Bank Short Name',max_length=50,blank=True,null=True)
+    bank_short_name = models.CharField('Bank Short Name',max_length=250,blank=False,null=False)
     bank_notes = models.TextField('Notes',blank=True,null=True)
+    export_format = models.JSONField('Export Format', blank=True, null=True)
     def __str__(self):
         return self.bank_short_name
     

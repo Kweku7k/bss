@@ -1,3 +1,4 @@
+import json
 from django.http import HttpResponseRedirect # type: ignore
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse # type: ignore
@@ -581,14 +582,20 @@ def add_bank(request):
     if request.method == 'POST':
         form = BankForm(request.POST)
         if form.is_valid(): 
-            # Check if the bank already exists
-            bank_long_name = form.cleaned_data.get('bank_long_name')
-            if Bank.objects.filter(bank_long_name=bank_long_name).exists():
-                messages.error(request, f'{bank_long_name} Bank already exists.')
+            bank_short_name = form.cleaned_data.get('bank_short_name')
+            export_format = json.loads(request.POST.get('export_format', '[]'))
+            
+            if Bank.objects.filter(bank_short_name=bank_short_name).exists():
+                messages.error(request, f'{bank_short_name} Bank already exists.')
                 return redirect('add-bank')
             else:
-                form.save()
+                bank = form.save(commit=False)
+                bank.export_format = export_format
+                bank.save()
                 return HttpResponseRedirect('bank?submitted=True')
+            
+        else:
+            print(form.errors)
     else:
         form = BankForm
         if 'submitted' in request.GET:
@@ -612,8 +619,18 @@ def edit_bank(request, bank_id):
     if request.method == 'POST':
         form = BankForm(request.POST, instance=bank)
         if form.is_valid():
-            form.save()
-            return redirect('add-bank')
+            bank_short_name = form.cleaned_data.get('bank_short_name')
+            export_format = json.loads(request.POST.get('export_format', '[]'))
+
+            if Bank.objects.filter(bank_short_name=bank_short_name).exclude(pk=bank_id).exists():
+                messages.error(request, f'{bank_short_name} Bank already exists.')
+                return redirect('add-bank')
+            else:
+                bank = form.save(commit=False)
+                bank.export_format = export_format
+                bank.save()
+                messages.success(request, f'{bank_short_name} Bank updated successfully.')
+                return redirect('add-bank')
 
     context = {'form':form,'banks':banks,'bank_count':bank_count,'bank':bank}
     return render(request, 'setup/add_bank.html', context)
@@ -652,20 +669,26 @@ def delete_bankbranch(request,bankbranch_id):
     return redirect('add-bankbranch')
 
 def edit_bankbranch(request, bankbranch_id,bankid):
-    banks = Bank.objects.order_by('bank_long_name')
+    banks = Bank.objects.order_by('bank_short_name')
     bankbranchs = BankBranch.objects.order_by('-id') 
-    #bankbranchs = bankbranchs.filter(pk__exact=bankbranch_id)
     bankbranchs = bankbranchs.filter(bank_code_id__exact=bankid)
     bankbranch_count = bankbranchs.count()
     bankbranch = BankBranch.objects.get(pk=bankbranch_id)
-    #bank_pk = bankid
     form = BankBranchForm(instance=bankbranch)
 
     if request.method == 'POST':
         form = BankBranchForm(request.POST, instance=bankbranch)
         if form.is_valid():
-            form.save()
-            return redirect('add-bankbranch')
+            # Check if the bank branch already exists
+            branch_name = form.cleaned_data.get('branch_name')
+            bank_code = form.cleaned_data.get('bank_code')
+
+            if BankBranch.objects.filter(branch_name=branch_name, bank_code=bank_code).exclude(pk=bankbranch_id).exists():
+                messages.error(request, f'{branch_name} Branch already exists for {bank_code} Bank.')
+                return redirect('add-bankbranch')
+            else:
+                form.save()
+                return redirect('add-bankbranch')
 
     context = {
                 'form':form,

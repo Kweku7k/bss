@@ -91,7 +91,7 @@ class PayrollCalculator:
             entitled = Decimal(income["entitled_amount"])
             
             # exclude rent, fuel, miscellaneous, and calculate withholding tax on the rest
-            if income_type not in ["rent", "fuel", "miscellaneous", "transportation"]:
+            if income_type not in ["rent", "fuel", "miscellaneous", "transportation", "drivers allowance", "official car use"]:
                 tax_amount = entitled * (withholding_tax_rate / 100)
                 
                 detail = {
@@ -276,10 +276,10 @@ class PayrollCalculator:
         has_vechile = False
         has_driver = False
         
-        benefit_rent_rate = self.get_all_income_type().filter(name__iexact="rent").first().bik_rate or Decimal("7.50")
-        benefit_fuel_rate = self.get_all_income_type().filter(name__iexact="fuel").first().bik_rate or Decimal("5.00")
-        benefit_vechile_rate = self.get_all_income_type().filter(name__iexact="Official Car Use").first().bik_rate or Decimal("5.00")
-        benefit_driver_rate = self.get_all_income_type().filter(name__iexact="Drivers Allowance").first().bik_rate or Decimal("2.50")
+        benefit_rent_rate = self.get_all_income_type().filter(name__iexact="rent").first().bik_rate
+        benefit_fuel_rate = self.get_all_income_type().filter(name__iexact="fuel").first().bik_rate
+        benefit_vechile_rate = self.get_all_income_type().filter(name__iexact="Official Car Use").first().bik_rate
+        benefit_driver_rate = self.get_all_income_type().filter(name__iexact="Drivers Allowance").first().bik_rate
         
         print("Benefit in Kind Rates: ", benefit_rent_rate, benefit_fuel_rate, benefit_vechile_rate, benefit_driver_rate)        
         
@@ -310,11 +310,11 @@ class PayrollCalculator:
         if has_rent:
             rent_bik = total_cash_enuroment * (benefit_rent_rate / 100)
         if has_fuel:
-            fuel_bik = min(total_cash_enuroment * (benefit_fuel_rate / 100), Decimal("625.00"))  
+            fuel_bik = min(total_cash_enuroment * (benefit_fuel_rate / 100), self.get_all_income_type().filter(name__iexact="fuel").first().bik_cap)  
         if has_vechile:
-            vechile_bik = min(total_cash_enuroment * (benefit_vechile_rate / 100), Decimal("625.00"))
+            vechile_bik = min(total_cash_enuroment * (benefit_vechile_rate / 100), self.get_all_income_type().filter(name__iexact="Official Car Use").first().bik_cap)
         if has_driver:
-            driver_bik = min(total_cash_enuroment * (benefit_driver_rate / 100), Decimal("250.00"))
+            driver_bik = min(total_cash_enuroment * (benefit_driver_rate / 100), self.get_all_income_type().filter(name__iexact="Drivers Allowance").first().bik_cap)
                       
         total_bik = rent_bik + fuel_bik + vechile_bik + driver_bik
 

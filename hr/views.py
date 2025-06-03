@@ -171,9 +171,8 @@ def logoutUser(request):
 
 @login_required(login_url='login')
 def landing(request):
-    # staffs = Employee.objects.order_by('lname').filter()
     staffs = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
-    company_info = CompanyInformation.objects.exclude(active_status='Inactive')
+    company_info = CompanyInformation.objects.all()
     active = CompanyInformation.objects.filter(active_status__exact='Active')
     inactive = CompanyInformation.objects.filter(active_status__exact='Inactive')
     dormant = CompanyInformation.objects.filter(active_status__exact='Dormant')
@@ -190,6 +189,13 @@ def landing(request):
     pending_users = User.objects.filter(approval=False)
     pending_exits = Exits.objects.filter(is_approved=False, is_disapproved=False)
     
+    for staff in sixty_and_above:
+        staff_company_info = CompanyInformation.objects.filter(staffno=staff).first()
+        
+        if staff_company_info and staff_company_info.ssn_con:
+            staff_company_info.ssn_con = False
+            staff_company_info.save()
+            logger.info(f"Disabled SSN contribution for {staff.fname} {staff.lname} due to age over 60")  
     
     notification_count = ( expiring_soon.count() + sixty_and_above.count() + pending_renewals.count() + pending_promotions.count() )
 
@@ -751,7 +757,6 @@ def company_info(request,staffno):
         'company_infos':company_infos,
         'staff':staff,
         'staffcategory':staffcategory,
-        'contract':contract,
         'campus':campus,
         'bank_list':bank_list,
         'bankbranches':bankbranches,
@@ -2793,17 +2798,26 @@ def payroll_processing(request):
 @login_required
 @role_required(['superadmin'])
 def payroll_register(request):
-    selected_month = request.GET.get("month")  # format: "2025-04"
+    selected_month = request.GET.get("month")
+    selected_staff_cat = request.GET.get("staff_cat", None)
     all_payrolls = []
+    filters = Q()
 
     if selected_month:
         current_month_date = date.fromisoformat(selected_month)
-        staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
+        
+        if selected_staff_cat:
+            filters &= Q(companyinformation__staff_cat=selected_staff_cat)
+            
+        staff_list = Employee.objects.filter(filters).exclude(companyinformation__active_status='Inactive').order_by('lname')
+        if not staff_list:
+            messages.error(request, "No staff found for the selected criteria.")
+            return redirect('payroll-register')
 
         for staff in staff_list:
             company_info = CompanyInformation.objects.filter(staffno=staff).first()
             if not company_info:
-                continue  # skip if company info is missing
+                continue 
 
             payroll = PayrollCalculator(staffno=staff, month=current_month_date)
 
@@ -2837,17 +2851,36 @@ def payroll_register(request):
 @login_required
 @role_required(['superadmin'])
 def payroll_bank_sheet(request):
-    selected_month = request.GET.get("month")  # format: "2025-04"
+    banks = Bank.objects.all().order_by('bank_short_name')
+    selected_month = request.GET.get("month")
+    selected_bank = request.GET.get("bank", None)
     all_payrolls = []
+    DEFAULT_EXPORT_FORMAT = ["sort_code","accno","acc_name","narration","bank_name","net_salary","bank_branch",]
+    COLUMN_LABELS = {"accno": "Account Number","acc_name": "Account Name","narration": "Narration","bank_name": "Bank Name","sort_code": "Sort Code","net_salary": "Net Salary","bank_branch": "Bank Branch",}
+    export_format = DEFAULT_EXPORT_FORMAT
+    
+    filters = Q()
 
     if selected_month:
         current_month_date = date.fromisoformat(selected_month)
-        staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
-
+        
+        if selected_bank:
+            selected_bank = get_object_or_404(Bank, pk=selected_bank)
+            filters &= Q(companyinformation__bank_name=selected_bank.bank_short_name)
+            if selected_bank.export_format:
+                export_format = selected_bank.export_format
+            print("Selected Bank:", selected_bank)        
+        
+        staff_list = Employee.objects.filter(filters).exclude(companyinformation__active_status='Inactive').order_by('lname')
+        print("Staff List:", staff_list)
+        if not staff_list:
+            messages.error(request, "No staff found for the selected criteria.")
+            return redirect('payroll-bank-sheet')
+        
         for staff in staff_list:
             company_info = CompanyInformation.objects.filter(staffno=staff).first()
             if not company_info:
-                continue  # skip if company info is missing
+                continue
             
             branch_name = company_info.bank_branch
             bank_name = company_info.bank_name
@@ -2867,6 +2900,11 @@ def payroll_bank_sheet(request):
                 "month": current_month_date.strftime("%B %Y"),
                 "net_salary": payroll.get_net_salary(),
                 "sort_code": sort_code,
+                "bank_branch": company_info.bank_branch,
+                "bank_name": company_info.bank_name,
+                "accno": company_info.accno,
+                "acc_name": company_info.acc_name,
+                "narration": f"Salary for {current_month_date.strftime('%B %Y')}",     
             }
 
             all_payrolls.append(payroll_data)
@@ -2874,7 +2912,11 @@ def payroll_bank_sheet(request):
         messages.success(request, f"Bank Sheet for {selected_month} has been generated succesfully")
     context = {
         "payrolls": all_payrolls,
-        "selected_month": selected_month
+        "selected_month": selected_month,
+        "selected_bank": selected_bank,
+        "export_format": export_format,
+        "banks": banks,
+        "column_labels": COLUMN_LABELS,
     }
     return render (request, 'hr/payroll_bank_sheet.html', context)
 
