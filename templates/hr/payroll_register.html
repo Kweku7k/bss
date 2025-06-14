@@ -23,16 +23,108 @@
     <div class="row">
         <div class="col-md-12">
             <div class="row mb-4">
-                <div class="col-5">
+                <div class="">
                     <h4 class="mb-3 fw-bold">📅 Process Payroll Register</h4>
                     <form method="get" id="payrollForm">
-                        <div class="input-group">
-                            <label class="input-group-text" for="month">Select Month:</label>
-                            <input class="form-control" type="date" name="month" id="month" required>
-                            <button type="submit" class="btn btn-success" id="processBtn">
-                                <span id="btnText">Process Register</span>
-                                <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                            </button>
+                        <div class="col-5">
+                            <div class="input-group">
+                                <label class="input-group-text" for="month">Select Month:</label>
+                                <input class="form-control" type="date" name="month" id="month" value="{{ selected_month|default:'' }}" required>
+                                <button type="submit" class="btn btn-success" id="processBtn">
+                                    <span id="btnText">Process Register</span>
+                                    <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+                        <h5>Other Filters</h5>
+
+                        <div class="row mb-2">
+                            <div class="col-md-4">           
+                                <div class="input-group mb-2">
+                                    <label for="staff_cat" class="input-group-text">Categories:</label>
+                                    <select class="form-control"id="staff_cat" name="staff_cat">
+                                        <option value="" disabled selected>N/A</option>
+                                        {% for sc in staff_categories %}
+                                            <option value="{{ sc.category_name }}" {% if sc.category_name == selected_staff_cat %}selected{% endif %}>
+                                                {{ sc.category_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">           
+                                <div class="input-group mb-2">
+                                    <label for="school" class="input-group-text">School:</label>
+                                    <select class="form-control"id="school" name="school">
+                                        <option value="" disabled selected>N/A</option>
+                                        {% for ss in schools %}
+                                            <option value="{{ ss.sch_fac_name }}" {% if ss.sch_fac_name == selected_school %}selected{% endif %}>
+                                                {{ ss.sch_fac_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="col-md-4">           
+                                <div class="input-group mb-2">
+                                    <label for="department" class="input-group-text">Department:</label>
+                                    <select class="form-control"id="department" name="department">
+                                        <option value="" disabled selected>N/A</option>
+                                        {% for dept in departments %}
+                                            <option value="{{ dept.dept_long_name }}" {% if dept.dept_long_name == selected_department %}selected{% endif %}>
+                                                {{ dept.dept_long_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">           
+                                <div class="input-group mb-2">
+                                    <label for="directorate" class="input-group-text">Directorate:</label>
+                                    <select class="form-control"id="directorate" name="directorate">
+                                        <option value="" disabled selected>N/A</option>
+                                        {% for dt in directorate %}
+                                            <option value="{{ dt.direct_name }}" {% if dt.direct_name == selected_directorate %}selected{% endif %}>
+                                                {{ dt.direct_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">           
+                                <div class="input-group mb-2">
+                                    <label for="bank" class="input-group-text">Bank:</label>
+                                    <select class="form-control"id="bank" name="bank">
+                                        <option value="" disabled selected>N/A</option>
+                                        {% for bk in banks %}
+                                            <option value="{{ bk.bank_short_name }}" {% if bk.bank_short_name == selected_bank %}selected{% endif %}>
+                                                {{ bk.bank_short_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">           
+                                <div class="input-group mb-2">
+                                    <label for="campus" class="input-group-text">Campus:</label>
+                                    <select class="form-control"id="campus" name="campus">
+                                        <option value="" disabled selected>N/A</option>
+                                        {% for cp in campus %}
+                                            <option value="{{ cp.campus_name }}" {% if cp.campus_name == selected_campus %}selected{% endif %}>
+                                                {{ cp.campus_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -42,12 +134,22 @@
             <div class="row mb-4 mt-5">
                 <div class="row mb-4 align-items-end justify-content-between">
                     <div class="col-md-7 text-start">
-                        <h4 class="text-start">Payroll Register</h4>
+                        <h4 class="text-start fw-bold">Payroll Register</h4>
                         {% if selected_month %}<h6>For the month of {{ selected_month }}</h6>{% endif %}
                     </div>
 
-                    <div class="col-md-3 float-end">
-                        <a href="" class="btn btn-outline-secondary float-end" target="_blank">Download PDF</a>
+                    <div class="col-md-3">
+                        {% if payrolls %}
+                        <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
+                            <label for="format" class="form-label mb-0">Export</label>
+                            <select name="format" id="format" class="form-select form-select-sm" style="width: auto;">
+                                <option value="">Select format</option>
+                                <option value="pdf">PDF</option>
+                                <option value="excel">Excel</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-success">Download</button>
+                        </form>
+                        {% endif %}
                     </div>
                 </div>
 

@@ -206,6 +206,9 @@ class ChoicesMedicalType(models.Model):
 class ChoicesContribution(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
+class ChoicesLoanType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
 class ProfessionalBody(models.Model):
     staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE) # Link to Employees model
     assoc_code = models.CharField(ProfBody,max_length=50,blank=False,null=False) #Link this to the Prof. Body
@@ -530,6 +533,46 @@ class StaffDeduction(models.Model):
     def __str__(self):
         return f"{self.deduction_type} - {self.staffno}"
     
+    
+class StaffLoan(models.Model):
+    staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE)
+    loan_type = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    monthly_installment = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total_interest = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    duration_months = models.IntegerField(null=True, blank=True)
+    months_left = models.IntegerField(null=True, blank=True)
+    is_active = models.BooleanField(default=False)
+    notes = models.TextField(max_length=300, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.loan_type} - {self.staffno} ({self.amount}) - {self.start_date} to {self.end_date})"
+    
+    def save(self, *args, **kwargs):
+        if self.start_date and self.end_date:
+            self.duration_months = (self.end_date.year - self.start_date.year) * 12 + (self.end_date.month - self.start_date.month) + 1
+            
+        if self.amount and self.total_interest and self.duration_months:
+            self.monthly_installment = (self.amount + self.total_interest) / self.duration_months
+            
+        if self.duration_months and self.months_left is None:
+            self.months_left = self.duration_months
+            
+        super().save(*args, **kwargs)
+        
+        
+class LoanPayment(models.Model):
+    loan = models.ForeignKey(StaffLoan, on_delete=models.CASCADE, related_name='payments')
+    payment_date = models.DateField()
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2)
+    created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.loan.staffno} paid {self.amount_paid} on {self.payment_date}"
+            
     
 class Payroll(models.Model):
     staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE)

@@ -1,0 +1,96 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+
+
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast show bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+        <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body text-white">
+            {{ message }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="container">
+            <div class="d-flex justify-content-between mb-3">
+                {% if report_for == "all" %}
+                    <h4 class="mb-3 fw-bold">📅 Payroll History for All Staff</h4>
+                {% elif report_for and payroll_data %}
+                    <h4 class="mb-0">Payroll History for {{ payroll_data.0.staff.fname }} {{ payroll_data.0.staff.lname }}</h4>
+                {% else %}
+                    <h4 class="mb-0">Payroll History Report</h4>
+                {% endif %}
+
+                {% if payroll_data %}
+                <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
+                    <label for="format" class="form-label mb-0">Export</label>
+                    <select name="format" id="format" class="form-select form-select-sm" style="width: auto;">
+                        <option value="">Select format</option>
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-success">Download</button>
+                </form>
+                {% endif %}
+            </div>
+
+
+            <form method="get" class="row g-2 mb-4">
+                <div class="col-md-4">
+                    <label for="staffno" class="form-label">Select Staff</label>
+                    <select name="staffno" id="staffno" class="form-select">
+                        <option value="">-- Choose --</option>
+                        <option value="all" {% if report_for == 'all' %}selected{% endif %}>All Staff</option>
+                        {% for emp in employees %}
+                            <option value="{{ emp.pk }}" {% if report_for == emp.pk|stringformat:"s" %}selected{% endif %}>
+                                {{ emp.fname }} {{ emp.lname }} ({{ emp.staffno }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Generate</button>
+                </div>
+            </form>
+
+
+
+            {% if report_for %}
+                {% for entry in payroll_data %}
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between">
+                            <strong>{{ entry.staff.fname }} {{ entry.staff.lname }}</strong>
+                            <span class="text-muted">{{ entry.payroll.month }}</span>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Basic Salary:</strong> GH₵ {{ entry.payroll.basic_salary }}</p>
+                            <p><strong>Total Income:</strong> GH₵ {{ entry.payroll.total_income }}</p>
+                            <p><strong>Gross Salary:</strong> GH₵ {{ entry.payroll.gross_salary }}</p>
+                            <p><strong>Income Tax:</strong> GH₵ {{ entry.payroll.income_tax }}</p>
+                            <p><strong>SSF:</strong> GH₵ {{ entry.payroll.ssf }}</p>
+                            <p><strong>PF (Employee):</strong> GH₵ {{ entry.payroll.pf_employee }}</p>
+                            <p><strong>PF (Employer):</strong> GH₵ {{ entry.payroll.pf_employer }}</p>
+                            <p><strong>Other Deductions:</strong> GH₵ {{ entry.payroll.other_deductions }}</p>
+                            <p><strong>Total Deduction:</strong> GH₵ {{ entry.payroll.total_deduction }}</p>
+                            <p><strong>Net Salary:</strong> GH₵ {{ entry.payroll.net_salary }}</p>
+                            <p><strong>Cost Center:</strong> {{ entry.payroll.cost_center }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

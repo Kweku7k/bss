@@ -1,0 +1,163 @@
+{% comment %} {% include "partials/_staffdetails_newsidebar.html" %} {% endcomment %}
+{% include "partials/_topnav.html" %} 
+{% load static %}
+
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
+
+    <div class="col-md-8 mt-3 py-5 ">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h5 class="my-3 text-primary"><strong>Staff Loan for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        
+                        {% if staff.staff_pix %}
+                            <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
+                        {% else %}
+                            <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
+                        {% endif %}
+                    </div>
+                 
+                    <h5><b>Staff Loans ({{ staff_loan_count }})</b></h5>
+
+                    {% if staff_loans %}
+                    <table class="table table-striped mb-5">
+                        <thead>
+                            <tr>
+                                <th>Loan Type</th>
+                                <th>Amount (Ghc)</th>
+                                <th>Monthly Installment</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Duration (Months)</th>
+                                <th>Months Left</th>
+                                <th>Active</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for loan in staff_loans %}
+                            <tr>
+                                <td>{{ loan.loan_type }}</td>
+                                <td>{{ loan.amount|floatformat:2 }}</td>
+                                <td>{{ loan.monthly_installment|floatformat:2 }}</td>
+                                <td>{{ loan.start_date }}</td>
+                                <td>{{ loan.end_date }}</td>
+                                <td>{{ loan.duration_months }}</td>
+                                <td>{{ loan.months_left }}</td>
+                                <td>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" {% if loan.is_active %}checked{% endif %} disabled>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                        <p>No loans found for this staff.</p>
+                    {% endif %}
+
+
+
+                    <!-- Loan Request Form -->
+                    <h5><b>Add Staff Loan</b></h5>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row g-3 mb-4">
+
+                            <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+                            <div class="col-md-4">
+                                <label for="loan_type" class="form-label">Loan Type</label>
+                                <select name="loan_type" class="form-control" required>
+                                    <option selected disabled value="">-- Select Type --</option>
+                                    {% for lt in loan_types %}
+                                        <option value="{{ lt.name }}">{{ lt.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="amount" class="form-label">Loan Amount (Ghc)</label>
+                                <input type="number" step="0.01" name="amount" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="total_interest" class="form-label">Total Interest (Ghc)</label>
+                                <input type="number" step="0.01" name="total_interest" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="start_date" class="form-label">Start Date</label>
+                                <input type="date" name="start_date" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="end_date" class="form-label">End Date</label>
+                                <input type="date" name="end_date" class="form-control" required>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label for="is_active" class="form-label">Activate Now?</label>
+                                <select name="is_active" class="form-control">
+                                    <option value="True">Yes</option>
+                                    <option value="False" selected>No</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="notes" class="form-label">Notes (Optional)</label>
+                                <textarea name="notes" class="form-control" rows="4"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-4">
+                            <button type="submit" class="btn btn-info me-2">Create a Loan</button>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    function clampInput(selector) {
+        document.querySelector(selector).addEventListener('input', function () {
+            let val = parseFloat(this.value);
+            if (val > 100) {
+                alert("Value cannot exceed 100.");
+                this.value = 100;
+            } else if (val < 0) {
+                this.value = 0;
+            }
+        });
+    }
+    
+    clampInput('input[name="percentage_of_basic"]');
+</script>

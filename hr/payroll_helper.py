@@ -1,5 +1,6 @@
 from decimal import Decimal
-from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType
+from django.db.models import Sum
+from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType, StaffLoan
 
 class PayrollCalculator:
     def __init__(self, staffno, month):
@@ -74,6 +75,49 @@ class PayrollCalculator:
         print("Gross Income: ", gross_income)
         return gross_income
     
+    
+    
+    def get_active_loan_deductions(self):
+        selected_month = self.month
+
+        active_loans = StaffLoan.objects.filter(
+            staffno=self.staffno,
+            start_date__year__lte=selected_month.year,
+            start_date__month__lte=selected_month.month,
+            end_date__year__gte=selected_month.year,
+            end_date__month__gte=selected_month.month,
+            is_active=True
+        )
+
+        loan_deductions = []
+
+        for loan in active_loans:
+            total_loan = loan.amount + loan.total_interest
+            monthly_installment = loan.monthly_installment
+            
+            # Get actual amount paid so far
+            total_paid = loan.payments.filter(payment_date__year__lte=selected_month.year, payment_date__month__lte=selected_month.month).aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')            
+            outstanding_balance = total_loan - total_paid
+            months_left = int(outstanding_balance / monthly_installment) if monthly_installment > 0 else 0
+
+            loan_deductions.append({
+                "id": loan.id,
+                "type": f"{loan.loan_type}",
+                "monthly_installment": round(monthly_installment, 2),
+                "meta": {
+                    "duration_months": loan.duration_months,
+                    "months_left": months_left,
+                    "start_date": loan.start_date,
+                    "end_date": loan.end_date,
+                    "principal_amount": round(total_loan, 2),
+                    "amount_paid": round(total_paid, 2),
+                    "outstanding_balance": round(outstanding_balance, 2),
+                }
+            })
+
+        print("Loan details", loan_deductions)
+        return loan_deductions
+
     
     
     def get_tax_for_taxable_income(self):
@@ -226,6 +270,16 @@ class PayrollCalculator:
             })
             
             total_deduction += deductable
+            
+            
+        # Add loan deductions as standalone entries
+        for loan in self.get_active_loan_deductions():
+            deduction_list.append({
+                "deduction_type": loan["type"],
+                "deductable_amount": loan["monthly_installment"],
+                "meta": loan["meta"]
+            })
+            total_deduction += loan["monthly_installment"]
         
         print(f"Staff Deductions: {round(total_deduction, 2)}")
         return {"deductions": deduction_list, "total_deduction": round(total_deduction, 2)}

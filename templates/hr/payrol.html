@@ -234,7 +234,36 @@
                         <p><strong>Total Benefits In Kind:</strong> GH₵{{ payroll_data.benefits_in_kind.total_bik }}</p>
                     </div>
                 {% endif %}
+
+                {% if payroll_data.loan_details %}
+                    <div class="col-md-6">
+                        <h5 class="fw-bold">Loan Details</h5>
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Loan Type</th>
+                                    <th class="text-end">Principal (GH₵)</th>
+                                    <th class="text-end">Outstanding (GH₵)</th>
+                                    <th class="text-end">Paid (GH₵)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for loan in payroll_data.loan_details %}
+                                    <tr>
+                                        <td>{{ loan.type }}</td>
+                                        <td class="text-end">{{ loan.meta.principal_amount }}</td>
+                                        <td class="text-end">{{ loan.meta.outstanding_balance }}</td>
+                                        <td class="text-end">{{ loan.meta.amount_paid }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
             </div>
+
+
+
             <hr>
             <div class="row">
                 <div class="col-md-3">

@@ -124,6 +124,13 @@
                 </li>
 
                 <li class="nav-item active">
+                    <a class="nav-link" href="{% url 'create-staff-loan' staff.staffno  %}">
+                        <i class="fas fa-fw fa-circle"></i>
+                        <span>Staff Loan</span>
+                    </a>
+                </li>
+
+                <li class="nav-item active">
                     <a class="nav-link" href="{% url 'payroll-details' staff.staffno  %}">
                         <i class="fas fa-fw fa-circle"></i>
                         <span>Process Salary</span>

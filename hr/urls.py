@@ -139,9 +139,21 @@ urlpatterns = [
     path('edit_staff_deduction/<str:staffno>/<int:deduction_id>', views.edit_staff_deduction, name='edit-staff-deduction'),
     # path('delete_staff_deduction/<str:staffno>/<int:deduction_id>', views.delete_staff_deduction, name='delete-staff-deduction'),
     
+    path('create_staff_loan/<str:staffno>', views.create_staff_loan, name='create-staff-loan'),
+    # path('edit_staff_loan/<str:staffno>/<int:loan_id>', views.edit_staff_loan, name='edit-staff-loan'),
+    
+    path('loan_history/', views.loan_history, name='loan-history'),   
+    path('payroll_history/', views.payroll_history, name='payroll-history'),
+ 
+    
     path('payroll/register/', views.payroll_register, name='payroll-register'),
+    path('payroll/post_payroll/', views.generate_payroll, name='payroll-post-payroll'),
     path('payroll/bank_sheet/', views.payroll_bank_sheet, name='payroll-bank-sheet'),
     path('payroll/salary_increment/', views.staff_salary_increment, name='payroll-salary-increment'),
+    
+    # Payrol Report 
+    path('payroll/report/', views.payroll_report, name='payroll-report'),
+    
     
     path('new_dash/', views.new_landing, name='new-dash'),
 
