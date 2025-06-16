@@ -172,3 +172,25 @@ INFO 2025-06-14 13:58:56,018 Login Successful: Softlife
 INFO 2025-06-14 15:00:56,214 Login Successful: Softlife
 INFO 2025-06-14 17:33:09,812 Login Successful: Softlife
 INFO 2025-06-14 18:39:50,361 Login Successful: Softlife
+INFO 2025-06-16 13:49:02,527 Login Successful: Softlife
+INFO 2025-06-16 13:59:14,771 Login Successful: Softlife
+INFO 2025-06-16 15:02:12,957 Login Successful: Softlife
+INFO 2025-06-16 17:03:46,959 Login Successful: Softlife
+INFO 2025-06-16 17:06:51,719 Login Successful: hradmin
+INFO 2025-06-16 17:06:53,106 Disabled SSN contribution for James Amezi due to age over 60
+INFO 2025-06-16 17:06:53,118 Disabled SSN contribution for Emma Bedzo due to age over 60
+INFO 2025-06-16 17:06:53,128 Disabled SSN contribution for Jonathan Djangmah due to age over 60
+INFO 2025-06-16 17:06:53,148 Disabled SSN contribution for Emmanuel Duker due to age over 60
+INFO 2025-06-16 17:06:53,158 Disabled SSN contribution for Stella Etse due to age over 60
+INFO 2025-06-16 17:06:53,172 Disabled SSN contribution for Georgina Myers due to age over 60
+INFO 2025-06-16 17:06:53,186 Disabled SSN contribution for Charles Nsiah due to age over 60
+INFO 2025-06-16 17:06:53,208 Disabled SSN contribution for Bill Puplampu due to age over 60
+INFO 2025-06-16 17:06:53,220 Disabled SSN contribution for Nii Wilson due to age over 60
+INFO 2025-06-16 19:58:49,165 Login Successful: Softlife
+INFO 2025-06-16 20:01:32,988 Login Successful: hradmin
+INFO 2025-06-16 20:06:03,641 Logout Successful: hradmin
+WARNING 2025-06-16 20:07:03,912 Login attempt by unapproved user: Andrew
+INFO 2025-06-16 20:07:57,454 Login Successful: hradmin
+INFO 2025-06-16 21:06:39,096 Disabled SSN contribution for Edmond Boateng (Retirement Age 60)
+INFO 2025-06-16 21:09:37,919 Login Successful: hradmin
+INFO 2025-06-16 21:38:55,422 Login Successful: Softlife

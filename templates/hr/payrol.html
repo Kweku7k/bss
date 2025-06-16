@@ -243,8 +243,8 @@
                                 <tr>
                                     <th>Loan Type</th>
                                     <th class="text-end">Principal (GH₵)</th>
-                                    <th class="text-end">Outstanding (GH₵)</th>
                                     <th class="text-end">Paid (GH₵)</th>
+                                    <th class="text-end">Outstanding (GH₵)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -252,8 +252,8 @@
                                     <tr>
                                         <td>{{ loan.type }}</td>
                                         <td class="text-end">{{ loan.meta.principal_amount }}</td>
-                                        <td class="text-end">{{ loan.meta.outstanding_balance }}</td>
                                         <td class="text-end">{{ loan.meta.amount_paid }}</td>
+                                        <td class="text-end">{{ loan.meta.outstanding_balance }}</td>
                                     </tr>
                                 {% endfor %}
                             </tbody>

@@ -181,21 +181,43 @@ def landing(request):
     
     today = timezone.now().date()
     expiring_soon = company_info.filter(doe__lte=today + timedelta(days=180)).order_by('doe')
-    sixty_and_above = staffs.filter(dob__lte=today - timedelta(days=60*365))
+    sixty_and_above = []
     pending_renewals = RenewalHistorys.objects.filter(is_approved=False, is_disapproved=False)
     pending_promotions = PromotionHistory.objects.filter(is_approved=False, is_disapproved=False)
-    pending_users = User.objects.filter(approval=False)
+    pending_users = User.objects.filter(approval=False, is_superuser=False)    
     pending_exits = Exits.objects.filter(is_approved=False, is_disapproved=False)
     
+    
+    for staff in staffs:
+        company_info = CompanyInformation.objects.filter(staffno=staff).first()
+        if not company_info:
+            continue 
+        
+        staff.company_info = company_info
+
+        retirement_age = 65 if company_info.staff_cat.lower() == "senior member(admin)" else 60
+        retirement_date = today - timedelta(days=retirement_age * 365)
+
+        if staff.dob <= retirement_date:
+            sixty_and_above.append(staff)
+
+            if company_info.ssn_con:
+                company_info.ssn_con = False
+                company_info.save()
+                logger.info(f"Disabled SSN contribution for {staff.fname} {staff.lname} (Retirement Age {retirement_age})")
+                
     for staff in sixty_and_above:
         staff_company_info = CompanyInformation.objects.filter(staffno=staff).first()
         
-        if staff_company_info and staff_company_info.ssn_con:
-            staff_company_info.ssn_con = False
-            staff_company_info.save()
-            logger.info(f"Disabled SSN contribution for {staff.fname} {staff.lname} due to age over 60")  
+        if staff_company_info:
+            staff.company_info = staff_company_info
+            
+            if staff_company_info.ssn_con:
+                staff_company_info.ssn_con = False
+                staff_company_info.save()
+                logger.info(f"Disabled SSN contribution for {staff.fname} {staff.lname} due to age over 60")  
     
-    notification_count = ( expiring_soon.count() + sixty_and_above.count() + pending_renewals.count() + pending_promotions.count() )
+    notification_count = ( expiring_soon.count() + len(sixty_and_above) + pending_renewals.count() + pending_promotions.count() )
 
     context = {
         'staffs':staffs,
@@ -407,6 +429,12 @@ def report(request):
     company_info = CompanyInformation.objects.all()
     staff_school = Staff_School.objects.all()
     
+    staff_category_custom = [
+        ("faculty", "Faculty / Lecturers"),
+        ("admin", "Admin")
+    ]
+
+    
     AGE_CLASSIFICATIONS = {
         "child": (0, 12),
         "teen": (13, 19), 
@@ -443,6 +471,7 @@ def report(request):
     filter_age = None
     filter_renewal = None
     filter_promotion = None
+    filter_category = None
 
     # Initial filter container
     filters = Q()
@@ -462,6 +491,7 @@ def report(request):
         filter_age = request.POST.get('filter_age')
         filter_renewal = request.POST.get('filter_renewal')
         filter_promotion = request.POST.get('filter_promotion')
+        filter_category = request.POST.get('filter_category')
 
         # Filter by Staff Category
         if filter_staffcategory:
@@ -495,13 +525,23 @@ def report(request):
             company_info = CompanyInformation.objects.filter(dept__in=filter_department)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
+            
+            
+        # Filter by Category
+        if filter_category == "faculty":
+            faculty_ids = CompanyInformation.objects.exclude(sch_fac_dir__isnull=True).exclude(sch_fac_dir="").values_list('staffno_id', flat=True)
+            filters &= Q(staffno__in=faculty_ids)
 
-        # Filter by Job Title
+        elif filter_category == "admin":
+            admin_ids = CompanyInformation.objects.exclude(directorate__isnull=True).exclude(directorate="").values_list('staffno_id', flat=True)
+            filters &= Q(staffno__in=admin_ids)
+
+        # Filter by Job Title  
         if filter_jobtitle:
             company_info = CompanyInformation.objects.filter(job_title__in=filter_jobtitle)
             company_staffno = {company.staffno_id for company in company_info}
-            filters &= Q(staffno__in=company_staffno)
-            
+            filters &= Q(staffno__in=company_staffno)  
+                      
         # Filter by Directorate
         if filter_directorate:
             company_info = CompanyInformation.objects.filter(directorate__in=filter_directorate)
@@ -571,6 +611,7 @@ def report(request):
         'directorate': [(q.direct_name, q.direct_name) for q in Directorate.objects.all()],
         'school_faculty': [(q.sch_fac_name, q.sch_fac_name) for q in School_Faculty.objects.all()],
         'age_classifications': AGE_LABELS,
+        'staff_category_custom': staff_category_custom,
         # The filters being used for rendering in the template 
         'filter_staffcategory': filter_staffcategory,
         'filter_qualification': filter_qualification,
@@ -582,6 +623,7 @@ def report(request):
         'filter_jobtitle': filter_jobtitle,
         'filter_directorate': filter_directorate,
         'filter_school_faculty': filter_school_faculty,
+        'filter_category': filter_category,
         'filter_age': filter_age,
         'min_age': min_age,
         'max_age': max_age,
@@ -2723,7 +2765,7 @@ def generate_payroll(request):
                     'total_income': payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
                     'gross_salary': payroll.get_gross_income(),
                     'income_tax': payroll.get_income_tax()["tax"],
-                    'deductions': payroll.get_deductions()["total_deduction"],
+                    'other_deductions': payroll.get_deductions()["total_deduction"],
                     'ssf': payroll.get_ssnit_contribution()["amount"],
                     'pf_employee': payroll.get_pf_contribution()["amount"], 
                     'pf_employer': payroll.get_employer_pf_contribution(),
