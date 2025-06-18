@@ -150,6 +150,8 @@ urlpatterns = [
     path('payroll/post_payroll/', views.generate_payroll, name='payroll-post-payroll'),
     path('payroll/bank_sheet/', views.payroll_bank_sheet, name='payroll-bank-sheet'),
     path('payroll/salary_increment/', views.staff_salary_increment, name='payroll-salary-increment'),
+    path("payroll/toggle_approve/<int:payroll_id>/", views.toggle_approval, name="payroll-toggle-approve"),
+
     
     # Payrol Report 
     path('payroll/report/', views.payroll_report, name='payroll-report'),

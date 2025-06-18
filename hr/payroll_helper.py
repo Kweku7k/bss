@@ -31,10 +31,8 @@ class PayrollCalculator:
 
         incomes = StaffIncome.objects.filter(
             staffno=self.staffno,
-            start_month__year__lte=selected_month.year,
-            start_month__month__lte=selected_month.month,
-            end_month__year__gte=selected_month.year,
-            end_month__month__gte=selected_month.month,
+            start_month__lte=selected_month,
+            end_month__gte=selected_month,
         )
 
         entitlement_list = []
@@ -82,14 +80,14 @@ class PayrollCalculator:
 
         active_loans = StaffLoan.objects.filter(
             staffno=self.staffno,
-            start_date__year__lte=selected_month.year,
-            start_date__month__lte=selected_month.month,
-            end_date__year__gte=selected_month.year,
-            end_date__month__gte=selected_month.month,
+            start_date__lte=selected_month,
+            end_date__gte=selected_month,
             is_active=True
         )
+        
 
         loan_deductions = []
+        print("This is what is active", active_loans)
 
         for loan in active_loans:
             total_loan = loan.amount + loan.total_interest
@@ -242,10 +240,8 @@ class PayrollCalculator:
         
         deductions = StaffDeduction.objects.filter(
             staffno=self.staffno,
-            start_month__year__lte=selected_month.year,
-            start_month__month__lte=selected_month.month,
-            end_month__year__gte=selected_month.year,
-            end_month__month__gte=selected_month.month,
+            start_month__lte=selected_month,
+            end_month__gte=selected_month,
         )
         
         deduction_list = []

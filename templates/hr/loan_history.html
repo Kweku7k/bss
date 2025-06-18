@@ -46,6 +46,10 @@
 
 
             <form method="get" class="row g-2 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label" for="month">Select Month:</label>
+                    <input class="form-control" type="date" name="month" id="month" value="{{ selected_month|default:'' }}" required>
+                </div>
                 <div class="col-md-4">
                     <label for="staffno" class="form-label">Select Staff</label>
                     <select name="staffno" id="staffno" class="form-select">
@@ -58,6 +62,15 @@
                         {% endfor %}
                     </select>
                 </div>
+                <div class="col-md-3">
+                    <label for="filter_status" class="form-label">Status</label>
+                    <select name="filter_status" id="filter_status" class="form-select">
+                        <option value="">-- All --</option>
+                        <option value="active" {% if filter_status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if filter_status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                
                 <div class="col-md-2 d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">Generate</button>
                 </div>
@@ -65,7 +78,51 @@
 
 
 
-            {% for entry in history_data %}
+
+            {% if history_data %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>Staff No</th>
+                                <th>Name</th>
+                                <th>Loan Type</th>
+                                <th>Duration</th>
+                                <th>Months Left</th>
+                                <th>Principal</th>
+                                <th>Principal Left</th>
+                                <th>Total Interest</th>
+                                <th>Interest Left</th>
+                                <th>Monthly Deduction</th>
+                                <th>Outstanding</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in history_data %}
+                                <tr>
+                                    <td>{{ entry.staff.staffno }}</td>
+                                    <td>{{ entry.staff.fname }} {{ entry.staff.lname }}</td>
+                                    <td>{{ entry.loan.loan_type }}</td>
+                                    <td>{{ entry.duration_months }}</td>
+                                    <td>{{ entry.months_left }}</td>
+                                    <td>{{ entry.total_principal }}</td>
+                                    <td>{{ entry.principal_balance }}</td>
+                                    <td>{{ entry.total_interest }}</td>
+                                    <td>{{ entry.interest_balance }}</td>
+                                    <td>{{ entry.monthly_deduction }}</td>
+                                    <td>{{ entry.outstanding }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted">No loan data found.</p>
+            {% endif %}
+
+
+
+            {% comment %} {% for entry in history_data %}
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between">
                         <strong>{{ entry.staff.fname }} {{ entry.staff.lname }} - {{ entry.loan.loan_type }}</strong>
@@ -103,7 +160,7 @@
                         </table>
                     </div>
                 </div>
-            {% endfor %}
+            {% endfor %} {% endcomment %}
         </div>
     </div>
 </div>

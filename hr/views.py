@@ -30,11 +30,11 @@ from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from hr.decorators import role_required
 from django.db.models.functions import Concat
-from django.db.models import F, Value, CharField
+from django.db.models import F, Value, CharField, Sum
 from datetime import date
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 from hr.utils.export import render_to_excel, render_to_pdf
-
 
 
 
@@ -2736,16 +2736,41 @@ def create_staff_loan(request, staffno):
 
 
 
+@login_required
+@role_required(["superadmin"])
+def toggle_approval(request, payroll_id):
+    payroll = get_object_or_404(Payroll, id=payroll_id)
+    payroll.is_approved = not payroll.is_approved
+    payroll.save()
+    return redirect("payroll-post-payroll")
+
+
 
 ########## GENERATE PAYROLL INFORMATION ###############
 @login_required
 @role_required(['superadmin'])
 def generate_payroll(request):
-    selected_month = request.POST.get("month")
-    all_payrolls = []
+    selected_month = request.POST.get("filter_by_month")
+    selected_year = request.POST.get("filter_by_year")
+    payrolls = Payroll.objects.order_by('-month')
 
-    if selected_month:
-        current_month_date = date.fromisoformat(selected_month)
+    if selected_month and selected_year:        
+        current_month_date = date(int(selected_year), int(selected_month), 28)
+        
+        # Block changes if already approved
+        if Payroll.objects.filter(month=current_month_date, is_approved=True).exists():
+            messages.error(request, f"Payroll for {current_month_date.strftime('%B %Y')} has already been approved and cannot be modified.")
+            return redirect('payroll-post-payroll')
+        
+        # Enforce month-by-month finalization
+        last_approved = Payroll.objects.filter(is_approved=True).order_by('-month').first()
+        if last_approved:
+            expected_next_month = (last_approved.month + relativedelta(months=1)).replace(day=28)
+            if current_month_date != expected_next_month:
+                messages.error(request, f"You must finalize payroll for {expected_next_month.strftime('%B %Y')} before proceeding.")
+                return redirect('payroll-post-payroll')
+        
+        
         # staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
         staff_list = Employee.objects.filter(staffno="20034").exclude(companyinformation__active_status='Inactive').order_by('lname')
         
@@ -2780,7 +2805,7 @@ def generate_payroll(request):
                 payroll_obj.total_income = payroll.get_gross_income() - payroll.get_entitled_basic_salary()
                 payroll_obj.gross_salary = payroll.get_gross_income()
                 payroll_obj.income_tax = payroll.get_income_tax()["tax"]
-                payroll_obj.deductions = payroll.get_deductions()["total_deduction"]
+                payroll_obj.other_deductions = payroll.get_deductions()["total_deduction"]
                 payroll_obj.ssf = payroll.get_ssnit_contribution()["amount"]
                 payroll_obj.pf_employee = payroll.get_pf_contribution()["amount"]
                 payroll_obj.pf_employer = payroll.get_employer_pf_contribution()
@@ -2792,23 +2817,33 @@ def generate_payroll(request):
             
             for loan in loan_deductions:
                 monthly_payment = loan["monthly_installment"]
-    
                 loan_obj = StaffLoan.objects.filter(id=loan["id"]).first()
                 
-                if loan_obj and not LoanPayment.objects.filter(loan=loan_obj, payment_date=current_month_date).exists():
-                    LoanPayment.objects.create(loan=loan_obj,payment_date=current_month_date,amount_paid=monthly_payment)
-                    loan_obj.months_left -= 1
-                    if loan_obj.months_left <= 0:
-                        loan_obj.is_active = False
-                    loan_obj.save()
-
-                
-        context = {
-            'staff': staff,
-            'company_info': company_info,
-        }
-    return render(request, 'hr/payrol.html', context)
-
+                if loan_obj:
+                    # Get or create loan payment record for this month
+                    loan_payment, created = LoanPayment.objects.get_or_create(
+                        loan=loan_obj,
+                        payment_date=current_month_date,
+                        defaults={'amount_paid': monthly_payment}
+                    )
+                    
+                    if created:
+                        # Update loan object
+                        loan_obj.months_left -= 1
+                        if loan_obj.months_left <= 0:
+                            loan_obj.is_active = False
+                        loan_obj.save()
+                    else:
+                        # Update existing loan payment record
+                        loan_payment.amount_paid = monthly_payment
+                        loan_payment.save()
+                    
+        
+        messages.success(request, f"Payroll for {current_month_date.strftime('%B %Y')} has been finalised you can update once not approved")        
+        return redirect('payroll-post-payroll')
+        
+    context = {"selected_month": selected_month, "payrolls":payrolls}
+    return render(request, 'payroll/finalise_payroll.html', context)
 
 
 
@@ -3161,33 +3196,82 @@ def payroll_report(request):
 @login_required
 @role_required(['superadmin'])
 def loan_history(request):
+    selected_month = request.GET.get("month")
     staffno = request.GET.get("staffno")
+    filter_status = request.GET.get("filter_status", None)
+    
     history_data = []
+    filters = Q()
+    
+    if selected_month:
+        current_month_date = date.fromisoformat(selected_month)
+        filters &= Q(start_date__lte=current_month_date, end_date__gte=current_month_date)
 
-    if staffno and staffno != "all":
-        staff = get_object_or_404(Employee, pk=staffno)
-        staff_list = [staff]
-    elif staffno == "all":
-        staff_list = Employee.objects.all()
-    else:
-        staff_list = []
+        if filter_status == "active":
+            filters &= Q(is_active=True)
+        elif filter_status == "inactive":
+            filters &= Q(is_active=False)
 
-    for staff in staff_list:
-        loans = StaffLoan.objects.filter(staffno=staff)
+        if staffno and staffno != "all":
+            filters &= Q(staffno=staffno)
+
+        loans = StaffLoan.objects.filter(filters).order_by('staffno')
+
         for loan in loans:
             payments = loan.payments.order_by('payment_date')
-            total_paid = sum(p.amount_paid for p in payments)
+            
+            # Total value of loan (principal + total interest for full duration)
             total_loan = loan.amount + loan.total_interest
-            outstanding = total_loan - total_paid
+            monthly_installment = loan.monthly_installment
+
+            # Actual amount paid up to and including the selected month
+            total_paid = loan.payments.filter(
+                payment_date__year__lte=current_month_date.year,
+                payment_date__month__lte=current_month_date.month
+            ).aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')
+
+            # Estimate how many full months have been paid
+            months_paid = int(total_paid / monthly_installment) if monthly_installment > 0 else 0
+            months_left = loan.duration_months - months_paid
+
+            # Derive monthly principal and interest portions
+            monthly_principal = loan.amount / loan.duration_months
+            monthly_interest = loan.total_interest / loan.duration_months
+
+            # Estimate how much of the paid amount went to principal and interest
+            principal_paid = months_paid * monthly_principal
+            interest_paid = months_paid * monthly_interest
+
+            # Remaining principal and interest balances
+            principal_balance = loan.amount - principal_paid
+            interest_balance = loan.total_interest - interest_paid
+
+            # Final outstanding = what's left to be paid
+            outstanding = principal_balance + interest_balance
 
             history_data.append({
-                "staff": staff,
+                "staff": loan.staffno,
                 "loan": loan,
                 "payments": payments,
-                "total_paid": total_paid,
-                "outstanding": outstanding,
+                "duration_months": loan.duration_months,
+                "months_paid": months_paid,
+                "months_left": months_left,
+                "monthly_deduction": monthly_installment,
+                "total_loan": round(total_loan, 2),
+                "total_paid": round(total_paid, 2),
+                "principal": round(loan.amount, 2),
+                "principal_paid": round(principal_paid, 2),
+                "principal_balance": round(principal_balance, 2),
+                "total_principal": round(loan.amount, 2),
+                "total_interest": round(loan.total_interest, 2),
+                "interest_paid": round(interest_paid, 2),
+                "interest_balance": round(interest_balance, 2),
+                "outstanding": round(outstanding, 2),
             })
 
+
+    print("Loan History", history_data)
+    
     export_format = request.GET.get("format")
     if export_format == "pdf":
         return render_to_pdf("hr/loan_history.html", {
@@ -3214,8 +3298,10 @@ def loan_history(request):
 
     return render(request, "hr/loan_history.html", {
         "history_data": history_data,
-        "employees": Employee.objects.all(),  # for dropdown
-        "report_for": staffno
+        "employees": Employee.objects.all(),
+        "report_for": staffno,
+        "filter_status": filter_status,
+        "selected_month": selected_month,
     })
 
 
@@ -3223,57 +3309,65 @@ def loan_history(request):
 @login_required
 @role_required(['superadmin'])
 def payroll_history(request):
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
     staffno = request.GET.get("staffno")
     payroll_data = []
-
-    if staffno and staffno != "all":
-        staff = get_object_or_404(Employee, pk=staffno)
-        staff_list = [staff]
-    elif staffno == "all":
-        staff_list = Employee.objects.all()
-    else:
-        staff_list = []
-
-    for staff in staff_list:
-        payrolls = Payroll.objects.filter(staffno=staff).order_by('-month')
-        for p in payrolls:
-            payroll_data.append({
-                "staff": staff,
-                "payroll": p
-            })
-
-    export_format = request.GET.get("format")
     
-    if export_format == "pdf":
-        return render_to_pdf("hr/payroll_history.html", {
-            "payroll_data": payroll_data,
-            "report_for": staffno,
-        }, filename="payroll_history.pdf")
+    if selected_month and selected_year:
+        current_month_date = date(int(selected_year), int(selected_month), 28)
+        
+        if staffno and staffno != "all":
+            staff = get_object_or_404(Employee, pk=staffno)
+            staff_list = [staff]
+        elif staffno == "all":
+            staff_list = Employee.objects.all()
+        else:
+            staff_list = []
 
-    if export_format == "excel":
-        excel_data = {}
-        for entry in payroll_data:
-            p = entry["payroll"]
-            sheet_name = f"{entry['staff'].fname}_{p.month.strftime('%Y-%m')}"
-            excel_data[sheet_name] = [{
-                "Month": p.month,
-                "Basic Salary": float(p.basic_salary or 0),
-                "Total Income": float(p.total_income or 0),
-                "Gross Salary": float(p.gross_salary or 0),
-                "Income Tax": float(p.income_tax or 0),
-                "SSF": float(p.ssf or 0),
-                "PF Employee": float(p.pf_employee or 0),
-                "PF Employer": float(p.pf_employer or 0),
-                "Other Deductions": float(p.other_deductions or 0),
-                "Total Deduction": float(p.total_deduction or 0),
-                "Net Salary": float(p.net_salary or 0),
-                "Cost Center": p.cost_center or "",
-            }]
+        for staff in staff_list:
+            payrolls = Payroll.objects.filter(staffno=staff, month=current_month_date)
+            # payrolls = Payroll.objects.filter(staffno=staff).order_by('-month')
+            for p in payrolls:
+                payroll_data.append({
+                    "staff": staff,
+                    "payroll": p
+                })
 
-        return render_to_excel(excel_data, filename="payroll_history.xlsx")
+        export_format = request.GET.get("format")
+        
+        if export_format == "pdf":
+            return render_to_pdf("hr/payroll_history.html", {
+                "payroll_data": payroll_data,
+                "report_for": staffno,
+            }, filename="payroll_history.pdf")
+
+        if export_format == "excel":
+            excel_data = {}
+            for entry in payroll_data:
+                p = entry["payroll"]
+                sheet_name = f"{entry['staff'].fname}_{p.month.strftime('%Y-%m')}"
+                excel_data[sheet_name] = [{
+                    "Month": p.month,
+                    "Basic Salary": float(p.basic_salary or 0),
+                    "Total Income": float(p.total_income or 0),
+                    "Gross Salary": float(p.gross_salary or 0),
+                    "Income Tax": float(p.income_tax or 0),
+                    "SSF": float(p.ssf or 0),
+                    "PF Employee": float(p.pf_employee or 0),
+                    "PF Employer": float(p.pf_employer or 0),
+                    "Other Deductions": float(p.other_deductions or 0),
+                    "Total Deduction": float(p.total_deduction or 0),
+                    "Net Salary": float(p.net_salary or 0),
+                    "Cost Center": p.cost_center or "",
+                }]
+
+            return render_to_excel(excel_data, filename="payroll_history.xlsx")
 
     return render(request, "hr/payroll_history.html", {
         "payroll_data": payroll_data,
         "employees": Employee.objects.all(),
-        "report_for": staffno
+        "report_for": staffno,
+        "selected_month": selected_month,
+        "selected_year": selected_year,
     })
