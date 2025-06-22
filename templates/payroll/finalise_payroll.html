@@ -75,6 +75,7 @@
                         <tr>
                             <th>Month</th>
                             <th>Narration</th>
+                            <th>Total Staff</th>
                             <th>Approved</th>
                             <th>View</th>
                         </tr>
@@ -84,6 +85,7 @@
                         <tr>
                             <td>{{ payroll.month|date:"F Y" }}</td>
                             <td>Monthly payroll processed</td>
+                            <td>{{ payroll.staff_count }}</td>
                             <td>
                                 <form method="post" action="{% url 'payroll-toggle-approve' payroll.id %}">
                                     {% csrf_token %}

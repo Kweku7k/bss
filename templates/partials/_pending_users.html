@@ -22,17 +22,25 @@
             <div class="card" style="height: 400px;">
                 <div class="card-body" style="height: 100%; overflow-y: auto;">
                     <h5 class="pt-3 mb-1 text-black text-center"><strong>Pending User Approvals</strong></h5>
-                    <p class="text-center text-muted mb-4">Contract renewals awaiting your approval</p>
-
+                    <p class="text-center text-muted mb-4">Pending users awaiting your approval</p>
                     <hr>
                     <div>
                         {% for user in pending_users %}
                             <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                                <!-- Status indicator (Pending approval) -->
                                 <div style="background-color: #992621; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;"></div>
                                 
-                                <!-- Staff name link -->
-                                <a href="#" style="text-decoration: none; color: inherit; flex-grow: 1;">{{ user.email }}</a>
+                                <a href="#" style="text-decoration: none; color: inherit; flex-grow: 1;">
+                                    {% if user.first_name or user.last_name %}
+                                        {{ user.first_name }} {{ user.last_name }}
+                                    {% endif %}
+                                    {% if user.date_joined %}
+                                        <br><small class="text-muted">Created: {{ user.date_joined|date:"M d, Y" }}</small>
+                                    {% endif %}
+                                </a>
+
+                                <a href="#" style="text-decoration: none; color: inherit; flex-grow: 1;">
+                                    {{ user.email }}
+                                </a>
 
                                 <!-- Approve button -->
                                 <form method="post" action="{% url 'approve-user' user.id %}" style="margin-left: 8px; display: inline;">

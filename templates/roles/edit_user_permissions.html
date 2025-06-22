@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+  <h3>Edit Permissions for {{ user.username }}</h3>
+  <form method="POST">
+    {% csrf_token %}
+
+    <h5>Assign Groups</h5>
+    {% for group in groups %}
+      <label class="me-3">
+        <input type="checkbox" name="groups" value="{{ group.id }}"
+          {% if group.id in current_group_ids %}checked{% endif %}>
+        {{ group.name }}
+      </label>
+    {% endfor %}
+
+    <hr>
+
+    <h5>Assign Tags</h5>
+
+    <div class="row">
+    {% for tag in tags %}
+        <div class="col-md-4 mb-2">
+        <label>
+            <input type="checkbox" name="tags" value="{{ tag.pk }}"
+            {% if tag.pk in current_tag_ids %}checked{% endif %}>
+            {{ tag.name }}
+        </label>
+        </div>
+    {% empty %}
+        <p class="text-muted">No permission tags found.</p>
+    {% endfor %}
+    </div>
+
+
+
+
+    <button type="submit" class="btn btn-success mt-3">Save Changes</button>
+  </form>
+</div>
+
+{% endblock %}

@@ -126,6 +126,8 @@ urlpatterns = [
     path('groups/<int:group_id>/assign-permissions/', views.assign_permissions_to_group, name='assign-permissions'),
     path('assign_user_group/', views.assign_user_to_group, name='assign-user-group'),
     path('manage_users/', views.manage_users, name='manage-users'),
+    path('users/<int:user_id>/edit/', views.edit_user_permissions, name='edit-user-permissions'),
+
 
 
     path('user/approve/<int:user_id>/', views.approve_user, name='approve-user'),

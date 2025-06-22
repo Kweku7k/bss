@@ -24,12 +24,13 @@
         <div class="container">
             <div class="d-flex justify-content-between mb-3">
                 {% if report_for == "all" %}
-                    <h4 class="mb-3 fw-bold">📅 Payroll History for All Staff</h4>
+                    <h4 class="mb-3 fw-bold">📅 Payroll History Report</h4>
                 {% elif report_for and payroll_data %}
                     <h4 class="mb-0">Payroll History for {{ payroll_data.0.staff.fname }} {{ payroll_data.0.staff.lname }}</h4>
                 {% else %}
                     <h4 class="mb-0">Payroll History Report</h4>
                 {% endif %}
+                
 
                 {% if payroll_data %}
                 <form method="get" id="exportForm" class="d-flex align-items-center gap-2">

@@ -134,6 +134,22 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.staffno})"
+    
+    
+class PermissionTag(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    category = models.CharField(max_length=250)
+
+    def __str__(self):
+        return f"{self.name}"
+    
+
+class UserTag(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tag = models.ForeignKey(PermissionTag, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'tag')
 
 
 class Rank(models.Model):

@@ -14,6 +14,7 @@ from leave.models import *
 from medical.models import *
 from django.db.models import Q
 from .forms import *
+from collections import defaultdict
 from django.db import connection # type: ignore
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -28,9 +29,9 @@ from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
-from hr.decorators import role_required
+from hr.decorators import role_required, tag_required
 from django.db.models.functions import Concat
-from django.db.models import F, Value, CharField, Sum
+from django.db.models import F, Value, CharField, Sum, Max, Count
 from datetime import date
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
@@ -302,7 +303,8 @@ def staff_details(request, staffno):
     return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hrofficer'])
+@tag_required(['edit_staff'])
 def edit_staff(request,staffno):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter() 
@@ -2522,7 +2524,7 @@ def approve_user(request, user_id):
     user.save()
     messages.success(request, f"User {user.username} has been approved!")
     logger.info(f"User {user.username} has been approved by {request.user.username}.")
-    return redirect('assign-user-group')
+    return redirect('edit-user-permissions', user_id)
 
 
 @login_required
@@ -2533,6 +2535,41 @@ def disapprove_user(request, user_id):
     messages.success(request, f"User {user.username} has been disapproved!")
     logger.info(f"User {user.username} has been disapproved by {request.user.username}.")
     return redirect('landing')
+
+
+@login_required
+@role_required(['superadmin'])
+def edit_user_permissions(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    groups = Group.objects.all()
+    tags = PermissionTag.objects.all().order_by('name')
+
+    if request.method == 'POST':
+        selected_group_ids = request.POST.getlist('groups')
+        user.groups.set(Group.objects.filter(id__in=selected_group_ids))
+
+        selected_tag_ids = request.POST.getlist('tags')
+        UserTag.objects.filter(user=user).delete()
+        for tag_id in selected_tag_ids:
+            tag = PermissionTag.objects.get(id=tag_id)
+            UserTag.objects.create(user=user, tag=tag)
+
+        messages.success(request, f"Permissions updated for {user.username}")
+        return redirect('manage-users')
+
+    current_group_ids = user.groups.values_list('id', flat=True)
+    current_tag_ids = list(UserTag.objects.filter(user=user).values_list('tag_id', flat=True))
+    current_tag_ids = [int(id) for id in current_tag_ids]
+
+    return render(request, 'roles/edit_user_permissions.html', {
+        'user': user,
+        'groups': groups,
+        'tags': tags,
+        'current_group_ids': current_group_ids,
+        'current_tag_ids': current_tag_ids,
+    })
+
+
 
 
 
@@ -2735,6 +2772,36 @@ def create_staff_loan(request, staffno):
     return render(request, 'hr/staff_loan.html', context)
 
 
+@login_required
+@role_required(['superadmin'])
+def edit_staff_loan(request, staffno, loan_id):
+    staff = get_object_or_404(Employee, pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    staff_loans = StaffLoan.objects.filter(staffno=staff).order_by('-start_date')
+    loan = get_object_or_404(StaffLoan, id=loan_id)
+    staff_loan_count = staff_loans.count()
+
+    if request.method == 'POST':
+        is_active = request.POST.get('is_active') == 'true'
+        loan.is_active = is_active
+        loan.save()
+        status = "activated" if is_active else "deactivated"
+        messages.success(request, f"Loan has been {status} successfully.")
+        return redirect('create-staff-loan', staffno)
+
+    context = {
+        'staff_loans': staff_loans,
+        'staff': staff,
+        'company_info': company_info,
+        'loan': loan,
+        'staff_loan_count': staff_loan_count
+    }
+    return render(request, 'hr/staff_loan.html', context)
+
+
+
+
+
 
 @login_required
 @role_required(["superadmin"])
@@ -2752,7 +2819,6 @@ def toggle_approval(request, payroll_id):
 def generate_payroll(request):
     selected_month = request.POST.get("filter_by_month")
     selected_year = request.POST.get("filter_by_year")
-    payrolls = Payroll.objects.order_by('-month')
 
     if selected_month and selected_year:        
         current_month_date = date(int(selected_year), int(selected_month), 28)
@@ -2771,8 +2837,8 @@ def generate_payroll(request):
                 return redirect('payroll-post-payroll')
         
         
-        # staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
-        staff_list = Employee.objects.filter(staffno="20034").exclude(companyinformation__active_status='Inactive').order_by('lname')
+        staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
+        # staff_list = Employee.objects.filter(staffno="20034").exclude(companyinformation__active_status='Inactive').order_by('lname')
         
         for staff in staff_list:
             company_info = CompanyInformation.objects.filter(staffno=staff).first()
@@ -2841,6 +2907,16 @@ def generate_payroll(request):
         
         messages.success(request, f"Payroll for {current_month_date.strftime('%B %Y')} has been finalised you can update once not approved")        
         return redirect('payroll-post-payroll')
+    
+    payrolls_group = (
+        Payroll.objects.values('month').annotate(latest_id=Max('id'), staff_count=Count('staffno')).order_by('-month'))
+
+    payrolls = []
+    for item in payrolls_group:
+        payroll = Payroll.objects.get(id=item['latest_id'])
+        payroll.staff_count = item['staff_count']
+        payrolls.append(payroll)
+
         
     context = {"selected_month": selected_month, "payrolls":payrolls}
     return render(request, 'payroll/finalise_payroll.html', context)

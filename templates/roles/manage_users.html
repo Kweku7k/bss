@@ -13,7 +13,6 @@
                     <th>Username</th>
                     <th>Email</th>
                     <th>Current Group</th>
-                    <th>Assign New Group</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -36,7 +35,7 @@
                                     <span class="text-muted">No group</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            {% comment %} <td>
                                 <select name="group_id" class="form-select">
                                     <option value="">Select a Group</option>
                                     {% for group in groups %}
@@ -44,10 +43,14 @@
                                     {% endfor %}
                                 </select>
                                 <input type="hidden" name="user_id" value="{{ user.id }}">
-                            </td>
+                            </td> {% endcomment %}
                             <td>
-                                <button type="submit" class="btn btn-success btn-sm">Assign</button>
+                                <a href="{% url 'edit-user-permissions' user.id %}" class="btn btn-primary btn-sm">Edit</a>
                             </td>
+
+                            {% comment %} <td>
+                                <button type="submit" class="btn btn-success btn-sm">Assign</button>
+                            </td> {% endcomment %}
                         </form>
                     </tr>
                 {% endfor %}
