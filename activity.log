@@ -238,3 +238,15 @@ INFO 2025-06-22 17:01:41,239 User cu has been approved by Softlife.
 INFO 2025-06-22 17:10:49,634 User cu has been approved by Softlife.
 INFO 2025-06-22 17:15:22,988 Logout Successful: Softlife
 INFO 2025-06-22 17:15:38,236 Login Successful: cu
+INFO 2025-06-22 20:04:12,666 Login Successful: cu
+WARNING 2025-06-22 20:22:51,939 [TAG DENIED] User 'cu' tried to access tag '['edit_staff']'.
+WARNING 2025-06-22 20:41:39,584 [TAG DENIED] User 'cu' tried to access tag '['edit_staff']'.
+WARNING 2025-06-22 20:41:53,888 [TAG DENIED] User 'cu' tried to access tag '['add_staff']'.
+WARNING 2025-06-22 20:45:49,118 [TAG DENIED] User 'cu' tried to access tag '['add_staff']'.
+WARNING 2025-06-22 20:49:21,003 [TAG DENIED] User 'cu' tried to access tag '['add_staff']'.
+WARNING 2025-06-22 20:50:17,286 [TAG DENIED] User 'cu' tried to access tag '['edit_staff']'.
+WARNING 2025-06-22 20:51:05,266 [TAG DENIED] User 'cu' tried to access tag '['edit_staff']'.
+WARNING 2025-06-22 20:55:18,732 [TAG DENIED] User 'cu' tried to access tag '['add_staff']'.
+INFO 2025-06-22 21:04:56,630 Login Successful: cu
+WARNING 2025-06-22 21:06:18,243 [TAG DENIED] User 'cu' tried to access tag 'delete_staff'.
+WARNING 2025-06-22 21:25:17,772 [TAG DENIED] User 'cu' tried to access tag 'record_medical_bill'.

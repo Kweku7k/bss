@@ -303,8 +303,8 @@ def staff_details(request, staffno):
     return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
 @login_required
-@role_required(['superadmin', 'hrofficer'])
-@tag_required(['edit_staff'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('edit_staff')
 def edit_staff(request,staffno):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter() 
@@ -406,6 +406,8 @@ def allstaff(request):
 
 
 @login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('dormant_staff')
 def dormant_staff(request): 
     staffs = Employee.objects.filter(companyinformation__active_status='Inactive').order_by('lname')
     staff_count = staffs.count()
@@ -425,7 +427,7 @@ def dormant_staff(request):
     return render(request, 'hr/dormant_staff.html', context)
   
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
 def report(request): 
     staffs = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
     company_info = CompanyInformation.objects.all()
@@ -638,7 +640,8 @@ def report(request):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('add_staff')
 def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter()
@@ -744,11 +747,10 @@ def get_units_by_department(request, dept_name):
     except Department.DoesNotExist:
         return JsonResponse({"units": []}, status=404)
 
-
-    
     
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('add_staff')
 def company_info(request,staffno):
     submitted = False
     company_infos = CompanyInformation.objects.filter(staffno__exact=staffno)    
@@ -801,6 +803,7 @@ def company_info(request,staffno):
         'staffcategory':staffcategory,
         'campus':campus,
         'bank_list':bank_list,
+        'contract':contract,
         'bankbranches':bankbranches,
         'school_faculty':school_faculty,
         'directorate':directorate,
@@ -817,7 +820,8 @@ def company_info(request,staffno):
     return render(request,'hr/company_info.html',context)
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('edit_staff')
 def edit_company_info(request,staffno):
     company_infos = CompanyInformation.objects.all()  
     company_info = CompanyInformation.objects.get(staffno__exact=staffno)
@@ -887,7 +891,8 @@ def edit_company_info(request,staffno):
 ############### EMPLOYEE RELATIONSHIP ###############
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('add_staff')
 def emp_relation(request,staffno):
     submitted = False
     emp_relations = Kith.objects.filter(staffno__exact=staffno)
@@ -927,7 +932,8 @@ def emp_relation(request,staffno):
     return render(request,'hr/emp_relation.html',context)
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('edit_staff')
 def edit_emp_relation(request,staffno,emp_id):
     emp_relations = Kith.objects.filter(staffno__exact=staffno)  
     emp_relation = Kith.objects.get(pk=emp_id)
@@ -959,7 +965,8 @@ def edit_emp_relation(request,staffno,emp_id):
     return render(request, 'hr/emp_relation.html', context)
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('delete_staff')
 def delete_emp_relation(request,emp_id,staffno):
     emp_relation = Kith.objects.get(pk=emp_id)
     staff = Employee.objects.get(pk=staffno)
@@ -976,7 +983,8 @@ def delete_emp_relation(request,emp_id,staffno):
 
 # Write a function for bulk upload csv format
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('bulk_upload')
 def bulk_upload(request):
     if request.method == 'POST':
         form = CSVUploadForm(request.POST, request.FILES)
@@ -1188,7 +1196,8 @@ def download_csv(request):
 
 ####### EDUCATIONAL BACKGROUND #################
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('add_staff')
 def education(request,staffno):
     submitted = False
     educations = Staff_School.objects.filter(staffno__exact=staffno)
@@ -1226,7 +1235,8 @@ def education(request,staffno):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('edit_staff')
 def edit_education(request,staffno,edu_id):
     educations = Staff_School.objects.filter(staffno__exact=staffno)  
     education = Staff_School.objects.get(pk=edu_id)
@@ -1264,8 +1274,11 @@ def edit_education(request,staffno,edu_id):
 
     return render(request, 'hr/education.html', context)
 
+
+
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('delete_staff')
 def delete_education(request,edu_id,staffno):
     education = Staff_School.objects.get(pk=edu_id)
     staff = Employee.objects.get(pk=staffno)
@@ -1281,7 +1294,8 @@ def delete_education(request,edu_id,staffno):
 ### Staff leave transaction
 ######################################################################
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('record_leave')
 def leave_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno) 
@@ -1353,7 +1367,10 @@ def leave_transaction(request, staffno):
         'taken_dates': taken_dates,
     })
     
+    
 @login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('modify_leave')
 def edit_leave_transaction(request, staffno, lt_id):
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
@@ -1401,7 +1418,8 @@ def edit_leave_transaction(request, staffno, lt_id):
 ### Staff Medical views
 ######################################################################
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('record_medical_bill')
 def medical_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -1478,6 +1496,8 @@ def medical_transaction(request, staffno):
 
 
 @login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('modify_medical_bill')
 def edit_medical_transaction(request, staffno, med_id):
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
@@ -1529,6 +1549,8 @@ def edit_medical_transaction(request, staffno, med_id):
     }
 
     return render(request, 'hr/medical.html', context)
+
+
 
 ######################################################################
 ### Staff education views
@@ -2152,7 +2174,8 @@ def delete_celebration(request,bno,staffno):
 
 # View for adding a new renewal history
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('renewal_record')
 def add_renewal_history(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -2196,7 +2219,7 @@ def add_renewal_history(request, staffno):
 
 # View for approving a renewal history
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr admin'])
 def approve_renewal(request, renewal_id):
     renewal = get_object_or_404(RenewalHistorys, id=renewal_id)
 
@@ -2214,7 +2237,7 @@ def approve_renewal(request, renewal_id):
 
 # View for rejecting a renewal history
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr admin'])
 def disapprove_renewal(request, renewal_id):
     renewal = get_object_or_404(RenewalHistorys, id=renewal_id)
 
@@ -2233,7 +2256,8 @@ def disapprove_renewal(request, renewal_id):
 
 # View for adding new promotion history
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('promotion_record')
 def add_promotion_history(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -2276,7 +2300,7 @@ def add_promotion_history(request, staffno):
 
 # View for approving a promotion history
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr admin'])
 def approve_promotion(request, promotion_id):
     promotion = get_object_or_404(PromotionHistory, id=promotion_id)
 
@@ -2294,7 +2318,7 @@ def approve_promotion(request, promotion_id):
 
 # View for rejecting a promotion history
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr admin'])
 def disapprove_promotion(request, promotion_id):
     promotion = get_object_or_404(PromotionHistory, id=promotion_id)
 
@@ -2313,7 +2337,8 @@ def disapprove_promotion(request, promotion_id):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('exits_record')
 def add_exit_history(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -2356,7 +2381,7 @@ def add_exit_history(request, staffno):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr admin'])
 def approve_exit(request, exit_id):
     exit_history = get_object_or_404(Exits, id=exit_id)
 
@@ -2374,7 +2399,7 @@ def approve_exit(request, exit_id):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr admin'])
 def disapprove_exit(request, exit_id):
     exit_history = get_object_or_404(Exits, id=exit_id)
 
@@ -2490,7 +2515,7 @@ def assign_user_to_group(request):
     
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer'])
 def manage_users(request):
     users = User.objects.all()
     groups = Group.objects.all()
@@ -2538,7 +2563,7 @@ def disapprove_user(request, user_id):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer'])
 def edit_user_permissions(request, user_id):
     user = get_object_or_404(User, id=user_id)
     groups = Group.objects.all()

@@ -50,9 +50,9 @@ urlpatterns = [
     path('medical_transaction/<str:staffno>', views.medical_transaction, name="medical-transaction"),
     path('edit_medical_transaction/<str:med_id>/<str:staffno>', views.edit_medical_transaction, name="edit-medical-transaction"),
     
-    path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
-    path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),
-    path('delete_staff_education/<str:sch_id>/<str:staffno>', views.delete_staff_education,name="delete-staff-education"),
+    # path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
+    # path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),
+    # path('delete_staff_education/<str:sch_id>/<str:staffno>', views.delete_staff_education,name="delete-staff-education"),
 
     path('prev_work/<str:staffno>', views.prev_work,name="prev-work"),
     path('edit_prev_work/<str:coy_id>/<str:staffno>', views.edit_prev_work,name="edit-prev-work"),
