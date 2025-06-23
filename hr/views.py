@@ -57,7 +57,7 @@ def to_bool(val):
 
 @login_required
 def view_logs(request):
-    log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), os.environ.get('LOG_FILE'))
+    log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), os.environ.get('LOG_FILE', 'activity.log'))
     logs = []
 
     if os.path.exists(log_file_path):
