@@ -2419,7 +2419,7 @@ def disapprove_exit(request, exit_id):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr admin', 'hr officer'])
 def staff_settings(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
@@ -2431,6 +2431,7 @@ def staff_settings(request, staffno):
     return render(request, 'hr/staff_settings.html', context)
         
 @login_required
+@role_required(['superadmin', 'hr admin', 'hr officer'])
 def mark_dormant(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
@@ -2515,7 +2516,7 @@ def assign_user_to_group(request):
     
 
 @login_required
-@role_required(['superadmin', 'hr officer'])
+@role_required(['superadmin', 'hr admin', 'finance admin'])
 def manage_users(request):
     users = User.objects.all()
     groups = Group.objects.all()
@@ -3297,7 +3298,6 @@ def new_landing(request):
         "tax_band_count":tax_band_count,
     }
     return render(request, 'payroll/landing.html', context)
-
 
 
 

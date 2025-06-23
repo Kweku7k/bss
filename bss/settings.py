@@ -211,7 +211,8 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'activity.log'),
+            # 'filename': os.path.join(BASE_DIR, 'activity.log'),
+            'filename': os.environ.get('LOG_FILE', os.path.join(BASE_DIR, 'activity.log')),
             'formatter': 'verbose',
         },
     },
