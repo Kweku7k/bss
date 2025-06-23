@@ -250,3 +250,11 @@ WARNING 2025-06-22 20:55:18,732 [TAG DENIED] User 'cu' tried to access tag '['ad
 INFO 2025-06-22 21:04:56,630 Login Successful: cu
 WARNING 2025-06-22 21:06:18,243 [TAG DENIED] User 'cu' tried to access tag 'delete_staff'.
 WARNING 2025-06-22 21:25:17,772 [TAG DENIED] User 'cu' tried to access tag 'record_medical_bill'.
+INFO 2025-06-22 23:12:04,419 Login Successful: cu
+WARNING 2025-06-22 23:55:27,686 [TAG DENIED] User 'cu' tried to access tag 'finalise_payroll'.
+WARNING 2025-06-22 23:59:07,659 [TAG DENIED] User 'cu' tried to access tag 'finalise_payroll'.
+INFO 2025-06-23 01:39:28,970 Login Successful: cu
+WARNING 2025-06-23 01:58:50,092 [TAG DENIED] User 'cu' tried to access tag 'view_payroll_history'.
+WARNING 2025-06-23 01:59:56,507 [TAG DENIED] User 'cu' tried to access tag 'view_payroll_history'.
+INFO 2025-06-23 02:03:52,139 Logout Successful: cu
+INFO 2025-06-23 02:05:07,198 Login Successful: Softlife

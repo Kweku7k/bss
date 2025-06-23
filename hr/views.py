@@ -2567,7 +2567,7 @@ def disapprove_user(request, user_id):
 def edit_user_permissions(request, user_id):
     user = get_object_or_404(User, id=user_id)
     groups = Group.objects.all()
-    tags = PermissionTag.objects.all().order_by('name')
+    tags = PermissionTag.objects.all().order_by('-category', 'name')
 
     if request.method == 'POST':
         selected_group_ids = request.POST.getlist('groups')
@@ -2598,9 +2598,12 @@ def edit_user_permissions(request, user_id):
 
 
 
+########## INCOME DEDUCTION AND LOAN ###############
+
 ############ STAFF INCOME #############
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('record_staff_income')
 def create_staff_income(request, staffno):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
@@ -2638,6 +2641,9 @@ def create_staff_income(request, staffno):
     return render(request, 'hr/staff_income.html', context)
 
 
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('modify_staff_income')
 def edit_staff_income(request, staffno, income_id):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
@@ -2676,7 +2682,8 @@ def edit_staff_income(request, staffno, income_id):
 
 ############ STAFF DEDUCTIONS #############
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('record_staff_deduction')
 def create_staff_deduction(request, staffno):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
@@ -2713,7 +2720,8 @@ def create_staff_deduction(request, staffno):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('modify_staff_deduction')
 def edit_staff_deduction(request, staffno, deduction_id):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
@@ -2752,7 +2760,8 @@ def edit_staff_deduction(request, staffno, deduction_id):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('record_staff_loan')
 def create_staff_loan(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
@@ -2767,7 +2776,6 @@ def create_staff_loan(request, staffno):
             is_active = form.cleaned_data.get('is_active')
             loan_type = form.cleaned_data.get('loan_type')
 
-            # ✅ Proper duplicate check
             if is_active and StaffLoan.objects.filter(staffno=staff,loan_type=loan_type,is_active=True).exists():
                 messages.error(request, f"Staff already has an active {loan_type} loan.")
                 return redirect('create-staff-loan', staffno)
@@ -2798,7 +2806,8 @@ def create_staff_loan(request, staffno):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('modify_staff_loan')
 def edit_staff_loan(request, staffno, loan_id):
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
@@ -2824,12 +2833,13 @@ def edit_staff_loan(request, staffno, loan_id):
     return render(request, 'hr/staff_loan.html', context)
 
 
+########## END OF INCOME DEDUCTION AND LOAN ###############
 
 
 
 
 @login_required
-@role_required(["superadmin"])
+@role_required(["superadmin", "audit"])
 def toggle_approval(request, payroll_id):
     payroll = get_object_or_404(Payroll, id=payroll_id)
     payroll.is_approved = not payroll.is_approved
@@ -2840,7 +2850,8 @@ def toggle_approval(request, payroll_id):
 
 ########## GENERATE PAYROLL INFORMATION ###############
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('finalise_payroll')
 def generate_payroll(request):
     selected_month = request.POST.get("filter_by_month")
     selected_year = request.POST.get("filter_by_year")
@@ -2949,7 +2960,8 @@ def generate_payroll(request):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('process_single_payroll')
 def payroll_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
@@ -2993,7 +3005,8 @@ def payroll_details(request, staffno):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('process_all_payroll')
 def payroll_processing(request):
     selected_month = request.GET.get("month")  # format: "2025-04"
     all_payrolls = []
@@ -3043,7 +3056,8 @@ def payroll_processing(request):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('generate_payroll_register')
 def payroll_register(request):
     staff_categories = StaffCategory.objects.all().order_by('category_name')
     campus = Campus.objects.all().order_by('campus_name')
@@ -3144,7 +3158,8 @@ def payroll_register(request):
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('export_bank_sheet')
 def payroll_bank_sheet(request):
     banks = Bank.objects.all().order_by('bank_short_name')
     selected_month = request.GET.get("month")
@@ -3218,6 +3233,8 @@ def payroll_bank_sheet(request):
 
 @login_required
 @role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('modify_salary')
 def staff_salary_increment(request):
     staff_categories = StaffCategory.objects.all()
     staff_list = []
@@ -3285,17 +3302,17 @@ def new_landing(request):
 
 
 
-
 ####### REPORT ##########
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
 def payroll_report(request):
     return render(request, "payroll/report.html")
 
 
 @login_required
-@role_required(['superadmin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_loan_history')
 def loan_history(request):
     selected_month = request.GET.get("month")
     staffno = request.GET.get("staffno")
@@ -3408,6 +3425,8 @@ def loan_history(request):
 
 
 @login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_payroll_history')
 @role_required(['superadmin'])
 def payroll_history(request):
     selected_month = request.GET.get("filter_by_month")

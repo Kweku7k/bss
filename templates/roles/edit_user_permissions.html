@@ -12,7 +12,7 @@
         {% csrf_token %}
 
         <div class="my-5">
-          <h5 class="border-bottom pb-2">Assign Groups</h5>
+          <h5 class="border-bottom pb-2 mb-4">Assign Groups</h5>
           <div class="d-flex flex-wrap gap-3">
             {% for group in groups %}
               <div class="form-check">
@@ -28,15 +28,15 @@
         </div>
 
         <div class="mb-4">
-          <h5 class="border-bottom pb-2">Assign Tags</h5>
+          <h5 class="border-bottom pb-2 mb-4">Assign Permissions</h5>
           
           {% regroup tags by category as tag_categories %}
           
           {% for category in tag_categories %}
             <div class="mb-3">
-              <h6 class="text-muted">{{ category.grouper|default:"Uncategorized" }}</h6>
+              <h6 class="text-muted">{{ category.grouper|default:"Uncategorized"|title }}</h6>
               <div class="row">
-                {% for tag in category.list %}
+                {% for tag in category.list|dictsort:"name" %}
                   <div class="col-md-4 mb-2">
                     <div class="form-check">
                       <input class="form-check-input" type="checkbox" 

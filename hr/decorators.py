@@ -39,7 +39,7 @@ def tag_required(tag_name):
             if has_tag:
                 return view_func(request, *args, **kwargs)
 
-            logger.warning(f"[TAG DENIED] User '{user.username}' tried to access tag '{tag_name}'.")
+            logger.warning(f"Access denied: User '{user.username}' tried to access permission '{tag_name}'.")
             messages.error(request, "Access denied. You do not have the required permissions for this feature.")
             return redirect(request.META.get('HTTP_REFERER', '/'))
         return _wrapped_view
