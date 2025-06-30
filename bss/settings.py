@@ -116,6 +116,10 @@ DATABASES = {
     }
 }
 
+print("Database configuration:")
+print(f"Database Info: {DATABASES['default']['NAME']}")
+print(f"Database Host: {DATABASES['default']['HOST']}")
+
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
