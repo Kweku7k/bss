@@ -29,10 +29,20 @@
                         <label for="job_title" class="col-form-label">Staff Rank</label>
                         <input type="text" name="job_title" class="form-control" {% if jobtitle %} value="{{ jobtitle.job_title }}" {% else %} value="" {% endif %} required>
                     </div>
+
                     <div class="form-group">
-                        <label for="salary_level" class="col-form-label">Salary Level</label>
-                        <input type="text" name="salary_level" class="form-control" {% if jobtitle %} value="{{ jobtitle.salary_level }}" {% else %} value="" {% endif %}>
+                        <label for="salary_level" class="col-form-label">Salary Scale</label>
+                        <select name="salary_level" class="form-select" required> 
+                          <option selected="true" disabled="disabled">--Select--</option>
+                          {% if salary_scale %}
+                                {% for ss in salary_scale %}
+                                    <option value="{{ ss.name }}" {% if jobtitle.salary_level == ss.name %} selected {% endif %}>{{ ss.name }}</option>
+                                {% endfor %}
+                            {% endif %}
+                      </select>
                     </div>
+
+                
                     <div class="form-group">
                         <label for="jobtitle_notes" class="col-form-label">Rank Description</label>
                         <textarea name="jobtitle_notes" class="form-control">{% if jobtitle %} {{ jobtitle.jobtitle_notes }} {% endif %}</textarea>

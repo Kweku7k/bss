@@ -756,6 +756,9 @@ def add_jobtitle(request):
     staffcategorys = StaffCategory.objects.order_by('category_abbr') 
     jobtitles = JobTitle.objects.order_by('-id') 
     jobtitle_count = jobtitles.count()
+    salary_scale = SalaryScale.objects.all()
+    
+    
     if request.method == 'POST':
         form = JobTitleForm(request.POST)
         print(form)
@@ -774,7 +777,7 @@ def add_jobtitle(request):
         if 'submitted' in request.GET:
             submitted = True
 
-    return render(request,'setup/add_jobtitle.html',{'form':form,'submitted':submitted,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'staffcategorys':staffcategorys})
+    return render(request,'setup/add_jobtitle.html',{'form':form,'submitted':submitted,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'staffcategorys':staffcategorys, 'salary_scale':salary_scale})
 
 def delete_jobtitle(request,jobtitle_id):
     jobtitle = JobTitle.objects.get(pk=jobtitle_id)
@@ -787,6 +790,8 @@ def edit_jobtitle(request, jobtitle_id):
     jobtitle_count = jobtitles.count()
     staffcategorys = StaffCategory.objects.order_by('category_abbr') 
     jobtitle = JobTitle.objects.get(pk=jobtitle_id)
+    salary_scale = SalaryScale.objects.all()
+    
     form = JobTitleForm(instance=jobtitle)
 
     if request.method == 'POST':
@@ -795,7 +800,7 @@ def edit_jobtitle(request, jobtitle_id):
             form.save()
             return redirect('add-jobtitle')
 
-    context = {'form':form,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'jobtitle':jobtitle,'STAFFLEVEL':STAFFLEVEL, 'staffcategorys':staffcategorys}
+    context = {'form':form,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'jobtitle':jobtitle,'STAFFLEVEL':STAFFLEVEL, 'staffcategorys':staffcategorys, 'salary_scale':salary_scale}
     return render(request, 'setup/add_jobtitle.html', context)
 ########### END OF STAFF RANK VIEWS ################
 
@@ -803,7 +808,8 @@ def edit_jobtitle(request, jobtitle_id):
 def add_staff_rank(request):
     submitted = False
     staff_ranks = StaffRank.objects.order_by('-id') 
-    staff_rank_count = staff_ranks.count()
+    staff_rank_count = staff_ranks.count()    
+    
     if request.method == 'POST':
         form = StaffRankForm(request.POST)
         if form.is_valid(): 
