@@ -108,5 +108,7 @@ urlpatterns = [
     path('choices_contribution', views.generic_model_crud, {'model_class': ChoicesContribution, 'model_name': 'Contribution', 'template_name': 'setup/generic.html'}, name='choices-contribution'),
     path('choices_exit_type', views.generic_model_crud, {'model_class': ChoicesExitType, 'model_name': 'Exit Type', 'template_name': 'setup/generic.html'}, name='choices-exit-type'),
     path('choices_loan_type', views.generic_model_crud, {'model_class': ChoicesLoanType, 'model_name': 'Loan Type', 'template_name': 'setup/generic.html'}, name='choices-loan-type'),
+    path('salary_scale', views.generic_model_crud, {'model_class': SalaryScale, 'model_name': 'Salary Scale', 'template_name': 'setup/generic.html'}, name='salary-scale'),
+    
     
 ]
