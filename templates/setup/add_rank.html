@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 col-md-6 pt-2">
+        <div class="card bg-white pt-4">
+            <div class="card-header text-center">
+                <h5><strong>Add New Job Title</strong></h5>
+            </div>
+            <div class="card-body">
+                <form action="" method="POST">
+                    {% csrf_token %}
+
+
+                    <div class="form-group">
+                        <label for="staff_rank" class="col-form-label">Job Title</label>
+                        <input type="text" name="staff_rank" class="form-control" {% if staff_ranks %} value="{{ staff_ranks.staff_rank }}" {% else %} value="" {% endif %} required>
+                    </div>
+                    
+
+                    <hr>
+                    <input type="submit" value="Add" class="btn btn-block btn-success">
+                    <a class="btn btn-sm btn-info" href="{% url 'add-rank' %}">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8 col-md-6 p-1">
+        <div class="card pt-1 mx-4 shadow-lg">
+            <div class="card-header text-center">
+                <h5><strong>Number of Job Title: {{ staff_rank_count }}</strong></h5>
+            </div>
+            <div class="card-body">
+                {% if staff_ranks %}
+                <table class="table table-sm table-hover">
+                    <tr>
+                        <th>Job Title</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                    {% for jobtitle in staff_ranks %}
+                    <tr>
+                      <td>{{ jobtitle.staff_rank }}</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-rank' jobtitle.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-rank' jobtitle.id %}" onclick="return confirm('Do you really want to delete the data for {{ jobtitle.staff_rank }}?');"></a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% else %}
+                <h5>Add More Job Titles</h5>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

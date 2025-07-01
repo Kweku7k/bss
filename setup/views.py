@@ -799,6 +799,50 @@ def edit_jobtitle(request, jobtitle_id):
     return render(request, 'setup/add_jobtitle.html', context)
 ########### END OF STAFF RANK VIEWS ################
 
+######### STAFF RANK ###############
+def add_staff_rank(request):
+    submitted = False
+    staff_ranks = StaffRank.objects.order_by('-id') 
+    staff_rank_count = staff_ranks.count()
+    if request.method == 'POST':
+        form = StaffRankForm(request.POST)
+        if form.is_valid(): 
+            # Check if the staff rank already exists
+            rank_name = form.cleaned_data.get('rank_name')
+            if StaffRank.objects.filter(rank_name=rank_name).exists():
+                messages.error(request, f'{rank_name} Staff Rank already exists.')
+                return redirect('add-rank')
+            else:
+                form.save()
+                return HttpResponseRedirect('staff_rank?submitted=True')
+    else:
+        form = StaffRankForm
+        if 'submitted' in request.GET:
+            submitted = True
+
+    return render(request,'setup/add_rank.html',{'form':form,'submitted':submitted,'staff_ranks':staff_ranks,'staff_rank_count':staff_rank_count})
+
+def delete_staff_rank(request, sr_id):
+    staff_rank = StaffRank.objects.get(pk=sr_id)
+    if request.method == 'GET':
+       staff_rank.delete()
+    return redirect('add-rank')
+
+def edit_staff_rank(request, sr_id):
+    staff_ranks = StaffRank.objects.order_by('-id') 
+    staff_rank_count = staff_ranks.count()
+    staff_rank = StaffRank.objects.get(pk=sr_id)
+    form = StaffRankForm(instance=staff_rank)
+
+    if request.method == 'POST':
+        form = StaffRankForm(request.POST, instance=staff_rank)
+        if form.is_valid():
+            form.save()
+            return redirect('add-rank')
+
+    context = {'form':form,'staff_ranks':staff_ranks,'staff_rank_count':staff_rank_count,'staff_rank':staff_rank}
+    return render(request, 'setup/add_rank.html', context)
+
 ########### INCOME TYPE ##############
 def add_income_type(request):
     submitted = False

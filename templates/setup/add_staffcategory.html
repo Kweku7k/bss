@@ -44,8 +44,8 @@
                         <td>{{ staffcategory.category_name }}</td>
                         <td>{{ staffcategory.category_abbr }}</td>
                         <td>
-                            <a class="btn btn-sm btn-info " href="{% url 'edit-staffcategory' staffcategory.id %}"><i class="fas fa-fw fa-pen"></i></a>
-                            <a class="btn btn-sm btn-danger" href="{% url 'delete-staffcategory' staffcategory.id %}" onclick="return confirm('Do you really want to delete the data for {{ staffcategory.category_name }}?');"><i class="fas fa-fw fa-pen"></i></a>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staffcategory' staffcategory.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-staffcategory' staffcategory.id %}" onclick="return confirm('Do you really want to delete the data for {{ staffcategory.category_name }}?');"></a>
                         </td>
                     </tr>
                     {% endfor %}

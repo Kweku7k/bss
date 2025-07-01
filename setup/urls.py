@@ -60,6 +60,10 @@ urlpatterns = [
     path('edit_jobtitle/<int:jobtitle_id>', views.edit_jobtitle,name="edit-jobtitle"),
     path('delete_jobtitle/<int:jobtitle_id>', views.delete_jobtitle,name="delete-jobtitle"),
     
+    path('rank', views.add_staff_rank, name="add-rank"),
+    path('edit_rank/<int:sr_id>', views.edit_staff_rank, name="edit-rank"),
+    path('delete_rank/<int:sr_id>', views.delete_staff_rank, name="delete-rank"),
+    
     path('academic_year', views.academic_year, name="academic-year"),
     path('edit_academic_year/<int:ay_id>', views.edit_academic_year, name="edit-academic-year"),
     path('delete_academic_year/<int:ay_id>', views.delete_academic_year, name="delete-academic-year"),

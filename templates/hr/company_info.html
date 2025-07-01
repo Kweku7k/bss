@@ -47,7 +47,7 @@
                                     <option value="" selected>N/A</option>
                                     {% if jobtitle %} 
                                         {% for jt in jobtitle %}
-                                            <option value="{{ jt.job_title }}" {% if jt.job_title == company_info.job_title %} selected {% endif %}> {{ jt.job_title }} </option>
+                                            <option value="{{ jt.staff_rank }}" {% if jt.staff_rank == company_info.job_title %} selected {% endif %}> {{ jt.staff_rank }} </option>
                                         {% endfor %}
                                     {% endif %}
                                 </select>
@@ -167,11 +167,19 @@
                                     {% endif %}
                                 </select>
                             </div>
-                    
+
                             <div class="col-md-4">
-                                <label for="rank" class="form-label">Designation/Rank</label>
-                                <input type="text" class="form-control" id="rank" name="rank" value="{{ company_info.rank }}">
+                                <label for="rank" class="form-label">Staff Rank</label>
+                                <select id="rank" name="rank" class="form-select">
+                                    <option value="" selected>N/A</option>
+                                    {% if ranks %} 
+                                        {% for jt in ranks %}
+                                            <option value="{{ jt.job_title }}" {% if jt.job_title == company_info.job_title %} selected {% endif %}> {{ jt.job_title }} </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
                             </div>
+
                             <div class="col-md-4">
                                 <label for="campus" class="form-label">Campus</label>
                                 <select id="campus" name="campus" class="form-select">

@@ -773,7 +773,8 @@ def company_info(request,staffno):
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
     departments = Department.objects.all()
-    jobtitle = JobTitle.objects.all()
+    ranks = JobTitle.objects.all()
+    jobtitle = StaffRank.objects.all()
     units = Unit.objects.all()
     salary_scales = SalaryScale.objects.all()
     
@@ -823,6 +824,7 @@ def company_info(request,staffno):
         'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
         'departments':departments,
         'jobtitle':jobtitle,
+        'ranks':ranks,
         'units':units,
         'salary_scales':salary_scales,
         'COSTCENTERS': departments.values_list('dept_long_name', 'dept_long_name').union(directorate.values_list('direct_name', 'direct_name')),
@@ -846,7 +848,8 @@ def edit_company_info(request,staffno):
     bank_list = Bank.objects.all()
     bankbranches = BankBranch.objects.all()
     departments = Department.objects.all()
-    jobtitle = JobTitle.objects.all()
+    ranks = JobTitle.objects.all()
+    jobtitle = StaffRank.objects.all()
     units = Unit.objects.all()
     salary_scales = SalaryScale.objects.all()
     
@@ -896,6 +899,7 @@ def edit_company_info(request,staffno):
                'bank_list': bank_list,
                 'bank_branches': bankbranches,
                 'jobtitle':jobtitle,
+                'ranks':ranks,
                 'salary_scales':salary_scales,
                 'units':units,
                 'COSTCENTERS': departments.values_list('dept_long_name', 'dept_long_name').union(directorate.values_list('direct_name', 'direct_name')),
