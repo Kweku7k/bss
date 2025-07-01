@@ -299,7 +299,12 @@ def deletestaff(request,staffno):
 def staff_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     schools = School.objects.order_by('school_name')
-    company_info = CompanyInformation.objects.get(staffno=staff)
+    try:
+        company_info = CompanyInformation.objects.get(staffno=staffno)
+    except CompanyInformation.DoesNotExist:
+        messages.warning(request, "Company Information not found for this staff.")
+        return redirect('edit-company-info', staffno=staffno)  # or any other appropriate view
+    # company_info = CompanyInformation.objects.get(staffno=staff)
     return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
 @login_required
@@ -824,8 +829,9 @@ def company_info(request,staffno):
 @tag_required('edit_staff')
 def edit_company_info(request,staffno):
     company_infos = CompanyInformation.objects.all()  
-    company_info = CompanyInformation.objects.get(staffno__exact=staffno)
     staff = Employee.objects.get(pk=staffno)
+    company_info, created = CompanyInformation.objects.get_or_create(staffno=staff)
+
     staffcategory = StaffCategory.objects.all()
     contract = Contract.objects.all()
     company_info_count = company_infos.count()
@@ -838,6 +844,10 @@ def edit_company_info(request,staffno):
     jobtitle = JobTitle.objects.all()
     units = Unit.objects.all()
     salary_scales = SalaryScale.objects.all()
+    
+    if created:
+        messages.info(request, f"No previous company info found. A new record has been prepared for {staff.fname}.")
+
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
