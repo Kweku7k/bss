@@ -17,7 +17,9 @@
                         <label for="staff_rank" class="col-form-label">Job Title</label>
                         <input type="text" name="staff_rank" class="form-control" {% if staff_ranks %} value="{{ staff_ranks.staff_rank }}" {% else %} value="" {% endif %} required>
                     </div>
-                    
+
+                    <input type="text" class="form-control" id="staff_level" name="staff_level" value="None" hidden>
+                
 
                     <hr>
                     <input type="submit" value="Add" class="btn btn-block btn-success">

@@ -761,7 +761,6 @@ def add_jobtitle(request):
     
     if request.method == 'POST':
         form = JobTitleForm(request.POST)
-        print(form)
         if form.is_valid(): 
             staff_cat = form.cleaned_data.get('staff_cat')
             job_title = form.cleaned_data.get('job_title')
@@ -813,19 +812,25 @@ def add_staff_rank(request):
     if request.method == 'POST':
         form = StaffRankForm(request.POST)
         if form.is_valid(): 
-            # Check if the staff rank already exists
-            rank_name = form.cleaned_data.get('rank_name')
-            if StaffRank.objects.filter(rank_name=rank_name).exists():
-                messages.error(request, f'{rank_name} Staff Rank already exists.')
+            staff_rank = form.cleaned_data.get('staff_rank')
+            staff_level = staff_rank
+
+            # Check for duplicate
+            if StaffRank.objects.filter(staff_rank=staff_rank).exists():
+                messages.error(request, f'{staff_rank} Staff Rank already exists.')
                 return redirect('add-rank')
             else:
-                form.save()
+                new_rank = form.save(commit=False)
+                new_rank.staff_level = staff_level
+                new_rank.save()
                 return HttpResponseRedirect('staff_rank?submitted=True')
+        else:
+            print(form.errors)
+ 
     else:
         form = StaffRankForm
         if 'submitted' in request.GET:
             submitted = True
-
     return render(request,'setup/add_rank.html',{'form':form,'submitted':submitted,'staff_ranks':staff_ranks,'staff_rank_count':staff_rank_count})
 
 def delete_staff_rank(request, sr_id):
