@@ -823,7 +823,7 @@ def add_staff_rank(request):
                 new_rank = form.save(commit=False)
                 new_rank.staff_level = staff_level
                 new_rank.save()
-                return HttpResponseRedirect('staff_rank?submitted=True')
+                return redirect('add-rank')
         else:
             print(form.errors)
  
