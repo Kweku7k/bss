@@ -54,7 +54,7 @@ class Employee(models.Model):
     institution = models.CharField('Institution of Study',max_length=100,blank=True,null=True)
     other_heq = models.CharField('Other Educational Qualification',max_length=100,blank=True,null=True)
     hpq = models.CharField('Highest Professional Qualification',max_length=100,blank=True,null=True)
-    staff_pix = models.ImageField(upload_to='images/', blank=True,null=True)
+    staff_pix = models.URLField(blank=True,null=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     
@@ -608,3 +608,15 @@ class Payroll(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.staffno} - {self.month}"
+
+
+
+class StaffDocument(models.Model):
+    staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255)
+    doc_url = models.URLField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.staff.staffno} - {self.title}"

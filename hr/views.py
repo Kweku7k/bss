@@ -2,6 +2,7 @@ from decimal import Decimal
 import json
 from math import e
 import pprint
+import uuid
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
@@ -36,7 +37,8 @@ from datetime import date
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
 from hr.utils.export import render_to_excel, render_to_pdf
-
+from bss.firebase import upload_file_to_firebase, delete_file_from_firebase
+import tempfile
 
 
 
@@ -292,7 +294,7 @@ def deletestaff(request,staffno):
     if staff.suffix:
         staff1 +=  ' ' + staff.suffix
     # if staff.staff_pix:
-    #     staffpix = "{{ staff.staff_pix.url }}"
+    #     staffpix = "{{ staff.staff_pix }}"
     if request.method == 'POST':
         with connection.cursor() as cursor:
             cursor.execute("UPDATE hr_employee SET active_status = 'Inactive' WHERE staffno = %s", [staffno])
@@ -312,6 +314,8 @@ def staff_details(request, staffno):
     # company_info = CompanyInformation.objects.get(staffno=staff)
     return render(request,'hr/staff_data.html',{'staff':staff,'schools':schools, 'company_info':company_info})
 
+
+
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('edit_staff')
@@ -324,24 +328,54 @@ def edit_staff(request,staffno):
     qualification = Qualification.objects.all()
     staff = Employee.objects.get(pk=staffno)
     form = EmployeeForm(request.POST or None,request.FILES or None,instance=staff)
+    
     if request.method == 'POST':
-        if form.is_valid():
-            if form.has_changed():
-                fname = form.cleaned_data['fname']
-                lname = form.cleaned_data['lname']
+        print("📩 POST received")  # ✅
 
-                print("Form was submitted successfully")
-                form.save()
-                full_name = f"{fname} {lname}"
-                messages.success(request, f"Staff data for {full_name} has been updated successfully")
-                logger.info(f"Personal information updated for {full_name} by {request.user.username}")
-            else: 
-                messages.warning(request, "No changes were made to the staff record.")
+        if form.is_valid():
+            print("Edit Information", form.cleaned_data)
+
+            fname = form.cleaned_data['fname']
+            lname = form.cleaned_data['lname']
+
+            # Instead of immediately saving:
+            staff_instance = form.save(commit=False)
+
+            # 📸 Handle image upload
+            image_file = request.FILES.get('staff_pix')
+
+            if image_file:
+                try:
+                    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                        for chunk in image_file.chunks():
+                            temp_file.write(chunk)
+                        temp_file.flush()
+
+                        unique_filename = f"{uuid.uuid4().hex}_{image_file.name}"
+                        firebase_path = f"staff_pictures/{unique_filename}"
+                        firebase_url = upload_file_to_firebase(temp_file.name, firebase_path)
+
+                        print("✅ Firebase URL:", firebase_url)
+                        staff_instance.staff_pix = firebase_url
+
+                except Exception as e:
+                    print(f"❌ Error uploading to Firebase: {str(e)}")
+                    
+            # Now save safely
+            staff_instance.save()
+            full_name = f"{fname} {lname}"
+            messages.success(request, f"Staff data for {full_name} has been updated successfully")
+            logger.info(f"Personal information updated for {full_name} by {request.user.username}")
             return redirect('staff-details', staffno)
+        
+            # else: 
+            #     messages.warning(request, "No changes were made to the staff record.")
+            # return redirect('staff-details', staffno)
         else:
             print(form.errors)
             messages.error(request, "Form submission failed. Please check the form for errors.")
             logger.error(f"Failed to update staff data for staff #{staffno}. Errors: {form.errors}")
+            
     else:
         form = EmployeeForm
         if 'submitted' in request.GET:
@@ -676,8 +710,23 @@ def newstaff(request):
                 messages.error(request, f"Staff number {staff_number} for {full_name} already exists. Please use another unique staff number.")
                 print(f"Staff number {staff_number} already exists")
             else:
-                print("Form was submitted successfully")
-                form.save()
+                print("Form was submitted successfully", form.cleaned_data)
+                # 🚀 Save form but don't commit yet
+                staff_instance = form.save(commit=False)
+
+                # 📸 Handle image upload to Firebase
+                image_file = request.FILES.get('staff_pix')
+                if image_file:
+                    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                        for chunk in image_file.chunks():
+                            temp_file.write(chunk)
+                        temp_file.flush()
+                        firebase_path = f"staff_pictures/{image_file.name}"
+                        firebase_url = upload_file_to_firebase(temp_file.name, firebase_path)
+                        staff_instance.staff_pix = firebase_url  # ✅ Save URL in model field
+
+                # Save staff to DB
+                staff_instance.save()
                 url = reverse('company-info', kwargs={'staffno': str(staff_number)})
                 full_name = f"{fname} {lname}"
                 messages.success(request, f"The details for staff member {full_name} have been successfully created in the system")
@@ -2616,6 +2665,73 @@ def edit_user_permissions(request, user_id):
 
 
 
+######## Staff Documents ###########
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('record_staff_documents')
+def create_staff_document(request, staffno):
+    staff = Employee.objects.get(pk=staffno)
+    staff_documents = StaffDocument.objects.filter(staffno__exact=staffno).order_by('-uploaded_at')
+    staff_document_count = staff_documents.count()
+    form = StaffDocumentForm(request.POST or None, request.FILES or None)
+
+    
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        notes = request.POST.get('notes')
+        doc_file = request.FILES.get('scanned_doc')
+
+        if doc_file and title:
+            with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                for chunk in doc_file.chunks():
+                    temp_file.write(chunk)
+                temp_file.flush()
+
+                unique_filename = f"staff_documents/{uuid.uuid4().hex}_{doc_file.name}"
+                firebase_url = upload_file_to_firebase(temp_file.name, unique_filename)
+
+                # Save document to DB
+                StaffDocument.objects.create(
+                    staffno=staff,
+                    title=title,
+                    notes=notes,
+                    doc_url=firebase_url
+                )
+
+                messages.success(request, f"{title} uploaded for {staff.fname} {staff.lname} successfully.")
+                logger.info(f"{request.user.username} uploaded {title} for {staff.fname} {staff.lname}.")
+                return redirect('staff-details', staffno=staffno)
+        else:
+            messages.error(request, "Title and document file are required.")
+            return redirect('upload-document', staffno=staffno)
+
+    context = {'form': form, 'staff': staff, 'staff_documents': staff_documents, 'staff_document_count': staff_document_count}
+    return render(request, 'hr/upload_staff_document.html', context)
+
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('delete_staff_document')
+def delete_staff_document(request, doc_id, staffno):
+    staff = Employee.objects.get(pk=staffno)
+    staff_document = StaffDocument.objects.get(pk=doc_id)
+
+    # Delete file from Firebase
+    try:
+        delete_file_from_firebase(staff_document.doc_url)
+    except Exception as e:
+        logger.warning(f"Failed to delete Firebase file: {e}")
+
+    # Delete the record from DB
+    staff_document.delete()
+
+    full_name = f"{staff.fname} {staff.lname}"
+    messages.success(request, f"Document '{staff_document.title}' for {full_name} has been deleted successfully.")
+    logger.info(f"{request.user.username} deleted document '{staff_document.title}' for {full_name}.")
+
+    return redirect('staff-details', staffno=staffno)
 
 
 ########## INCOME DEDUCTION AND LOAN ###############

@@ -61,8 +61,8 @@
                         <td>{{ dept.dept_long_name }}</td>
                         {% comment %} <td>{{ dept.dept_short_name }}</td> {% endcomment %}
                         <td class="text-end">
-                            <a class="btn btn-sm btn-info" href="{% url 'edit-dept' dept.id %}"><i class="fas fa-fw fa-pen"></i></a>
-                            <a class="btn btn-sm btn-danger" href="{% url 'delete-dept' dept.id %}" onclick="return confirm('Do you really want to delete the data for {{ dept.dept_long_name }}?');"><i class="fas fa-fw fa-trash"></i></a>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-dept' dept.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-dept' dept.id %}" onclick="return confirm('Do you really want to delete the data for {{ dept.dept_long_name }}?');"></a>
                         </td>
                     </tr>
                     {% endfor %}

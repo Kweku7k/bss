@@ -30,7 +30,7 @@
                     <div class="d-flex justify-content-between align-items-center my-3">
                         <h5 class="mb-3 text-primary"><strong>Personnel Particulars for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
                         {% if staff.staff_pix %}
-                            <img src="{{ staff.staff_pix.url }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
+                            <img src="{{ staff.staff_pix }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
                         {% else %}
                             <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
                         {% endif %}
@@ -396,13 +396,22 @@
                             </div>
                         </div>
 
-
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label for="staff_pix">Employee Photo</label>
-                                <input type="file" class="form-control" id="staff_pix" name="staff_pix" aria-label="staff_pix" aria-describedby="staff_pix" {% if staff %} value="{{ staff.staff_pix }}" {% else %} {% endif %}>
+
+                                {% if staff.staff_pix %}
+                                <div class="mb-2">
+                                    <img src="{{ staff.staff_pix }}" class="img-thumbnail" style="max-height: 150px;" />
+                                </div>
+                                {% endif %}
+
+                                <input type="file" class="form-control" id="staff_pix" name="staff_pix">
+                                <small class="text-muted">Leave this empty if you're not changing the photo.</small>
                             </div>
                         </div>
+
+
                                             
 
                         <div class="d-flex justify-content-end mt-4">

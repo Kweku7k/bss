@@ -807,6 +807,7 @@ def edit_jobtitle(request, jobtitle_id):
 def add_staff_rank(request):
     submitted = False
     staff_ranks = StaffRank.objects.order_by('-id') 
+    
     staff_rank_count = staff_ranks.count()    
     
     if request.method == 'POST':
@@ -955,6 +956,7 @@ def edit_deduction_type(request, dt_id):
 def salary_scale(request):
     submitted = False
     salary_scales = SalaryScale.objects.order_by('-id')
+    
     salary_scale_count = salary_scales.count()
     if request.method == 'POST':
         form = SalaryScaleForm(request.POST)

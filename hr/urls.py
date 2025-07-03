@@ -114,6 +114,11 @@ urlpatterns = [
     path('exit/approve/<int:exit_id>/', views.approve_exit, name='approve-exit'),
     path('exit/disapprove/<int:exit_id>/', views.disapprove_exit, name='disapprove-exit'),
     
+    # upload staff documents
+    path('upload_document/<str:staffno>', views.create_staff_document, name='upload-document'),
+    path('staff/<str:staffno>/delete/<int:doc_id>/', views.delete_staff_document, name='delete-document'),
+
+    
     
     # payroll url
     path('payroll/<str:staffno>', views.payroll_details, name="payroll-details"),

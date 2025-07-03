@@ -1,0 +1,100 @@
+{% include "partials/_topnav.html" %} 
+{% load static %}
+
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+          <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          </div>
+          <div class="toast-body text-white">
+            {{ message }}
+          </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-3 mt-4">
+        {% include "partials/_staffdetails_sidebar.html" %} 
+    </div>
+
+    <div class="col-md-8">
+        <div class="container mt-5">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <h5 class="my-3 text-primary"><strong>Existing Documents for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        
+                        {% if staff.staff_pix %}
+                            <img src="{{ staff.staff_pix }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
+                        {% else %}
+                            <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
+                        {% endif %}
+                    </div>
+
+                    <!-- Display Documents -->
+                    {% if staff_document_count > 0 %}
+                        <div class="row">
+                            {% for doc in staff_documents %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h5 class="card-title">{{ doc.title }}</h5>
+                                                <a href="{% url 'delete-staff-document' staff.staffno doc.id %}" class="btn btn-sm btn-outline-danger bi-trash"></a>
+                                            </div>
+
+                                            <p class="card-text">
+                                                <small class="text-muted">Uploaded on {{ doc.uploaded_at|date:"M d, Y H:i" }}</small>
+                                            </p>
+                                            <a href="{{ doc.doc_url }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">🔗 View Document</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="alert alert-info">No documents uploaded yet.</p>
+                    {% endif %}
+
+                    <hr class="my-4">
+
+                    <!-- Upload Form -->
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">📤 Upload New Document</h5>
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
+
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="title" class="form-label">Document Title</label>
+                                        <input type="text" class="form-control" name="title" id="title" required>
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="scanned_doc" class="form-label">Upload Document</label>
+                                        <input type="file" class="form-control" name="scanned_doc" id="scanned_doc" required>
+                                        <div class="form-text">Accepted formats: PDF, DOCX, JPG, PNG. Max size: 5MB.</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="notes" class="form-label">Notes (optional)</label>
+                                    <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary">Upload</button>
+                            </form>
+                    </div>
+                </div>
+            {% comment %} </div> {% endcomment %}
+        </div>
+    </div>
+</div>

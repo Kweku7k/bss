@@ -29,7 +29,7 @@ class EmployeeForm(ModelForm):
     class Meta:
         model = Employee
         fields = '__all__'
-        exclude = ['updated','created']
+        exclude = ['updated','created', 'staff_pix']
         
 class CompanyInformationForm(ModelForm):
     class Meta:
@@ -42,6 +42,12 @@ class StaffSchoolForm(ModelForm):
         model = Staff_School
         fields = '__all__'
         exclude = ['updated','created']
+        
+        
+class StaffDocumentForm(forms.ModelForm):
+    class Meta:
+        model = StaffDocument
+        fields = '__all__'
 
 
 class LeaveTransactionForm(ModelForm):
