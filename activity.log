@@ -46,3 +46,5 @@ INFO 2025-07-03 18:06:56,787 Login Successful: Softlife
 INFO 2025-07-03 18:07:32,415 Softlife uploaded Certificate for Adewale Onikosi.
 WARNING 2025-07-03 18:08:03,979 Failed to delete Firebase file: 404 DELETE https://storage.googleapis.com/storage/v1/b/cu-hr-caf00.firebasestorage.app/o/cu-hr-caf00.firebasestorage.app%2Fstaff_documents%2F7b4ecbdd424d4e9a841da2cb99389b87_CENTRAL%2520UNIVERSITY.pdf?prettyPrint=false: No such object: cu-hr-caf00.firebasestorage.app/cu-hr-caf00.firebasestorage.app/staff_documents/7b4ecbdd424d4e9a841da2cb99389b87_CENTRAL%20UNIVERSITY.pdf
 INFO 2025-07-03 18:08:03,988 Softlife deleted document 'Certificate' for Adewale Onikosi.
+INFO 2025-07-04 17:33:49,400 Login Successful: Softlife
+INFO 2025-07-04 17:43:07,292 Logout Successful: Softlife

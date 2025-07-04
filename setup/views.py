@@ -9,6 +9,9 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.forms import modelform_factory
 from django.db import IntegrityError
+from django.contrib.auth.decorators import login_required
+
+
 
 
 
@@ -19,6 +22,7 @@ def home(request):
     pass
 
 ########### SCHOOL VIEWS ################
+@login_required
 def add_school(request):
     submitted = False
     schools = School_Faculty.objects.order_by('-id') 
@@ -41,12 +45,14 @@ def add_school(request):
     context = {'form':form,'submitted':submitted,'schools':schools,'sch_count':sch_count}
     return render(request,'setup/add_schoolfaculty.html',context)
 
+@login_required
 
 def delete_sch(request,sch_id):
     school = School_Faculty.objects.get(pk=sch_id)
     if request.method == 'GET':
        school.delete()
     return redirect('add-school')
+@login_required
 
 def edit_school(request, sch_id):
     schools = School_Faculty.objects.order_by('-id') 
@@ -66,6 +72,7 @@ def edit_school(request, sch_id):
 
 
 ########### TITLE ################
+@login_required
 def add_title(request):
     submitted = False
     titles = Title.objects.order_by('-id') 
@@ -88,12 +95,14 @@ def add_title(request):
 
     return render(request,'setup/add_title.html',{'form':form,'submitted':submitted,'titles':titles,'title_count':title_count})
 
+@login_required
 def delete_title(request,title_id):
     title = Title.objects.get(pk=title_id)
     if request.method == 'GET':
        title.delete()
     return redirect('add-title')
 
+@login_required
 def edit_title(request, title_id):
     titles = Title.objects.order_by('-id') 
     title_count = titles.count()
@@ -111,6 +120,7 @@ def edit_title(request, title_id):
 ########### END OF TITLE ################
 
 ########### QUALIFICATIONS ################
+@login_required
 def add_qualification(request):
     submitted = False
     quals = Qualification.objects.order_by('-id') 
@@ -133,12 +143,14 @@ def add_qualification(request):
 
     return render(request,'setup/add_qualification.html',{'form':form,'submitted':submitted,'quals':quals,'qual_count':qual_count})
 
+@login_required
 def delete_qualification(request,qual_id):
     qual = Qualification.objects.get(pk=qual_id)
     if request.method == 'GET':
        qual.delete()
     return redirect('add-qualification')
 
+@login_required
 def edit_qualification(request, qual_id):
     quals = Qualification.objects.order_by('-id') 
     qual_count = quals.count()
@@ -156,6 +168,7 @@ def edit_qualification(request, qual_id):
 ########### END OF QUALIFICATIONS ################
 
 ########### STAFF CATEGORY ################
+@login_required
 def add_staffcategory(request):
     submitted = False
     staffcategorys = StaffCategory.objects.order_by('-id') 
@@ -177,12 +190,16 @@ def add_staffcategory(request):
 
     return render(request,'setup/add_staffcategory.html',{'form':form,'submitted':submitted,'staffcategorys':staffcategorys,'staffcategory_count':staffcategory_count})
 
+
+@login_required
 def delete_staffcategory(request,sc_id):
     staffcategory = StaffCategory.objects.get(pk=sc_id)
     if request.method == 'GET':
        staffcategory.delete()
     return redirect('add-staffcategory')
 
+
+@login_required
 def edit_staffcategory(request, sc_id):
     staffcategorys = StaffCategory.objects.order_by('-id') 
     staffcategory_count = staffcategorys.count()
@@ -200,6 +217,7 @@ def edit_staffcategory(request, sc_id):
 ########### END OF STAFF CATEGORY ################
 
 ########### CONTRACT ################
+@login_required
 def add_contract(request):
     submitted = False
     contracts = Contract.objects.order_by('-id') 
@@ -223,6 +241,8 @@ def add_contract(request):
 
     return render(request,'setup/add_contract.html',{'form':form,'submitted':submitted,'contracts':contracts,'contract_count':contract_count})
 
+
+@login_required
 def delete_contract(request,ct_id):
     contract = get_object_or_404(Contract, pk=ct_id)
     if request.method == 'GET':
@@ -230,7 +250,7 @@ def delete_contract(request,ct_id):
         messages.success(request, 'Contract deleted successfully.')
     return redirect('add-contract')
 
-
+@login_required
 def edit_contract(request, ct_id):
     contracts = Contract.objects.order_by('-id')
     contract_count = contracts.count()
@@ -255,6 +275,7 @@ def edit_contract(request, ct_id):
 ########### CONTRACT ################
 
 ########### CAMPUS VIEW ################
+@login_required
 def add_campus(request):
     submitted = False
     campus = Campus.objects.order_by('-id')
@@ -278,12 +299,15 @@ def add_campus(request):
     return render(request,'setup/add_campus.html',{'form':form,'submitted':submitted,'campus':campus,'campus_count':campus_count })
 
 
+@login_required
 def delete_campus(request,camp_id):
     campus = Campus.objects.get(pk=camp_id)
     if request.method == 'GET':
        campus.delete()
     return redirect('add-campus')
 
+
+@login_required
 def edit_campus(request, camp_id):
     campus = Campus.objects.order_by('-id') 
     campus_count = campus.count()
@@ -302,6 +326,7 @@ def edit_campus(request, camp_id):
 ########### END OF CAMPUS VIEW ################
 
 ########### DIRECTORATE VIEW ################
+@login_required
 def add_directorate(request):
     submitted = False
     directorate = Directorate.objects.order_by('-id')
@@ -324,12 +349,15 @@ def add_directorate(request):
                 
     return render(request,'setup/add_directorate.html',{'form':form,'submitted':submitted,'directorate':directorate,'dict_count':dict_count })
 
+@login_required
 def delete_directorate(request,dict_id):
     directorate = Directorate.objects.get(pk=dict_id)
     if request.method == 'GET':
        directorate.delete()
     return redirect('add-directorate')
 
+
+@login_required
 def edit_directorate(request, dict_id):
     directorate = Directorate.objects.order_by('-id') 
     dict_count = directorate.count()
@@ -348,6 +376,7 @@ def edit_directorate(request, dict_id):
 ########### END OF DIRECTORATE VIEW ################
 
 ########### PROFESSIONAL BODIES VIEWS ################
+@login_required
 def add_profbody(request):
     submitted = False
     profbodys = ProfBody.objects.order_by('-id') 
@@ -370,12 +399,16 @@ def add_profbody(request):
 
     return render(request,'setup/add_profbody.html',{'form':form,'submitted':submitted,'profbodys':profbodys,'pb_count':pb_count})
 
+
+@login_required
 def delete_profbody(request,pb_id):
     profbody = ProfBody.objects.get(pk=pb_id)
     if request.method == 'GET':
        profbody.delete()
     return redirect('add-profbody')
 
+
+@login_required
 def edit_profbody(request, pb_id):
     profbodys = ProfBody.objects.order_by('-id') 
     pb_count = profbodys.count()
@@ -393,6 +426,7 @@ def edit_profbody(request, pb_id):
 ########### END OF PROFESSIONAL BODIES VIEWS ################
 
 ########### DEPARTMENT VIEWS ################
+@login_required
 def add_dept(request):
     submitted = False
     depts = Department.objects.order_by('-id') 
@@ -418,12 +452,16 @@ def add_dept(request):
 
     return render(request,'setup/add_dept.html',{'form':form,'submitted':submitted,'depts':depts,'dept_count':dept_count, 'schools':schools})
 
+
+@login_required
 def delete_dept(request,dept_id):
     dept = Department.objects.get(pk=dept_id)
     if request.method == 'GET':
        dept.delete()
     return redirect('add-dept')
 
+
+@login_required
 def edit_dept(request, dept_id):
     depts = Department.objects.order_by('-id') 
     dept_count = depts.count()
@@ -443,6 +481,7 @@ def edit_dept(request, dept_id):
 
 
 ########### UNITS VIEWS ################
+@login_required
 def add_unit(request):
     submitted = False
     units = Unit.objects.order_by('-id')
@@ -480,6 +519,8 @@ def add_unit(request):
     return render(request, 'setup/add_unit.html', {'form':form, 'submitted':submitted, 'units':units, 'unit_count':unit_count, 'departments':departments, 'directorates':directorates})
 
 
+
+@login_required
 def delete_unit(request, unit_id):
     unit = Unit.objects.get(pk=unit_id)
     if request.method == 'GET':
@@ -487,6 +528,8 @@ def delete_unit(request, unit_id):
     return redirect('add-unit')
 
 
+
+@login_required
 def edit_unit(request, unit_id):
     units = Unit.objects.order_by('-id')
     unit_count = units.count()
@@ -530,6 +573,7 @@ def edit_unit(request, unit_id):
 
 
 ########### HOSPITAL VIEWS ################
+@login_required
 def add_hosp(request):
     submitted = False
     hosps = Hospital.objects.order_by('-id') 
@@ -552,12 +596,16 @@ def add_hosp(request):
 
     return render(request,'setup/add_hosp.html',{'form':form,'submitted':submitted,'hosps':hosps,'hosp_count':hosp_count})
 
+
+@login_required
 def delete_hosp(request,hosp_id):
     hosp = Hospital.objects.get(pk=hosp_id)
     if request.method == 'GET':
        hosp.delete()
     return redirect('add-hosp')
 
+
+@login_required
 def edit_hosp(request, hosp_id):
     hosps = Hospital.objects.order_by('-id') 
     hosp_count = hosps.count()
@@ -575,6 +623,7 @@ def edit_hosp(request, hosp_id):
 ########### END OF HOSPITAL VIEWS ################
 
 ########### BANK VIEWS ################
+@login_required
 def add_bank(request):
     submitted = False
     banks = Bank.objects.order_by('-id') 
@@ -604,12 +653,15 @@ def add_bank(request):
     context = {'form':form,'submitted':submitted,'banks':banks,'bank_count':bank_count}
     return render(request,'setup/add_bank.html',context)
 
+@login_required
 def delete_bank(request,bank_id):
     bank = Bank.objects.get(pk=bank_id)
     if request.method == 'GET':
        bank.delete()
     return redirect('add-bank')
 
+
+@login_required
 def edit_bank(request, bank_id):
     banks = Bank.objects.order_by('-id') 
     bank_count = banks.count()
@@ -637,6 +689,7 @@ def edit_bank(request, bank_id):
 ########### END OF BANK VIEWS ################
 
 ########### BANK BRANCH VIEWS ################
+@login_required
 def add_bankbranch(request):
     submitted = False
     banks = Bank.objects.order_by('bank_short_name')
@@ -662,12 +715,16 @@ def add_bankbranch(request):
 
     return render(request,'setup/add_bankbranch.html',{'form':form,'submitted':submitted,'bankbranchs':bankbranchs,'bankbranch_count':bankbranch_count,'banks':banks})
 
+
+@login_required
 def delete_bankbranch(request,bankbranch_id):
     bankbranch = BankBranch.objects.get(pk=bankbranch_id)
     if request.method == 'GET':
        bankbranch.delete()
     return redirect('add-bankbranch')
 
+
+@login_required
 def edit_bankbranch(request, bankbranch_id,bankid):
     banks = Bank.objects.order_by('bank_short_name')
     bankbranchs = BankBranch.objects.order_by('-id') 
@@ -703,6 +760,7 @@ def edit_bankbranch(request, bankbranch_id,bankid):
 ########### END OF BANK BRANCH VIEWS ################
 
 ########### ACADEMIC YEAR ################
+@login_required
 def academic_year(request):
     submitted = False
     academic_years = AcademicYear.objects.all()
@@ -726,6 +784,8 @@ def academic_year(request):
     print(context)
     return render(request, 'setup/academic_year.html', context)
 
+
+@login_required
 def edit_academic_year(request, ay_id):
     academic_years = AcademicYear.objects.order_by('-id')
     academic_year_count = academic_years.count()
@@ -741,6 +801,7 @@ def edit_academic_year(request, ay_id):
     return render(request, 'setup/academic_year.html', context)
 
 
+@login_required
 def delete_academic_year(request, ay_id):
     academic_year = AcademicYear.objects.get(pk=ay_id)
     if request.method == 'GET':
@@ -751,6 +812,7 @@ def delete_academic_year(request, ay_id):
 
 
 ########### STAFF RANK VIEWS ################
+@login_required
 def add_jobtitle(request):
     submitted = False
     staffcategorys = StaffCategory.objects.order_by('category_abbr') 
@@ -778,12 +840,16 @@ def add_jobtitle(request):
 
     return render(request,'setup/add_jobtitle.html',{'form':form,'submitted':submitted,'jobtitles':jobtitles,'jobtitle_count':jobtitle_count,'staffcategorys':staffcategorys, 'salary_scale':salary_scale})
 
+
+@login_required
 def delete_jobtitle(request,jobtitle_id):
     jobtitle = JobTitle.objects.get(pk=jobtitle_id)
     if request.method == 'GET':
        jobtitle.delete()
     return redirect('add-jobtitle')
 
+
+@login_required
 def edit_jobtitle(request, jobtitle_id):
     jobtitles = JobTitle.objects.order_by('-id') 
     jobtitle_count = jobtitles.count()
@@ -804,6 +870,7 @@ def edit_jobtitle(request, jobtitle_id):
 ########### END OF STAFF RANK VIEWS ################
 
 ######### STAFF RANK ###############
+@login_required
 def add_staff_rank(request):
     submitted = False
     staff_ranks = StaffRank.objects.order_by('-id') 
@@ -834,12 +901,16 @@ def add_staff_rank(request):
             submitted = True
     return render(request,'setup/add_rank.html',{'form':form,'submitted':submitted,'staff_ranks':staff_ranks,'staff_rank_count':staff_rank_count})
 
+
+@login_required
 def delete_staff_rank(request, sr_id):
     staff_rank = StaffRank.objects.get(pk=sr_id)
     if request.method == 'GET':
        staff_rank.delete()
     return redirect('add-rank')
 
+
+@login_required
 def edit_staff_rank(request, sr_id):
     staff_ranks = StaffRank.objects.order_by('-id') 
     staff_rank_count = staff_ranks.count()
@@ -856,6 +927,7 @@ def edit_staff_rank(request, sr_id):
     return render(request, 'setup/add_rank.html', context)
 
 ########### INCOME TYPE ##############
+@login_required
 def add_income_type(request):
     submitted = False
     income_types = IncomeType.objects.order_by('-id')
@@ -883,12 +955,16 @@ def add_income_type(request):
     context = {'form':form,'submitted':submitted,'income_types':income_types,'income_count':income_count}
     return render(request, 'setup/add_income_type.html', context)
 
+
+@login_required
 def delete_income_type(request, it_id):
     income = IncomeType.objects.get(pk=it_id)
     if request.method == 'GET':
        income.delete()
     return redirect('add-income-type')
 
+
+@login_required
 def edit_income_type(request, it_id):
     income_types = IncomeType.objects.order_by('-id')
     income_count = income_types.count()
@@ -906,6 +982,7 @@ def edit_income_type(request, it_id):
 
 
 ########### DEDUCTION TYPE ################
+@login_required
 def add_deduction_type(request):
     submitted = False
     deduction_types = DeductionType.objects.order_by('-id')
@@ -930,12 +1007,16 @@ def add_deduction_type(request):
     context = {'form':form,'submitted':submitted,'deduction_types':deduction_types,'deduction_count':deduction_count}
     return render(request, 'setup/add_deduction_type.html', context)
 
+
+@login_required
 def delete_deduction_type(request, dt_id):
     deduction = DeductionType.objects.get(pk=dt_id)
     if request.method == 'GET':
        deduction.delete()
     return redirect('add-deduction-type')
 
+
+@login_required
 def edit_deduction_type(request, dt_id):
     deduction_types = DeductionType.objects.order_by('-id')
     deduction_count = deduction_types.count()
@@ -953,6 +1034,7 @@ def edit_deduction_type(request, dt_id):
 
 
 ########### SALARY SCALE ################
+@login_required
 def salary_scale(request):
     submitted = False
     salary_scales = SalaryScale.objects.order_by('-id')
@@ -977,6 +1059,8 @@ def salary_scale(request):
     context = {'form':form,'submitted':submitted,'salary_scales':salary_scales,'salary_scale_count':salary_scale_count}
     return render(request, 'setup/add_salary_scale.html', context)
 
+
+@login_required
 def delete_salary_scale(request, ss_id):
     salary_scale = SalaryScale.objects.get(pk=ss_id)
     if request.method == 'GET':
@@ -984,6 +1068,7 @@ def delete_salary_scale(request, ss_id):
     return redirect('add-salary-scale')
 
 
+@login_required
 def edit_salary_scale(request, ss_id):
     salary_scales = SalaryScale.objects.order_by('-id')
     salary_scale_count = salary_scales.count()
@@ -1002,6 +1087,7 @@ def edit_salary_scale(request, ss_id):
 
 
 ########## TAX BAND ##############
+@login_required
 def add_tax_band(request):
     submitted = False
     tax_bands = TaxBand.objects.order_by('id')
@@ -1027,6 +1113,7 @@ def add_tax_band(request):
     return render(request, 'setup/add_tax_band.html', context)
 
 
+@login_required
 def delete_tax_band(request, tb_id):
     tax_band = TaxBand.objects.get(pk=tb_id)
     if request.method == 'GET':
@@ -1034,6 +1121,7 @@ def delete_tax_band(request, tb_id):
     return redirect('add-tax-band')
 
 
+@login_required
 def edit_tax_band(request, tb_id):
     submitted = False
     tax_bands = TaxBand.objects.order_by('id')
@@ -1061,6 +1149,7 @@ def edit_tax_band(request, tb_id):
 
 
 ########## ContributionRate ##############
+@login_required
 def add_contribution_rate(request):
     submitted = False
     contribution_rates = ContributionRate.objects.order_by('-id')
@@ -1083,12 +1172,16 @@ def add_contribution_rate(request):
     return render(request, 'setup/add_contribution_rate.html', context)
     
 
+
+@login_required
 def delete_contribution(request, contrib_id):
     contribution_rate = ContributionRate.objects.get(pk=contrib_id)
     if request.method == 'GET':
         contribution_rate.delete()
     return redirect('add-contribution-rate')
 
+
+@login_required
 def edit_contribution(request, contrib_id):
     contribution_rates = ContributionRate.objects.order_by('-id')
     contribution_rate_count = contribution_rates.count()
@@ -1105,6 +1198,7 @@ def edit_contribution(request, contrib_id):
 
 ########### DYNAMIC CHOICE VIEWS ################
 
+@login_required
 def generic_model_crud(request, model_class, model_name, template_name):
     # Generic function to handle Add, Edit, and Delete for models with a 'name' field.
     
