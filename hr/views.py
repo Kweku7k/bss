@@ -57,6 +57,9 @@ def to_bool(val):
     return str(val).strip().lower() in ['true', '1', 'yes']
 
 
+def handler404(request, exception):
+    return render(request, '404.html', status=404)
+
 @login_required
 def view_logs(request):
     log_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), os.environ.get('LOG_FILE', 'activity.log'))
