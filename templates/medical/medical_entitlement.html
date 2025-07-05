@@ -24,10 +24,19 @@
                       </select>
                     </div>
 
+                    <div class="form-group">
+                        <label for="treatment_type" class="form-label">Treatment Type</label>
+                        <select name="treatment_type" class="form-select">
+                            <option value="" disabled selected>Type</option>
+                            {% for key, value in MEDICALTREATMENT %}
+                            <option value="{{ key }}" {% if key == medical_ent.treatment_type %} selected {% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
                     <div class="form-group">
                         <label for="entitlement" class="col-form-label">Medical Entitlement (Amount)</label>
-                        <input type="text" placeholder="example 3000" name="entitlement" class="form-control" {% if medical_ent %} value="{{ medical_ent.entitlement }}" {% else %} value="" {% endif %} required>
+                        <input type="text" placeholder="example 3000" name="entitlement" step="0.01" class="form-control" {% if medical_ent %} value="{{ medical_ent.entitlement }}" {% else %} value="" {% endif %} required>
                     </div>
 
                     <div class="form-group">
@@ -59,14 +68,16 @@
                 <table class="table table-sm table-hover">
                     <tr>
                         <th>Staff Category</th>
-                        <th>Entitlement</th>
+                        <th>Type</th>
+                        <th>Entitlement ₵</th>
                         <th>Academic year</th>
                         <th class="text-end">Action</th>
                     </tr>
                     {% for entitlements in medical_entitlements %}
                     <tr>
                       <td>{{ entitlements.staff_cat }}</td>
-                        <td>₵{{ entitlements.entitlement }}</td>
+                        <td>{{ entitlements.treatment_type }}</td>
+                        <td>{{ entitlements.entitlement }}</td>
                         <td>{{ entitlements.academic_year }}</td>
                         <td class="text-end">
                             <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-medical-entitlement' entitlements.id %}"></a>

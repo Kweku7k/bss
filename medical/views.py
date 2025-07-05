@@ -26,8 +26,9 @@ def medical_entitlement(request):
             # Check if the medical entitlement already exists
             staff_category = form.cleaned_data.get('staff_cat')
             academic_year = form.cleaned_data.get('academic_year')
+            treatment_type = form.cleaned_data.get('treatment_type')
             
-            if MedicalEntitlement.objects.filter(staff_cat=staff_category, academic_year=academic_year).exists():
+            if MedicalEntitlement.objects.filter(staff_cat=staff_category, academic_year=academic_year, treatment_type=treatment_type).exists():
                 messages.error(request, 'Medical entitlement already exists for the selected staff category and academic year.')
             else:
                 form.save()
@@ -44,6 +45,7 @@ def medical_entitlement(request):
         'staffcategorys': staffcategorys,
         'academic_years': academic_years,
         'submitted':submitted,
+        'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),        
     }
     return render(request, 'medical/medical_entitlement.html', context)
 
@@ -61,15 +63,24 @@ def edit_medical_entitlement(request, me_id):
         if form.is_valid():
             staff_category = form.cleaned_data.get('staff_cat')
             academic_year = form.cleaned_data.get('academic_year')
+            treatment_type = form.cleaned_data.get('treatment_type')
 
             # Check if another medical entitlement with the same staff category and academic year exists
-            if MedicalEntitlement.objects.filter(staff_cat=staff_category, academic_year=academic_year).exclude(pk=me_id).exists():
+            if MedicalEntitlement.objects.filter(staff_cat=staff_category, academic_year=academic_year, treatment_type=treatment_type).exclude(pk=me_id).exists():
                 messages.error(request, 'Medical entitlement already exists for the selected staff category and academic year.')
             else:
                 # Save the changes if no conflict
                 form.save()
                 return redirect('medical-entitlement')
-    context = {'form':form, 'medical_entitlements':medical_entitlements, 'medical_entitlement_count':medical_entitlement_count, 'staffcategorys':staffcategorys, 'medical_ent':medical_ent, 'academic_years':academic_years}
+    context = {
+        'form':form, 
+        'medical_entitlements':medical_entitlements, 
+        'medical_entitlement_count':medical_entitlement_count, 
+        'staffcategorys':staffcategorys, 
+        'medical_ent':medical_ent, 
+        'academic_years':academic_years, 
+        'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),          
+    }
     return render(request, 'medical/medical_entitlement.html', context)
 
 

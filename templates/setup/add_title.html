@@ -17,7 +17,7 @@
                     </div>
                     <div class="form-group">
                         <label for="title_abbr" class="col-form-label">Abbreviation</label>
-                        <input type="text" name="title_abbr" class="form-control" {% if title %} value="{{ title.title_abbr }}" {% else %} value="" {% endif %}>
+                        <input type="text" name="title_abbr" class="form-control" {% if title %} value="{{ title.title_abbr }}" {% else %} value="" {% endif %} required>
                     </div>
                     <hr>
                     <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">

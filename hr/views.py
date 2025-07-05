@@ -700,6 +700,8 @@ def newstaff(request):
         print("Form has been received")
 
         if form.is_valid():
+            print("New Staff Info", form.cleaned_data)
+            
             staff_number = form.cleaned_data['staffno']
             fname = form.cleaned_data['fname']
             lname = form.cleaned_data['lname']
@@ -833,9 +835,10 @@ def company_info(request,staffno):
         # print(form)
         print("form has been recieved")
         if form.is_valid(): 
+            print("Company Info", form.cleaned_data)
+            
             ssn_con = form.cleaned_data.get('ssn_con')
             pf_con = form.cleaned_data.get('pf_con')
-            print("form was submitted successfully")
             company_info = form.save(commit=False)
             company_info.staffno = staff 
             company_info.ssn_con = ssn_con
@@ -909,8 +912,11 @@ def edit_company_info(request,staffno):
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES, instance=company_info)
         if form.is_valid():
+            print("Edit Company Info", form.cleaned_data)
+
             if form.has_changed():
-                print("Form was submitted successfully")
+                print("Edit Company Info", form.cleaned_data)
+                
                 form.save()
                 full_name = f"{staff.fname} {staff.lname}"
                 messages.success(request, f"Company information for {full_name} has been updated successfully")
@@ -1485,6 +1491,7 @@ def edit_leave_transaction(request, staffno, lt_id):
 ######################################################################
 ### Staff Medical views
 ######################################################################
+
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('record_medical_bill')
@@ -1492,75 +1499,106 @@ def medical_transaction(request, staffno):
     submitted = False
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
-    medical_entitlement = MedicalEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
-    medical_transactions = Medical.objects.filter(staffno__exact=staffno)
-    medical_trans_count = medical_transactions.count()
     academic_years = AcademicYear.objects.all()
     hospitals = Hospital.objects.all()
-    
-    # Filter beneficiaries based on staffno
-    bene_list = Kith.objects.filter(staffno=staff).annotate(full_name=Concat( F('kith_fname'), Value(' '), F('kith_middlenames'), Value(' '), F('kith_lname'), output_field=CharField())).values_list('id', 'full_name')
-    
-    # Add the staff name to the list
-    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"  # Update field names as per your Employee model
-    final_bene_list = list(bene_list) + [(staff.staffno, staff_fullname)]
-    # pprint.pprint(final_bene_list)
+    medical_transactions = Medical.objects.filter(staffno=staff)
+    medical_trans_count = medical_transactions.count()
 
+    # Get active academic year
+    active_year = AcademicYear.objects.filter(active=True).first()
+    active_year_value = active_year.academic_year if active_year else None
+
+    # Get all entitlements for this staff category in the active year
+    entitlements = MedicalEntitlement.objects.filter(
+        staff_cat=company_info.staff_cat,
+        academic_year=active_year_value
+    )
     
-    if not medical_entitlement:
-        messages.error(request, 'No medical entitlement found for this staff category.')
+    if not entitlements.exists():
+        messages.error(request, f"No medical entitlement set for {company_info.staff_cat} in {active_year_value}.")
         return redirect('medical-entitlement')
-    
-    remaining_amount = medical_entitlement.get_remaining_amount(staff)
-    amount_spent = medical_entitlement.get_amount_used(staff)
+
+    # Build entitlement summary for OPD, Admission, Surgery
+    treatment_summary = []
+    for ttype in ['OPD', 'Admission', 'Surgery']:
+        ent = entitlements.filter(treatment_type=ttype).first()
+        if ent:
+            used = ent.get_amount_used(staff)
+            remaining = ent.get_remaining_amount(staff)
+            surcharge = ent.get_surcharge(staff)
+            treatment_summary.append({
+                'type': ttype,
+                'entitlement': ent.entitlement,
+                'used': used,
+                'remaining': remaining,
+                'surcharge': surcharge
+            })
+
+    # Load beneficiaries
+    bene_list = Kith.objects.filter(staffno=staff).annotate(
+        full_name=Concat(
+            F('kith_fname'), Value(' '),
+            F('kith_middlenames'), Value(' '),
+            F('kith_lname'),
+            output_field=CharField()
+        )
+    ).values_list('id', 'full_name')
     staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
-    
+    final_bene_list = [(staff.staffno, staff_fullname)] + list(bene_list)
+
     if request.method == 'POST':
         form = MedicalTransactionForm(request.POST)
         if form.is_valid():
-            treatment_cost = int(form.cleaned_data['treatment_cost'])
+            treatment_type = form.cleaned_data['nature']
             academic_year = form.cleaned_data['academic_year']
+            selected_key = form.cleaned_data['patient_name']
+            bene_dict = dict(final_bene_list)
+            patient_name = bene_dict.get(selected_key, selected_key)  # fallback if not found
 
+            # Get the correct entitlement
+            medical_entitlement = entitlements.filter(treatment_type=treatment_type).first()
+
+
+            if not medical_entitlement:
+                messages.error(request, f"No entitlement for {treatment_type} in {academic_year}.")
+                return redirect('medical-transaction', staffno=staffno)
+            
+            # Accept all transactions regardless of balance (surcharge will be shown later)
             medical_transaction = form.save(commit=False)
             medical_transaction.staffno = staff
-            medical_transaction.staff_cat = request.POST.get('staff_cat')
-            
-            if remaining_amount >= treatment_cost:
-                medical_transaction.academic_year = academic_year
-                medical_transaction.save()
+            medical_transaction.patient_name = patient_name
+            medical_transaction.staff_cat = company_info.staff_cat
+            medical_transaction.save()
 
-                messages.success(request, f'Medical transaction created successfully  {staff_fullname}.')
-                logger.info(f'Medical transaction created successfully for {staff_fullname} by {request.user.username}')
-                return redirect('medical-transaction', staffno=staffno)
-            else:
-                messages.error(request, 'Insufficient Medical balance to process this request. Please review the treatment cost entered')
-        else:
-            print(form.errors)
-            messages.error(request, 'Form is not valid. Please check the entered data.')
+            messages.success(request, f'Medical transaction created for {staff_fullname}.')
             return redirect('medical-transaction', staffno=staffno)
+        else:
+            print("There was an error")
+            print(form.errors)
+            messages.error(request, 'Form is not valid.')
     else:
         form = MedicalTransactionForm()
         if 'submitted' in request.GET:
             submitted = True
-            
+
     context = {
-        'form':form,
-        'staff':staff,
-        'submitted':submitted,
-        'medical_entitlement':medical_entitlement,
-        'medical_transactions':medical_transactions,
-        'remaining_amount':remaining_amount,
-        'amount_spent':amount_spent,
-        'medical_trans_count':medical_trans_count,
-        'company_info':company_info,
-        'academic_years':academic_years,
-        'hospitals':hospitals,
+        'form': form,
+        'staff': staff,
+        'submitted': submitted,
+        'treatment_summary': treatment_summary,
+        'medical_transactions': medical_transactions,
+        'medical_trans_count': medical_trans_count,
+        'company_info': company_info,
+        'academic_years': academic_years,
+        'hospitals': hospitals,
         'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
         'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
         'MEDICALTYPE': ChoicesMedicalType.objects.all().values_list("name", "name"),
         'BENE': final_bene_list,
+        'active_year': active_year_value,
     }
     return render(request, 'hr/medical.html', context)
+
 
 
 @login_required
@@ -1569,55 +1607,82 @@ def medical_transaction(request, staffno):
 def edit_medical_transaction(request, staffno, med_id):
     staff = get_object_or_404(Employee, pk=staffno)
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
-    academic_years = AcademicYear.objects.all()
-    medical_transactions = Medical.objects.filter(staffno__exact=staffno)
     medical_transaction = get_object_or_404(Medical, pk=med_id)
-    medical_entitlement = MedicalEntitlement.objects.filter(staff_cat=company_info.staff_cat).first()
+    academic_years = AcademicYear.objects.all()
     hospitals = Hospital.objects.all()
-    
-    # Filter beneficiaries based on staffno
-    bene_list = Kith.objects.filter(staffno=staff).annotate(full_name=Concat( F('kith_fname'), Value(' '), F('kith_middlenames'), Value(' '), F('kith_lname'), output_field=CharField())).values_list('full_name', 'full_name')
-    
-    # Add the staff name to the list
-    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"  # Update field names as per your Employee model
+
+    # Get active academic year
+    active_year = AcademicYear.objects.filter(active=True).first()
+    active_year_value = active_year.academic_year if active_year else None
+
+    # Get all entitlements for this staff category in the active year
+    entitlements = MedicalEntitlement.objects.filter(
+        staff_cat=company_info.staff_cat,
+        academic_year=active_year_value
+    )
+
+    if not entitlements.exists():
+        messages.error(request, f"No medical entitlement set for {company_info.staff_cat} in {active_year_value}.")
+        return redirect('medical-entitlement')
+
+    # Load beneficiaries
+    bene_list = Kith.objects.filter(staffno=staff).annotate(
+        full_name=Concat(
+            F('kith_fname'), Value(' '),
+            F('kith_middlenames'), Value(' '),
+            F('kith_lname'),
+            output_field=CharField()
+        )
+    ).values_list('full_name', 'full_name')
+    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
     final_bene_list = list(bene_list) + [(staff_fullname, staff_fullname)]
 
-    # Calculate the remaining Medical Balance
-    remaining_amount = medical_entitlement.get_remaining_amount(staff)
-    remaining_amount += medical_transaction.treatment_cost
-    form = MedicalTransactionForm(request.POST or None, instance=medical_transaction)
-    staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
     if request.method == 'POST':
+        form = MedicalTransactionForm(request.POST, instance=medical_transaction)
         if form.is_valid():
-            treatment_cost = int(form.cleaned_data['treatment_cost'])
+            updated_transaction = form.save(commit=False)
+            treatment_type = updated_transaction.nature
+            academic_year = updated_transaction.academic_year
+            
+            selected_key = updated_transaction.patient_name
+            bene_dict = dict(final_bene_list)
+            patient_name = bene_dict.get(selected_key, selected_key)
 
-            if remaining_amount >= treatment_cost:
-                form.save()
-                messages.success(request, f'Medical transaction updated successfully for {staff_fullname}.')
+            # Get the correct entitlement for updated treatment type
+            medical_entitlement = entitlements.filter(treatment_type=treatment_type).first()
+
+            if not medical_entitlement:
+                messages.error(request, f"No entitlement found for {treatment_type} in {academic_year}.")
                 return redirect('medical-transaction', staffno=staffno)
-            else:
-                messages.error(request, 'Insufficient Medical balance to process this request. Please review the treatment cost entered')
+
+            updated_transaction.staffno = staff
+            updated_transaction.staff_cat = company_info.staff_cat
+            updated_transaction.patient_name = patient_name
+            updated_transaction.save()
+
+            messages.success(request, f'Medical transaction updated successfully for {staff_fullname}.')
+            return redirect('medical-transaction', staffno=staffno)
+        else:
+            messages.error(request, 'Form is not valid.')
+            print(form.errors)
+    else:
+        form = MedicalTransactionForm(instance=medical_transaction)
 
     context = {
-        'staff': staff,
-        'staff_cat': company_info.staff_cat,
-        'medical_transactions': medical_transactions,
-        'medical_transaction': medical_transaction,
         'form': form,
+        'staff': staff,
+        'medical_transaction': medical_transaction,
         'company_info': company_info,
-        'LEAVE_TYPE': ChoicesLeaveType.objects.all().values_list("name", "name"),
         'academic_years': academic_years,
-        'medical_entitlement': medical_entitlement,
-        'remaining_amount': remaining_amount,
         'hospitals': hospitals,
         'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
         'MEDICALTREATMENT': ChoicesMedicalTreatment.objects.all().values_list("name", "name"),
         'MEDICALTYPE': ChoicesMedicalType.objects.all().values_list("name", "name"),
-        'BENE': final_bene_list,        
+        'BENE': final_bene_list,
+        'active_year': active_year_value,
     }
 
     return render(request, 'hr/medical.html', context)
-
 
 
 ######################################################################
@@ -2718,13 +2783,11 @@ def delete_staff_document(request, doc_id, staffno):
     staff = Employee.objects.get(pk=staffno)
     staff_document = StaffDocument.objects.get(pk=doc_id)
 
-    # Delete file from Firebase
     try:
         delete_file_from_firebase(staff_document.doc_url)
     except Exception as e:
         logger.warning(f"Failed to delete Firebase file: {e}")
-
-    # Delete the record from DB
+        
     staff_document.delete()
 
     full_name = f"{staff.fname} {staff.lname}"

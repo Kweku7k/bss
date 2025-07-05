@@ -1,6 +1,8 @@
 import firebase_admin
 from firebase_admin import credentials, storage
 import os, json
+from urllib.parse import urlparse, unquote
+
 
 # === Firebase Initialization ===
 if not firebase_admin._apps:
@@ -43,11 +45,25 @@ def delete_file_from_firebase(public_url):
     """
     Deletes a file from Firebase Storage using its public URL.
     """
-    from urllib.parse import urlparse
-
     bucket = storage.bucket()
+
+    # Extract the path from the URL
     path = urlparse(public_url).path.lstrip('/')
-    
-    blob = bucket.blob(path)
-    blob.delete()
-    print(f"🔥 Deleted file from Firebase: {path}")
+
+    # Remove the bucket name if it's in the path
+    if path.startswith(bucket.name + "/"):
+        path = path[len(bucket.name) + 1:]
+
+    # Decode URL-encoded characters like %20
+    path = unquote(path)
+
+    try:
+        blob = bucket.blob(path)
+        if blob.exists():
+            blob.delete()
+            print(f"🔥 Deleted file from Firebase: {path}")
+        else:
+            print(f"⚠️ File not found in Firebase: {path}")
+    except Exception as e:
+        print(f"❌ Failed to delete file from Firebase: {path}")
+        print(f"Error: {str(e)}")

@@ -121,9 +121,16 @@ class JobTitle(models.Model):
 
 class AcademicYear(models.Model):
     academic_year = models.CharField(max_length=10)
+    active = models.BooleanField(default=False)
     
     def __str__(self):
         return self.academic_year
+    
+    def save(self, *args, **kwargs):
+        if self.active:
+            # Deactivate other academic years
+            AcademicYear.objects.exclude(pk=self.pk).update(active=False)
+        super().save(*args, **kwargs)
     
     
     

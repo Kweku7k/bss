@@ -116,7 +116,7 @@ urlpatterns = [
     
     # upload staff documents
     path('upload_document/<str:staffno>', views.create_staff_document, name='upload-document'),
-    path('staff/<str:staffno>/delete/<int:doc_id>/', views.delete_staff_document, name='delete-document'),
+    path('staff/<str:staffno>/<int:doc_id>/', views.delete_staff_document, name='delete-document'),
 
     
     

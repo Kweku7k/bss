@@ -775,6 +775,7 @@ def academic_year(request):
                 return redirect('academic-year')
             else:
                 form.save()
+                messages.success(request, 'Academic year added successfully.')
                 return HttpResponseRedirect('academic_year?submitted=True')
     else:
         form = AcademicYearForm
