@@ -6,7 +6,10 @@ from urllib.parse import urlparse, unquote
 
 # === Firebase Initialization ===
 if not firebase_admin._apps:
-    creds_raw = os.environ.get('FIREBASE_CREDENTIALS_JSON')
+    # creds_raw = os.environ.get('FIREBASE_CREDENTIALS_JSON')
+    with open('bss/firebase_key.json', 'r') as f:
+        creds_raw = f.read()
+
     if not creds_raw:
         raise Exception("Firebase credentials not found in env")
 
