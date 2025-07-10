@@ -56,7 +56,7 @@
                             <div class="col-md-4">
                                 <label for="staff_cat" class="form-label">Staff Category</label>
                                 <select id="staff_cat" name="staff_cat" class="form-select" required>
-                                    <option value="" disabled selected>N/A</option>
+                                    <option value="" selected>N/A</option>
                                     {% if staffcategory %} 
                                         {% for sc in staffcategory %}
                                             <option value="{{ sc.category_name }}"
@@ -70,7 +70,7 @@
                             <div class="col-md-4">
                                 <label for="contract" class="form-label">Contract Type</label>
                                 <select id="contract" name="contract" class="form-select">
-                                    <option value="" disabled selected>N/A</option>
+                                    <option value="" selected>N/A</option>
                                     {% if contract %} 
                                         {% for ct in contract %}
                                             <option value="{{ ct.contract_type }}"
@@ -85,7 +85,7 @@
                             <div class="col-md-4">
                                 <label for="active_status" class="form-label">Employee Status</label>
                                 <select id="active_status" name="active_status" class="form-select" required>
-                                    <option value="" disabled selected>N/A</option>
+                                    <option value="" selected>N/A</option>
                                     {% if STAFFSTATUS %}
                                         {% for key, value in STAFFSTATUS %}
                                         <option value="{{ key }}" {% if key == company_info.active_status %} selected {% endif %}>{{ value }}</option>
@@ -115,7 +115,7 @@
                             <div class="col-md-4">
                                 <label for="sch_fac_dir" class="form-label">School/Faculty</label>
                                 <select id="sch_fac_dir" name="sch_fac_dir" class="form-select">
-                                    <option value="" disabled selected>N/A</option>
+                                    <option value="" selected>N/A</option>
                                     {% if school_faculty %} 
                                         {% for sch_fac in school_faculty %}
                                             <option value="{{ sch_fac }}" {% if sch_fac.sch_fac_name == company_info.sch_fac_dir %} selected {% endif %}> {{ sch_fac }} </option>
@@ -126,7 +126,7 @@
                             <div class="col-md-4">
                                 <label for="dept" class="form-label">Department</label>
                                 <select id="dept" name="dept" class="form-select">
-                                    <option value="" disabled selected>N/A</option>
+                                    <option value="" selected>N/A</option>
                                     {% if departments %}
                                         {% for dept in departments %}
                                             <option value="{{ dept }}" {% if dept.dept_long_name == company_info.dept %} selected {% endif %}> {{ dept }} </option>
@@ -137,7 +137,7 @@
                             <div class="col-md-4">
                                 <label for="dept_unit" class="form-label">Department Unit</label>
                                 <select id="dept_unit" name="dept_unit" class="form-select">
-                                    <option value="" disabled selected>N/A</option>
+                                    <option value="" selected>N/A</option>
                                     {% if units %}
                                         {% for uni in units %}
                                             <option value="{{ uni }}" {% if uni.unit_name == company_info.dept_unit %} selected {% endif %}> {{ uni }} </option>
@@ -159,7 +159,7 @@
                             <div class="col-md-4">
                                 <label for="directorate_unit" class="form-label">Directorate Unit</label>
                                 <select id="directorate_unit" name="directorate_unit" class="form-select">
-                                    <option value="" disabled selected>N/A</option>
+                                    <option value="" selected>N/A</option>
                                     {% if units %}
                                         {% for unit in units %}
                                             <option value="{{ unit }}" {% if unit.unit_name == company_info.directorate_unit %} selected {% endif %}> {{ unit }} </option>
@@ -183,7 +183,7 @@
                             <div class="col-md-4">
                                 <label for="campus" class="form-label">Campus</label>
                                 <select id="campus" name="campus" class="form-select">
-                                    <option value="" disabled selected>Select Campus</option>
+                                    <option value="" selected>Select Campus</option>
                                     {% for camp in campus %}
                                     <option value="{{ camp }}" {% if camp.campus_name == company_info.campus %} selected {% endif %}>{{ camp }}</option>
                                     {% endfor %}
@@ -211,7 +211,7 @@
                             <div class="col-md-4">
                                 <label for="pte" class="form-label">Salary Scale</label>
                                 <select id="pte" name="pte" class="form-select">
-                                    <option value="" disabled selected>Select a Salary Scale</option>
+                                    <option value="" selected>Select a Salary Scale</option>
                                     {% if salary_scales %}
                                         {% for ss in salary_scales %}
                                         <option value="{{ ss }}" {% if ss.name == company_info.pte %} selected {% endif %}>{{ ss }}</option>
@@ -347,7 +347,7 @@
             const bankName = this.value;  // Get the selected bank name
     
             // Clear current branch options
-            branchSelect.innerHTML = '<option value="" disabled selected>Select Bank Branch</option>';
+            branchSelect.innerHTML = '<option value="" selected>Select Bank Branch</option>';
     
             // Fetch branches based on the selected bank
             if (bankName) {
@@ -385,7 +385,7 @@
             const schFacName = this.value;
     
             // Clear current department options
-            departmentSelect.innerHTML = '<option value="" disabled selected>Select Department</option>';
+            departmentSelect.innerHTML = '<option value="" selected>Select Department</option>';
     
             // Fetch departments based on the selected school/faculty
             if (schFacName) {
@@ -421,7 +421,7 @@
             const deptName = this.value;
     
             // Clear current unit options
-            unitSelect.innerHTML = '<option value="" disabled selected>Select Unit</option>';
+            unitSelect.innerHTML = '<option value="" selected>Select Unit</option>';
     
             // Fetch units based on the selected department
             if (deptName) {
@@ -458,7 +458,7 @@
             const dirName = this.value;
     
             // Clear current unit options
-            unitSelect.innerHTML = '<option value="" disabled selected>Select Unit</option>';
+            unitSelect.innerHTML = '<option value="" selected>Select Unit</option>';
     
             // Fetch units based on the selected directorate
             if (dirName) {
