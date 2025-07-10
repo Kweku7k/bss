@@ -42,18 +42,21 @@
                         {% if emp_relations %}
                         <div class="row">
                             {% for emp in emp_relations %}
-                            <div class="col-6 col-md-6 mb-2">
+                            <div class="col-6 col-md-4 mb-2">
                                 <div class="card p-3">
                                     <div class="w-100 d-flex justify-content-between align-items-start mb-1">
                                         <div class="flex-grow-1 me-2">
-                                            <h6 class="mb-0 text-truncate" style="width: 300px;"><b>{{ emp.kith_fname }} {{ emp.kith_lname }}</b></h6>
-                                            <p class="mb-0">{{ emp.kith_relationship }}</p>
                                             <p class="mb-0">Percentage: {{ emp.percentage }}%</p>
                                         </div>
                                         <div class="d-flex">
                                             <a class="btn btn-sm btn-info bi-pencil-square me-2" href="{% url 'edit-emp-relation' emp.id staff.staffno %}"></a>
                                             <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-emp-relation' emp.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ emp.kith_fname }}?');"></a>
                                         </div>
+                                        
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0 text-truncate" style="width: 300px;"><b>{{ emp.kith_fname }} {{ emp.kith_lname }}</b></h6>
+                                            <p class="mb-0">{{ emp.kith_relationship }}</p>
                                     </div>
                                 </div>
                             </div>
