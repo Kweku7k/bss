@@ -461,6 +461,8 @@ def dormant_staff(request):
     staffs = Employee.objects.filter(companyinformation__active_status='Inactive').order_by('lname')
     staff_count = staffs.count()
     company_info = CompanyInformation.objects.all()
+    
+    print("Dormant Staff", staffs)
         
     # Pagination
     paginator = Paginator(staffs, 10)
@@ -641,6 +643,8 @@ def report(request):
 
         # Apply filters to the staff queryset
         staffs = staffs.filter(filters).distinct()  # Ensure distinct entries
+        
+        print("Queries for staff", staffs)
 
     # Pagination setup
     paginator = Paginator(staffs, 30)
