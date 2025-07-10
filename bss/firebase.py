@@ -21,7 +21,6 @@ if not firebase_admin._apps:
     })
 
 bucket = storage.bucket()
-print("🔥 Firebase initialized with bucket:", bucket.name)
 
 
 # === Upload Function ===

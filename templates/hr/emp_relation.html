@@ -105,17 +105,17 @@
                             </div>
                             <div class="col-md-4">
                                 <label for="kith_dob" class="form-label">Date of Birth</label>
-                                <input type="date" class="form-control" name="kith_dob" {% if emp_relation %} value="{{ emp_relation.kith_dob|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                                <input type="date" class="form-control" name="kith_dob" {% if emp_relation %} value="{{ emp_relation.kith_dob|date:"Y-m-d" }}" {% else %} value="" {% endif %} >
                             </div>
                             <div class="col-md-4">
                                 <label for="phone" class="form-label">Phone Number</label>
-                                <input type="text" class="form-control" name="phone" {% if emp_relation %} value="{{ emp_relation.phone }}" {% else %} value="" {% endif %} required>
+                                <input type="text" class="form-control" name="phone" {% if emp_relation %} value="{{ emp_relation.phone }}" {% else %} value="" {% endif %} >
                             </div>
                             <div class="col-md-4">
                                 <label for="residential" class="form-label">Residential Address</label>
                                 <input type="text" class="form-control" name="residential" {% if emp_relation %} value="{{ emp_relation.residential }}" {% else %} value="" {% endif %}>
                             </div>
-                            <div class="col-md-4">
+                            {% comment %} <div class="col-md-4">
                                 <label for="status" class="form-label">Status</label>
                                 <select name="status" class="form-select" required>
                                     <option value="" disabled selected>Select Relationship Status</option>
@@ -123,7 +123,7 @@
                                     <option value="{{ key }}" {% if key == emp_relation.status %} selected {% endif %}>{{ value }}</option>
                                     {% endfor %}
                                 </select>
-                            </div>
+                            </div> {% endcomment %}
                             <div class="col-md-2">
                                 <label for="kin" class="form-check-label">Next of Kin</label>
                                 <input type="checkbox" class="form-check-input" role="switch" id="kin" name="kin" value="yes" {% if emp_relation.kin %} checked {% endif %}>
