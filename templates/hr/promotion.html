@@ -48,10 +48,9 @@
                                     <div class="w-100 d-flex justify-content-between align-items-start mb-1">
                                         <div class="flex-grow-1 me-2">
                                             <h6 class="mb-0"><b>{{ promotion.new_staff_category }}</b></h6>
-                                            <p class="mb-0">{{ promotion.effective_date }}</p>
-                                            <p class="mb-0">{{ promotion.end_date }}</p>
+                                            <p class="mb-0">{{ promotion.effective_date }} - {{ promotion.end_date }}</p>
                                             <p class="mb-0">{{ promotion.new_job_title }}</p>
-                                            {% if renpromotionewal.new_position %}
+                                            {% if promotion.new_position %}
                                                 <p class="mb-0">{{ promotion.new_position }}</p>
                                             {% endif %}
                                         </div>
@@ -95,7 +94,7 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="prev_position" class="form-label">Prev. Position</label>
+                                <label for="prev_position" class="form-label">Prev. Rank</label>
                                 <input type="text" name="prev_position" class="form-control" value="{{ company_info.rank }}" readonly >
                             </div>
 
@@ -113,16 +112,26 @@
                                 <label class="form-label" for="new_job_title">New Job Title</label>
                                 <select name="new_job_title" id="new_job_title" class="form-select" required>
                                     <option selected="true" disabled="disabled">-----Select------</option>
-                                    {% for jt in jobtitle %}
-                                        <option value="{{ jt }}" {% if jt.job_title == promotion_list.new_job_title %} selected{% endif %} >{{ jt }}</option>
+                                    {% for jt in ranks %}
+                                        <option value="{{ jt.staff_rank }}" {% if jt.staff_rank == promotion_list.new_job_title %} selected{% endif %} >{{ jt.staff_rank }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
 
                             <div class="col-md-4">
+                                <label class="form-label" for="new_position">New Rank</label>
+                                <select name="new_position" id="new_position" class="form-select" required>
+                                    <option selected="true" disabled="disabled">-----Select------</option>
+                                    {% for jt in jobtitle %}
+                                        <option value="{{ jt }}" {% if jt.job_title == promotion_list.new_rank %} selected{% endif %} >{{ jt }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            {% comment %} <div class="col-md-4">
                                 <label class="form-label" for="new_position">New Position</label>
                                 <input type="text" name="new_position" class="form-control" value="{{ promotion_list.new_position }}" >
-                            </div>
+                            </div> {% endcomment %}
 
                             <div class="col-md-4">
                                 <label for="effective_date" class="form-label">Effective Date</label>

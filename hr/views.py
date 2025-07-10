@@ -2326,6 +2326,8 @@ def add_renewal_history(request, staffno):
     renewal_count = renewal_list.count()
     staffcategory = StaffCategory.objects.all()
     jobtitle = JobTitle.objects.all()
+    ranks = StaffRank.objects.all()
+    
 
     
     if request.method == 'POST':
@@ -2353,6 +2355,7 @@ def add_renewal_history(request, staffno):
         'renewal_count':renewal_count,
         'staffcategory':staffcategory,
         'jobtitle':jobtitle,
+        'ranks': ranks,
         'company_info':company_info,
     }
     
@@ -2408,6 +2411,8 @@ def add_promotion_history(request, staffno):
     promotion_count = promotion_list.count()
     staffcategory = StaffCategory.objects.all()
     jobtitle = JobTitle.objects.all()
+    ranks = StaffRank.objects.all()
+    
 
 
     if request.method == 'POST':
@@ -2435,6 +2440,7 @@ def add_promotion_history(request, staffno):
         'promotion_count':promotion_count,
         'staffcategory':staffcategory,
         'jobtitle':jobtitle,
+        'ranks':ranks,
         'company_info':company_info,
     }
 
