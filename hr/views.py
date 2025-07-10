@@ -435,6 +435,8 @@ def allstaff(request):
     staffs = Employee.objects.filter(filters).exclude(companyinformation__active_status='Inactive').order_by('fname')
     staff_count = staffs.count()
     company_info = CompanyInformation.objects.all()
+    
+    print("All Staff", staffs)
 
     # Pagination
     paginator = Paginator(staffs, 30)
