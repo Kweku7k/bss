@@ -42,11 +42,11 @@
                         {% if emp_relations %}
                         <div class="row">
                             {% for emp in emp_relations %}
-                            <div class="col-6 col-md-4 mb-2">
+                            <div class="col-6 col-md-6 mb-2">
                                 <div class="card p-3">
                                     <div class="w-100 d-flex justify-content-between align-items-start mb-1">
                                         <div class="flex-grow-1 me-2">
-                                            <h6 class="mb-0 text-truncate" style="width: 100px;"><b>{{ emp.kith_lname }} {{ emp.kith_fname }}</b></h6>
+                                            <h6 class="mb-0 text-truncate" style="width: 300px;"><b>{{ emp.kith_fname }} {{ emp.kith_lname }}</b></h6>
                                             <p class="mb-0">{{ emp.kith_relationship }}</p>
                                             <p class="mb-0">Percentage: {{ emp.percentage }}%</p>
                                         </div>
