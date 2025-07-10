@@ -33,7 +33,7 @@
                         {% if staff.staff_pix %}
                             <img src="{{ staff.staff_pix }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
                         {% else %}
-                            <img src="/media/images/fav.png" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
+                            <img src="https://firebasestorage.googleapis.com/v0/b/cu-hr-caf00.firebasestorage.app/o/staff_pictures%2Ffav.png?alt=media&token=97abe448-d881-4cc1-92cc-e5f65cbb0244" alt="Avatar" style="width: 110px; height: 110px" class="img-fluid rounded-circle" />
                         {% endif %}
                     </div>
 
@@ -42,11 +42,11 @@
                     {% for item in treatment_summary %}
                         <div class="col-lg-4 col-md-12 mb-2">
                             <div class="card mb-3 p-3">
-                                <p><strong>Type:</strong> {{ item.type }}</p>
-                                <p><strong>Entitlement:</strong> ₵{{ item.entitlement }}</p>
-                                <p><strong>Used:</strong> ₵{{ item.used }}</p>
-                                <p><strong>Remaining:</strong> ₵{{ item.remaining }}</p>
-                                <p><strong>Surcharge:</strong> ₵{{ item.surcharge }}</p>
+                                <h6><strong>Type:</strong> {{ item.type }}</h6>
+                                <h6><strong>Entitlement:</strong> ₵{{ item.entitlement }}</h6>
+                                <h6><strong>Used:</strong> ₵{{ item.used }}</h6>
+                                <h6><strong>Remaining:</strong> ₵{{ item.remaining }}</h6>
+                                <h6><strong>Surcharge:</strong> ₵{{ item.surcharge }}</h6>
                             </div>
                         </div>
                     {% empty %}
