@@ -20,6 +20,20 @@
       </div>
    {% endif %}
 
+   <!-- Session Warning Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="sessionWarningToast" class="toast bg-danger text-white" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="15000">
+    <div class="toast-header bg-danger text-white">
+      <strong class="me-auto">Session Warning</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      Your session will expire in 10 minutes. Please save your work.
+    </div>
+  </div>
+</div>
+
+
    {% block content %}
    <!-- Your content goes here -->
    {% endblock %}
@@ -45,3 +59,28 @@
       {% endfor %}
    });
 </script>
+
+<script>
+  const sessionRemaining = {{ session_remaining_seconds|default:0 }};
+  const warningTime = 5 * 60; // 5 minutes
+  const endTime = Date.now() + sessionRemaining * 1000;
+
+  function checkSessionTime() {
+    const now = Date.now();
+    const remaining = endTime - now;
+
+    if (remaining <= warningTime * 1000 && !window.warned) {
+      window.warned = true;
+
+      const toastEl = document.getElementById('sessionWarningToast');
+      if (toastEl) {
+        const toast = new bootstrap.Toast(toastEl);
+        toast.show();
+      }
+    }
+  }
+
+  setInterval(checkSessionTime, 10000); // every 10 seconds
+</script>
+
+

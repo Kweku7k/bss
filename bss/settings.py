@@ -90,6 +90,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'hr.context_processors.base_context',
+                'hr.context_processors.session_expiry',
             ],
         },
     },
