@@ -173,8 +173,8 @@
                                 <select id="rank" name="rank" class="form-select">
                                     <option value="" selected>N/A</option>
                                     {% if ranks %} 
-                                        {% for jt in ranks %}
-                                            <option value="{{ jt.job_title }}" {% if jt.job_title == company_info.job_title %} selected {% endif %}> {{ jt.job_title }} </option>
+                                        {% for rank in ranks %}
+                                            <option value="{{ rank.job_title }}" {% if rank.job_title == company_info.rank %} selected {% endif %}> {{ rank.job_title }} </option>
                                         {% endfor %}
                                     {% endif %}
                                 </select>
