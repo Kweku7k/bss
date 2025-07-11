@@ -73,7 +73,7 @@ AUTH_USER_MODEL = 'hr.User'
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Session timeout duration in seconds (e.g., 1 hour = 3600 seconds)
-SESSION_COOKIE_AGE = 3600  # 1 hour
+SESSION_COOKIE_AGE = 7200  # 2 hour
 
 ROOT_URLCONF = 'bss.urls'
 

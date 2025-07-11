@@ -27,7 +27,7 @@
                         <div class="form-group">
                             <label for="title">Title</label>
                             <select name="title" class="form-select" required> 
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for ts in title %}
                                     <option value="{{ ts }}"
                                     {% if ts.title_abbr == staff.title %}
@@ -42,7 +42,7 @@
                         <div class="form-group">
                             <label for="suffix">Suffix</label>
                             <select name="suffix" id="suffix" class="form-select">
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in SUFFIX %}
                                     <option value="{{ key }}"
                                     {% if key == staff.suffix %}
@@ -87,7 +87,7 @@
                         <div class="form-group">
                             <label for="gender">Gender</label>
                             <select name="gender" id="gender" class="form-select" required>
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in GENDER %}
                                     <option value="{{ key }}"
                                     {% if key == staff.gender %}
@@ -109,7 +109,7 @@
                         <div class="form-group">
                             <label for="m_status">Marital Status</label>
                             <select name="m_status" id="m_status" class="form-select">
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in MARITALSTATUS %}
                                     <option value="{{ key }}"
                                     {% if key == staff.m_status %}
@@ -131,7 +131,7 @@
                         <div class="form-group">
                             <label for="ethnic">Ethnic Group</label>
                             <select name="ethnic" id="ethnic" class="form-select">
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in RBA %}
                                     <option value="{{ key }}"
                                     {% if key == staff.ethnic %}
@@ -153,7 +153,7 @@
                         <div class="form-group">
                             <label for="region">Region</label>
                             <select name="region" id="region" class="form-select">
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in REGION %}
                                     <option value="{{ key }}"
                                     {% if key == staff.region %}
@@ -175,7 +175,7 @@
                         <div class="form-group">
                             <label for="religion">Religion</label>
                             <select name="religion" id="religion" class="form-select">
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in RELIGION %}
                                     <option value="{{ key }}"
                                     {% if key == staff.religion %}
@@ -190,7 +190,7 @@
                         <div class="form-group">
                             <label for="denomination">Denomination</label>
                             <select name="denomination" id="denomination" class="form-select">
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in DENOMINATION %}
                                     <option value="{{ key }}"
                                     {% if key == staff.denomination %}
@@ -225,7 +225,7 @@
                         <div class="form-group">
                             <label for="idtype">ID Type</label>
                             <select name="idtype" id="idtype" class="form-select" required>
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in IDTYPE %}
                                     <option value="{{ key }}"
                                     {% if key == staff.idtype %}
@@ -276,7 +276,7 @@
                         <div class="form-group">
                             <label for="heq">Highest Educational Qualification</label>
                             <select name="heq" id="heq" class="form-select" required>
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for qual in qualification %}
                                 <option value="{{ qual }}"
                                 {% if qual.qual_abbr == staff.heq %}
@@ -327,7 +327,7 @@
                         <div class="form-group">
                             <label for="hpq">Highest Professional Qualification</label>
                             <select name="hpq" id="hpq" class="form-select" >
-                                <option value="" disabled selected>N/A</option>
+                                <option value="" selected>N/A</option>
                                 {% for key,value in HPQ %}
                                     <option value="{{ key }}"
                                     {% if key == staff.hpq %}
