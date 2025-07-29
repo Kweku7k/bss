@@ -630,10 +630,14 @@ def add_bank(request):
     bank_count = banks.count()
     if request.method == 'POST':
         form = BankForm(request.POST)
-        if form.is_valid(): 
+        if form.is_valid():
             bank_short_name = form.cleaned_data.get('bank_short_name')
-            export_format = json.loads(request.POST.get('export_format', '[]'))
-            
+            raw_export_format = request.POST.get('export_format')
+            try:
+                export_format = json.loads(raw_export_format) if raw_export_format else []
+            except json.JSONDecodeError:
+                export_format = []
+
             if Bank.objects.filter(bank_short_name=bank_short_name).exists():
                 messages.error(request, f'{bank_short_name} Bank already exists.')
                 return redirect('add-bank')
@@ -642,7 +646,6 @@ def add_bank(request):
                 bank.export_format = export_format
                 bank.save()
                 return HttpResponseRedirect('bank?submitted=True')
-            
         else:
             print(form.errors)
     else:
