@@ -985,6 +985,7 @@ def emp_relation(request,staffno):
         form = KithForm(request.POST)
         print("form has been recieved")
         if form.is_valid(): 
+            print("Somethig is wrong somewhere")
             new_percentage = form.cleaned_data['percentage']
             current_total = sum(emp.percentage for emp in emp_relations)
             
@@ -998,6 +999,10 @@ def emp_relation(request,staffno):
                 messages.success(request, f"Beneficiaries for {full_name} has been created successfully")
                 logger.info(f"Beneficiaries added for {full_name} by {request.user.username}")
                 return redirect('emp-relation', staffno)
+            
+        else:
+            print("form.errors")
+            print(form.errors)
     else:
         form = KithForm
         if 'submitted' in request.GET:

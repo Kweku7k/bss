@@ -113,7 +113,7 @@ class Kith(models.Model):
      kith_middlenames = models.CharField('Middle Names',max_length=120,blank=True,null=True)
      kith_relationship = models.CharField(max_length=50,blank=True,null=True)
      kith_gender = models.CharField(max_length=50,blank=True,null=True)
-     kith_dob = models.DateField('Date of Birth')
+     kith_dob = models.DateField('Date of Birth', blank=True,null=True)
      phone = models.CharField('Phone No.',max_length=15,blank=True,null=True)
      residential = models.CharField('Residential Address',max_length=100,blank=True,null=True)
      status = models.CharField('Dead or Alive',max_length=10,blank=True,null=True)
