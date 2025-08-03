@@ -299,8 +299,8 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="heq">Highest Educational Qualification</label>
-                                    <select name="heq" id="heq" class="form-select" required>
-                                        <option value="" disabled selected>N/A</option>
+                                    <select name="heq" id="heq" class="form-select">
+                                        <option value="" selected>N/A</option>
                                         {% for qual in qualification %}
                                         <option value="{{ qual }}"
                                         {% if qual.qual_abbr == staff.heq %}

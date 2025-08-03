@@ -39,35 +39,38 @@
 
                     <h5><b>Medical Entitlements</b></h5>
                     <div class="row">
-                    {% for item in treatment_summary %}
-                        <div class="col-lg-4 col-md-12 mb-2">
-                            <div class="card mb-3 p-3">
-                                <h6><strong>Type:</strong> {{ item.type }}</h6>
-                                <h6><strong>Entitlement:</strong> ₵{{ item.entitlement }}</h6>
-                                <h6><strong>Used:</strong> ₵{{ item.used }}</h6>
-                                <h6><strong>Remaining:</strong> ₵{{ item.remaining }}</h6>
-                                <h6><strong>Surcharge:</strong> ₵{{ item.surcharge }}</h6>
+                        {% for item in treatment_summary %}
+                            <div class="col-lg-4 col-md-12 mb-2">
+                                <div class="card mb-3 p-3 shadow-sm border-0">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-primary mb-3">{{ item.type }}</h5>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="text-muted">Entitlement:</h6>
+                                            <h6 class="fw-bold">₵{{ item.entitlement }}</h6>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="text-muted">Used:</h6>
+                                            <h6 class="fw-bold">₵{{ item.used }}</h6>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="text-muted">Remaining:</h6>
+                                            <h6 class="fw-bold text-success">₵{{ item.remaining }}</h6>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <h6 class="text-muted">Surcharge:</h6>
+                                            <h6 class="fw-bold text-danger">₵{{ item.surcharge }}</h6>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    {% empty %}
-                        <p>No entitlement records for this staff's category.</p>
-                    {% endfor %}
+                        {% empty %}
+                            <div class="col-12">
+                                <div class="alert alert-info" role="alert">
+                                    No entitlement records for this staff's category.
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
-
-                    {% comment %} <h5><b>Medical Entitlement</b></h5>
-
-                    <!-- Display leave entitlement -->
-                    <div class="mb-5">
-                        <div class="col-lg-6 col-md-12 mb-2">
-                            <div class="card p-3">
-                                <p><strong>Staff Category:</strong> {{ company_info.staff_cat }}</p>
-                                <p><strong>Entitled Amount:</strong> ₵{{ medical_entitlement.entitlement }}</p>
-                                <p><strong>Medical Balance:</strong> ₵{{ remaining_amount }}</p>
-                                <p><strong>Amount Spent:</strong> ₵{{ amount_spent }}</p>
-                                <p><strong>Surcharge:</strong> ₵{{ surcharge }}</p>
-                            </div>
-                        </div>
-                    </div> {% endcomment %}
 
 
                     <h5 class="mt-4"><b>Medical transactions {{medical_trans_count}}</b></h5>
@@ -113,20 +116,9 @@
                     <form action="" method="POST" enctype="multipart/form-data"> 
                         {% csrf_token %}
                         <div class="row g-3 mb-4">
-                            {% comment %} <div class="col-md-4">
-                                <label for="staffno" class="form-label">Staff Number</label>
-                                </div> {% endcomment %}
                             <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
-                            {% comment %} <div class="col-md-4">
-                                <label for="staff_cat" class="form-label">Staff Category</label>
-                            </div> {% endcomment %}
                             <input type="text" class="form-control" name="staff_cat" value="{{ company_info.staff_cat }}" readonly hidden>
-
-                            {% comment %} <div class="col-md-4">
-                                <label for="patient_name" class="form-label">Patient Name</label>
-                                <input type="text" class="form-control" name="patient_name" {% if medical_transaction %} value="{{ medical_transaction.patient_name }}" {% else %} value="" {% endif %} required>
-                            </div> {% endcomment %}
 
                             <div class="col-md-4">
                                 <label for="patient_name" class="form-label">Patient Name</label>
@@ -196,9 +188,10 @@
                             </div>        
                         </div>
 
+                
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-info me-2">Add</button>
-                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-secondary  me-2">Finish</a>
+                            <button type="submit" class="btn btn-success">Submit</button>
                         </div>
                     </form>
                 </div>

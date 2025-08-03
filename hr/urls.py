@@ -151,6 +151,10 @@ urlpatterns = [
     
     path('loan_history/', views.loan_history, name='loan-history'),   
     path('payroll_history/', views.payroll_history, name='payroll-history'),
+    path('income_history/', views.income_history, name='income-history'),
+    path('deduction_history/', views.deduction_history, name='deduction-history'),
+
+
  
     
     path('payroll/register/', views.payroll_register, name='payroll-register'),

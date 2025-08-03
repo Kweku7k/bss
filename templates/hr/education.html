@@ -49,37 +49,45 @@
                         </div>
                     </div>
 
-
-
                     
                     <h6><b> Other Education Background</b></h6>
                     <div class="mb-4">
                         {% if educations %}
-                        <div class="row">
-                            {% for edu in educations %}
-                            <div class="col-6 col-md-4 mb-2">
-                                <div class="card p-3">
-                                    <div class="w-100 d-flex justify-content-between align-items-start mb-1">
-                                        <div class="flex-grow-1 me-2">
-                                            <p class="mb-0"><b>{{ edu.certification }}</b></p>
-                                            <h6 class="mb-0 text-truncate" style="width: 100px;">{{ edu.prog_studied }}</h6>
-                                            <p class="mb-0">{{ edu.start_date }} - {{ edu.finish_date }}</p>
-                                            <p class="mb-0">{{ edu.school_code }} </p>
-                                        </div>
-                                        <div class="d-flex">
-                                            <a class="btn btn-sm btn-info bi-pencil-square me-2" href="{% url 'edit-education' edu.id staff.staffno %}"></a>
-                                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-education' edu.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ edu.prog_studied }}?');"></a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
+                        <div style="height: 200px; overflow-y: auto;">
+                            <table class="table table-hover">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Qual</th>
+                                        <th>Study</th>
+                                        <th>Duration</th>
+                                        <th>Institution</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for edu in educations %}
+                                    <tr>
+                                        <td><b>{{ edu.certification }}</b></td>
+                                        <td>{{ edu.prog_studied }}</td>
+                                        <td>{{ edu.start_date }} - {{ edu.finish_date }}</td>
+                                        <td>{{ edu.school_code }}</td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <a class="btn btn-sm btn-info bi-pencil-square me-2" href="{% url 'edit-education' edu.id staff.staffno %}"></a>
+                                                <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-education' edu.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ edu.prog_studied }}?');"></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                         {% else %}
-                        <p>No Education Background added yet.</p>
+                            <p>No Education Background added yet.</p>
                         {% endif %}
                     </div>
 
+                
                     <br/>
 
 
@@ -105,10 +113,12 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            
                             <div class="col-md-4">
                                 <label for="prog_studied" class="form-label">Area of study </label>
                                 <input type="text" name="prog_studied" class="form-control" {% if education %} value="{{ education.prog_studied }}" {% else %} value="" {% endif %} required>
                             </div>
+                            
                             <div class="col-md-4">
                                 <label for="start_date" class="form-label">Start Date</label>
                                 <input type="date" class="form-control" name="start_date" {% if education %} value="{{ education.start_date|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
@@ -122,30 +132,12 @@
                                 <label for="school_code" class="form-label">Institution of Study </label>
                                 <input type="text" name="school_code" class="form-control" {% if education %} value="{{ education.school_code }}" {% else %} value="" {% endif %} required>
                             </div>
-                            
-
-                            {% comment %} <div class="col-md-4">
-                                <label for="school_code" class="form-label">Institution of Study</label>
-                                <select name="school_code" class="form-select" required>
-                                    <option value="" disabled selected>Select Institution</option>
-                                    {% if school_list %} 
-                                        {% for school in school_list %}
-                                            <option value="{{ school.id }}"
-                                            {% if school.id == pkno %} selected {% endif %}
-                                            
-                                            > {{ school.school_name }} </option>
-                                        {% endfor %}
-                                    {% endif %}
-                                </select>
-                            </div> {% endcomment %}
-                            
-                            
-                        
                         </div>
 
+                    
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-info me-2">Add</button>
-                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-secondary  me-2">Finish</a>
+                            <button type="submit" class="btn btn-success">Submit</button>
                         </div>
                     </form>
                 </div>

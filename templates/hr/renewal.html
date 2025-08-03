@@ -41,23 +41,27 @@
 
                     <div class="mb-4">
                         {% if renewal_list %}
-                        <div class="row">
-                            {% for renewal in renewal_list %}
-                            <div class="col-6 col-md-4 mb-2">
-                                <div class="card p-3">
-                                    <div class="w-100 d-flex justify-content-between align-items-start mb-1">
-                                        <div class="flex-grow-1 me-2">
-                                            <h6 class="mb-0"><b>{{ renewal.new_staff_category }}</b></h6>
-                                            <p class="mb-0">{{ renewal.effective_date }}</p>
-                                            <p class="mb-0">{{ renewal.end_date }}</p>
-                                            <p class="mb-0">{{ renewal.new_job_title }}</p>
-                                            {% if renewal.new_position %}
-                                                <p class="mb-0">{{ renewal.new_position }}</p>
-                                            {% endif %}
-                                        </div>
-                                        
-                                        <!-- Display approval or disapprove status -->
-                                        <div class="ms-2">
+                        <div style="height: 300px; overflow-y: auto;">
+                            <table class="table table-hover">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Staff Category</th>
+                                        <th>Job Title</th>
+                                        <th>Position</th>
+                                        <th>Duration</th>
+                                        <th>Approved By</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for renewal in renewal_list %}
+                                    <tr>
+                                        <td><b>{{ renewal.new_staff_category }}</b></td>
+                                        <td>{{ renewal.new_job_title }}</td>
+                                        <td>{{ renewal.new_position|default:"-" }}</td>
+                                        <td>{{ renewal.effective_date }} - {{ renewal.end_date }}</td>
+                                        <td>{{ renewal.approved_by.username }}</td>
+                                        <td>
                                             {% if renewal.is_approved %}
                                                 <span class="badge bg-success">Approved</span>
                                             {% elif renewal.is_disapproved %}
@@ -65,16 +69,17 @@
                                             {% else %}
                                                 <span class="badge bg-warning">Pending</span>
                                             {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                         {% else %}
-                        <p>No renewal history found.</p>
+                            <p>No renewal history found.</p>
                         {% endif %}
                     </div>
+
                     <br/>
 
                     <!-- Renewal Request Form -->
@@ -137,8 +142,8 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-info me-2">Add</button>
-                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-secondary  me-2">Finish</a>
+                            <button type="submit" class="btn btn-success">Submit</button>
                         </div>
                     </form>
                 </div>

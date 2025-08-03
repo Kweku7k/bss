@@ -979,6 +979,7 @@ def edit_company_info(request,staffno):
 def emp_relation(request,staffno):
     submitted = False
     emp_relations = Kith.objects.filter(staffno__exact=staffno)
+    emp_count = emp_relations.count()
     staff = Employee.objects.get(pk=staffno)
     
     if request.method == 'POST':
@@ -1008,15 +1009,16 @@ def emp_relation(request,staffno):
         if 'submitted' in request.GET:
             submitted = True
     context = {
-               'form':form,
-               'submitted':submitted,
-               'emp_relations':emp_relations,
-               'staff':staff,
-               'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-               'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
-               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
-                'total_percentage': sum(emp.percentage for emp in emp_relations),
-            }
+        'form':form,
+        'submitted':submitted,
+        'emp_relations':emp_relations,
+        'emp_count':emp_count,
+        'staff':staff,
+        'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+        'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
+        'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+        'total_percentage': sum(emp.percentage for emp in emp_relations),
+    }
     return render(request,'hr/emp_relation.html',context)
 
 @login_required
@@ -1040,15 +1042,15 @@ def edit_emp_relation(request,staffno,emp_id):
             return redirect('emp-relation', staffno=staffno)
         
     context = {
-                'form':form,
-                'emp_relations':emp_relations,
-                'emp_relation':emp_relation,
-                'staff':staff,
-                'emp_count':emp_count,
-                'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-               'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
-                'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
-               }
+        'form':form,
+        'emp_relations':emp_relations,
+        'emp_relation':emp_relation,
+        'staff':staff,
+        'emp_count':emp_count,
+        'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
+        'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
+        'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+    }
 
     return render(request, 'hr/emp_relation.html', context)
 
@@ -1556,7 +1558,7 @@ def medical_transaction(request, staffno):
             F('kith_lname'),
             output_field=CharField()
         )
-    ).values_list('id', 'full_name')
+    ).values_list('full_name', 'full_name')
     staff_fullname = f"{staff.title} {staff.fname} {staff.lname}"
     final_bene_list = [(staff.staffno, staff_fullname)] + list(bene_list)
 
@@ -2498,8 +2500,8 @@ def add_exit_history(request, staffno):
     company_info = get_object_or_404(CompanyInformation, staffno=staff)
     exit_list = Exits.objects.filter(staffno=staff)
     exit_count = exit_list.count()
-    approvers_list = User.objects.filter(groups__name='superadmin')
-
+    approvers_list = User.objects.filter(is_superuser='True')
+    
     if request.method == 'POST':
         form = ExitHistoryForm(request.POST)
         if form.is_valid():
@@ -3708,4 +3710,179 @@ def payroll_history(request):
         "report_for": staffno,
         "selected_month": selected_month,
         "selected_year": selected_year,
+    })
+    
+    
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_income_history')
+def income_history(request):
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
+    staffno = request.GET.get("staffno")
+    income_type_id = request.GET.get("income_type")
+
+    income_data = []
+
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 1)
+
+        # ✅ only allow if payroll for selected month is approved
+        if not Payroll.objects.filter(month__year=selected_date.year, month__month=selected_date.month, is_approved=True).exists():
+            messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been finalized, therefore you can't view report")
+            return redirect('income-history')
+        
+        # staff selection
+        if staffno and staffno != "all":
+            staff_list = [get_object_or_404(Employee, pk=staffno)]
+        elif staffno == "all":
+            staff_list = Employee.objects.all()
+        else:
+            staff_list = []
+
+        for staff in staff_list:
+            incomes = StaffIncome.objects.filter(staffno=staff)
+            
+            if income_type_id and income_type_id != "all":
+                incomes = incomes.filter(income_type=income_type_id)
+                
+            for income in incomes:
+                start = income.start_month
+                end = income.end_month or selected_date  # fallback to selected if open-ended
+                if start <= selected_date <= end:
+                    income_data.append({
+                        "staff": staff,
+                        "income": income,
+                        "for_month": selected_date,  # ✅ Add this to track what month we're showing
+                    })
+
+        # Export PDF/Excel
+        export_format = request.GET.get("format")
+        if export_format == "pdf":
+            return render_to_pdf("hr/income_history.html", {
+                "income_data": income_data,
+                "report_for": staffno,
+                "month": selected_date,
+            }, filename="income_history.pdf")
+
+        if export_format == "excel":
+            excel_data = {}
+            for entry in income_data:
+                income = entry["income"]
+                sheet_title = f"{entry['staff'].fname}_{income.income_type}_{income.id}"
+                rows = [{
+                    "Month": entry["for_month"].strftime("%B %Y"),
+                    "Amount": float(income.amount or 0),
+                    "Type": str(income.income_type),
+                }]
+                excel_data[sheet_title] = rows
+            return render_to_excel(excel_data, filename="income_history.xlsx")
+
+    return render(request, "hr/income_history.html", {
+        "income_data": income_data,
+        "employees": Employee.objects.all(),
+        "income_types": IncomeType.objects.all(),
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+        "report_for": staffno,
+        "selected_income_type": income_type_id,
+    })
+
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_deduction_history')
+def deduction_history(request):
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
+    staffno = request.GET.get("staffno")
+    deduction_type_id = request.GET.get("deduction_type")
+
+    deduction_data = []
+
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 1)
+
+        if not Payroll.objects.filter(month__year=selected_date.year, month__month=selected_date.month, is_approved=True).exists():
+            messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been finalized.")
+            return redirect('deduction-history')
+
+        if staffno and staffno != "all":
+            staff_list = [get_object_or_404(Employee, pk=staffno)]
+        elif staffno == "all":
+            staff_list = Employee.objects.all()
+        else:
+            staff_list = []
+
+        for staff in staff_list:
+            deductions = StaffDeduction.objects.filter(staffno=staff)
+            
+            if deduction_type_id and deduction_type_id != "all":
+                deductions = deductions.filter(deduction_type=deduction_type_id)
+
+            for deduction in deductions:
+                start = deduction.start_month
+                end = deduction.end_month or selected_date
+                if start <= selected_date <= end:
+                    # deduction_data.append({"staff": staff, "deduction": deduction, "for_month": selected_date,})
+                    deduction_data.append({
+                        "staff": staff,
+                        "deduction_type": str(deduction.deduction_type),
+                        "amount": float(deduction.amount or 0),
+                        "for_month": selected_date,
+                    })
+            
+            payroll = Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month, is_approved=True).first()
+
+            print(f"{staff.staffno}: payroll found = {bool(payroll)}")
+
+            if payroll:
+                print(f"Income Tax: {payroll.income_tax}, SSF: {payroll.ssf}, PF Emp: {payroll.pf_employee}, PF Emp: {payroll.pf_employer}")
+                statutory_deductions = [
+                    ("Income Tax", payroll.income_tax),
+                    ("SSF", payroll.ssf),
+                    ("PF Employee", payroll.pf_employee),
+                    ("PF Employer", payroll.pf_employer),
+                ]
+
+                for dtype, amount in statutory_deductions:
+                    if amount and (deduction_type_id == "all" or not deduction_type_id or dtype == deduction_type_id):
+                        deduction_data.append({
+                            "staff": staff,
+                            "deduction_type": dtype,
+                            "amount": float(amount),
+                            "for_month": selected_date,
+                        })
+        print(deduction_data)
+        # Export
+        export_format = request.GET.get("format")
+        if export_format == "pdf":
+            return render_to_pdf("hr/deduction_history.html", {
+                "deduction_data": deduction_data,
+                "report_for": staffno,
+                "month": selected_date,
+            }, filename="deduction_history.pdf")
+
+        if export_format == "excel":
+            excel_data = {}
+            for entry in deduction_data:
+                d = entry["deduction"]
+                sheet_title = f"{entry['staff'].fname}_{d.deduction_type}_{d.id}"
+                rows = [{
+                    "Month": entry["for_month"].strftime("%B %Y"),
+                    "Amount": float(d.amount or 0),
+                    "Type": str(d.deduction_type),
+                }]
+                excel_data[sheet_title] = rows
+            return render_to_excel(excel_data, filename="deduction_history.xlsx")
+
+    return render(request, "hr/deduction_history.html", {
+        "deduction_data": deduction_data,
+        "employees": Employee.objects.all(),
+        "deduction_types": DeductionType.objects.all(),
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+        "report_for": staffno,
+        "selected_deduction_type": deduction_type_id,
     })
