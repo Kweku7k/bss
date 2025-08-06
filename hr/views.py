@@ -3057,16 +3057,23 @@ def edit_staff_loan(request, staffno, loan_id):
 ########## END OF INCOME DEDUCTION AND LOAN ###############
 
 
-
-
 @login_required
 @role_required(["superadmin", "audit"])
 def toggle_approval(request, payroll_id):
     payroll = get_object_or_404(Payroll, id=payroll_id)
-    payroll.is_approved = not payroll.is_approved
-    payroll.save()
-    return redirect("payroll-post-payroll")
 
+    target_month = payroll.month.month 
+    target_year = payroll.month.year 
+
+    new_status = not payroll.is_approved
+
+    Payroll.objects.filter(month__month=target_month, month__year=target_year).update(is_approved=new_status)
+
+    status_text = "approved" if new_status else "unapproved"
+    messages.success(request, f"Payroll for {payroll.month.strftime('%B %Y')} has been {status_text} successfully.")
+    logger.info(f"Payroll for {payroll.month.strftime('%B %Y')} has been {status_text} by {request.user.username}.")
+
+    return redirect("payroll-post-payroll")
 
 
 ########## GENERATE PAYROLL INFORMATION ###############
@@ -3162,7 +3169,8 @@ def generate_payroll(request):
                         loan_payment.save()
                     
         
-        messages.success(request, f"Payroll for {current_month_date.strftime('%B %Y')} has been finalised you can update once not approved")        
+        messages.success(request, f"Payroll for {current_month_date.strftime('%B %Y')} has been finalised you can update once not approved")   
+        logger.info(f"Payroll for {current_month_date.strftime('%B %Y')} has been finalised")     
         return redirect('payroll-post-payroll')
     
     payrolls_group = (

@@ -28,11 +28,11 @@
                     </div>
                     <div class="form-group">
                         <label for="sort_code" class="col-form-label">Branch Sort Code</label>
-                        <input type="text" name="sort_code" class="form-control" {% if bankbranch %} value="{{ bankbranch.sort_code }}" {% else %} value="" {% endif %} required>
+                        <input type="text" name="sort_code" class="form-control" {% if bankbranch %} value="{{ bankbranch.sort_code }}" {% else %} value="" {% endif %} >
                     </div>
                     <div class="form-group">
                         <label for="branch_location" class="col-form-label">Location</label>
-                        <input type="text" name="branch_location" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_location }}" {% else %} value="" {% endif %} required>
+                        <input type="text" name="branch_location" class="form-control" {% if bankbranch %} value="{{ bankbranch.branch_location }}" {% else %} value="" {% endif %} >
                     </div>
                     <hr>
                     <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
