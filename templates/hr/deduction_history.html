@@ -76,7 +76,7 @@
                     </select>
                 </div>
 
-                <div class="col">
+                {% comment %} <div class="col">
                     <label for="deduction_type" class="form-label">Deduction Type</label>
                     <select name="deduction_type" id="deduction_type" class="form-control">
                         <option value="">-- All Types --</option>
@@ -86,7 +86,31 @@
                             </option>
                         {% endfor %}
                     </select>
+                </div> {% endcomment %}
+
+                <div class="col">
+                    <label for="deduction_type" class="form-label">Deduction Type</label>
+                    <select name="deduction_type" id="deduction_type" class="form-control">
+                        <option value="all">-- All Types --</option>
+
+                        <optgroup label="Statutory">
+                            {% for dtype in statutory_deductions %}
+                                <option value="{{ dtype }}" {% if dtype == selected_deduction_type %}selected{% endif %}>
+                                    {{ dtype }}
+                                </option>
+                            {% endfor %}
+                        </optgroup>
+
+                        <optgroup label="Custom">
+                            {% for dtype in deduction_types %}
+                                <option value="{{ dtype }}" {% if dtype == selected_deduction_type %}selected{% endif %}>
+                                    {{ dtype }}
+                                </option>
+                            {% endfor %}
+                        </optgroup>
+                    </select>
                 </div>
+
 
                 <div class="col">
                     <label for="staffno" class="form-label">Select Staff</label>
