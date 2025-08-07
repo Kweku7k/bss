@@ -148,7 +148,7 @@
                                     <td>{{ entry.staff.fname }} {{ entry.staff.lname }} {{ entry.staff.middlenames }}</td>
                                     <td>{{ entry.income_type}}</td>
                                     <td>{{ entry.for_month|date:"F Y" }}</td>
-                                    <td>{{ entry.amount}}</td>
+                                    <td class="text-end">{{ entry.amount}}</td>
                                 </tr>
                             {% endfor %}
 
@@ -157,7 +157,7 @@
                                 <td colspan="4" class="text-left fw-bold">
                                     Total
                                 </td>
-                                <td class="fw-bold" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">
+                                <td class="fw-bold text-end" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">
                                     {{ total_amount|floatformat:2 }}
                                 </td>
                             </tr>

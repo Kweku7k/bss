@@ -58,8 +58,6 @@ class PayrollCalculator:
             
             total_entitled += entitled
 
-            # print(f"{income.income_type} - Entitled: {entitled}")
-
         print(f"Total Entitlement: {round(total_entitled, 2)}")
         return {"incomes": entitlement_list, "total_entitlement": round(total_entitled, 2)}
         
@@ -120,11 +118,11 @@ class PayrollCalculator:
     
     def get_tax_for_taxable_income(self):
         income_list = self.get_allowance_values()["incomes"]
-        # all_income_types = self.get_all_income_type()
 
         total_tax = Decimal("0.00")
         rent_tax = Decimal("0.00")
-        withholding_tax_rate = Decimal("10.00")
+        settings = self.get_settings()
+        withholding_tax_rate = (Decimal(settings.withholding_tax_rate) )
         withholding_tax_details = []
         rent_tax_details = None
 
@@ -358,7 +356,7 @@ class PayrollCalculator:
         
         
         if has_rent:
-            rent_bik = total_cash_enuroment * (benefit_rent_rate / 100)
+            rent_bik = total_cash_enuroment * (benefit_rent_rate / 100) # No cap on Rent benefits
         if has_fuel:
             fuel_bik = min(total_cash_enuroment * (benefit_fuel_rate / 100), self.get_all_income_type().filter(name__iexact="fuel").first().bik_cap)  
         if has_vechile:

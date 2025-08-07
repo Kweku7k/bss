@@ -67,8 +67,8 @@
                         <td>{{ it.bik_rate }}</td>
                         <td>{{ it.bik_cap }}</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-info" href="{% url 'edit-income-type' it.id %}"><i class="fas fa-fw fa-pen"></i></a>
-                            <a class="btn btn-sm btn-danger" href="{% url 'delete-income-type' it.id %}" onclick="return confirm('Do you really want to delete the data for {{ it.name }}?');"><i class="fas fa-fw fa-trash"></i></a>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-income-type' it.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-income-type' it.id %}" onclick="return confirm('Do you really want to delete the data for {{ it.name }}?');"></a>
                         </td>
                     </tr>
                     {% endfor %}

@@ -31,6 +31,11 @@
                         <label for="employer_pf_rate" class="col-form-label">PF Employer Rate (%)</label>
                         <input type="number" name="employer_pf_rate" class="form-control" max="100" min="0" step="0.01" value="{{ contribution_rate.employer_pf_rate|default:'' }}" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="withholding_tax_rate" class="col-form-label">WH Tax (%)</label>
+                        <input type="number" name="withholding_tax_rate" class="form-control" max="100" min="0" step="0.01" value="{{ contribution_rate.withholding_tax_rate|default:'' }}" required>
+                    </div>
                     
                     <hr>
                     <input type="submit" value="Add" class="btn btn-sm btn-block btn-success">
@@ -48,10 +53,11 @@
                 {% if contribution_rates %}
                 <table class="table table-sm table-hover">
                     <tr>
-                        <th>SSF Employee Rate</th>
-                        <th>SSF Employer Rate</th>
-                        <th>PF Employee Rate</th>
-                        <th>PF Employer Rate</th>
+                        <th>SSF Employee (%)</th>
+                        <th>SSF Employer (%)</th>
+                        <th>PF Employee (%)</th>
+                        <th>PF Employer (%)</th>
+                        <th>Withholding Tax (%)</th>
                         <th class="text-end">Action</th>
                     </tr>
                     {% for cr in contribution_rates %}
@@ -60,9 +66,10 @@
                         <td>{{ cr.employer_ssnit_rate }}</td>
                         <td>{{ cr.employee_pf_rate }}</td>
                         <td>{{ cr.employer_pf_rate }}</td>
+                        <td>{{ cr.withholding_tax_rate }}</td>
                         <td class="text-end">
-                            <a class="btn btn-sm btn-info" href="{% url 'edit-contribution' cr.id %}"><i class="fas fa-fw fa-pen"></i></a>
-                            <a class="btn btn-sm btn-danger" href="{% url 'delete-contribution' cr.id %}" onclick="return confirm('Do you really want to delete the data for {{ cr.name }}?');"><i class="fas fa-fw fa-trash"></i></a>
+                            <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-contribution' cr.id %}"></a>
+                            <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-contribution' cr.id %}" onclick="return confirm('Do you really want to delete the data for {{ cr.name }}?');"></a>
                         </td>
                     </tr>
                     {% endfor %}

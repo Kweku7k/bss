@@ -934,7 +934,7 @@ def edit_staff_rank(request, sr_id):
 @login_required
 def add_income_type(request):
     submitted = False
-    income_types = IncomeType.objects.order_by('-id')
+    income_types = IncomeType.objects.order_by('name')
     income_count = income_types.count()
     if request.method == 'POST':
         form = IncomeTypeForm(request.POST)
@@ -970,7 +970,7 @@ def delete_income_type(request, it_id):
 
 @login_required
 def edit_income_type(request, it_id):
-    income_types = IncomeType.objects.order_by('-id')
+    income_types = IncomeType.objects.order_by('name')    
     income_count = income_types.count()
     income = IncomeType.objects.get(pk=it_id)
     form = IncomeTypeForm(instance=income)
@@ -989,7 +989,7 @@ def edit_income_type(request, it_id):
 @login_required
 def add_deduction_type(request):
     submitted = False
-    deduction_types = DeductionType.objects.order_by('-id')
+    deduction_types = DeductionType.objects.order_by('name')
     deduction_count = deduction_types.count()
     if request.method == 'POST':
         form = DeductionTypeForm(request.POST)
@@ -1158,8 +1158,6 @@ def add_contribution_rate(request):
     submitted = False
     contribution_rates = ContributionRate.objects.order_by('-id')
     contribution_rate_count = contribution_rates.count()
-    contribution_type = ChoicesContribution.objects.all()
-    
     
     if request.method == 'POST':
         form = ContributionRateForm(request.POST)
@@ -1172,7 +1170,7 @@ def add_contribution_rate(request):
             submitted = True
             
             
-    context = {'form':form,'submitted':submitted,'contribution_rates':contribution_rates,'contribution_rate_count':contribution_rate_count,'contribution_type':contribution_type, 'contribution_type':contribution_type}
+    context = {'form':form,'submitted':submitted,'contribution_rates':contribution_rates,'contribution_rate_count':contribution_rate_count}
     return render(request, 'setup/add_contribution_rate.html', context)
     
 
@@ -1187,6 +1185,7 @@ def delete_contribution(request, contrib_id):
 
 @login_required
 def edit_contribution(request, contrib_id):
+    submitted = False
     contribution_rates = ContributionRate.objects.order_by('-id')
     contribution_rate_count = contribution_rates.count()
     contribution_rate = ContributionRate.objects.get(pk=contrib_id)
@@ -1196,6 +1195,11 @@ def edit_contribution(request, contrib_id):
         if form.is_valid():
             form.save()
             return redirect('add-contribution-rate')
+        
+    else:
+        form = ContributionRateForm(instance=contribution_rate)
+        if 'submitted' in request.GET:
+            submitted = True
         
     context = {'form':form,'contribution_rates':contribution_rates,'contribution_rate_count':contribution_rate_count,'contribution_rate':contribution_rate}
     return render(request, 'setup/add_contribution_rate.html', context)
