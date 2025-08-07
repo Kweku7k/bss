@@ -31,16 +31,22 @@
                 {% endif %}
 
                 {% if deduction_data %}
-                <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
-                    <label for="format" class="form-label mb-0">Export</label>
-                    <select name="format" id="format" class="form-select form-select-sm" style="width: auto;">
-                        <option value="">Select format</option>
-                        <option value="pdf">PDF</option>
-                        <option value="excel">Excel</option>
-                    </select>
-                    <button type="submit" class="btn btn-sm btn-success">Download</button>
-                </form>
+                    <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
+                        <input type="hidden" name="filter_by_month" value="{{ selected_month }}">
+                        <input type="hidden" name="filter_by_year" value="{{ selected_year }}">
+                        <input type="hidden" name="staffno" value="{{ report_for }}">
+                        <input type="hidden" name="deduction_type" value="{{ selected_deduction_type }}">
+
+                        <label for="format" class="form-label mb-0">Export</label>
+                        <select name="format" id="format" class="form-select form-select-sm" style="width: auto;">
+                            <option value="">Select format</option>
+                            <option value="pdf">PDF</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-success">Download</button>
+                    </form>
                 {% endif %}
+
             </div>
 
             <form method="get" class="row g-2 mb-4">
@@ -75,18 +81,6 @@
                         <option value="2030" {% if selected_year == '2030' %}selected{% endif %}>2030</option>
                     </select>
                 </div>
-
-                {% comment %} <div class="col">
-                    <label for="deduction_type" class="form-label">Deduction Type</label>
-                    <select name="deduction_type" id="deduction_type" class="form-control">
-                        <option value="">-- All Types --</option>
-                        {% for dtype in deduction_types %}
-                            <option value="{{ dtype.name }}" {% if dtype.name|stringformat:"s" == selected_deduction_type %}selected{% endif %}>
-                                {{ dtype.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div> {% endcomment %}
 
                 <div class="col">
                     <label for="deduction_type" class="form-label">Deduction Type</label>
@@ -154,6 +148,18 @@
                                     <td>{{ entry.amount }}</td>
                                 </tr>
                             {% endfor %}
+
+                            <tr style="margin-top: 15px;">
+                                <td colspan="1"></td> 
+                                <td colspan="4" class="text-left fw-bold">
+                                    Total
+                                </td>
+                                <td class="fw-bold" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">
+                                    {{ total_amount|floatformat:2 }}
+                                </td>
+                            </tr>
+
+
                         </tbody>
                     </table>
                 </div>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Poppins, sans-serif;
+            font-size: 12px;
+            margin: 30px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .header-line {
+            border-bottom: 1px solid black;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+        }
+
+        th, td {
+            padding: 6px 4px;
+            font-size: 14px;
+        }
+
+        thead {
+            border-bottom: 1px solid #000;
+        }
+
+        th.no, td.no {
+            width: 10%;
+            text-align: left;
+        }
+
+        th.staffno, td.staffno {
+            width: 25%;
+            text-align: left;
+        }
+
+        th.name, td.name {
+            width: 40%;
+            text-align: left;
+        }
+
+        th.amount, td.amount {
+            width: 25%;
+            text-align: right;
+        }
+
+        tfoot {
+            position: running(footer);
+        }
+
+        .footer {
+            font-size: 10px;
+            text-align: center;
+            border-top: 1px solid #000;
+            margin-top: 40px;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Central University</h2>
+    <h2>
+        {% if selected_deduction_type == 'all' %}
+            All Income Types for the month of {{ selected_date }}
+        {% else %}
+            {{ deduction_data.0.deduction_type }} Deduction for the month of {{ selected_date }}
+        {% endif %}
+    </h2>
+    <div class="header-line"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="no">No</th>
+                <th class="staffno">Employee ID</th>
+                <th class="name">Employee</th>
+                <th class="amount">Employee Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in deduction_data %}
+            <tr>
+                <td class="no">{{ forloop.counter }}</td>
+                <td class="staffno">{{ entry.staff.staffno }}</td>
+                <td class="name">{{ entry.staff.fname }} {{ entry.staff.lname }}</td>
+                <td class="amount">{{ entry.amount|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+
+            <tr>
+                <td colspan="4" style="padding-top: 20px;"></td>
+            </tr>
+
+            <!-- total row -->
+            <tr>
+                <td colspan="3" style="text-align: left; font-weight: bold;">
+                    Total
+                </td>
+                <td class="amount" style="border-top: 1px solid #000; font-weight: bold; border-bottom: 1px solid #000; text-align: center;">
+                    {{ total_amount|floatformat:2 }}
+                </td>
+            </tr>
+
+        </tbody>
+        
+    </table>
+
+    <!-- Static footer for HTML preview (optional) -->
+    <div class="footer">
+    </div>
+
+</body>
+</html>

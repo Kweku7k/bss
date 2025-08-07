@@ -51,7 +51,8 @@
                                         <th>Relationship</th>
                                         <th>Next of Kin</th>
                                         <th>Beneficiary</th>
-                                        <th>Percentage</th>
+                                        <th>Per (%)</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -81,6 +82,12 @@
                                             {% else %}
                                                 -
                                             {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex">
+                                                <a class="btn btn-sm btn-info bi-pencil-square me-2" href="{% url 'edit-emp-relation' emp.id staff.staffno %}"></a>
+                                                <a class="btn btn-sm btn-danger bi-trash" href="{% url 'delete-emp-relation' emp.id staff.staffno %}" onclick="return confirm('Do you really want to delete the data for {{ emp.kith_fname }}?');"></a>
+                                            </div>
                                         </td>
                                     </tr>
                                     {% endfor %}
