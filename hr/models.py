@@ -529,8 +529,8 @@ class StaffIncome(models.Model):
     income_type = models.CharField(max_length=100, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     percentage_of_basic = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    start_month = models.DateField()
-    end_month = models.DateField()
+    is_active = models.BooleanField(default=True)
+    is_one_time = models.BooleanField(default=False)
     income_entitlement = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=100)
     income_description = models.TextField(max_length=300, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
@@ -543,11 +543,21 @@ class StaffDeduction(models.Model):
     deduction_type = models.CharField(max_length=100, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     percentage_of_basic = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    start_month = models.DateField()
-    end_month = models.DateField()
+    is_active = models.BooleanField(default=True)
+    is_one_time = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.deduction_type} - {self.staffno}"
+    
+    
+class StaffRelief(models.Model):
+    staffno = models.ForeignKey(Employee,blank=False,null=False,on_delete=models.CASCADE)
+    relief_type = models.CharField(max_length=100, blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.relief_type} - {self.staffno}"
     
     
 class StaffLoan(models.Model):
@@ -595,14 +605,18 @@ class Payroll(models.Model):
     month = models.DateField()
     basic_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total_income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    paye_total_income = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    paye_total_emoluments = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     gross_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     income_tax = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     other_deductions = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     ssf = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     pf_employee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     pf_employer = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    total_relief = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     total_deduction = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     net_salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    net_taxable_pay = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     cost_center = models.CharField('Cost Center', max_length=100, blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)

@@ -47,9 +47,10 @@
                             <thead>
                                 <tr>
                                     <th>Income Type</th>
-                                    <th>Amount/Percentage (Ghc)</th>
-                                    <th>Start Month</th>
-                                    <th>End Month</th>
+                                    <th>Amount / Percentage (Ghc)</th>
+                                    <th>Active</th>
+                                    <th>One Time</th>
+                                    <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -63,12 +64,23 @@
                                             {{ si.percentage_of_basic }}%
                                         {% endif %}
                                     </td>
-                                    <td>{{ si.start_month }}</td>
-                                    <td>{{ si.end_month }}</td>
+                                    <td>
+                                        {% if si.is_active %}
+                                            <span class="badge bg-success">True</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">False</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if si.is_one_time %}
+                                            <span class="badge bg-success">True</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">False</span>
+                                        {% endif %}
+                                    </td>
                                     <td class="text-end">
                                         <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staff-income' staff.staffno si.id %}"></a>
                                         {% comment %} <a class="btn btn-sm btn-info" href="{% url 'edit-school' sch.id %}"><i class="fas fa-fw fa-pen"></i></a> {% endcomment %}
-
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -107,16 +119,20 @@
                                 <input type="number" class="form-control" name="percentage_of_basic" step="0.01" {% if staff_income %} value="{{ staff_income.percentage_of_basic }}" {% endif %}>
                             </div>
 
-                            <div class="col-md-3 mb-3">
-                                <label for="start_month" class="form-label">Start Month</label>
-                                <input type="date" class="form-control" name="start_month" {% if staff_income %} value="{{ staff_income.start_month|date:"Y-m-d" }}" {% endif %} required>
-                            </div>
-                            
-                            <div class="col-md-3 mb-3">
-                                <label for="end_month" class="form-label">End Month</label>
-                                <input type="date" class="form-control" name="end_month" {% if staff_income %} value="{{ staff_income.end_month|date:"Y-m-d" }}" {% endif %} required>
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="is_active" class="col-form-label">Activate Now ?</label>
+                                    <input type="checkbox" name="is_active" value="TRUE" {% if staff_income and staff_income.is_active %} checked {% endif %}>
+                                </div>
                             </div>
 
+                            <div class="col-md-4 mb-3">
+                                <div class="form-group">
+                                    <label for="is_one_time" class="col-form-label">One Time Payment ?</label>
+                                    <input type="checkbox" name="is_one_time" value="TRUE" {% if staff_income and staff_income.is_one_time %} checked {% endif %}>
+                                </div>
+                            </div>
+                            
                             <div class="col-md-4 mb-3">
                                 <label for="income_entitlement" class="form-label">Income Entitlement (%)</label>
                                 <input type="number" class="form-control" name="income_entitlement" {% if staff_income %} value="{{ staff_income.income_entitlement }}" {% else %} value="100" {% endif %}>
@@ -130,8 +146,8 @@
                         </div>
 
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-info me-2">Add</button>
-                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-success">Finish</a>
+                            <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-secondary  me-2">Finish</a>
+                            <button type="submit" class="btn btn-success">Submit</button>
                         </div>
                     </form>
                 </div>

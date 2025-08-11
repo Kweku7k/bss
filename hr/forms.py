@@ -170,6 +170,13 @@ class StaffDeductionForm(ModelForm):
         exclude = ['updated', 'created']
         
         
+class StaffReliefForm(ModelForm):
+    class Meta:
+        model = StaffRelief
+        fields = '__all__'
+        exclude = ['updated', 'created']
+        
+        
 class StaffLoanForm(ModelForm):
     class Meta:
         model = StaffLoan

@@ -108,6 +108,9 @@ def register(request):
     print(context)
     return render(request, 'authentication/register.html', context)
 
+def waiting_approval(request):
+    return render(request, 'authentication/waiting_approval.html')
+
 def index(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -122,7 +125,7 @@ def index(request):
                 if not user.approval and not user.is_superuser:
                     logger.warning(f"Login attempt by unapproved user: {user.username}")
                     messages.error(request, "Your account is not approved yet. Please contact the administrator.")
-                    return render(request, 'authentication/waiting_approval.html')
+                    return redirect('waiting_approval')
                 login(request, user)
                 messages.success(request, f"Login Successful. Welcome Back {user.username}")
                 logger.info(f"Login Successful: {user.username}")
@@ -2830,9 +2833,9 @@ def create_staff_income(request, staffno):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
-    staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('income_type')
     staff_income_count = staff_incomes.count()
-    income_types = IncomeType.objects.all()
+    income_types = IncomeType.objects.all().order_by('name')
     
     if request.method == 'POST':
         form = StaffIncomeForm(request.POST)
@@ -2870,7 +2873,7 @@ def edit_staff_income(request, staffno, income_id):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
-    staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_incomes = StaffIncome.objects.filter(staffno__exact=staffno).order_by('income_type')
     staff_income = StaffIncome.objects.get(pk=income_id)
     staff_income_count = staff_incomes.count()
     income_types = IncomeType.objects.all()
@@ -2910,7 +2913,7 @@ def create_staff_deduction(request, staffno):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
-    staff_deductions = StaffDeduction.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_deductions = StaffDeduction.objects.filter(staffno__exact=staffno).order_by('deduction_type')
     staff_deduction_count = staff_deductions.count()
     deduction_types = DeductionType.objects.all()
     
@@ -2948,12 +2951,12 @@ def edit_staff_deduction(request, staffno, deduction_id):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
-    staff_deductions = StaffDeduction.objects.filter(staffno__exact=staffno).order_by('-start_month')
+    staff_deductions = StaffDeduction.objects.filter(staffno__exact=staffno).order_by('deduction_type')
     staff_deduction = StaffDeduction.objects.get(pk=deduction_id)
     staff_deduction_count = staff_deductions.count()
     deduction_types = DeductionType.objects.all()
     
-    if request.methods == 'POST':
+    if request.method == 'POST':
         form = StaffDeductionForm(request.POST, instance=staff_deduction)
         if form.is_valid():
             amount = form.cleaned_data.get('amount')
@@ -2974,10 +2977,65 @@ def edit_staff_deduction(request, staffno, deduction_id):
         if 'submitted' in request.GET:
             submitted = True
     
-    context = {'form':form,'staff_deductions':staff_deductions,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_deduction_count':staff_deduction_count, 'deduction_types':deduction_types}
+    context = {'form':form,'staff_deductions':staff_deductions,'staff_deduction': staff_deduction,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_deduction_count':staff_deduction_count, 'deduction_types':deduction_types}
     
     return render(request, 'hr/staff_deductions.html', context)
 
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('record_staff_relief')
+def create_staff_relief(request, staffno):
+    submitted = False
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    staff_reliefs = StaffRelief.objects.filter(staffno__exact=staffno).order_by('relief_type')
+    staff_relief_count = staff_reliefs.count()
+    relief_types = ReliefType.objects.all()
+
+    if request.method == 'POST':
+        form = StaffReliefForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Staff relief added successfully.")
+            return redirect('create-staff-relief', staffno)
+        else:
+            print("Form Errors:", form.errors)
+    else:
+        form = StaffReliefForm()
+        if 'submitted' in request.GET:
+            submitted = True
+    context = {'form':form,'staff_reliefs':staff_reliefs,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_relief_count':staff_relief_count, 'relief_types':relief_types}
+    return render(request, 'hr/staff_relief.html', context)
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('modify_staff_deduction')
+def edit_staff_relief(request, staffno, relief_id):
+    submitted = False
+    staff = Employee.objects.get(pk=staffno)
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    staff_reliefs = StaffRelief.objects.filter(staffno__exact=staffno).order_by('relief_type')
+    staff_relief = StaffRelief.objects.get(pk=relief_id)
+    staff_relief_count = staff_reliefs.count()
+    relief_types = ReliefType.objects.all()
+
+    if request.method == 'POST':
+        form = StaffReliefForm(request.POST, instance=staff_relief)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Staff relief updated successfully.")
+            return redirect('create-staff-relief', staffno)
+    else:
+        form = StaffReliefForm(instance=staff_relief)
+        if 'submitted' in request.GET:
+            submitted = True
+
+    context = {'form':form,'staff_reliefs':staff_reliefs,'staff_relief': staff_relief,'staff':staff,'company_info':company_info,'submitted':submitted,'staff_relief_count':staff_relief_count, 'relief_types':relief_types}
+
+    return render(request, 'hr/staff_relief.html', context)
 
 
 
@@ -3129,6 +3187,11 @@ def generate_payroll(request):
                         'pf_employee': payroll.get_pf_contribution()["amount"], 
                         'pf_employer': payroll.get_employer_pf_contribution(),
                         'total_deduction': payroll.get_total_deductions(),
+                        'cost_center': company_info.cost_center,
+                        'paye_total_income': payroll.get_miscellaneous_and_benefit_in_kind(),
+                        'paye_total_emoluments': payroll.get_entitled_basic_salary() + payroll.get_miscellaneous_and_benefit_in_kind(),
+                        'total_relief': payroll.get_staff_relief()["total_relief"],
+                        'net_taxable_pay': payroll.get_taxable_income(),
                         'net_salary': payroll.get_net_salary(),
                     }
                 )
@@ -3145,6 +3208,11 @@ def generate_payroll(request):
                     payroll_obj.pf_employer = payroll.get_employer_pf_contribution()
                     payroll_obj.total_deduction = payroll.get_total_deductions()
                     payroll_obj.net_salary = payroll.get_net_salary()
+                    payroll_obj.cost_center = company_info.cost_center
+                    payroll_obj.paye_total_income = payroll.get_miscellaneous_and_benefit_in_kind()
+                    payroll_obj.paye_total_emoluments = payroll.get_entitled_basic_salary() + payroll.get_miscellaneous_and_benefit_in_kind()
+                    payroll_obj.total_relief = payroll.get_staff_relief()["total_relief"]
+                    payroll_obj.net_taxable_pay = payroll.get_taxable_income()
                     payroll_obj.save()
                     
                 loan_deductions = payroll.get_active_loan_deductions()
@@ -3204,17 +3272,19 @@ def generate_payroll(request):
 def payroll_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
-    selected_month = request.GET.get("month")  # format: "2025-04"
+    selected_month = request.GET.get("month")
+    selected_year = request.GET.get("year")
     payroll_data = {}
     
 
-    if selected_month:
-        current_month_date = date.fromisoformat(selected_month)
-        payroll = PayrollCalculator(staffno=staff, month=current_month_date)
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 28)
+        # current_month_date = date.fromisoformat(selected_month)
+        payroll = PayrollCalculator(staffno=staff, month=selected_date)
         
 
         payroll_data = {
-            "month": current_month_date.strftime("%B %Y"),
+            "month": selected_date.strftime("%B %Y"),
             "basic_salary": payroll.get_entitled_basic_salary(),
             "total_income": payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
             "gross_salary": payroll.get_gross_income(),
@@ -3239,6 +3309,8 @@ def payroll_details(request, staffno):
         'staff': staff,
         'company_info': company_info,
         'payroll_data': payroll_data,
+        "selected_month": selected_month,
+        "selected_year": selected_year,
     }
     return render(request, 'hr/payrol.html', context)
 
@@ -3670,12 +3742,12 @@ def loan_history(request):
             sheet_title = f"{entry['staff'].fname}_{entry['loan'].loan_type}_{entry['loan'].id}"
             rows = [{
                 "Payment Date": p.payment_date,
-                "Amount Paid (GH₵)": float(p.amount_paid),
+                "Amount Paid (GH₵)": p.amount_paid,
             } for p in entry["payments"]]
 
             rows.append({})
-            rows.append({"Total Paid": float(entry["total_paid"])})
-            rows.append({"Outstanding": float(entry["outstanding"])})
+            rows.append({"Total Paid": entry["total_paid"]})
+            rows.append({"Outstanding": entry["outstanding"]})
 
             excel_data[sheet_title] = rows
 
@@ -3737,16 +3809,16 @@ def payroll_history(request):
                 sheet_name = f"{entry['staff'].fname}_{p.month.strftime('%Y-%m')}"
                 excel_data[sheet_name] = [{
                     "Month": p.month,
-                    "Basic Salary": float(p.basic_salary or 0),
-                    "Total Income": float(p.total_income or 0),
-                    "Gross Salary": float(p.gross_salary or 0),
-                    "Income Tax": float(p.income_tax or 0),
-                    "SSF": float(p.ssf or 0),
-                    "PF Employee": float(p.pf_employee or 0),
-                    "PF Employer": float(p.pf_employer or 0),
-                    "Other Deductions": float(p.other_deductions or 0),
-                    "Total Deduction": float(p.total_deduction or 0),
-                    "Net Salary": float(p.net_salary or 0),
+                    "Basic Salary": p.basic_salary or 0,
+                    "Total Income": p.total_income or 0,
+                    "Gross Salary": p.gross_salary or 0,
+                    "Income Tax": p.income_tax or 0,
+                    "SSF": p.ssf or 0,
+                    "PF Employee": p.pf_employee or 0,
+                    "PF Employer": p.pf_employer or 0,
+                    "Other Deductions": p.other_deductions or 0,
+                    "Total Deduction": p.total_deduction or 0,
+                    "Net Salary": p.net_salary or 0,
                     "Cost Center": p.cost_center or "",
                 }]
 
@@ -3810,7 +3882,7 @@ def income_history(request):
                     income_data.append({
                         "staff": staff,
                         "income_type": str(income.income_type),
-                        "amount": float(income.amount or 0),
+                        "amount": income.amount or 0,
                         "for_month": selected_date,
                     })
                     
@@ -3823,7 +3895,7 @@ def income_history(request):
                         income_data.append({
                             "staff": staff,
                             "income_type": itype,
-                            "amount": float(amount),
+                            "amount": amount,
                             "for_month": selected_date,
                         })
          
@@ -3917,7 +3989,7 @@ def deduction_history(request):
                     deduction_data.append({
                         "staff": staff,
                         "deduction_type": str(deduction.deduction_type),
-                        "amount": float(deduction.amount or 0),
+                        "amount": deduction.amount or 0,
                         "for_month": selected_date,
                     })
 
@@ -3936,7 +4008,7 @@ def deduction_history(request):
                         deduction_data.append({
                             "staff": staff,
                             "deduction_type": dtype,
-                            "amount": float(amount),
+                            "amount": amount,
                             "for_month": selected_date,
                         })
                         
@@ -3979,3 +4051,85 @@ def deduction_history(request):
     }
 
     return render(request, "hr/deduction_history.html", context)
+
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_paye-history')
+def paye_history(request):
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
+    staffno = request.GET.get("staffno")
+    
+    paye_data = []
+    
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 1)
+
+        if not Payroll.objects.filter(month__year=selected_date.year, month__month=selected_date.month).exists():
+            messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been processed.")
+            return redirect('paye-history')
+
+        if staffno and staffno != "all":
+            staff_list = [get_object_or_404(Employee, pk=staffno)]
+        elif staffno == "all":
+            staff_list = Employee.objects.all()
+        else:
+            staff_list = []
+
+        for staff in staff_list:
+            if not Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).exists():
+                continue
+
+            payroll = Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).first()
+            if payroll:
+                paye_data.append({
+                    "staff": staff,
+                    "basic_salary": payroll.basic_salary or 0,
+                    "paye_total_income": payroll.paye_total_income or 0,
+                    "paye_total_emoluments": payroll.paye_total_emoluments or 0,
+                    "ssf": payroll.ssf or 0,
+                    "pf_employee": payroll.pf_employee or 0,
+                    "total_relief": payroll.total_relief or 0,
+                    "net_taxable_pay": payroll.net_taxable_pay or 0,
+                    "income_tax": payroll.income_tax or 0,
+                    "for_month": selected_date,
+                })
+    
+    # Export PDF/Excel
+    export_format = request.GET.get("format")
+    if export_format and paye_data:
+        filename = f"PAYE__{selected_date.strftime('%b_%Y')}"
+        if export_format == "pdf":
+            context = {
+                "paye_data": paye_data,
+                "selected_date": selected_date.strftime('%B %Y'),
+            }
+            return render_to_pdf("export/paye.html", context, f"{filename}.pdf")
+        elif export_format == "excel":
+            rows = []
+            for entry in paye_data:
+                rows.append({
+                    "Staff No": entry["staff"].staffno,
+                    "Staff": f"{entry['staff'].fname} {entry['staff'].lname}",
+                    "Basic Salary": entry["basic_salary"],
+                    "PAYE Total Income": entry["paye_total_income"],
+                    "PAYE Total Emoluments": entry["paye_total_emoluments"],
+                    "SSF": entry["ssf"],
+                    "PF Employee": entry["pf_employee"],
+                    "Total Relief": entry["total_relief"],
+                    "Net Taxable Pay": entry["net_taxable_pay"],
+                    "Income Tax": entry["income_tax"],
+                })
+            return render_to_excel({"PAYE History": rows}, f"{filename}.xlsx")
+    
+    context = {
+        "paye_data": paye_data,
+        "employees": Employee.objects.all(),
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+        "report_for": staffno,
+    }
+    
+    return render(request, "hr/paye_history.html", context)

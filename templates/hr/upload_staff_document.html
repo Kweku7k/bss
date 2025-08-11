@@ -89,7 +89,11 @@
                                     <textarea class="form-control" name="notes" id="notes" rows="3"></textarea>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">Upload</button>
+
+                                <div class="d-flex justify-content-end mt-5">
+                                    <a href="{% url 'staff-details' staff.staffno %}" class="btn btn-secondary  me-2">Finish</a>
+                                    <button type="submit" class="btn btn-success">Upload Document</button>
+                                </div>
                             </form>
                     </div>
                 </div>

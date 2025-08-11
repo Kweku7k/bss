@@ -30,7 +30,7 @@
                 <div class="card-body">
 
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <h5 class="my-3 text-primary"><strong>Deductions for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
+                        <h5 class="my-3 text-primary"><strong>Relief for {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.staffno }})</strong></h5>
                         
                         {% if staff.staff_pix %}
                             <img src="{{ staff.staff_pix }}" alt="{{ staff.fname }} {{ staff.lname }}'s picture" class="img-fluid rounded-circle" style="height: 110px; width: 110px; object-fit: cover;"> 
@@ -39,59 +39,45 @@
                         {% endif %}
                     </div>
                  
-                    <h5><b>Staff Deductions {{staff_deduction_count}}</b></h5>
+                    <h5><b>Staff Relief ({{staff_relief_count}})</b></h5>
 
                     <!-- Check if there are any leave transactions -->
-                    {% if staff_deductions %}
+                    {% if staff_reliefs %}
                         <table class="table table-striped mb-5">
                             <thead>
                                 <tr>
-                                    <th>Deduction Type</th>
-                                    <th>Amount/Percentage (Ghc)</th>
+                                    <th>Relief Type</th>
+                                    <th>Amount (Ghc)</th>
                                     <th>Active</th>
-                                    <th>One Time</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for sd in staff_deductions %}
+                                {% for sr in staff_reliefs %}
                                 <tr>
-                                    <td>{{ sd.deduction_type }}</td>
+                                    <td>{{ sr.relief_type }}</td>
+                                    <td>{{ sr.amount }}</td>
                                     <td>
-                                        {% if sd.amount %}
-                                            {{ sd.amount }}
-                                        {% elif sd.percentage_of_basic %}
-                                            {{ sd.percentage_of_basic }}%
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if sd.is_active %}
-                                            <span class="badge bg-success">True</span>
-                                        {% else %}
-                                            <span class="badge bg-secondary">False</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if sd.is_one_time %}
+                                        {% if sr.is_active %}
                                             <span class="badge bg-success">True</span>
                                         {% else %}
                                             <span class="badge bg-secondary">False</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-end">
-                                        <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staff-deduction' staff.staffno sd.id %}"></a>
+                                        <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-staff-relief' staff.staffno sr.id %}"></a>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     {% else %}
-                        <p>No Deduction for this staff.</p>
+                        <p>No Relief for this staff.</p>
                     {% endif %}
 
 
                     <!-- Leave Request Form -->
-                    <h5><b>Add Staff Deductions</b></h5>
+                    <h5><b>Add Staff Relief</b></h5>
                     <form action="" method="POST" enctype="multipart/form-data"> 
                         {% csrf_token %}
                         <div class="row g-3 mb-4">
@@ -99,36 +85,24 @@
                             <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly hidden>
 
                             <div class="col-md-4">
-                                <label class="form-label" for="deduction_type">Deduction Type</label>
-                                <select name="deduction_type" class="form-control" required>
+                                <label class="form-label" for="relief_type">Relief Type</label>
+                                <select name="relief_type" class="form-control" required>
                                     <option selected="true" value="" disabled>-----Select------</option>
-                                    {% for dt in deduction_types %}
-                                        <option value="{{ dt.name }}" {% if dt.name == staff_deduction.deduction_type %}selected{% endif %}>{{ dt.name }}</option>
+                                    {% for rt in relief_types %}
+                                        <option value="{{ rt.name }}" {% if rt.name == staff_relief.relief_type %}selected{% endif %}>{{ rt.name }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
                     
                             <div class="col-md-4">
                                 <label for="amount" class="form-label">Amount (Ghc)</label>
-                                <input type="number" class="form-control" step="0.01" name="amount" {% if staff_deduction %} value="{{ staff_deduction.amount }}" {% endif %}>
-                            </div>
-
-                            <div class="col-md-4">
-                                <label for="percentage_of_basic" class="form-label">Percentrage on Basic(%)</label>
-                                <input type="number" class="form-control" name="percentage_of_basic" step="0.01" {% if staff_deduction %} value="{{ staff_deduction.percentage_of_basic }}" {% endif %}>
+                                <input type="number" class="form-control" step="0.01" name="amount" {% if staff_relief %} value="{{ staff_relief.amount }}" {% endif %}>
                             </div>
 
                             <div class="col-md-4 mb-3">
                                 <div class="form-group">
                                     <label for="is_active" class="col-form-label">Activate Now ?</label>
-                                    <input type="checkbox" name="is_active" value="TRUE" {% if staff_deduction and staff_deduction.is_active %} checked {% endif %}>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 mb-3">
-                                <div class="form-group">
-                                    <label for="is_one_time" class="col-form-label">One Time Payment ?</label>
-                                    <input type="checkbox" name="is_one_time" value="TRUE" {% if staff_deduction and staff_deduction.is_one_time %} checked {% endif %}>
+                                    <input type="checkbox" name="is_active" value="TRUE" {% if staff_relief and staff_relief.is_active %} checked {% endif %}>
                                 </div>
                             </div>
                   

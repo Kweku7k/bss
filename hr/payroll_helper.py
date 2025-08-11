@@ -1,6 +1,6 @@
 from decimal import Decimal
-from django.db.models import Sum
-from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType, StaffLoan
+from django.db.models import Sum, Q
+from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType, StaffLoan, StaffRelief
 
 class PayrollCalculator:
     def __init__(self, staffno, month):
@@ -28,11 +28,11 @@ class PayrollCalculator:
     def get_allowance_values(self):
         basic_salary = self.get_entitled_basic_salary()
         selected_month = self.month
-
-        incomes = StaffIncome.objects.filter(
-            staffno=self.staffno,
-            start_month__lte=selected_month,
-            end_month__gte=selected_month,
+        
+        # All active allowances for staff where the allowance is either recurring OR it’s a one-time allowance created in the current payroll month
+        incomes = StaffIncome.objects.filter(staffno=self.staffno, is_active=True).filter(
+            Q(is_one_time=False) |
+            Q(is_one_time=True, created__month=selected_month.month, created__year=selected_month.year)
         )
 
         entitlement_list = []
@@ -118,11 +118,11 @@ class PayrollCalculator:
     
     def get_tax_for_taxable_income(self):
         income_list = self.get_allowance_values()["incomes"]
-
         total_tax = Decimal("0.00")
         rent_tax = Decimal("0.00")
         settings = self.get_settings()
-        withholding_tax_rate = (Decimal(settings.withholding_tax_rate) )
+        withholding_tax_rate = Decimal(settings.withholding_tax_rate)
+        print("Withholding tax", withholding_tax_rate)
         withholding_tax_details = []
         rent_tax_details = None
 
@@ -131,7 +131,10 @@ class PayrollCalculator:
             entitled = Decimal(income["entitled_amount"])
             
             # exclude rent, fuel, miscellaneous, and calculate withholding tax on the rest
-            if income_type not in ["rent", "fuel", "miscellaneous", "transportation", "drivers allowance", "official car use"]:
+            excluded_income_types = [income.name.lower() for income in self.get_all_income_type().filter(withholding_tax=False)]
+            print("Excluded income types: ", excluded_income_types)
+            if income_type not in excluded_income_types:   
+                             
                 tax_amount = entitled * (withholding_tax_rate / 100)
                 
                 detail = {
@@ -142,10 +145,13 @@ class PayrollCalculator:
                 }
                 
                 withholding_tax_details.append(detail)
+                print("Withholding tax details: ", withholding_tax_details)
                 total_tax += tax_amount
 
             if income_type == "rent":
-                rent_tax_rate = Decimal("8.00")
+                get_rent_tax_rate = self.get_all_income_type().filter(name__iexact="rent").first().tax_rate
+                rent_tax_rate = Decimal(get_rent_tax_rate)
+                print("Rent tax rate", rent_tax_rate)
                 tax_amount = entitled * (rent_tax_rate / 100)
                 rent_tax_details = {
                     "income_type": income["income_type"],
@@ -215,10 +221,10 @@ class PayrollCalculator:
         extimated_pf = self.get_entitled_basic_salary() * (Decimal(settings.employer_pf_rate) / 100)
         print("Employer PF Value: ", extimated_pf)
         return round(extimated_pf, 2)
-
+    
 
     def get_taxable_income(self):
-        taxable_pay = self.get_entitled_basic_salary() + self.get_miscellaneous_and_benefit_in_kind() - self.get_ssnit_contribution()["amount"] - self.get_pf_contribution()["amount"]
+        taxable_pay = self.get_entitled_basic_salary() + self.get_miscellaneous_and_benefit_in_kind() - self.get_ssnit_contribution()["amount"] - self.get_pf_contribution()["amount"] - self.get_staff_relief()["total_relief"]
         print("Taxable Pay: ", taxable_pay)
         return round(taxable_pay, 2)
         
@@ -236,11 +242,11 @@ class PayrollCalculator:
         basic_salary = self.get_entitled_basic_salary()
         selected_month = self.month
         
-        deductions = StaffDeduction.objects.filter(
-            staffno=self.staffno,
-            start_month__lte=selected_month,
-            end_month__gte=selected_month,
+        deductions = StaffDeduction.objects.filter(staffno=self.staffno, is_active=True).filter(
+            Q(is_one_time=False) |
+            Q(is_one_time=True, created__month=selected_month.month, created__year=selected_month.year)
         )
+        print("Deductions", deductions)
         
         deduction_list = []
         total_deduction = Decimal("0.00")
@@ -378,17 +384,41 @@ class PayrollCalculator:
         return {"benefit_in_kind": benefit_in_kind_list}
     
     
+    
     def get_miscellaneous_and_benefit_in_kind(self):
         income_list = self.get_allowance_values()["incomes"]
         benefit_in_kind = self.get_benefits_in_kind()["benefit_in_kind"]
-        miscellaneous = Decimal("0.00")
-        
+
+        total_taxable_incomes = Decimal("0.00")
+
         for income in income_list:
-            if income["income_type"].lower() == "miscellaneous":
-                miscellaneous = Decimal(income["entitled_amount"])
-                break
-            
-        total_miscellaneous_and_bik = miscellaneous + benefit_in_kind["total_bik"]
-        print("Total Miscellaneous and Benefit in Kind: ", total_miscellaneous_and_bik)
-        
+            income_type_obj = self.get_all_income_type().filter(name=income["income_type"]).first()
+            if income_type_obj and income_type_obj.taxable:
+                total_taxable_incomes += Decimal(income["entitled_amount"])
+                
+        print("Total Taxable Incomes: ", total_taxable_incomes)
+
+        total_miscellaneous_and_bik = total_taxable_incomes + benefit_in_kind["total_bik"]
+
+        print("Total Taxable Incomes + Benefit in Kind: ", total_miscellaneous_and_bik)
+
         return round(total_miscellaneous_and_bik, 2)
+
+
+
+    def get_staff_relief(self):        
+        reliefs = StaffRelief.objects.filter(staffno=self.staffno, is_active=True)
+        print("Staff Reliefs: ", reliefs)
+        
+        relief_list = []
+        total_relief = Decimal("0.00")
+        
+        for relief in reliefs:
+            relief_list.append({
+                "relief_type": relief.relief_type,
+                "amount": relief.amount,
+            })
+            total_relief += relief.amount
+            
+        print(("Total Relief: ", total_relief))
+        return {"relief_list": relief_list, "total_relief": round(total_relief, 2)}

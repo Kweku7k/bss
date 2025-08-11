@@ -52,35 +52,37 @@
      {% endfor %}
   </div>
  {% endif %}
-  <div class="container">
-    <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-6 col-md-8 d-flex flex-column align-items-center justify-content-center">
-                    <div class="text-center justify-content-center py-4">
-                      <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="100%">
-                      <h4 class="mt-3"><b>Human Resource Support System</b></h4>
-                    </div><!-- End Logo -->
-
-                    <div class="card mb-3 shadow-sm border-light rounded">
-                        <div class="card-body">
-                            <div class="pt-4 pb-2">
-                                <h3 class="text-center text-muted">Account Awaiting Approval</h3>
-                                <p class="text-center text-muted mb-4">Your account is currently under review by an Administrator. You will be notified once it's approved.</p>
-                                
-                                <div class="text-center">
-                                    <p>If you have any questions or need further assistance, please <a href="mailto:hr.central.edu.gh">contact support.</a></p>
-                                </div>
-
-                                <div class="text-center mt-4">
-                                    <a href="{% url 'login' %}" class="btn btn-primary btn-md">Back to Login</a>
-                                </div>
-                            </div>
+  <div>
+    <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4" style="background-image: url('{% static 'img/hr.jpg' %}'); background-size: cover; background-position: center;">
+        <div class="container" style="position: relative;">
+          <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center" style="position: relative; z-index: 1;">
+              <div class="card mb-3 shadow-lg">
+                <div class="card-body p-4">
+                    <div class="pt-4 pb-3">
+                        <div class="text-center justify-content-center py-4">
+                        <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="60%" class="mb-4">
+                        <h3 class="text-black"><b>Account Awaiting Approval</b></h3>
+                        {% comment %} <p class="text-center text-muted"></p> {% endcomment %}
                         </div>
-                    </div><!-- End Card -->
+                    </div>
+
+                    <div class="pt-1 pb-2">
+                        <p class="text-center mb-4">Your account registration is pending administrative review. You will receive an email notification once your account has been approved.</p>
+                        
+                        <div class="text-center">
+                            <p>For any inquiries or assistance, please contact our support team at <a href="mailto:hr.central.edu.gh">hr.central.edu.gh</a></p>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="{% url 'login' %}" class="btn btn-primary btn-md">Return to Login Page</a>
+                        </div>
+                    </div>
 
                 </div>
+              </div>
             </div>
+          </div>
         </div>
     </section>
   </div>

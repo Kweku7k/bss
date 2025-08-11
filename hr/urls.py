@@ -13,6 +13,7 @@ urlpatterns = [
     path('register', views.register,name="register"),
     path('logout', views.logoutUser,name="logout"),
     path('profile', views.user_profile,name="profile"),
+    path('waiting_approval', views.waiting_approval,name="waiting-approval"),
     path('search', views.search,name="search"),
     path('newstaff', views.newstaff,name="newstaff"),
     path('allstaff', views.allstaff,name="allstaff"),
@@ -146,6 +147,9 @@ urlpatterns = [
     path('edit_staff_deduction/<str:staffno>/<int:deduction_id>', views.edit_staff_deduction, name='edit-staff-deduction'),
     # path('delete_staff_deduction/<str:staffno>/<int:deduction_id>', views.delete_staff_deduction, name='delete-staff-deduction'),
     
+    path('create_staff_relief/<str:staffno>', views.create_staff_relief, name='create-staff-relief'),
+    path('edit_staff_relief/<str:staffno>/<int:relief_id>', views.edit_staff_relief, name='edit-staff-relief'),
+    
     path('create_staff_loan/<str:staffno>', views.create_staff_loan, name='create-staff-loan'),
     # path('edit_staff_loan/<str:staffno>/<int:loan_id>', views.edit_staff_loan, name='edit-staff-loan'),
     
@@ -153,8 +157,7 @@ urlpatterns = [
     path('payroll_history/', views.payroll_history, name='payroll-history'),
     path('income_history/', views.income_history, name='income-history'),
     path('deduction_history/', views.deduction_history, name='deduction-history'),
-
-
+    path('paye_history/', views.paye_history, name='paye-history'),
  
     
     path('payroll/register/', views.payroll_register, name='payroll-register'),

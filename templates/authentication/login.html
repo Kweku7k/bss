@@ -52,59 +52,65 @@
       {% endfor %}
    </div>
   {% endif %}
-    <div class="container">
-
-      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-        <div class="container">
+    <div>
+      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4" style="background-image: url('{% static 'img/hr.jpg' %}'); background-size: cover; background-position: center;">
+        <div class="container" style="position: relative;">
           <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center">
-              <div class="text-center justify-content-center py-4">
-                <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="100%">
-
-                  {% comment %} <img src="../static/img/Central-Uni-logo.png" width="100%" style="display: flex; justify-content: center; align-items: center; text-align: center; margin: 0 auto;" class="center" alt=""> {% endcomment %}
-                <h4><b>Human Resource Support System</b></h4>
-              </div><!-- End Logo -->
-
-              <div class="card mb-3">
-
-                <div class="card-body">
-
-                  <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
-                    <p class="text-center small">Enter your username & password to login</p>
+            <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center" style="position: relative; z-index: 1;">
+              <div class="card mb-3 shadow-lg">
+                <div class="card-body p-4">
+                  <div class="pt-4 pb-3">
+                    <div class="text-center justify-content-center py-4">
+                      <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="60%" class="mb-4">
+                      <h3 class="text-black"><b>Welcome Back</b></h3>
+                      <p class="text-center text-muted">Sign in to continue to HR Portal</p>
+                    </div>
                   </div>
   
-                  <form method="POST" class="row g-3 needs-validation">
+                  <form method="POST" class="row g-4 needs-validation">
                     {% csrf_token %}
 
                     <div class="col-12">
-                      <label for="email" class="form-label">Email Address</label>
-                      <input type="text" name="email" class="form-control" id="email" required>
+                      <label for="email" class="form-label fw-bold">Email Address</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" name="email" class="form-control" id="email" placeholder="Enter your email" required>
+                      </div>
                     </div>
 
                     <div class="col-12">
-                      <label for="yourPassword" class="form-label">Password</label>
-                      <input type="password" name="password" class="form-control" id="yourPassword" required>
+                      <label for="yourPassword" class="form-label fw-bold">Password</label>
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" name="password" class="form-control" id="yourPassword" placeholder="Enter your password" required>
+                      </div>
                       <div class="invalid-feedback">Please enter your password!</div>
                     </div>
 
                     <div class="col-12">
-                      <button class="btn btn-primary w-100" type="submit">Login</button>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                      </div>
                     </div>
+
                     <div class="col-12">
-                      <p class="small mb-0">Don't have account? <a href="{% url 'register' %}">Create an account</a></p>
+                      <button class="btn btn-primary w-100 py-2 fw-bold" type="submit">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                      </button>
+                    </div>
+                    
+                    <div class="col-12 text-center">
+                      <p class="mb-0">Don't have an account? <a href="{% url 'register' %}" class="text-primary fw-bold">Create an account</a></p>
+                      {% comment %} <a href="#" class="text-muted"><small>Forgot Password?</small></a> {% endcomment %}
                     </div>
                   </form>
 
                 </div>
               </div>
-
-              
-
             </div>
           </div>
         </div>
-
       </section>
 
     </div>

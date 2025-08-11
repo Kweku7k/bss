@@ -137,6 +137,7 @@ class AcademicYear(models.Model):
 class IncomeType(models.Model):
     name = models.CharField(max_length=100, blank=False,null=False)
     taxable = models.BooleanField(default=False)
+    withholding_tax = models.BooleanField(default=False)
     tax_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, blank=True, null=True)
     bik_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, blank=True, null=True)
     bik_cap = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, blank=True, null=True)
@@ -145,6 +146,12 @@ class IncomeType(models.Model):
         return self.name
     
 class DeductionType(models.Model):
+    name = models.CharField(max_length=100, blank=False,null=False)
+
+    def __str__(self):
+        return self.name
+    
+class ReliefType(models.Model):
     name = models.CharField(max_length=100, blank=False,null=False)
 
     def __str__(self):

@@ -34,7 +34,7 @@
 
 <body>
   <main>
-    <div class="container">
+    <div>
 
       <!-- Toast for success or error messages -->
    {% if messages %}
@@ -52,31 +52,30 @@
       {% endfor %}
    </div>
 {% endif %}
-<div class="container">
+<div>
+  <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4" style="background-image: url('{% static 'img/hr.jpg' %}'); background-size: cover; background-position: center;">
+        <div class="container" style="position: relative;">
+          <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center" style="position: relative; z-index: 1;">
+              <div class="card mb-3 shadow-lg">
+                <div class="card-body p-4">
+                  <div class="pt-4 pb-3">
+                    <div class="text-center justify-content-center py-4">
+                      <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="60%" class="mb-4">
+                      <h3 class="text-black"><b>Create an Account</b></h3>
+                      <p class="text-center text-muted">Kindly fill in the form below</p>
+                    </div>
+                  </div>
 
-  <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-    <div class="container">
-      <div class="row justify-content-center">
-        <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center">
-          <div class="text-center justify-content-center py-4">
-            <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="100%">
-            <h4><b>Human Resource Support System</b></h4>
-          </div><!-- End Logo -->
-
-          <div class="card mb-3">
-
-            <div class="card-body">
-
-              <div class="pt-4 pb-2">
-                <h5 class="card-title text-center pb-0 fs-4">Create an Account</h5>
-                <p class="text-center small">Kindly fill in the form below</p>
-              </div>
                   <form method="POST" class="row g-3 needs-validation">
                     {% csrf_token %}
                     
                     <div class="col-12">
-                        {{ form.username.label }}
-                        <input type="text" name="{{ form.username.name }}" class="form-control" />
+                        <label for="username" class="form-label">{{ form.username.label }}</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-person"></i></span>
+                            <input type="text" name="{{ form.username.name }}" class="form-control" id="username" required>
+                        </div>
                         {% if form.username.errors %}
                             <div class="alert alert-danger">
                                 {% for error in form.username.errors %}
@@ -85,10 +84,13 @@
                             </div>
                         {% endif %}
                     </div>
-                
+
                     <div class="col-12">
-                        {{ form.email.label }}
-                        <input type="text" name="{{ form.email.name }}" class="form-control" />
+                        <label for="email" class="form-label">{{ form.email.label }}</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-envelope"></i></span>
+                            <input type="email" name="{{ form.email.name }}" class="form-control" id="email" required>
+                        </div>
                         {% if form.email.errors %}
                             <div class="text-danger">
                                 {% for error in form.email.errors %}
@@ -97,10 +99,13 @@
                             </div>
                         {% endif %}
                     </div>
-                
+
                     <div class="col-12">
-                        {{ form.staffno.label }}
-                        <input type="text" name="{{ form.staffno.name }}" class="form-control" />
+                        <label for="staffno" class="form-label">{{ form.staffno.label }}</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-card-text"></i></span>
+                            <input type="text" name="{{ form.staffno.name }}" class="form-control" id="staffno" required>
+                        </div>
                         {% if form.staffno.errors %}
                             <div class="alert alert-danger">
                                 {% for error in form.staffno.errors %}
@@ -109,10 +114,13 @@
                             </div>
                         {% endif %}
                     </div>
-                
+
                     <div class="col-12">
-                        {{ form.password1.label }}
-                        <input type="password" name="{{ form.password1.name }}" class="form-control" />
+                        <label for="password1" class="form-label">{{ form.password1.label }}</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="{{ form.password1.name }}" class="form-control" id="password1" required>
+                        </div>
                         {% if form.password1.errors %}
                             <div class="alert alert-danger">
                                 {% for error in form.password1.errors %}
@@ -121,10 +129,13 @@
                             </div>
                         {% endif %}
                     </div>
-                
+
                     <div class="col-12">
-                        {{ form.password2.label }}
-                        <input type="password" name="{{ form.password2.name }}" class="form-control" />
+                        <label for="password2" class="form-label">{{ form.password2.label }}</label>
+                        <div class="input-group has-validation">
+                            <span class="input-group-text" id="inputGroupPrepend"><i class="bi bi-lock"></i></span>
+                            <input type="password" name="{{ form.password2.name }}" class="form-control" id="password2" required>
+                        </div>
                         {% if form.password2.errors %}
                             <div class="alert alert-danger">
                                 {% for error in form.password2.errors %}
@@ -134,11 +145,15 @@
                         {% endif %}
                     </div>
                 
+                    
                     <div class="col-12">
-                        <button class="btn btn-primary w-100" type="submit">Create Account</button>
+                      <button class="btn btn-primary w-100 py-2 fw-bold" type="submit">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Create Account
+                      </button>
                     </div>
-                    <div class="col-12">
-                        <p class="small mb-0">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
+                    
+                    <div class="col-12 text-center">
+                      <p class="mb-0">Already have an account? <a href="{% url 'login' %}" class="text-primary fw-bold">Sign In</a></p>
                     </div>
                 </form>
                 
@@ -148,7 +163,6 @@
             </div>
           </div>
         </div>
-
       </section>
 
     </div>
