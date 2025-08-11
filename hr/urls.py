@@ -21,7 +21,6 @@ urlpatterns = [
     path('edit_staff/<str:staffno>', views.edit_staff,name="edit-staff"),
     path('delete_staff/<str:staffno>', views.deletestaff,name="delete-staff"),
     path('staff_details/<str:staffno>', views.staff_details,name="staff-details"),
-    # path('filter_staff', views.filter_staff, name="filter-staff"),
 
     path('company_info/<str:staffno>', views.company_info,name="company-info"),
     path('edit_company_info/<str:staffno>', views.edit_company_info,name="edit-company-info"),
@@ -35,6 +34,10 @@ urlpatterns = [
     path('download-sample-csv/', views.download_csv, name='download_sample_csv'),
     
     path('report', views.report,name="report"),
+    path('verify_user', views.verify_user,name="verify-user"),
+    path('verify_complete', views.verify_complete,name="verify-complete"),
+    path('personal-info/<str:staffno>/<str:dob>', views.submit_personal_info, name='submit-personal-info'),
+
     
     path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),
     path('edit_emp_relation/<str:emp_id>/<str:staffno>', views.edit_emp_relation,name="edit-emp-relation"),

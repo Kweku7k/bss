@@ -1,0 +1,341 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Verification</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<!-- Header -->
+<header class="bg-white shadow-sm py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="{% url 'landing' %}" class="logo d-flex align-items-center">
+            <img src="{% static 'img/Central-Uni-logo.png' %}" alt="navbar image" style="width: 130px;">
+        </a>
+
+        <a href="tel:+233553080264" class="btn btn-outline-danger btn-md">Call for Support</a>
+    </div>
+</header>
+
+ <!-- Toast for success or error messages -->
+   {% if messages %}
+      <div class="toast-container position-fixed bottom-0 end-0 p-3">
+         {% for message in messages %}
+            <div id="toast{{ forloop.counter }}" class="toast {{ message.tags }} bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+               <div class="toast-header text-white bg-{{ message.tags }}">
+                  <strong class="me-auto">{{ message.tags|title }}</strong>
+                  <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+               </div>
+               <div class="toast-body text-white">
+                  {{ message }}
+               </div>
+            </div>
+         {% endfor %}
+      </div>
+   {% endif %}
+
+<!-- Greeting -->
+<section class="py-4">
+    <div class="container text-start">
+        <h4 class="fw-bold">Welcome {{ staff.fname }} {{ staff.lname }} 👋</h4>
+        <p class="text-muted mb-0">
+           Congratualtions you have successfully passed the verification step. Please update your personal information for the HR Department of Central University.
+        </p>
+        <p class="text-muted">
+            Kindly ensure all details provided are accurate and current before submission.
+        </p>
+        
+    </div>
+</section>
+
+<!-- Form -->
+<section class="pb-5">
+    <div class="container bg-white p-4 rounded shadow-sm">
+        <form action="" method="POST" enctype="multipart/form-data"> 
+            {% csrf_token %}
+            <div class="row g-3 mb-4">
+
+                <h5 class="mb-3 text-dark"><strong>Personnel Information</strong></h5>
+
+                <div class="col-6 col-lg-4">
+                    <label for="staffno" class="form-label">Staff Number</label>
+                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="title" class="form-label">Title</label>
+                    <select name="title" class="form-select" required>
+                        <option value="">Select</option>
+                        {% for ts in title %}
+                            <option value="{{ ts }}" {% if ts.title_abbr == staff.title %}selected{% endif %}>{{ ts }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="suffix" class="form-label">Suffix</label>
+                    <select name="suffix" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in SUFFIX %}
+                            <option value="{{ key }}" {% if key == staff.suffix %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="lname" class="form-label">Surname</label>
+                    <input type="text" class="form-control" id="lname" name="lname" {% if staff %} value="{{ staff.lname }}" {% else %} value="" {% endif %} required>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="fname" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="fname" name="fname" {% if staff %} value="{{ staff.fname }}" {% else %} value="" {% endif %} required>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="middlenames" class="form-label">Middle Name</label>
+                    <input type="text" class="form-control" id="middlenames" name="middlenames" {% if staff %} value="{% if staff.middlenames %}{{ staff.middlenames }}{% endif %}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="oname" class="form-label">Other Name</label>
+                    <input type="text" class="form-control" id="oname" name="oname" {% if staff %} value="{% if staff.oname %}{{ staff.oname }}{% endif %}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="gender" class="form-label">Gender</label>
+                    <select name="gender" class="form-select" required>
+                        <option value="">Select</option>
+                        {% for key,value in GENDER %}
+                            <option value="{{ key }}" {% if key == staff.gender %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="dob" class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" id="dob" name="dob" {% if staff %} value="{{ staff.dob|date:"Y-m-d" }}" {% else %} value="" {% endif %} required>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="m_status" class="form-label">Marital Status</label>
+                    <select name="m_status" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in MARITALSTATUS %}
+                            <option value="{{ key }}" {% if key == staff.m_status %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="nationality" class="form-label">Nationality</label>
+                    <input type="text" class="form-control" id="nationality" name="nationality" {% if staff %} value="{{ staff.nationality }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="ethnic" class="form-label">Ethnic Group</label>
+                    <select name="ethnic" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in RBA %}
+                            <option value="{{ key }}" {% if key == staff.ethnic %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="home_town" class="form-label">Home Town</label>
+                    <input type="text" class="form-control" id="home_town" name="home_town" {% if staff %} value="{{ staff.home_town }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="region" class="form-label">Region</label>
+                    <select name="region" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in REGION %}
+                            <option value="{{ key }}" {% if key == staff.region %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="pob" class="form-label">Place of Birth</label>
+                    <input type="text" class="form-control" id="pob" name="pob" {% if staff %} value="{{ staff.pob }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="religion" class="form-label">Religion</label>
+                    <select name="religion" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in RELIGION %}
+                            <option value="{{ key }}" {% if key == staff.religion %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="denomination" class="form-label">Denomination</label>
+                    <select name="denomination" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in DENOMINATION %}
+                            <option value="{{ key }}" {% if key == staff.denomination %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="email_address" class="form-label">Personal Email</label>
+                    <input type="email" class="form-control" id="email_address" name="email_address" {% if staff %} value="{{ staff.email_address }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="active_phone" class="form-label">Active Phone</label>
+                    <input type="text" class="form-control" id="active_phone" name="active_phone" {% if staff %} value="{{ staff.active_phone }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="ssnitno" class="form-label">SSNIT No.</label>
+                    <input type="text" class="form-control" id="ssnitno" name="ssnitno" {% if staff %} value="{{ staff.ssnitno }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="idtype" class="form-label">ID Type</label>
+                    <select name="idtype" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in IDTYPE %}
+                            <option value="{{ key }}" {% if key == staff.idtype %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="gcardno" class="form-label">ID No.</label>
+                    <input type="text" class="form-control" id="gcardno" name="gcardno" {% if staff %} value="{{ staff.gcardno }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="digital" class="form-label">Digital Address</label>
+                    <input type="text" class="form-control" id="digital" name="digital" {% if staff %} value="{{ staff.digital }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="residential" class="form-label">Residential Address</label>
+                    <input type="text" class="form-control" id="residential" name="residential" {% if staff %} value="{{ staff.residential }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="postal" class="form-label">Postal Address</label>
+                    <input type="text" class="form-control" id="postal" name="postal" {% if staff %} value="{{ staff.postal }}" {% else %} value="" {% endif %}>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <h5 class="mb-3 text-dark"><strong>Educational Background</strong></h5>
+                
+                <div class="col-6 col-lg-4">
+                    <label for="heq" class="form-label">Highest Educational Qualification</label>
+                    <select name="heq" class="form-select">
+                        <option value="">Select</option>
+                        {% for qual in qualification %}
+                            <option value="{{ qual }}" {% if qual.qual_abbr == staff.heq %}selected{% endif %}>{{ qual }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="study_area" class="form-label">Area of Study</label>
+                    <input type="text" class="form-control" id="study_area" name="study_area" {% if staff %} value="{{ staff.study_area }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="completion_year" class="form-label">Completion Year</label>
+                    <input type="text" class="form-control" id="completion_year" name="completion_year" {% if staff %} value="{{ staff.completion_year }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="institution" class="form-label">Institution of Study</label>
+                    <input type="text" class="form-control" id="institution" name="institution" {% if staff %} value="{{ staff.institution }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="hpq" class="form-label">Highest Professional Qualification</label>
+                    <select name="hpq" class="form-select">
+                        <option value="">Select</option>
+                        {% for key,value in HPQ %}
+                            <option value="{{ key }}" {% if key == staff.hpq %}selected{% endif %}>{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <h5 class="mb-3 text-dark"><strong>Health Record</strong></h5>
+                <div class="col-6 col-lg-4">
+                    <label for="blood" class="form-label">Blood Group</label>
+                    <input type="text" class="form-control" id="blood" name="blood" {% if staff %} value="{{ staff.blood }}" {% else %} value="" {% endif %}>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <h5 class="mb-3 text-dark"><strong>Vehicle Details</strong></h5>
+                <div class="col-6 col-lg-4">
+                    <label for="car" class="form-label">Car Number</label>
+                    <input type="text" class="form-control" id="car" name="car" {% if staff %} value="{{ staff.car }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="chassis" class="form-label">Chassis Number</label>
+                    <input type="text" class="form-control" id="chassis" name="chassis" {% if staff %} value="{{ staff.chassis }}" {% else %} value="" {% endif %}>
+                </div>
+
+                <div class="col-6 col-lg-4">
+                    <label for="vech_type" class="form-label">Vehicle Type</label>
+                    <input type="text" class="form-control" id="vech_type" name="vech_type" {% if staff %} value="{{ staff.vech_type }}" {% else %} value="" {% endif %}>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="staff_pix">Employee Photo</label>
+
+                    {% if staff.staff_pix %}
+                    <div class="mb-2">
+                        <img src="{{ staff.staff_pix }}" class="img-thumbnail" style="max-height: 150px;" />
+                    </div>
+                    {% endif %}
+
+                    <input type="file" class="form-control" id="staff_pix" name="staff_pix">
+                    <small class="text-muted">Leave this empty if you're not changing the photo.</small>
+                </div>
+            </div>
+
+            <div class="col-12 text-end mt-5">
+                <button type="submit" class="btn btn-success px-4">
+                    Save & Submit →
+                </button>
+            </div>
+        </form>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+   // Wait until the DOM is fully loaded
+   document.addEventListener('DOMContentLoaded', function () {
+      // Loop through and show all the toasts for each message
+      {% for message in messages %}
+         const toastEl{{ forloop.counter }} = document.getElementById('toast{{ forloop.counter }}');
+         if (toastEl{{ forloop.counter }}) {
+            const toast{{ forloop.counter }} = new bootstrap.Toast(toastEl{{ forloop.counter }});
+            toast{{ forloop.counter }}.show();
+         }
+      {% endfor %}
+   });
+</script>
+</body>
+</html>

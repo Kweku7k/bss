@@ -13,7 +13,7 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="bank_code" class="col-form-label">Bank</label>
-                        <select name="bank_code" class="form-control">
+                        <select name="bank_code" class="form-control" required>
                             <option value="">---Select Bank---</option>
                             {% if banks %}
                                 {% for bank in banks %}

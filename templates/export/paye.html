@@ -1,0 +1,135 @@
+<!-- templates/export/paye.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PAYE History - {{ selected_date }}</title>
+    <style>
+        @page {
+            size: landscape;
+        }
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.6;
+            margin: 40px;
+            color: #333;
+            background: #fff;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            margin: 15px 0;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        h2 {
+            font-size: 20px;
+        }
+        h3 {
+            font-size: 16px;
+            color: #7f8c8d;
+        }
+        .header-info {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #7f8c8d;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            padding: 50px;
+            background: #fff;
+            table-layout: fixed;
+        }
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            text-align: left;
+            color: #2c3e50;
+            border-bottom: 2px solid #ddd;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        th, td {
+            padding: 10px;
+            text-align: right;
+            border-bottom: 1px solid #eee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        td.name {
+            text-align: left;
+        }
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            text-align: center;
+            color: #95a5a6;
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>GHANA REVENUE AUTHORITY</h1>
+    <h2>PAYE HISTORY REPORT</h2>
+    <h3>For the Month of {{ selected_date }}</h3>
+
+    <div class="header-info">
+        <p>Generated on: {{ date }}</p>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Staff</th>
+                <th>Tax ID No.</th>
+                <th>Basic Salary</th>
+                <th>Total Income</th>
+                <th>Total Emoluments</th>
+                <th>SSF</th>
+                <th>PF Employee</th>
+                <th>Total Relief</th>
+                <th>Net Taxable Pay</th>
+                <th>Tax Deductible</th>
+                <th>Tax Deductible & paid to IRS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for entry in paye_data %}
+            <tr>
+                <td class="name">{{ entry.staff.fname }} {{ entry.staff.lname }} {{ entry.staff.middlenames }}</td>
+                <td>{{ entry.staff.gcardno }}</td>
+                <td>{{ entry.basic_salary }}</td>
+                <td>{{ entry.paye_total_income }}</td>
+                <td>{{ entry.paye_total_emoluments }}</td>
+                <td>{{ entry.ssf }}</td>
+                <td>{{ entry.pf_employee }}</td>
+                <td>{{ entry.total_relief }}</td>
+                <td>{{ entry.net_taxable_pay }}</td>
+                <td>{{ entry.income_tax }}</td>
+                <td>{{ entry.income_tax }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" style="text-align:center;">No PAYE data found for the selected period.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>&copy; {{ date }} Ghana Revenue Authority. All Rights Reserved.</p>
+    </div>
+
+</body>
+</html>

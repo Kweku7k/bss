@@ -325,7 +325,7 @@ def staff_details(request, staffno):
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('edit_staff')
-def edit_staff(request,staffno):
+def edit_staff(request, staffno):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter() 
     staff_count = staffs.count()
@@ -976,6 +976,123 @@ def edit_company_info(request,staffno):
 
 ############### EMPLOYEE RELATIONSHIP ###############
 
+def verify_user(request):
+    days = range(1, 32)
+    years = range(1950, 2026)
+    
+    if request.method == "POST":
+        staffno = request.POST.get("staffno").strip()
+        day = request.POST.get("dob_day").strip()
+        month = request.POST.get("dob_month").strip()
+        year = request.POST.get("dob_year").strip()
+
+        dob = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+
+        try:
+            employee = Employee.objects.get(staffno=staffno, dob=dob)
+            
+            pending, created = PendingEmployeeUpdate.objects.update_or_create(
+                staffno=employee.staffno,
+                defaults={
+                    "title": employee.title,
+                    "lname": employee.lname,
+                    "fname": employee.fname,
+                    "middlenames": employee.middlenames,
+                    "gender": employee.gender,
+                    "dob": employee.dob,
+                }
+            )
+
+            return redirect('submit-personal-info', staffno=staffno, dob=dob)
+        except Employee.DoesNotExist:
+            return render(request, "hr/verification_failed.html", {"staffno": staffno})
+
+    context = {
+        "days": days,
+        "years": years,
+    }
+    return render(request, "hr/verify_user.html", context)
+
+
+def verify_complete(request):
+    return render(request, "hr/update_success.html")
+
+def submit_personal_info(request, staffno, dob):
+    submitted = False
+    title = Title.objects.all()
+    qualification = Qualification.objects.all()
+    
+    try:
+        pending = PendingEmployeeUpdate.objects.get(staffno=staffno, dob=dob)
+    except PendingEmployeeUpdate.DoesNotExist:
+        messages.error(request, "No pending record found for the provided details. Please verify your information again.")
+        return redirect("verify-user")
+    
+    form = PendingEmployeeUpdateForm(request.POST or None, request.FILES or None, instance=pending)
+
+    if request.method == 'POST':
+        if form.is_valid():
+            print("Staff Updating Information", form.cleaned_data)
+            fname = form.cleaned_data['fname']
+            lname = form.cleaned_data['lname']
+            staff_instance = form.save(commit=False)
+            # 📸 Handle image upload
+            image_file = request.FILES.get('staff_pix')
+
+            if image_file:
+                try:
+                    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+                        for chunk in image_file.chunks():
+                            temp_file.write(chunk)
+                        temp_file.flush()
+
+                        unique_filename = f"{uuid.uuid4().hex}_{image_file.name}"
+                        firebase_path = f"staff_pictures/{unique_filename}"
+                        firebase_url = upload_file_to_firebase(temp_file.name, firebase_path)
+
+                        print("✅ Firebase URL:", firebase_url)
+                        staff_instance.staff_pix = firebase_url
+
+                except Exception as e:
+                    print(f"❌ Error uploading to Firebase: {str(e)}")
+            
+            staff_instance.save()
+            full_name = f"{fname} {lname}"
+            logger.info(f"{full_name} has updated their Personal Information")
+            return redirect('verify-complete')
+        else:
+            messages.error(request, "Please correct the errors below.")
+            print(form.errors)
+    else:
+        form = PendingEmployeeUpdateForm
+        if 'submitted' in request.GET:
+            submitted = True
+            
+            
+    context = {
+        'form':form,
+        "staff": pending,
+        "submitted": submitted,
+        'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
+        'STAFFLEVEL':STAFFLEVEL,
+        'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
+        'STAFFRANK':STAFFRANK,
+        'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+        'SUFFIX': ChoicesSuffix.objects.all().values_list("name", "name"),
+        'REGION': ChoicesRegion.objects.all().values_list("name", "name"),
+        'MARITALSTATUS': ChoicesMaritalStatus.objects.all().values_list("name", "name"),
+        'IDTYPE': ChoicesIdType.objects.all().values_list("name", "name"),
+        'DENOMINATION': ChoicesDenomination.objects.all().values_list("name", "name"),
+        'DEPENDANTS':DEPENDANTS,
+        'RELIGION': ChoicesReligion.objects.all().values_list("name", "name"),
+        'HPQ': ChoicesHPQ.objects.all().values_list("name", "name"),
+        'title':title,
+        'qualification':qualification,
+    }
+            
+    return render(request, "hr/personal_info_form.html", context)
+    
+
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('add_staff')
@@ -1242,7 +1359,7 @@ def bulk_upload(request):
                                     'acc_name': row.get('acc_name', ''),
                                     'probation': parse_date(row.get('probation', None)),
                                     'pte': row.get('pte', ''),
-                                    'basic_entitled_percentage': row.get('basic_entitled_percentage', ''),
+                                    'basic_entitled_percentage': row.get('basic_entitled_percentage') or "100.00",
                                 }
                             )
                             print("Company Info Done for ", company_info.staffno)
@@ -1251,7 +1368,9 @@ def bulk_upload(request):
                         except Exception as row_error:
                             transaction.savepoint_rollback(savepoint)
                             errors.append(f"Error in row {reader.line_num}: {row_error}")
-                            print(f"Error in row {reader.line_num}, column: {', '.join(row_error.args)}")                                                        
+                            # print(f"Error in row {reader.line_num}, column: {', '.join(row_error.args)}")     
+                            print(f"Error in row {reader.line_num}, column: {', '.join(str(arg) for arg in row_error.args)}")
+                                                   
                             continue
                         finally:
                             transaction.savepoint_commit(savepoint)
@@ -4105,6 +4224,7 @@ def paye_history(request):
             context = {
                 "paye_data": paye_data,
                 "selected_date": selected_date.strftime('%B %Y'),
+                "date": datetime.now().strftime("%d %B, %Y")
             }
             return render_to_pdf("export/paye.html", context, f"{filename}.pdf")
         elif export_format == "excel":

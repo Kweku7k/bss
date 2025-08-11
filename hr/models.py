@@ -18,6 +18,17 @@ from django.contrib import messages
 
 # Create your models here.
 
+
+class User(AbstractUser): 
+    staffno = models.CharField(max_length=50, blank=False, null=False, unique=True)
+    approval = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.username} ({self.staffno})"
+    
+    
+    
 class Employee(models.Model):
     staffno = models.CharField('Staff Number',max_length=12,blank=False,null=False,primary_key=True,unique=True)
     title = models.CharField('Title',max_length=20,blank=False,null=False)
@@ -67,6 +78,52 @@ class Employee(models.Model):
             return today.year - self.dob.year - ((today.month, today.day) < (self.dob.month, self.dob.day))
         return None
 
+
+
+class PendingEmployeeUpdate(models.Model):    
+    staffno = models.CharField('Staff Number',max_length=12,blank=False,null=False,primary_key=True,unique=True)
+    title = models.CharField('Title',max_length=20,blank=False,null=False)
+    lname = models.CharField('Surname',max_length=120,blank=False,null=False)
+    fname = models.CharField('First Name',max_length=120,blank=False,null=False)
+    middlenames = models.CharField('Middle Names',max_length=120,blank=True,null=True)
+    oname = models.CharField('Other Names', max_length=120, blank=True, null=True)
+    suffix = models.CharField('Name Suffixe',max_length=20,blank=True,null=True)
+    gender = models.CharField(max_length=20)
+    dob = models.DateField('Date of Birth')
+    m_status = models.CharField('Marital Status',max_length=50,blank=True,null=True)
+    nationality = models.CharField('Nationality',max_length=50,blank=True,null=True)
+    ethnic = models.CharField('Ethnic Group',max_length=50,blank=True,null=True)
+    home_town = models.CharField('Home Town',max_length=100,blank=True,null=True)
+    region  = models.CharField('Region',max_length=50,blank=True,null=True)
+    pob  = models.CharField('Place of Birth',max_length=50,blank=True,null=True)
+    religion  = models.CharField('Religion',max_length=50,blank=True,null=True)
+    denomination  = models.CharField('Denomination',max_length=50,blank=True,null=True)
+    email_address= models.EmailField('Persoanl Email',max_length=50,blank=True,null=True)
+    active_phone = models.CharField('Active Phone No.',max_length=30,blank=True,null=True)
+    ssnitno = models.CharField('SSNIT No.',max_length=50,blank=True,null=True)
+    idtype = models.CharField('ID Type',max_length=50,blank=True,null=True)
+    gcardno = models.CharField('ID Card No.',max_length=50,blank=True,null=True)
+    digital = models.CharField('Digital Address',max_length=100,blank=True,null=True)
+    residential = models.CharField('Residential Address',max_length=100,blank=True,null=True)
+    postal = models.CharField('Postal Address',max_length=100,blank=True,null=True)
+    blood = models.CharField('Blood Group',max_length=50,blank=True,null=True)
+    car = models.CharField('Car Number',max_length=50,blank=True,null=True)
+    chassis = models.CharField('Chassis Number',max_length=50,blank=True,null=True)
+    vech_type = models.CharField('Vechicle Type',max_length=50,blank=True,null=True)
+    study_area = models.CharField('Area of Study',max_length=50,blank=True,null=True)
+    heq = models.CharField('Highest Academic Qualification',max_length=100,blank=True,null=True)
+    completion_year = models.CharField('Year of Completion',max_length=100,blank=True,null=True)
+    institution = models.CharField('Institution of Study',max_length=100,blank=True,null=True)
+    other_heq = models.CharField('Other Educational Qualification',max_length=100,blank=True,null=True)
+    hpq = models.CharField('Highest Professional Qualification',max_length=100,blank=True,null=True)
+    staff_pix = models.URLField(blank=True,null=True)
+    updated = models.DateTimeField(auto_now=True)
+    created = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
+    approved_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='pending_staff')
+    
+    def __str__(self):
+        return f"{self.staffno} {self.title} {self.fname or ''} {self.lname or ''}".strip()
 
 
 class CompanyInformation(models.Model):
@@ -125,16 +182,6 @@ class Kith(models.Model):
      def __str__(self):
         return self.kith_fname
      
-
-
-class User(AbstractUser): 
-    staffno = models.CharField(max_length=50, blank=False, null=False, unique=True)
-    approval = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.username} ({self.staffno})"
-    
     
 class PermissionTag(models.Model):
     name = models.CharField(max_length=100, unique=True)

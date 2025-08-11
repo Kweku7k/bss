@@ -1,0 +1,80 @@
+{% extends "authentication/auth_layout.html" %} 
+{% load static %}
+{% block content %}
+
+
+<div class="container" style="position: relative;">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center" style="position: relative; z-index: 1;">
+            <div class="card mb-3 shadow-lg">
+                <div class="card-body p-4">
+                    <div class="pt-4 pb-3">
+                        <div class="text-center justify-content-center py-4">
+                            <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="60%" class="mb-4">
+                            <h3 class="text-black"><b>Staff Verification Portal</b></h3>
+                            <p class="text-center text-muted">Please enter your staff number and date of birth to verify your identity</p>                        
+                        </div>
+
+                        <form method="post" onsubmit="document.getElementById('submitBtn').disabled = true; document.getElementById('spinner').style.display = 'inline-block'; document.getElementById('btnText').style.display = 'none';">
+                            {% csrf_token %}
+                            
+                            <!-- Staff Number -->
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Staff Number</label>
+                                <input type="text" name="staffno" class="form-control" placeholder="e.g. 12345" required>
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="mb-2 fw-semibold">Date of Birth</div>
+                            <div class="row g-2">
+                                <!-- Day -->
+                                <div class="col">
+                                    <select name="dob_day" class="form-control" required>
+                                        <option value="">Day</option>
+                                        {% for d in days %}
+                                            <option value="{{ d }}">{{ d }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- Month -->
+                                <div class="col">
+                                    <select name="dob_month" class="form-control" required>
+                                        <option value="">Month</option>
+                                        <option value="1">January</option>
+                                        <option value="2">February</option>
+                                        <option value="3">March</option>
+                                        <option value="4">April</option>
+                                        <option value="5">May</option>
+                                        <option value="6">June</option>
+                                        <option value="7">July</option>
+                                        <option value="8">August</option>
+                                        <option value="9">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
+                                </div>
+                                <!-- Year -->
+                                <div class="col">
+                                    <select name="dob_year" class="form-control" required>
+                                        <option value="">Year</option>
+                                        {% for y in years %}
+                                            <option value="{{ y }}">{{ y }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <button id="submitBtn" class="btn btn-primary w-100 mt-5">
+                                <span id="spinner" class="spinner-border spinner-border-sm me-2" role="status" style="display: none;"></span>
+                                <span id="btnText">Verify</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

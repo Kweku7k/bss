@@ -31,6 +31,13 @@ class EmployeeForm(ModelForm):
         fields = '__all__'
         exclude = ['updated','created', 'staff_pix']
         
+        
+class PendingEmployeeUpdateForm(ModelForm):
+    class Meta:
+        model = PendingEmployeeUpdate
+        fields = '__all__'
+        exclude = ['updated','created', 'staff_pix']
+        
 class CompanyInformationForm(ModelForm):
     class Meta:
         model = CompanyInformation
