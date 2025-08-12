@@ -87,8 +87,8 @@ def register(request):
     
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
-        print("Form has been received", form)
         if form.is_valid():
+            print("Someone is creating an account", form.cleaned_data)
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             if User.objects.filter(email=email).exists():
@@ -96,6 +96,7 @@ def register(request):
                 return redirect('register')
             form.save()
             messages.success(request, f"Account Creation for {username} has been successful")  
+            logger.info(f"Account Creation for {username} has been successful")
             return redirect('login')
         else:
             for field in form:
@@ -708,8 +709,6 @@ def newstaff(request):
     
     if request.method == 'POST':
         form = EmployeeForm(request.POST, request.FILES)
-        print("Form has been received")
-
         if form.is_valid():
             print("New Staff Info", form.cleaned_data)
             
@@ -1176,8 +1175,8 @@ def emp_relation(request,staffno):
     
     if request.method == 'POST':
         form = KithForm(request.POST)
-        print("form has been recieved", )
-        if form.is_valid(): 
+        if form.is_valid():
+            print("Employee Relation", form.cleaned_data) 
             new_percentage = form.cleaned_data['percentage']
             current_total = sum(emp.percentage for emp in emp_relations)
             
@@ -1492,8 +1491,8 @@ def education(request,staffno):
     
     if request.method == 'POST':
         form = StaffSchoolForm(request.POST)
-        print("form has been recieved")
         if form.is_valid(): 
+            print("Educational Background", form.cleaned_data)
             education = form.save(commit=False)
             education.staffno = staff
             education.save()
