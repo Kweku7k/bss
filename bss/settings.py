@@ -119,28 +119,6 @@ DATABASES = {
 }
 
 print("Database configuration:")
-print(f"Database Info: {DATABASES['default']['NAME']}")
-print(f"Database Host: {DATABASES['default']['HOST']}")
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'bss',
-#         'USER': 'postgres',
-#         'PASSWORD': 'AkpeNaMawu@123',
-#         'HOST': 'localhost',
-#     }
-# }
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
-# Password validation
-# https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {

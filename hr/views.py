@@ -338,8 +338,6 @@ def edit_staff(request, staffno):
     form = EmployeeForm(request.POST or None,request.FILES or None,instance=staff)
     
     if request.method == 'POST':
-        print("📩 POST received")  # ✅
-
         if form.is_valid():
             print("Edit Information", form.cleaned_data)
 
@@ -845,8 +843,6 @@ def company_info(request,staffno):
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES)
-        # print(form)
-        print("form has been recieved")
         if form.is_valid(): 
             print("Company Info", form.cleaned_data)
             
@@ -1180,9 +1176,8 @@ def emp_relation(request,staffno):
     
     if request.method == 'POST':
         form = KithForm(request.POST)
-        print("form has been recieved")
+        print("form has been recieved", )
         if form.is_valid(): 
-            print("Somethig is wrong somewhere")
             new_percentage = form.cleaned_data['percentage']
             current_total = sum(emp.percentage for emp in emp_relations)
             
