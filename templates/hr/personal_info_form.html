@@ -61,10 +61,7 @@
 
                 <h5 class="mb-3 text-dark"><strong>Personnel Information</strong></h5>
 
-                <div class="col-6 col-lg-4">
-                    <label for="staffno" class="form-label">Staff Number</label>
-                    <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno }}" readonly>
-                </div>
+                <input type="text" class="form-control" id="staffno" name="staffno" value="{{ staff.staffno.staffno }}" readonly hidden>
 
                 <div class="col-6 col-lg-4">
                     <label for="title" class="form-label">Title</label>
@@ -213,7 +210,7 @@
 
                 <div class="col-6 col-lg-4">
                     <label for="gcardno" class="form-label">ID No.</label>
-                    <input type="text" class="form-control" id="gcardno" name="gcardno" {% if staff %} value="{{ staff.gcardno }}" {% else %} value="" {% endif %}>
+                    <input type="text" class="form-control" id="gcardno" name="gcardno" {% if staff %} value="{{ staff.gcardno|default:'' }}" {% else %} value="" {% endif %}>
                 </div>
 
                 <div class="col-6 col-lg-4">

@@ -1,0 +1,61 @@
+{% load group_tags %}
+
+
+{% if request.user|has_group:"superadmin" or request.user.is_superuser %}
+    {% if pending_updates %}
+    <div class="col-lg-6 col-sm-6">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="text-black text-center mb-2"><strong>Pending Personal Info Updates</strong></h5>
+                <p class="text-center text-muted small mb-4">Staff data awaiting review</p>
+
+                <hr class="my-4">
+                
+                <div class="pending-updates-list">
+                    {% for update in pending_updates %}
+                        <div class="d-flex align-items-center p-3 mb-2 bg-white rounded border">
+                            <div class="status-indicator bg-warning rounded-circle me-3"></div>
+                            
+                            <span class="flex-grow-1 text-dark">
+                                {{ update.title }} {{ update.fname }} {{ update.lname }} {{ update.middlenames }}
+                            </span>
+
+                            <a href="{% url 'view-pending-update' update.staffno.staffno %}" 
+                               class="btn btn-sm btn-outline-secondary px-3"
+                               title="View Details">
+                                View
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="text-center text-muted p-4">
+                            <i class="fas fa-inbox mb-3"></i>
+                            <p class="mb-0">No pending updates</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .pending-updates-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+        .pending-updates-list::-webkit-scrollbar {
+            width: 5px;
+        }
+        .pending-updates-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .pending-updates-list::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 5px;
+        }
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+        }
+    </style>
+    {% endif %}
+{% endif %}

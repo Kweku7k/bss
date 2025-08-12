@@ -37,6 +37,10 @@ urlpatterns = [
     path('verify_user', views.verify_user,name="verify-user"),
     path('verify_complete', views.verify_complete,name="verify-complete"),
     path('personal-info/<str:staffno>/<str:dob>', views.submit_personal_info, name='submit-personal-info'),
+    path('view_pending_update/<str:staffno>', views.view_pending_update, name='view-pending-update'),
+    path('approve-pending-update/<int:update_id>', views.approve_pending_update, name='approve-pending-update'),
+    path('disapprove-pending-update/<int:update_id>', views.disapprove_pending_update, name='disapprove-pending-update'),
+    
 
     
     path('emp_relation/<str:staffno>', views.emp_relation,name="emp-relation"),

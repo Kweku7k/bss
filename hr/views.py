@@ -195,6 +195,7 @@ def landing(request):
     pending_promotions = PromotionHistory.objects.filter(is_approved=False, is_disapproved=False)
     pending_users = User.objects.filter(approval=False, is_superuser=False)    
     pending_exits = Exits.objects.filter(is_approved=False, is_disapproved=False)
+    pending_updates = PendingEmployeeUpdate.objects.filter(is_approved=False)
     
     
     for staff in staffs:
@@ -250,6 +251,7 @@ def landing(request):
         'pending_promotions':pending_promotions,
         'pending_users':pending_users,
         'pending_exits': pending_exits,
+        'pending_updates':pending_updates,
     }
     
     return render(request,'hr/landing_page.html', context)
@@ -361,11 +363,10 @@ def edit_staff(request, staffno):
                         firebase_path = f"staff_pictures/{unique_filename}"
                         firebase_url = upload_file_to_firebase(temp_file.name, firebase_path)
 
-                        print("✅ Firebase URL:", firebase_url)
                         staff_instance.staff_pix = firebase_url
 
                 except Exception as e:
-                    print(f"❌ Error uploading to Firebase: {str(e)}")
+                    print(f"Error uploading to Firebase: {str(e)}")
                     
             # Now save safely
             staff_instance.save()
@@ -991,8 +992,8 @@ def verify_user(request):
         try:
             employee = Employee.objects.get(staffno=staffno, dob=dob)
             
-            pending, created = PendingEmployeeUpdate.objects.update_or_create(
-                staffno=employee.staffno,
+            pending, created = PendingEmployeeUpdate.objects.get_or_create(
+                staffno=employee,
                 defaults={
                     "title": employee.title,
                     "lname": employee.lname,
@@ -1000,8 +1001,11 @@ def verify_user(request):
                     "middlenames": employee.middlenames,
                     "gender": employee.gender,
                     "dob": employee.dob,
+                    "staff_pix": employee.staff_pix,
                 }
             )
+            
+            print("Pending Employee", pending.staffno)
 
             return redirect('submit-personal-info', staffno=staffno, dob=dob)
         except Employee.DoesNotExist:
@@ -1021,9 +1025,11 @@ def submit_personal_info(request, staffno, dob):
     submitted = False
     title = Title.objects.all()
     qualification = Qualification.objects.all()
+    employee = get_object_or_404(Employee, staffno=staffno, dob=dob)
+
     
     try:
-        pending = PendingEmployeeUpdate.objects.get(staffno=staffno, dob=dob)
+        pending = get_object_or_404(PendingEmployeeUpdate, staffno=employee)
     except PendingEmployeeUpdate.DoesNotExist:
         messages.error(request, "No pending record found for the provided details. Please verify your information again.")
         return redirect("verify-user")
@@ -1036,6 +1042,8 @@ def submit_personal_info(request, staffno, dob):
             fname = form.cleaned_data['fname']
             lname = form.cleaned_data['lname']
             staff_instance = form.save(commit=False)
+            # staff_instance.staffno = employee 
+            
             # 📸 Handle image upload
             image_file = request.FILES.get('staff_pix')
 
@@ -1050,18 +1058,20 @@ def submit_personal_info(request, staffno, dob):
                         firebase_path = f"staff_pictures/{unique_filename}"
                         firebase_url = upload_file_to_firebase(temp_file.name, firebase_path)
 
-                        print("✅ Firebase URL:", firebase_url)
                         staff_instance.staff_pix = firebase_url
 
                 except Exception as e:
-                    print(f"❌ Error uploading to Firebase: {str(e)}")
+                    print(f"Error uploading to Firebase: {str(e)}")
             
             staff_instance.save()
             full_name = f"{fname} {lname}"
             logger.info(f"{full_name} has updated their Personal Information")
             return redirect('verify-complete')
         else:
-            messages.error(request, "Please correct the errors below.")
+            plain_error_message = " | ".join(
+                error for errors in form.errors.values() for error in errors)
+            messages.error(request, f"Please correct the errors below: {plain_error_message}")
+            # messages.error(request, f"Please correct the errors below.{form.errors}")
             print(form.errors)
     else:
         form = PendingEmployeeUpdateForm
@@ -1091,6 +1101,72 @@ def submit_personal_info(request, staffno, dob):
     }
             
     return render(request, "hr/personal_info_form.html", context)
+
+
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('view_pending_update')
+def view_pending_update(request, staffno):
+    employee = get_object_or_404(Employee, staffno=staffno)
+    pending_update = get_object_or_404(PendingEmployeeUpdate, staffno=employee)
+
+    context = {
+        'employee': employee,
+        'pending': pending_update
+    }
+    return render(request, 'hr/review_pending_update.html', context)
+    
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+def approve_pending_update(request, update_id):
+    pending_update = get_object_or_404(PendingEmployeeUpdate, id=update_id)
+
+    if request.method == 'POST':
+        employee = pending_update.staffno  
+
+        fields_to_copy = [
+            'title', 'fname', 'lname', 'middlenames', 'oname', 'suffix', 'gender', 'dob',
+            'nationality', 'ethnic', 'home_town', 'm_status', 'region', 'pob','religion','denomination','email_address','active_phone','ssnitno','idtype','gcardno','digital',
+            'residential','postal','blood','car','chassis', 'vech_type','study_area','heq','completion_year','institution','other_heq','hpq','staff_pix'
+        ]
+
+        for field in fields_to_copy:
+            setattr(employee, field, getattr(pending_update, field))
+
+        employee.save()
+
+        pending_update.delete()
+
+        messages.success(request, f"Update for {employee.fname} {employee.lname} has been approved and updated.")
+        logger.info(f"Pending update for {employee.staffno} approved by {request.user.username}.")
+
+        return redirect('staff-details', staffno=employee.staffno)
+
+    return redirect('landing')
+
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+def disapprove_pending_update(request, update_id):
+    pending_update = get_object_or_404(PendingEmployeeUpdate, id=update_id)
+
+    if request.method == 'POST':
+        full_name = f"{pending_update.fname} {pending_update.lname}"
+        pending_update.delete()
+
+        messages.warning(request, f"Pending update for {full_name} has been disapproved and removed.")
+        logger.info(f"Pending update for {full_name} disapproved by {request.user.username}.")
+
+        return redirect('landing')
+
+    return redirect('landing')
+
+
     
 
 @login_required
