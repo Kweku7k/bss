@@ -723,10 +723,8 @@ def newstaff(request):
                 print(f"Staff number {staff_number} already exists")
             else:
                 print("Form was submitted successfully", form.cleaned_data)
-                # 🚀 Save form but don't commit yet
                 staff_instance = form.save(commit=False)
 
-                # 📸 Handle image upload to Firebase
                 image_file = request.FILES.get('staff_pix')
                 if image_file:
                     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
@@ -735,7 +733,7 @@ def newstaff(request):
                         temp_file.flush()
                         firebase_path = f"staff_pictures/{image_file.name}"
                         firebase_url = upload_file_to_firebase(temp_file.name, firebase_path)
-                        staff_instance.staff_pix = firebase_url  # ✅ Save URL in model field
+                        staff_instance.staff_pix = firebase_url 
 
                 # Save staff to DB
                 staff_instance.save()
