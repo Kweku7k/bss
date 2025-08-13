@@ -25,7 +25,7 @@ def home(request):
 @login_required
 def add_school(request):
     submitted = False
-    schools = School_Faculty.objects.order_by('-id') 
+    schools = School_Faculty.objects.order_by('sch_fac_name') 
     sch_count = schools.count() 
     if request.method == 'POST':
         form = School_FacultyForm(request.POST)
@@ -55,7 +55,7 @@ def delete_sch(request,sch_id):
 @login_required
 
 def edit_school(request, sch_id):
-    schools = School_Faculty.objects.order_by('-id') 
+    schools = School_Faculty.objects.order_by('sch_fac_name') 
     sch_count = schools.count()
     school = School_Faculty.objects.get(pk=sch_id)
     form = School_FacultyForm(instance=school)
@@ -75,7 +75,7 @@ def edit_school(request, sch_id):
 @login_required
 def add_title(request):
     submitted = False
-    titles = Title.objects.order_by('-id') 
+    titles = Title.objects.order_by('title_name') 
     title_count = titles.count()
     if request.method == 'POST':
         form = TitleForm(request.POST)
@@ -104,7 +104,7 @@ def delete_title(request,title_id):
 
 @login_required
 def edit_title(request, title_id):
-    titles = Title.objects.order_by('-id') 
+    titles = Title.objects.order_by('title_name') 
     title_count = titles.count()
     title = Title.objects.get(pk=title_id)
     form = TitleForm(instance=title)
@@ -123,7 +123,7 @@ def edit_title(request, title_id):
 @login_required
 def add_qualification(request):
     submitted = False
-    quals = Qualification.objects.order_by('-id') 
+    quals = Qualification.objects.order_by('qual_name') 
     qual_count = quals.count()
     if request.method == 'POST':
         form = QualificationForm(request.POST)
@@ -152,7 +152,7 @@ def delete_qualification(request,qual_id):
 
 @login_required
 def edit_qualification(request, qual_id):
-    quals = Qualification.objects.order_by('-id') 
+    quals = Qualification.objects.order_by('qual_name') 
     qual_count = quals.count()
     qual = Qualification.objects.get(pk=qual_id)
     form = QualificationForm(instance=qual)
@@ -171,7 +171,7 @@ def edit_qualification(request, qual_id):
 @login_required
 def add_staffcategory(request):
     submitted = False
-    staffcategorys = StaffCategory.objects.order_by('-id') 
+    staffcategorys = StaffCategory.objects.order_by('category_name') 
     staffcategory_count = staffcategorys.count()
     if request.method == 'POST':
         form = StaffCategoryForm(request.POST)
@@ -201,7 +201,7 @@ def delete_staffcategory(request,sc_id):
 
 @login_required
 def edit_staffcategory(request, sc_id):
-    staffcategorys = StaffCategory.objects.order_by('-id') 
+    staffcategorys = StaffCategory.objects.order_by('category_name') 
     staffcategory_count = staffcategorys.count()
     staffcategory = StaffCategory.objects.get(pk=sc_id)
     form = StaffCategoryForm(instance=staffcategory)
@@ -220,7 +220,7 @@ def edit_staffcategory(request, sc_id):
 @login_required
 def add_contract(request):
     submitted = False
-    contracts = Contract.objects.order_by('-id') 
+    contracts = Contract.objects.order_by('contract_type') 
     contract_count = contracts.count()
     if request.method == 'POST':
         form = ContractForm(request.POST)
@@ -252,7 +252,7 @@ def delete_contract(request,ct_id):
 
 @login_required
 def edit_contract(request, ct_id):
-    contracts = Contract.objects.order_by('-id')
+    contracts = Contract.objects.order_by('contract_type')
     contract_count = contracts.count()
     contract = get_object_or_404(Contract, pk=ct_id)
     form = ContractForm(instance=contract)
@@ -278,7 +278,7 @@ def edit_contract(request, ct_id):
 @login_required
 def add_campus(request):
     submitted = False
-    campus = Campus.objects.order_by('-id')
+    campus = Campus.objects.order_by('campus_name')
     campus_count = campus.count()
     if request.method == 'POST':
         form = CampusForm(request.POST)
@@ -309,7 +309,7 @@ def delete_campus(request,camp_id):
 
 @login_required
 def edit_campus(request, camp_id):
-    campus = Campus.objects.order_by('-id') 
+    campus = Campus.objects.order_by('campus_name') 
     campus_count = campus.count()
     camp = Campus.objects.get(pk=camp_id)
     form = CampusForm(instance=camp)
@@ -329,7 +329,7 @@ def edit_campus(request, camp_id):
 @login_required
 def add_directorate(request):
     submitted = False
-    directorate = Directorate.objects.order_by('-id')
+    directorate = Directorate.objects.order_by('direct_name')
     dict_count = directorate.count()
     if request.method == 'POST':
         form = DirectorateForm(request.POST)
@@ -359,7 +359,7 @@ def delete_directorate(request,dict_id):
 
 @login_required
 def edit_directorate(request, dict_id):
-    directorate = Directorate.objects.order_by('-id') 
+    directorate = Directorate.objects.order_by('direct_name') 
     dict_count = directorate.count()
     dict = Directorate.objects.get(pk=dict_id)
     form = DirectorateForm(instance=dict)
@@ -379,7 +379,7 @@ def edit_directorate(request, dict_id):
 @login_required
 def add_profbody(request):
     submitted = False
-    profbodys = ProfBody.objects.order_by('-id') 
+    profbodys = ProfBody.objects.order_by('assoc_long_name') 
     pb_count = profbodys.count()
     if request.method == 'POST':
         form = ProfBodyForm(request.POST)
@@ -410,7 +410,7 @@ def delete_profbody(request,pb_id):
 
 @login_required
 def edit_profbody(request, pb_id):
-    profbodys = ProfBody.objects.order_by('-id') 
+    profbodys = ProfBody.objects.order_by('assoc_long_name') 
     pb_count = profbodys.count()
     profbody = ProfBody.objects.get(pk=pb_id)
     form = ProfBodyForm(instance=profbody)
@@ -429,7 +429,7 @@ def edit_profbody(request, pb_id):
 @login_required
 def add_dept(request):
     submitted = False
-    depts = Department.objects.order_by('-id') 
+    depts = Department.objects.order_by('dept_long_name') 
     dept_count = depts.count()
     schools = School_Faculty.objects.all()
     if request.method == 'POST':
@@ -463,7 +463,7 @@ def delete_dept(request,dept_id):
 
 @login_required
 def edit_dept(request, dept_id):
-    depts = Department.objects.order_by('-id') 
+    depts = Department.objects.order_by('dept_long_name') 
     dept_count = depts.count()
     schools = School_Faculty.objects.all()
     dept = Department.objects.get(pk=dept_id)
@@ -484,7 +484,7 @@ def edit_dept(request, dept_id):
 @login_required
 def add_unit(request):
     submitted = False
-    units = Unit.objects.order_by('-id')
+    units = Unit.objects.order_by('unit_name')
     unit_count = units.count()
     departments = Department.objects.all()
     directorates = Directorate.objects.all()
@@ -531,7 +531,7 @@ def delete_unit(request, unit_id):
 
 @login_required
 def edit_unit(request, unit_id):
-    units = Unit.objects.order_by('-id')
+    units = Unit.objects.order_by('unit_name')
     unit_count = units.count()
     departments = Department.objects.all()
     directorates = Directorate.objects.all()
@@ -576,7 +576,7 @@ def edit_unit(request, unit_id):
 @login_required
 def add_hosp(request):
     submitted = False
-    hosps = Hospital.objects.order_by('-id') 
+    hosps = Hospital.objects.order_by('hospital_name') 
     hosp_count = hosps.count()
     if request.method == 'POST':
         form = HospitalForm(request.POST)
@@ -607,7 +607,7 @@ def delete_hosp(request,hosp_id):
 
 @login_required
 def edit_hosp(request, hosp_id):
-    hosps = Hospital.objects.order_by('-id') 
+    hosps = Hospital.objects.order_by('hospital_name') 
     hosp_count = hosps.count()
     hosp = Hospital.objects.get(pk=hosp_id)
     form = HospitalForm(instance=hosp)
@@ -626,7 +626,7 @@ def edit_hosp(request, hosp_id):
 @login_required
 def add_bank(request):
     submitted = False
-    banks = Bank.objects.order_by('-id') 
+    banks = Bank.objects.order_by('bank_short_name') 
     bank_count = banks.count()
     if request.method == 'POST':
         form = BankForm(request.POST)
@@ -666,7 +666,7 @@ def delete_bank(request,bank_id):
 
 @login_required
 def edit_bank(request, bank_id):
-    banks = Bank.objects.order_by('-id') 
+    banks = Bank.objects.order_by('bank_short_name') 
     bank_count = banks.count()
     bank = Bank.objects.get(pk=bank_id)
     form = BankForm(instance=bank)
@@ -696,7 +696,7 @@ def edit_bank(request, bank_id):
 def add_bankbranch(request):
     submitted = False
     banks = Bank.objects.order_by('bank_short_name')
-    bankbranchs = BankBranch.objects.order_by('-id') 
+    bankbranchs = BankBranch.objects.order_by('branch_name') 
     bankbranch_count = bankbranchs.count()
     if request.method == 'POST':
         form = BankBranchForm(request.POST)
@@ -730,7 +730,7 @@ def delete_bankbranch(request,bankbranch_id):
 @login_required
 def edit_bankbranch(request, bankbranch_id,bankid):
     banks = Bank.objects.order_by('bank_short_name')
-    bankbranchs = BankBranch.objects.order_by('-id') 
+    bankbranchs = BankBranch.objects.order_by('branch_name') 
     bankbranchs = bankbranchs.filter(bank_code_id__exact=bankid)
     bankbranch_count = bankbranchs.count()
     bankbranch = BankBranch.objects.get(pk=bankbranch_id)
@@ -820,7 +820,7 @@ def delete_academic_year(request, ay_id):
 def add_jobtitle(request):
     submitted = False
     staffcategorys = StaffCategory.objects.order_by('category_abbr') 
-    jobtitles = JobTitle.objects.order_by('-id') 
+    jobtitles = JobTitle.objects.order_by('job_title') 
     jobtitle_count = jobtitles.count()
     salary_scale = SalaryScale.objects.all()
     
@@ -855,7 +855,7 @@ def delete_jobtitle(request,jobtitle_id):
 
 @login_required
 def edit_jobtitle(request, jobtitle_id):
-    jobtitles = JobTitle.objects.order_by('-id') 
+    jobtitles = JobTitle.objects.order_by('job_title') 
     jobtitle_count = jobtitles.count()
     staffcategorys = StaffCategory.objects.order_by('category_abbr') 
     jobtitle = JobTitle.objects.get(pk=jobtitle_id)
@@ -877,7 +877,7 @@ def edit_jobtitle(request, jobtitle_id):
 @login_required
 def add_staff_rank(request):
     submitted = False
-    staff_ranks = StaffRank.objects.order_by('-id') 
+    staff_ranks = StaffRank.objects.order_by('staff_rank') 
     
     staff_rank_count = staff_ranks.count()    
     
@@ -916,7 +916,7 @@ def delete_staff_rank(request, sr_id):
 
 @login_required
 def edit_staff_rank(request, sr_id):
-    staff_ranks = StaffRank.objects.order_by('-id') 
+    staff_ranks = StaffRank.objects.order_by('staff_rank') 
     staff_rank_count = staff_ranks.count()
     staff_rank = StaffRank.objects.get(pk=sr_id)
     form = StaffRankForm(instance=staff_rank)
@@ -1022,7 +1022,7 @@ def delete_deduction_type(request, dt_id):
 
 @login_required
 def edit_deduction_type(request, dt_id):
-    deduction_types = DeductionType.objects.order_by('-id')
+    deduction_types = DeductionType.objects.order_by('name')
     deduction_count = deduction_types.count()
     deduction = DeductionType.objects.get(pk=dt_id)
     form = DeductionTypeForm(instance=deduction)
@@ -1041,7 +1041,7 @@ def edit_deduction_type(request, dt_id):
 @login_required
 def salary_scale(request):
     submitted = False
-    salary_scales = SalaryScale.objects.order_by('-id')
+    salary_scales = SalaryScale.objects.order_by('name')
     
     salary_scale_count = salary_scales.count()
     if request.method == 'POST':
@@ -1074,7 +1074,7 @@ def delete_salary_scale(request, ss_id):
 
 @login_required
 def edit_salary_scale(request, ss_id):
-    salary_scales = SalaryScale.objects.order_by('-id')
+    salary_scales = SalaryScale.objects.order_by('name')
     salary_scale_count = salary_scales.count()
     salary_scale = SalaryScale.objects.get(pk=ss_id)
     form = SalaryScaleForm(instance=salary_scale)
@@ -1094,7 +1094,7 @@ def edit_salary_scale(request, ss_id):
 @login_required
 def add_tax_band(request):
     submitted = False
-    tax_bands = TaxBand.objects.order_by('id')
+    tax_bands = TaxBand.objects.order_by('rate')
     tax_band_count = tax_bands.count()
     if request.method == 'POST':
         form = TaxBandForm(request.POST)
@@ -1128,7 +1128,7 @@ def delete_tax_band(request, tb_id):
 @login_required
 def edit_tax_band(request, tb_id):
     submitted = False
-    tax_bands = TaxBand.objects.order_by('id')
+    tax_bands = TaxBand.objects.order_by('rate')
     tax_band_count = tax_bands.count()
     tax_band = TaxBand.objects.get(pk=tb_id)
 
@@ -1211,7 +1211,7 @@ def generic_model_crud(request, model_class, model_name, template_name):
     # Generic function to handle Add, Edit, and Delete for models with a 'name' field.
     
     form_class = modelform_factory(model_class, fields=['name'])  # Dynamically create the form
-    records = model_class.objects.order_by('-id')  # Fetch all records
+    records = model_class.objects.order_by('name')  # Fetch all records
     record_count = records.count()  # Count total records
 
     record = None

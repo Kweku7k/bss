@@ -207,7 +207,7 @@ def landing(request):
         staff.company_info = company_info
 
         # retirement_age = 65 if company_info.staff_cat.lower() == "senior member(admin)" else 60
-        if company_info.staff_cat and company_info.staff_cat.lower() == "senior member(admin)":
+        if company_info.staff_cat and company_info.staff_cat.lower() == "senior member":
             retirement_age = 65
         else:
             retirement_age = 60
