@@ -332,9 +332,9 @@ def edit_staff(request, staffno):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter() 
     staff_count = staffs.count()
-    title = Title.objects.all()
-    staffcategory = StaffCategory.objects.all()
-    qualification = Qualification.objects.all()
+    title = Title.objects.order_by("title_name")
+    staffcategory = StaffCategory.objects.order_by("category_name")
+    qualification = Qualification.objects.order_by("qual_abbr")
     staff = Employee.objects.get(pk=staffno)
     form = EmployeeForm(request.POST or None,request.FILES or None,instance=staff)
     
@@ -395,15 +395,15 @@ def edit_staff(request, staffno):
                'STAFFLEVEL':STAFFLEVEL,
                'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
                'STAFFRANK':STAFFRANK,
-               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
-               'SUFFIX': ChoicesSuffix.objects.all().values_list("name", "name"),
-               'REGION': ChoicesRegion.objects.all().values_list("name", "name"),
-               'MARITALSTATUS': ChoicesMaritalStatus.objects.all().values_list("name", "name"),
-               'IDTYPE': ChoicesIdType.objects.all().values_list("name", "name"),
-               'DENOMINATION': ChoicesDenomination.objects.all().values_list("name", "name"),
+               'GENDER': ChoicesGender.objects.order_by("name").values_list("name", "name"),
+               'SUFFIX': ChoicesSuffix.objects.order_by("name").values_list("name", "name"),
+               'REGION': ChoicesRegion.objects.order_by("name").values_list("name", "name"),
+               'MARITALSTATUS': ChoicesMaritalStatus.objects.order_by("name").values_list("name", "name"),
+               'IDTYPE': ChoicesIdType.objects.order_by("name").values_list("name", "name"),
+               'DENOMINATION': ChoicesDenomination.objects.order_by("name").values_list("name", "name"),
                'DEPENDANTS':DEPENDANTS,
-               'RELIGION': ChoicesReligion.objects.all().values_list("name", "name"),
-               'HPQ': ChoicesHPQ.objects.all().values_list("name", "name"),
+               'RELIGION': ChoicesReligion.objects.order_by("name").values_list("name", "name"),
+               'HPQ': ChoicesHPQ.objects.order_by("name").values_list("name", "name"),
                'title':title,
                'qualification':qualification,
                'staffcategory':staffcategory,
@@ -435,7 +435,7 @@ def allstaff(request):
         filters &= Q(companyinformation__active_status=status_filter)
 
     # Filtered queryset
-    staffs = Employee.objects.filter(filters).exclude(companyinformation__active_status='Inactive').order_by('fname')
+    staffs = Employee.objects.filter(filters).exclude(companyinformation__active_status='Inactive').order_by('lname')
     staff_count = staffs.count()
     company_info = CompanyInformation.objects.all()
     
@@ -702,8 +702,8 @@ def newstaff(request):
     submitted = False
     staffs = Employee.objects.order_by('lname').filter()
     title = Title.objects.all()
-    qualification = Qualification.objects.all()
-    staffcategory = StaffCategory.objects.all()
+    qualification = Qualification.objects.order_by('qual_abbr')
+    staffcategory = StaffCategory.objects.order_by('category_name')
     staff_count = staffs.count()
     
     
@@ -751,27 +751,27 @@ def newstaff(request):
         if 'submitted' in request.GET:
             submitted = True
     context = {
-                'form':form,
-               'submitted':submitted,
-               'staffs':staffs,
-               'staff_count':staff_count,
-               'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
-               'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
-               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
-               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
-               'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
-               'qualification':qualification,
-               'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],
-               'REGION':[(q.name, q.name)  for q in ChoicesRegion.objects.all()],
-               'title':title,
-               'staffcategory':staffcategory,
-               'qualification':qualification,
-               'MARITALSTATUS': ChoicesMaritalStatus.objects.all().values_list("name", "name"),
-               'IDTYPE': ChoicesIdType.objects.all().values_list("name", "name"),
-               'DENOMINATION': ChoicesDenomination.objects.all().values_list("name", "name"),
-               'RELIGION': ChoicesReligion.objects.all().values_list("name", "name"),
-               'SUFFIX':[(q.name, q.name)  for q in ChoicesSuffix.objects.all()]
-            }
+            'form':form,
+            'submitted':submitted,
+            'staffs':staffs,
+            'staff_count':staff_count,
+            'RBA':[(q.name, q.name) for q in ChoicesRBA.objects.order_by('name')],
+            'STAFFLEVEL': ChoicesStaffLevel.objects.order_by('name').values_list("name", "name"),
+            'STAFFSTATUS':[(q.name, q.name) for q in ChoicesStaffStatus.objects.order_by('name')],
+            'GENDER': ChoicesGender.objects.order_by('name').values_list("name", "name"), 
+            'DEPENDANTS':[(q.name, q.name) for q in ChoicesDependants.objects.order_by('name')],
+            'qualification':qualification,
+            'HPQ':[(q.name, q.name) for q in ChoicesHPQ.objects.order_by('name')],
+            'REGION':[(q.name, q.name) for q in ChoicesRegion.objects.order_by('name')],
+            'title':title,
+            'staffcategory':staffcategory,
+            'qualification':qualification,
+            'MARITALSTATUS': ChoicesMaritalStatus.objects.order_by('name').values_list("name", "name"),
+            'IDTYPE': ChoicesIdType.objects.order_by('name').values_list("name", "name"),
+            'DENOMINATION': ChoicesDenomination.objects.order_by('name').values_list("name", "name"),
+            'RELIGION': ChoicesReligion.objects.order_by('name').values_list("name", "name"),
+            'SUFFIX':[(q.name, q.name) for q in ChoicesSuffix.objects.order_by('name')]            
+        }
     return render(request,'hr/new_staff.html',context)
 
 
@@ -824,18 +824,18 @@ def company_info(request,staffno):
     submitted = False
     company_infos = CompanyInformation.objects.filter(staffno__exact=staffno)    
     staff = Employee.objects.get(pk=staffno)
-    staffcategory = StaffCategory.objects.all()
-    contract = Contract.objects.all()
-    campus = Campus.objects.all()
-    school_faculty = School_Faculty.objects.all()
-    directorate = Directorate.objects.all()
-    bank_list = Bank.objects.all()
-    bankbranches = BankBranch.objects.all()
-    departments = Department.objects.all()
-    ranks = JobTitle.objects.all()
-    jobtitle = StaffRank.objects.all()
-    units = Unit.objects.all()
-    salary_scales = SalaryScale.objects.all()
+    staffcategory = StaffCategory.objects.order_by('category_name')
+    contract = Contract.objects.order_by('contract_type')
+    campus = Campus.objects.order_by('campus_name')
+    school_faculty = School_Faculty.objects.order_by('sch_fac_name')
+    directorate = Directorate.objects.order_by('direct_name')
+    bank_list = Bank.objects.order_by('bank_short_name')
+    bankbranches = BankBranch.objects.order_by('branch_name')
+    departments = Department.objects.order_by('dept_long_name')
+    ranks = JobTitle.objects.order_by('job_title')
+    jobtitle = StaffRank.objects.order_by('staff_rank')
+    units = Unit.objects.order_by('unit_name')
+    salary_scales = SalaryScale.objects.order_by("name")
     
     
     if request.method == 'POST':
@@ -876,10 +876,10 @@ def company_info(request,staffno):
         'bankbranches':bankbranches,
         'school_faculty':school_faculty,
         'directorate':directorate,
-        'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.all()],
-        'STAFFLEVEL': ChoicesStaffLevel.objects.all().values_list("name", "name"),
-        'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
-        'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.all()],
+        'RBA':[(q.name, q.name)  for q in ChoicesRBA.objects.order_by("name")],
+        'STAFFLEVEL': ChoicesStaffLevel.objects.order_by("name").values_list("name", "name"),
+        'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.order_by("name")],
+        'DEPENDANTS':[(q.name, q.name)  for q in ChoicesDependants.objects.order_by("name")],
         'departments':departments,
         'jobtitle':jobtitle,
         'ranks':ranks,
@@ -896,20 +896,20 @@ def edit_company_info(request,staffno):
     company_infos = CompanyInformation.objects.all()  
     staff = Employee.objects.get(pk=staffno)
     company_info, created = CompanyInformation.objects.get_or_create(staffno=staff)
-
-    staffcategory = StaffCategory.objects.all()
-    contract = Contract.objects.all()
     company_info_count = company_infos.count()
-    campus = Campus.objects.all()
-    school_faculty = School_Faculty.objects.all()
-    directorate = Directorate.objects.all()
-    bank_list = Bank.objects.all()
-    bankbranches = BankBranch.objects.all()
-    departments = Department.objects.all()
-    ranks = JobTitle.objects.all()
-    jobtitle = StaffRank.objects.all()
-    units = Unit.objects.all()
-    salary_scales = SalaryScale.objects.all()
+    
+    staffcategory = StaffCategory.objects.order_by('category_name')
+    contract = Contract.objects.order_by('contract_type')
+    campus = Campus.objects.order_by('campus_name')
+    school_faculty = School_Faculty.objects.order_by('sch_fac_name')
+    directorate = Directorate.objects.order_by('direct_name')
+    bank_list = Bank.objects.order_by('bank_short_name')
+    bankbranches = BankBranch.objects.order_by('branch_name')
+    departments = Department.objects.order_by('dept_long_name')
+    ranks = JobTitle.objects.order_by('job_title')
+    jobtitle = StaffRank.objects.order_by('staff_rank')
+    units = Unit.objects.order_by('unit_name')
+    salary_scales = SalaryScale.objects.order_by("name")
     
     if created:
         messages.info(request, f"No previous company info found. A new record has been prepared for {staff.fname}.")
@@ -941,12 +941,12 @@ def edit_company_info(request,staffno):
             #    'submitted':submitted,
                'RBA':RBA,
                'STAFFLEVEL':STAFFLEVEL,
-               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.all()],
-               'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
-               'SUFFIX': ChoicesSuffix.objects.all().values_list("name", "name"),
-               'REGION': ChoicesRegion.objects.all().values_list("name", "name"),
+               'STAFFSTATUS':[(q.name, q.name)  for q in ChoicesStaffStatus.objects.order_by("name")],
+               'GENDER': ChoicesGender.objects.order_by("name").values_list("name", "name"),
+               'SUFFIX': ChoicesSuffix.objects.order_by("name").values_list("name", "name"),
+               'REGION': ChoicesRegion.objects.order_by("name").values_list("name", "name"),
                'DEPENDANTS':DEPENDANTS,
-               'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.all()],               
+               'HPQ':[(q.name, q.name)  for q in ChoicesHPQ.objects.order_by("name")],               
                'staffcategory':staffcategory,
                'company_info':company_info,
                'company_infos':company_infos,
@@ -1202,9 +1202,9 @@ def emp_relation(request,staffno):
         'emp_relations':emp_relations,
         'emp_count':emp_count,
         'staff':staff,
-        'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-        'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
-        'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+        'RELATIONSHIP': ChoicesDependants.objects.order_by("name").values_list("name", "name"),
+        'STATUS': ChoicesRelationStatus.objects.order_by("name").values_list("name", "name"),
+        'GENDER': ChoicesGender.objects.order_by("name").values_list("name", "name"),
         'total_percentage': sum(emp.percentage for emp in emp_relations),
     }
     return render(request,'hr/emp_relation.html',context)
@@ -1235,9 +1235,9 @@ def edit_emp_relation(request,staffno,emp_id):
         'emp_relation':emp_relation,
         'staff':staff,
         'emp_count':emp_count,
-        'RELATIONSHIP': ChoicesDependants.objects.all().values_list("name", "name"),
-        'STATUS': ChoicesRelationStatus.objects.all().values_list("name", "name"),
-        'GENDER': ChoicesGender.objects.all().values_list("name", "name"),
+        'RELATIONSHIP': ChoicesDependants.objects.order_by("name").values_list("name", "name"),
+        'STATUS': ChoicesRelationStatus.objects.order_by("name").values_list("name", "name"),
+        'GENDER': ChoicesGender.objects.order_by("name").values_list("name", "name"),
     }
 
     return render(request, 'hr/emp_relation.html', context)
