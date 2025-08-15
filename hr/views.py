@@ -1222,6 +1222,7 @@ def edit_emp_relation(request,staffno,emp_id):
     if request.method == 'POST':
         form = KithForm(request.POST, instance=emp_relation)
         if form.is_valid():
+            print("Employee Relation", form.cleaned_data)
             if form.has_changed():
                 form.save()
                 full_name = f"{staff.fname} {staff.lname}"
@@ -1229,6 +1230,7 @@ def edit_emp_relation(request,staffno,emp_id):
                 logger.info(f"Employee Beneficiaries updated for {full_name} by {request.user.username}")
             return redirect('emp-relation', staffno=staffno)
         
+        print("form.errors", form.errors)
     context = {
         'form':form,
         'emp_relations':emp_relations,
