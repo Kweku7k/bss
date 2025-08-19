@@ -174,7 +174,7 @@ class PayrollCalculator:
         if not company_info.ssn_con:
             return {"amount": Decimal("0.00"), "rate": None}
         settings = self.get_settings()
-        rate = Decimal(settings.employee_ssnit_rate)
+        rate = Decimal(settings.employee_ssnit_rate or "0.00")        
         extimated_ssnit = self.get_entitled_basic_salary() * (rate / 100)
         print("SSNIT Value: ", extimated_ssnit)
         return {"amount": round(extimated_ssnit, 2), "rate": rate}
@@ -330,11 +330,17 @@ class PayrollCalculator:
         has_vechile = False
         has_driver = False
         
-        benefit_rent_rate = self.get_all_income_type().filter(name__iexact="rent").first().bik_rate
-        benefit_fuel_rate = self.get_all_income_type().filter(name__iexact="fuel").first().bik_rate
-        benefit_vechile_rate = self.get_all_income_type().filter(name__iexact="Official Car Use").first().bik_rate
-        benefit_driver_rate = self.get_all_income_type().filter(name__iexact="Drivers Allowance").first().bik_rate
+        benefit_rent_rate = self.get_all_income_type().filter(name__iexact="rent").first()
+        benefit_rent_rate = benefit_rent_rate.bik_rate if benefit_rent_rate else Decimal("0.00")
         
+        benefit_fuel_rate = self.get_all_income_type().filter(name__iexact="fuel").first()
+        benefit_fuel_rate = benefit_fuel_rate.bik_rate if benefit_fuel_rate else Decimal("0.00")
+        
+        benefit_vechile_rate = self.get_all_income_type().filter(name__iexact="Official Car Use").first()
+        benefit_vechile_rate = benefit_vechile_rate.bik_rate if benefit_vechile_rate else Decimal("0.00")
+        
+        benefit_driver_rate = self.get_all_income_type().filter(name__iexact="Drivers Allowance").first()
+        benefit_driver_rate = benefit_driver_rate.bik_rate if benefit_driver_rate else Decimal("0.00")        
         print("Benefit in Kind Rates: ", benefit_rent_rate, benefit_fuel_rate, benefit_vechile_rate, benefit_driver_rate)        
         
         for income in income_list:

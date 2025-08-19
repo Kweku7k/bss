@@ -1178,11 +1178,16 @@ def emp_relation(request,staffno):
             new_percentage = form.cleaned_data['percentage']
             current_total = sum(emp.percentage for emp in emp_relations)
             
+            kin = form.cleaned_data.get('kin')
+            ben = form.cleaned_data.get('ben')
+            
             if current_total + new_percentage > 100:
                 messages.error(request, 'Total percentage exceeds 100%. Please adjust the percentage.')
             else:
                 emp_relation = form.save(commit=False)
                 emp_relation.staffno = staff
+                emp_relation.kin = kin
+                emp_relation.ben = ben
                 emp_relation.save()
                 full_name = f"{staff.fname} {staff.lname}"
                 messages.success(request, f"Beneficiaries for {full_name} has been created successfully")
@@ -1223,8 +1228,18 @@ def edit_emp_relation(request,staffno,emp_id):
         form = KithForm(request.POST, instance=emp_relation)
         if form.is_valid():
             print("Employee Relation", form.cleaned_data)
+            
+            kin = form.cleaned_data.get('kin')
+            ben = form.cleaned_data.get('ben')
+            
             if form.has_changed():
                 form.save()
+                emp_relation = form.save(commit=False)
+                emp_relation.staffno = staff
+                emp_relation.kin = kin
+                emp_relation.ben = ben
+                emp_relation.save()
+                
                 full_name = f"{staff.fname} {staff.lname}"
                 messages.success(request, f"Employee Beneficiaries for {full_name} has been updated successfully")
                 logger.info(f"Employee Beneficiaries updated for {full_name} by {request.user.username}")

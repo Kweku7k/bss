@@ -6,7 +6,6 @@ from hr.choices import *
 from setup.models import *
 from django.contrib.auth.models import AbstractUser
 # from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
@@ -176,7 +175,7 @@ class Kith(models.Model):
      status = models.CharField('Dead or Alive',max_length=10,blank=True,default="")
      kin = models.CharField('Next of Kin',max_length=10,blank=True,default="")
      ben = models.CharField('Beneficiary',max_length=100,blank=True,default="")
-     percentage = models.IntegerField('Beneficiary',validators=[ MinValueValidator(0), MaxValueValidator(100) ],blank=True, null=True)
+     percentage = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
      updated = models.DateTimeField(auto_now=True)
      created = models.DateTimeField(auto_now_add=True)
      def __str__(self):
