@@ -1195,6 +1195,7 @@ def emp_relation(request,staffno):
                 return redirect('emp-relation', staffno)
             
         else:
+            messages.error(request, form.errors)
             print("form.errors")
             print(form.errors)
     else:
@@ -1246,6 +1247,7 @@ def edit_emp_relation(request,staffno,emp_id):
             return redirect('emp-relation', staffno=staffno)
         
         print("form.errors", form.errors)
+        messages.error(request, form.errors)
     context = {
         'form':form,
         'emp_relations':emp_relations,
