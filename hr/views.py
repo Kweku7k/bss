@@ -6,7 +6,6 @@ import uuid
 from django.http import HttpResponseRedirect, JsonResponse, FileResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
-
 from hr.payroll_helper import PayrollCalculator # type: ignore
 from .models import *
 from django.contrib.auth.models import Group, User, Permission
@@ -31,7 +30,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from hr.decorators import role_required, tag_required
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, TruncMonth
 from django.db.models import F, Value, CharField, Sum, Max, Count
 from datetime import date
 from datetime import timedelta
@@ -112,6 +111,8 @@ def register(request):
 def waiting_approval(request):
     return render(request, 'authentication/waiting_approval.html')
 
+
+# Login Route
 def index(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -235,6 +236,17 @@ def landing(request):
     
     notification_count = ( expiring_soon.count() + len(sixty_and_above) + pending_renewals.count() + pending_promotions.count() )
 
+    # Get gender data from Employee model
+    gender_data = (Employee.objects.values('gender').annotate(count=Count('staffno')))
+
+    gender_labels = [g['gender'] for g in gender_data]
+    gender_counts = [g['count'] for g in gender_data]
+    
+    staff_per_staff_category = (CompanyInformation.objects.values('staff_cat').annotate(count=Count('staffno', distinct=True)).order_by('staff_cat'))
+    line_labels = [s['staff_cat'] for s in staff_per_staff_category]
+    line_counts = [s['count'] for s in staff_per_staff_category]
+
+    
     context = {
         'staffs':staffs,
         'company_info':company_info,
@@ -253,6 +265,11 @@ def landing(request):
         'pending_users':pending_users,
         'pending_exits': pending_exits,
         'pending_updates':pending_updates,
+        
+        'gender_labels': json.dumps(gender_labels),
+        'gender_counts': json.dumps(gender_counts),
+        'line_labels': json.dumps(line_labels),
+        'line_counts': json.dumps(line_counts),
     }
     
     return render(request,'hr/landing_page.html', context)

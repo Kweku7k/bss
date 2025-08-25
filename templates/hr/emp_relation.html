@@ -154,7 +154,7 @@
                                 <label for="residential" class="form-label">Residential Address</label>
                                 <input type="text" class="form-control" name="residential" {% if emp_relation %} value="{{ emp_relation.residential }}" {% else %} value="" {% endif %}>
                             </div>
-                            {% comment %} <div class="col-md-4">
+                            <div class="col-md-4">
                                 <label for="status" class="form-label">Status</label>
                                 <select name="status" class="form-select">
                                     <option value="" disabled selected>Select Relationship Status</option>
@@ -162,7 +162,7 @@
                                     <option value="{{ key }}" {% if key == emp_relation.status %} selected {% endif %}>{{ value }}</option>
                                     {% endfor %}
                                 </select>
-                            </div> {% endcomment %}
+                            </div>
                             <div class="col-md-2">
                                 <label for="kin" class="form-check-label">Next of Kin</label>
                                 <input type="checkbox" class="form-check-input" role="switch" id="kin" name="kin" value="TRUE" {% if emp_relation.kin %} checked {% endif %}>

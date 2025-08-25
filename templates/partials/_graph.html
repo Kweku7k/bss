@@ -1,0 +1,93 @@
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<div class="col-lg-8 col-sm-6">
+    <div class="card shadow-sm border-0 rounded-3">
+        <h5 class="py-3 mb-0 text-black text-center fw-bold">
+            <i class="bi bi-tags me-2"></i>Staff Category Chart
+        </h5>
+        <div class="card-body" style="height: 400px; overflow-y: auto;">
+            <div style="width:100%">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-lg-4 col-sm-6">
+    <div class="card shadow-sm border-0 rounded-3">
+        <h5 class="py-3 mb-0 text-black text-center fw-bold">
+            <i class="bi bi-person-arms-up me-2"></i>Gender Chart
+        </h5>
+        <div class="card-body" style="height: 400px; overflow-y: auto;">
+            <div style="width:100%">
+                <canvas id="genderChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+  // Gender Pie Chart
+  new Chart(document.getElementById('genderChart'), {
+    type: 'pie',
+    data: {
+      labels: {{ gender_labels|safe }},
+      datasets: [{
+        data: {{ gender_counts|safe }},
+        backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56'],
+      }]
+    }
+  });
+
+  new Chart(document.getElementById('lineChart'), {
+    type: 'line',
+    data: {
+      labels: {{ line_labels|safe }},
+      datasets: [{
+        label: 'Staff Category',
+        data: {{ line_counts|safe }},
+        borderColor: '#36A2EB',
+        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 4,
+        pointBackgroundColor: '#36A2EB',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointHoverRadius: 6,
+        pointHoverBackgroundColor: '#fff',
+        pointHoverBorderColor: '#36A2EB'
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(0, 0, 0, 0.1)'
+          }
+        },
+        x: {
+          grid: {
+            display: false
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          labels: {
+            font: {
+              size: 14
+            }
+          }
+        }
+      }
+    }
+  });
+</script>

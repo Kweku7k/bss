@@ -19,49 +19,54 @@
 {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
     {% if pending_users %}
         <div class="col-lg-6 col-sm-6">
-            <div class="card" style="height: 400px;">
-                <div class="card-body" style="height: 100%; overflow-y: auto;">
-                    <h5 class="pt-3 mb-1 text-black text-center"><strong>Pending User Approvals</strong></h5>
-                    <p class="text-center text-muted mb-4">Pending users awaiting your approval</p>
-                    <hr>
-                    <div>
+            <div class="card shadow-sm border-0 rounded-3">
+                <h5 class="pt-3 mb-0 text-black text-center fw-bold">
+                    <i class="fas fa-user-clock me-2"></i>Pending User Approvals
+                </h5>
+                <p class="text-center text-muted small mb-4">Pending users awaiting your approval</p>
+                <div class="card-body" style="height: 300px; overflow-y: auto;">
+                    <div class="approval-list">
                         {% for user in pending_users %}
-                            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                                <div style="background-color: #992621; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;"></div>
-                                
-                                <a href="#" style="text-decoration: none; color: inherit; flex-grow: 1;">
-                                    {% if user.username%}
-                                        {{ user.username }}
-                                    {% endif %}
-                                    {% if user.date_joined %}
-                                        <br><small class="text-muted">Created: {{ user.date_joined|date:"M d, Y" }}</small>
-                                    {% endif %}
-                                </a>
-
-                                <a href="#" style="text-decoration: none; color: inherit; flex-grow: 1;">
-                                    {{ user.email }}
-                                </a>
-
-                                <!-- Approve button -->
-                                <form method="post" action="{% url 'approve-user' user.id %}" style="margin-left: 8px; display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-success btn-circle" onclick="return confirm('Do you really want to approve {{ user.email }}?');" title="Approve">
-                                        ✅
-                                    </button>
-                                </form>
-
-                                <!-- Disapprove button -->
-                                <form method="post" action="{% url 'disapprove-user' user.id %}" style="margin-left: 8px; display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-danger btn-circle" onclick="return confirm('Do you really want to disapprove {{ user.email }}?');" title="Disapprove">
-                                        ❌
-                                    </button>
-                                </form>
-
+                            <div class="approval-item p-3 mb-3 rounded-3 bg-light hover-shadow transition">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-2 text-dark fw-semibold">
+                                            {% if user.username %}
+                                                {{ user.username }}
+                                            {% endif %}
+                                        </h6>
+                                        {% if user.date_joined %}
+                                            <span class="text-danger small">
+                                                <i class="bi bi-calendar-date me-2"></i>
+                                                Created: {{ user.date_joined|date:"M d, Y" }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <span class="text-muted small">
+                                            {{ user.email }}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <form method="post" action="{% url 'approve-user' user.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-circle" onclick="return confirm('Do you really want to approve {{ user.email }}?');"data-bs-toggle="tooltip"data-bs-placement="top"title="Approve User">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{% url 'disapprove-user' user.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-circle"onclick="return confirm('Do you really want to disapprove {{ user.email }}?');"data-bs-toggle="tooltip" data-bs-placement="top"title="Reject User">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    </div>                                    
+                                </div>
                             </div>
                         {% empty %}
-                            <div class="text-center text-muted">
-                                No pending user approval.
+                            <div class="text-center text-muted py-5">
+                                <i class="far fa-check-circle fa-4x mb-3 text-success"></i>
+                                <p class="lead">No pending user approval.</p>
                             </div>
                         {% endfor %}
                     </div>

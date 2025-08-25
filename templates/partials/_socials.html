@@ -1,23 +1,37 @@
 {% if expiring_soon %}
 <div class="col-lg-6 col-sm-6">
-    <div class="card" style="height: 400px;">
-        <div class="card-body" style="height: 100%; overflow-y: auto;">
-            <h5 class="pt-3 mb-1 text-black text-center"><strong>Contracts Expiring Soon</strong></h5>
-            <p class="text-center text-muted mb-4">Staff members with contracts expiring soon (within 180 days)</p>
-            <hr>
-
-            <div>
+    <div class="card shadow-sm border-0 rounded-3">
+        <h5 class="pt-3 mb-0 text-black text-center fw-bold">
+            <i class="fas fa-exclamation-circle me-2"></i>Expiring Contracts
+        </h5>
+        <p class="text-center text-muted small mb-4">Staff contracts expiring in the next 180 days</p>
+        
+        <div class="card-body" style="height: 350px; overflow-y: auto;">
+            <div class="contract-list">
                 {% for staff in expiring_soon %}
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <div style="background-color: #992621; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;"></div>
-                        <a href="{% url 'staff-details' staff.staffno.staffno %}" style="text-decoration: none; color: inherit;">
-                            {{ staff.staffno.title }} {{ staff.staffno.fname }} {{ staff.staffno.lname }} (Expires on {{ staff.doe }})
+                    <div class="contract-item p-3 mb-3 rounded-3 bg-light hover-shadow transition">
+                        <a href="{% url 'staff-details' staff.staffno.staffno %}" 
+                           class="text-decoration-none">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-2 text-dark fw-semibold">
+                                        {{ staff.staffno.title }} {{ staff.staffno.fname }} {{ staff.staffno.lname }}
+                                    </h6>
+                                    <span class="text-danger small">
+                                        <i class="bi bi-calendar-date me-2"></i>
+                                        Expires: {{ staff.doe }}
+                                    </span>
+                                </div>
+                                <i class="bi bi-info-circle text-danger"></i>
+                            </div>
                         </a>
                     </div>
                 {% empty %}
-                    <li>No contracts expiring within the next month.</li>
+                    <div class="text-center text-muted py-5">
+                        <i class="far fa-check-circle fa-4x mb-3 text-success"></i>
+                        <p class="lead">All contracts are up to date</p>
+                    </div>
                 {% endfor %}
-
             </div>
         </div>
     </div>

@@ -1,26 +1,44 @@
-{% if  sixty_and_above %}
-<div class="col-lg-6 col-sm-6">       
-    <div class="card" style="height: 400px;">
-        <div class="card-body" style="height: 100%; overflow-y: auto;">
-            <h5 class="pt-3 mb-1 text-center text-black">
-                <strong>Upcoming Retirements</strong>
-            </h5>
-            <p class="text-center text-muted mb-4"> Staff members approaching or exceeding retirement age</p>
-            <hr>
+{% if sixty_and_above %}
+<div class="col-lg-6 col-sm-6">
+    <div class="card shadow-sm border-0 rounded-3">
+        <h5 class="pt-3 mb-0 text-black text-center fw-bold">
+            <i class="fas fa-user-clock me-2"></i>Upcoming Retirements
+        </h5>
+        <p class="text-center text-muted small mb-4">Staff members approaching or exceeding retirement age</p>
 
-            <div>
+        <div class="card-body" style="height: 350px; overflow-y: auto;">
+            <div class="retirement-list">
                 {% for staff in sixty_and_above %}
-                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                        <div style="background-color: #992621; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px;"></div>
-                        <a href="{% url 'staff-details' staff.staffno %}" style="text-decoration: none; color: inherit;">
-                            <span>
-                            {{ staff.title }} {{ staff.fname }} {{ staff.lname }} ({{ staff.dob|date:"Y-m-d" }} - Age {{ staff.calculate_age }}) ({% if staff.company_info %} {{ staff.company_info.staff_cat }} {% endif %})
-                            </span>
+                    <div class="retirement-item p-3 mb-3 rounded-3 bg-light hover-shadow transition">
+                        <a href="{% url 'staff-details' staff.staffno %}" class="text-decoration-none">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-2 text-dark fw-semibold">
+                                        {{ staff.title }} {{ staff.fname }} {{ staff.lname }}
+                                    </h6>
+                                    <span class="text-danger small">
+                                        <i class="bi bi-calendar-date me-2"></i>
+                                        DOB: {{ staff.dob|date:"Y-m-d" }} - Age {{ staff.calculate_age }}
+                                    </span>
+                                    
+                                </div>
+                                <div>
+                                    {% if staff.company_info %}
+                                    <br>
+                                    <span class="text-muted small">
+                                        <i class="fas fa-briefcase me-2"></i>
+                                        {{ staff.company_info.staff_cat }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                {% comment %} <i class="bi bi-search text-danger"></i> {% endcomment %}
+                            </div>
                         </a>
                     </div>
                 {% empty %}
-                    <div class="text-center text-muted">
-                        No staff exceeding retirement age.
+                    <div class="text-center text-muted py-5">
+                        <i class="far fa-check-circle fa-4x mb-3 text-success"></i>
+                        <p class="lead">No staff exceeding retirement age</p>
                     </div>
                 {% endfor %}
             </div>
