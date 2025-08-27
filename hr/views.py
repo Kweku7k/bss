@@ -126,8 +126,8 @@ def index(request):
                 # Check if the user is not approve and redirect
                 if not user.approval and not user.is_superuser:
                     logger.warning(f"Login attempt by unapproved user: {user.username}")
-                    messages.error(request, "Your account is not approved yet. Please contact the administrator.")
-                    return redirect('waiting_approval')
+                    messages.error(request, "Your account requires administrator approval before you can log in. Please contact the system administrator for assistance.")                    
+                    return redirect('waiting-approval')
                 login(request, user)
                 messages.success(request, f"Login Successful. Welcome Back {user.username}")
                 logger.info(f"Login Successful: {user.username}")
@@ -427,7 +427,6 @@ def edit_staff(request, staffno):
                'staff':staff,
                }
 
-    # context = {'form':form,'staffs':staffs,'staff_count':staff_count,'staff':staff}
     return render(request, 'hr/edit_new_staff.html', context)
 
 

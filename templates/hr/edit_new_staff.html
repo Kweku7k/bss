@@ -247,6 +247,12 @@
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
+                                    <label for="tin">TIN No.</label>
+                                    <input type="text" class="form-control" id="tin" name="tin" {% if staff %} value="{{ staff.tin }}" {% else %} value="" {% endif %}>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
                                     <label for="idtype">ID Type</label>
                                     <select name="idtype" id="idtype" class="form-select" required>
                                         <option value="" disabled selected>N/A</option>
