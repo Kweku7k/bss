@@ -237,12 +237,12 @@ def landing(request):
     notification_count = ( expiring_soon.count() + len(sixty_and_above) + pending_renewals.count() + pending_promotions.count() )
 
     # Get gender data from Employee model
-    gender_data = (Employee.objects.values('gender').annotate(count=Count('staffno')))
+    gender_data = (Employee.objects.values('gender').exclude(companyinformation__active_status='Inactive').annotate(count=Count('staffno')))
 
     gender_labels = [g['gender'] for g in gender_data]
     gender_counts = [g['count'] for g in gender_data]
     
-    staff_per_staff_category = (CompanyInformation.objects.values('staff_cat').annotate(count=Count('staffno', distinct=True)).order_by('staff_cat'))
+    staff_per_staff_category = (CompanyInformation.objects.values('staff_cat').exclude(active_status='Inactive').annotate(count=Count('staffno', distinct=True)).order_by('staff_cat'))
     line_labels = [s['staff_cat'] for s in staff_per_staff_category]
     line_counts = [s['count'] for s in staff_per_staff_category]
 
@@ -857,6 +857,7 @@ def company_info(request,staffno):
     
     if request.method == 'POST':
         form = CompanyInformationForm(request.POST, request.FILES)
+        
         if form.is_valid(): 
             print("Company Info", form.cleaned_data)
             
