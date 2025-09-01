@@ -21,6 +21,10 @@ urlpatterns = [
     path('edit_staff/<str:staffno>', views.edit_staff,name="edit-staff"),
     path('delete_staff/<str:staffno>', views.deletestaff,name="delete-staff"),
     path('staff_details/<str:staffno>', views.staff_details,name="staff-details"),
+    
+    
+    # User and Staff Management
+    path('staff-dashboard', views.staff_dashboard,name="staff-dashboard"),
 
     path('company_info/<str:staffno>', views.company_info,name="company-info"),
     path('edit_company_info/<str:staffno>', views.edit_company_info,name="edit-company-info"),

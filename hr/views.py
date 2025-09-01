@@ -546,6 +546,7 @@ def report(request):
     filter_renewal = None
     filter_promotion = None
     filter_category = None
+    filter_campus = None
 
     # Initial filter container
     filters = Q()
@@ -566,6 +567,7 @@ def report(request):
         filter_renewal = request.POST.get('filter_renewal')
         filter_promotion = request.POST.get('filter_promotion')
         filter_category = request.POST.get('filter_category')
+        filter_campus = request.POST.getlist('filter_campus')
 
         # Filter by Staff Category
         if filter_staffcategory:
@@ -574,6 +576,10 @@ def report(request):
         # Filter by Contract Type
         if filter_contract:
             filters &= Q(companyinformation__contract__in=filter_contract)
+            
+        # Filter by Campus
+        if filter_campus:
+            filters &= Q(companyinformation__campus__in=filter_campus)
 
         # Filter by Qualification
         if filter_qualification:
@@ -615,6 +621,9 @@ def report(request):
             company_info = CompanyInformation.objects.filter(job_title__in=filter_jobtitle)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)  
+        
+            
+        print("Filters being applied", filter_campus)
                       
         # Filter by Directorate
         if filter_directorate:
@@ -686,6 +695,7 @@ def report(request):
         'jobtitle': [(q.job_title, q.job_title) for q in JobTitle.objects.all()],
         'directorate': [(q.direct_name, q.direct_name) for q in Directorate.objects.all()],
         'school_faculty': [(q.sch_fac_name, q.sch_fac_name) for q in School_Faculty.objects.all()],
+        'campus': [(q.campus_name, q.campus_name) for q in Campus.objects.all()],
         'age_classifications': AGE_LABELS,
         'staff_category_custom': staff_category_custom,
         # The filters being used for rendering in the template 
@@ -700,6 +710,7 @@ def report(request):
         'filter_directorate': filter_directorate,
         'filter_school_faculty': filter_school_faculty,
         'filter_category': filter_category,
+        'filter_campus': filter_campus,
         'filter_age': filter_age,
         'min_age': min_age,
         'max_age': max_age,
@@ -831,6 +842,12 @@ def get_units_by_department(request, dept_name):
         return JsonResponse({"units": unit_data})
     except Department.DoesNotExist:
         return JsonResponse({"units": []}, status=404)
+    
+    
+    
+# Staff Dashboard Views
+def staff_dashboard(request):
+    return render(request, 'hr/staff_dashboard.html', {})
 
     
 @login_required

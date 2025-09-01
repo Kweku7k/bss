@@ -1,0 +1,66 @@
+{% extends "../authentication/auth_layout.html" %} 
+{% load static %}
+{% block content %}
+
+<div class="container" style="position: relative;">
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-6 d-flex flex-column align-items-center justify-content-center" style="position: relative; z-index: 1;">
+      <div class="card mb-3 shadow-lg">
+        <div class="card-body p-4">
+          <div class="pt-4 pb-3">
+            <div class="text-center justify-content-center py-4">
+              <img src="{% static 'img/Central-Uni-logo.png' %}" alt="Profile" width="60%" class="mb-4">
+              <h3 class="text-black"><b>Access your Staff Portal</b></h3>
+              <p class="text-center text-muted">Please verify your identity by providing a valid information</p>    
+                <div class="alert alert-info" role="alert">
+                    Use your staff email and password to log in.
+                </div>          
+            </div>
+          </div>
+
+          <form method="POST" class="row g-4 needs-validation">
+            {% csrf_token %}
+
+            <div class="col-12">
+              <label for="email" class="form-label fw-bold">Staff Number</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-number"></i></span>
+                <input type="email" name="email" class="form-control" id="email" placeholder="Enter your Staff Number" required>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <label for="yourPassword" class="form-label fw-bold">Password</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" name="password" class="form-control" id="yourPassword" placeholder="Enter your password" required>
+              </div>
+              <div class="invalid-feedback">Please enter your password!</div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">Remember me</label>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <button class="btn btn-primary w-100 py-2 fw-bold" type="submit">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+              </button>
+            </div>
+            
+            <div class="col-12 text-center">
+              <p class="mb-0">Don't have an account? <a href="{% url 'register' %}" class="text-primary fw-bold">Create an account</a></p>
+              {% comment %} <a href="#" class="text-muted"><small>Forgot Password?</small></a> {% endcomment %}
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+{% endblock %}
