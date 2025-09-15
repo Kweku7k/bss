@@ -1,5 +1,7 @@
 from decimal import Decimal
 from django.db.models import Sum, Q
+from flask import redirect, request
+from django.contrib import messages
 from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType, StaffLoan, StaffRelief
 
 class PayrollCalculator:
@@ -8,7 +10,10 @@ class PayrollCalculator:
         self.month = month
 
     def get_settings(self):
-        return ContributionRate.objects.latest('created')
+        try:
+            return ContributionRate.objects.latest('created')
+        except ContributionRate.DoesNotExist:
+            return None
     
     def get_all_income_type(self):
         return IncomeType.objects.all()
@@ -173,7 +178,7 @@ class PayrollCalculator:
         company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
         if not company_info.ssn_con:
             return {"amount": Decimal("0.00"), "rate": None}
-        settings = self.get_settings()
+        settings = self.get_settings()     
         rate = Decimal(settings.employee_ssnit_rate or "0.00")        
         extimated_ssnit = self.get_entitled_basic_salary() * (rate / 100)
         print("SSNIT Value: ", extimated_ssnit)

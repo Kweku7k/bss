@@ -72,6 +72,18 @@
             </div>
     
             <div class="mb-3">
+                <label class="form-label border-bottom" style="font-weight: bold;">Staff Rank</label>
+                <div>
+                    {% for key, value in rank %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="filter_rank" id="rank_{{ key }}" value="{{ key }}" {% if key in filter_rank %} checked {% endif %}>
+                        <label class="form-check-label" for="rank_{{ key }}">{{ value }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label border-bottom" style="font-weight: bold;">Job Title</label>
                 <div>
                     {% for key, value in jobtitle %}

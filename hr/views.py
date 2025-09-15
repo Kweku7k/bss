@@ -547,6 +547,7 @@ def report(request):
     filter_promotion = None
     filter_category = None
     filter_campus = None
+    filter_rank = None
 
     # Initial filter container
     filters = Q()
@@ -568,6 +569,7 @@ def report(request):
         filter_promotion = request.POST.get('filter_promotion')
         filter_category = request.POST.get('filter_category')
         filter_campus = request.POST.getlist('filter_campus')
+        filter_rank = request.POST.getlist('filter_rank')
 
         # Filter by Staff Category
         if filter_staffcategory:
@@ -618,9 +620,14 @@ def report(request):
 
         # Filter by Job Title  
         if filter_jobtitle:
-            company_info = CompanyInformation.objects.filter(job_title__in=filter_jobtitle)
+            company_info = CompanyInformation.objects.filter(rank__in=filter_jobtitle)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)  
+            
+        if filter_rank:
+            company_info = CompanyInformation.objects.filter(job_title__in=filter_rank)
+            company_staffno = {company.staffno_id for company in company_info}
+            filters &= Q(staffno__in=company_staffno)
         
             
         print("Filters being applied", filter_campus)
@@ -692,7 +699,8 @@ def report(request):
         'STAFFSTATUS': [(q.name, q.name) for q in ChoicesStaffStatus.objects.all()],
         'GENDER': [(q.name, q.name) for q in ChoicesGender.objects.all()],
         'department': [(q.dept_long_name, q.dept_long_name) for q in Department.objects.all()],
-        'jobtitle': [(q.job_title, q.job_title) for q in JobTitle.objects.all()],
+        'jobtitle': [(q.staff_rank, q.staff_rank) for q in StaffRank.objects.all()],
+        'rank': [(q.job_title, q.job_title) for q in JobTitle.objects.all()],
         'directorate': [(q.direct_name, q.direct_name) for q in Directorate.objects.all()],
         'school_faculty': [(q.sch_fac_name, q.sch_fac_name) for q in School_Faculty.objects.all()],
         'campus': [(q.campus_name, q.campus_name) for q in Campus.objects.all()],
@@ -712,6 +720,7 @@ def report(request):
         'filter_category': filter_category,
         'filter_campus': filter_campus,
         'filter_age': filter_age,
+        'filter_rank': filter_rank,
         'min_age': min_age,
         'max_age': max_age,
         'filter_renewal': filter_renewal,

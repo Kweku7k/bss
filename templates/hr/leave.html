@@ -60,7 +60,6 @@
                             <thead>
                                 <tr>
                                     <th>Leave Type</th>
-                                    <th>Description</th>
                                     <th>Start Date</th>
                                     <th>End Date</th>
                                     <th>Days</th>
@@ -71,7 +70,6 @@
                                 {% for transaction in leave_transactions %}
                                 <tr>
                                     <td>{{ transaction.leave_type }}</td>
-                                    <td>{{ transaction.reason }}</td>
                                     <td>{{ transaction.start_date }}</td>
                                     <td>{{ transaction.end_date }}</td>
                                     <td>{{ transaction.days_taken }}</td>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payslip</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      margin: 40px;
+      color: #000;
+    }
+    .header {
+      text-align: center;
+    }
+    .header img {
+      width: 100px;
+      float: left;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .header h2 {
+      margin: 5px 0;
+      font-size: 18px;
+    }
+    .details, .summary, .loans {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .details td {
+      padding: 5px;
+    }
+    .section-title {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 20px;
+      text-decoration: underline;
+    }
+    .summary th, .summary td, .loans th, .loans td {
+      border: 1px solid #000;
+      padding: 6px;
+      text-align: left;
+    }
+    .summary th {
+      background: #f2f2f2;
+    }
+    .right { text-align: right; }
+    .bold { font-weight: bold; }
+    .underline { text-decoration: underline; }
+    .footer {
+      margin-top: 15px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="logo.png" alt="Logo"> <!-- replace with your logo path -->
+    <h1>Central University</h1>
+    <p>Location: Miotso</p>
+    <h2>Payslip August , 2025</h2>
+  </div>
+
+  <table class="details">
+    <tr>
+      <td><b>Name:</b> Mr. Onikosi, Adewale Segun</td>
+      <td><b>Grade:</b></td>
+      <td><b>Notch:</b></td>
+      <td><b>SS No.:</b> C010001180066</td>
+    </tr>
+    <tr>
+      <td><b>Employee ID:</b> 50402</td>
+      <td><b>Bank:</b> GT Bank</td>
+      <td><b>Bank Branch:</b> Tema Comm 6</td>
+      <td></td>
+    </tr>
+    <tr>
+      <td><b>Dept. (OU):</b> IT Services Directorate</td>
+      <td><b>Bank A/C No:</b> 2012214061720</td>
+      <td><b>Job Title:</b> Software Developer</td>
+      <td></td>
+    </tr>
+  </table>
+
+  <p class="footer">
+    SSF Contribution-Employer : 585.00 &nbsp;&nbsp;&nbsp;
+    S.A - ContributionEmployer : 0.00
+  </p>
+
+  <table class="summary">
+    <tr>
+      <th colspan="2" class="center">Allowance/Special Earning</th>
+      <th colspan="2" class="center">Deductions</th>
+    </tr>
+    <tr>
+      <td><b>Currency:</b> Ghana Cedi</td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="bold">Basic Salary</td>
+      <td>4,500.00</td>
+      <td class="bold">Type of Deductions</td>
+      <td class="bold">Amount</td>
+    </tr>
+    <tr>
+      <td class="bold">Total Allowances:</td>
+      <td></td>
+      <td>Income Tax</td>
+      <td>661.62</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Social Security (5.5%)</td>
+      <td>247.50</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Staff Welfare Dues</td>
+      <td>100.00</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>CUSCU Monthly contributions</td>
+      <td>1,000.00</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td>Loan-CUSCU LOAN</td>
+      <td>966.88</td>
+    </tr>
+    <tr>
+      <td class="bold">Basic Pay:</td>
+      <td class="bold right">4,500.00</td>
+      <td class="bold">Total Deductions:</td>
+      <td class="bold right">2,976.00</td>
+    </tr>
+    <tr>
+      <td class="bold">Gross Pay:</td>
+      <td class="bold right">4,500.00</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td class="bold">Taxable Pay:</td>
+      <td class="bold right">4,252.50</td>
+      <td class="bold">Net Salary:</td>
+      <td class="bold right">1,524.00</td>
+    </tr>
+  </table>
+
+  <h3 class="section-title">Loans</h3>
+
+  <table class="loans">
+    <tr>
+      <th>Loan Description</th>
+      <th>Loan Amount</th>
+      <th>Opening Balance</th>
+      <th>Re Payment</th>
+      <th>Closing Balance</th>
+    </tr>
+    <tr>
+      <td>CUSCU LOAN</td>
+      <td>9,668.80</td>
+      <td>7,735.04</td>
+      <td>966.88</td>
+      <td>6,768.16</td>
+    </tr>
+    <tr class="bold">
+      <td>Total</td>
+      <td>9,668.80</td>
+      <td>7,735.04</td>
+      <td>966.88</td>
+      <td>6,768.16</td>
+    </tr>
+  </table>
+
+</body>
+</html>
