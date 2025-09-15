@@ -1,6 +1,5 @@
 from decimal import Decimal
 from django.db.models import Sum, Q
-from flask import redirect, request
 from django.contrib import messages
 from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType, StaffLoan, StaffRelief
 
