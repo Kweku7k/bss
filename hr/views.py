@@ -620,12 +620,12 @@ def report(request):
 
         # Filter by Job Title  
         if filter_jobtitle:
-            company_info = CompanyInformation.objects.filter(rank__in=filter_jobtitle)
+            company_info = CompanyInformation.objects.filter(job_title__in=filter_jobtitle)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)  
             
         if filter_rank:
-            company_info = CompanyInformation.objects.filter(job_title__in=filter_rank)
+            company_info = CompanyInformation.objects.filter(rank__in=filter_rank)
             company_staffno = {company.staffno_id for company in company_info}
             filters &= Q(staffno__in=company_staffno)
         
