@@ -17,6 +17,7 @@ urlpatterns = [
     path('search', views.search,name="search"),
     path('newstaff', views.newstaff,name="newstaff"),
     path('allstaff', views.allstaff,name="allstaff"),
+    path('payslip', views.payslip,name="payslip"),
     path('dormant_staff', views.dormant_staff,name="dormant-staff"),
     path('edit_staff/<str:staffno>', views.edit_staff,name="edit-staff"),
     path('delete_staff/<str:staffno>', views.deletestaff,name="delete-staff"),
@@ -169,6 +170,9 @@ urlpatterns = [
     path('income_history/', views.income_history, name='income-history'),
     path('deduction_history/', views.deduction_history, name='deduction-history'),
     path('paye_history/', views.paye_history, name='paye-history'),
+    path('statutory_history/', views.statutory_history, name='statutory-history'),
+    path('payroll_allowances/', views.payroll_allowances, name='payroll-allowances'),
+    path('payroll_deductions/', views.payroll_deductions, name='payroll-deductions'),
  
     
     path('payroll/register/', views.payroll_register, name='payroll-register'),
@@ -183,5 +187,7 @@ urlpatterns = [
     
     
     path('new_dash/', views.new_landing, name='new-dash'),
+    
+    path("reports/departments/", views.generate_department_report, name="department_report"),
 
 ]

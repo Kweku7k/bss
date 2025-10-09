@@ -27,13 +27,17 @@
             border-collapse: collapse; 
             table-layout: auto;
         }
+        tr {
+            margin: 0;
+        }
         th, td { 
-            border: 0.6px solid #777; 
-            padding: 4px 6px;
+            padding: 3px 4px;
             font-size: 9px; 
+            border-bottom: 0.3px solid #000;
+            margin-bottom: 0px;
         }
         th { 
-            background: #f2f6fb; 
+            background: #fafafa; 
             font-weight: bold; 
             text-align: left;
             font-size: 10px;
@@ -47,61 +51,65 @@
             text-align: right; 
         }
     </style>
-    <title>PAYE Report - {{ selected_date }}</title>
+    <title>PAYROLL HISTORY Report - {{ selected_date }}</title>
     </head>
 <body>
-    <h2>PAYE Report - {{ selected_date }}</h2>
+    <h2>PAYROLL HISTORY Report - {{ selected_date }}</h2>
     <p class="meta">Generated on: {{ date }}</p>
 
     <table>
         <thead>
             <tr>
                 <th style="width: 3%;">#</th>
-                <th style="width: 15%;">Employee Name</th>
-                <th>Tax ID</th>
-                <th>Basic Wage</th>
-                <th>Total Allowances</th>
-                <th>Total Emoluments</th>
+                <th style="width: 15%;">Staff</th>
+                <th>Basic Salary</th>
+                <th>Total Income</th>
+                <th>Gross Salary</th>
+                <th>Income Tax</th>
                 <th>SSF Employee</th>
                 <th>PF Employee</th>
-                <th>Relief</th>
-                <th>Net Taxable Pay</th>
-                <th>Tax Deductible</th>
+                <th>PF Employer</th>
+                <th>Other Deductions</th>
+                <th>Total Deductions</th>
+                <th>Net Salary</th>
             </tr>
         </thead>
         <tbody>
-            {% for entry in paye_data %}
+            {% for entry in payroll_data %}
             <tr>
                 <td style="width: 3%;">{{ forloop.counter }}</td>
                 <td style="width: 15%;">{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
-                <td>{{ entry.staff.gcardno|default:"-" }}</td>
                 <td class="right">{{ entry.basic_salary|floatformat:2 }}</td>
-                <td class="right">{{ entry.paye_total_income|floatformat:2 }}</td>
-                <td class="right">{{ entry.paye_total_emoluments|floatformat:2 }}</td>
+                <td class="right">{{ entry.total_income|floatformat:2 }}</td>
+                <td class="right">{{ entry.gross_salary|floatformat:2 }}</td>
+                <td class="right">{{ entry.income_tax|floatformat:2 }}</td>
                 <td class="right">{{ entry.ssf_employee|floatformat:2 }}</td>
                 <td class="right">{{ entry.pf_employee|floatformat:2 }}</td>
-                <td class="right">{{ entry.total_relief|floatformat:2 }}</td>
-                <td class="right">{{ entry.net_taxable_pay|floatformat:2 }}</td>
-                <td class="right">{{ entry.income_tax|floatformat:2 }}</td>
+                <td class="right">{{ entry.pf_employer|floatformat:2 }}</td>
+                <td class="right">{{ entry.other_deductions|floatformat:2 }}</td>
+                <td class="right">{{ entry.total_deduction|floatformat:2 }}</td>
+                <td class="right">{{ entry.net_salary|floatformat:2 }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="10" style="text-align:center;">No PAYE data found for the selected period.</td>
+                <td colspan="11" style="text-align:center;">No PAYROLL data found for the selected period.</td>
             </tr>
             {% endfor %}
             
-            {% if paye_data %}
+            {% if payroll_data %}
             <!-- Totals Row -->
             <tr class="totals-row">
-                <td colspan="3" class="right">Total</td>
+                <td colspan="2" class="right">Total</td>
                 <td class="right">{{ totals.basic_salary|floatformat:2 }}</td>
-                <td class="right">{{ totals.paye_total_income|floatformat:2 }}</td>
-                <td class="right">{{ totals.paye_total_emoluments|floatformat:2 }}</td>
+                <td class="right">{{ totals.total_income|floatformat:2 }}</td>
+                <td class="right">{{ totals.gross_salary|floatformat:2 }}</td>
+                <td class="right">{{ totals.income_tax|floatformat:2 }}</td>
                 <td class="right">{{ totals.ssf_employee|floatformat:2 }}</td>
                 <td class="right">{{ totals.pf_employee|floatformat:2 }}</td>
-                <td class="right">{{ totals.total_relief|floatformat:2 }}</td>
-                <td class="right">{{ totals.net_taxable_pay|floatformat:2 }}</td>
-                <td class="right">{{ totals.income_tax|floatformat:2 }}</td>
+                <td class="right">{{ totals.pf_employer|floatformat:2 }}</td>
+                <td class="right">{{ totals.other_deductions|floatformat:2 }}</td>
+                <td class="right">{{ totals.total_deduction|floatformat:2 }}</td>
+                <td class="right">{{ totals.net_salary|floatformat:2 }}</td>
             </tr>
             {% endif %}
         </tbody>

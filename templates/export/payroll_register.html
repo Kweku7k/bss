@@ -1,0 +1,166 @@
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 10mm;
+        }
+        body { 
+            font-family: Poppins, sans-serif; 
+            font-size: 9px; 
+            color: #222; 
+        }
+        h2 { 
+            margin: 0 0 8px 0; 
+            text-align: center;
+        }
+        .meta { 
+            margin: 0 0 12px 0; 
+            color: #555; 
+            text-align: center;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            table-layout: auto;
+        }
+        th, td { 
+            border-bottom: 0.3px solid #777; 
+            padding: 3px 4px; 
+            font-size: 8px;
+        }
+        th { 
+            background: #f2f6fb; 
+            font-weight: bold; 
+            text-align: left;
+            font-size: 8px;
+        }
+        .right { 
+            text-align: right; 
+        }
+        .group-header {
+            background: #e8e8e8;
+            font-weight: bold;
+        }
+        .subtotal-row td { 
+            background: #f0f0f0; 
+            font-weight: bold;
+            font-size: 9px;
+        }
+        .grand-total-row td { 
+            background: #f0f0f0; 
+            font-weight: bold;
+            font-size: 9px;
+        }
+        
+    </style>
+    <title>Payroll Register - {{ selected_date }}</title>
+</head>
+<body>
+    <h2>Payroll Register - {{ selected_date }}</h2>
+    <p class="meta">Generated on: {{ date }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 2%;">#</th>
+                <th style="width: 6%;">Employee ID</th>
+                <th style="width: 15%;">Employee Name</th>
+                <th class="right">Basic Salary</th>
+                <th class="right">Allowances</th>
+                <th class="right">Gross Salary</th>
+                <th class="right">Income Tax</th>
+                <th class="right">Other Deductions</th>
+                <th class="right">SSF Employee</th>
+                <th class="right">PF Employee</th>
+                <th class="right">PF Employer</th>
+                <th class="right">Total Deduction</th>
+                <th class="right">Net Pay</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if grouped_payrolls %}
+                {% for group_key, group_data in grouped_payrolls.items %}
+                    <tr class="group-header">
+                        <td colspan="12">{{ group_key }}</td>
+                    </tr>
+                    {% for entry in group_data %}
+                    <tr>
+                        <td style="width: 2%;">{{ forloop.counter }}</td>
+                        <td style="width: 6%;">{{ entry.staff.staffno }}</td>
+                        <td style="width: 15%;">{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
+                        <td class="right">{{ entry.basic_salary|floatformat:2 }}</td>
+                        <td class="right">{{ entry.total_income|floatformat:2 }}</td>
+                        <td class="right">{{ entry.gross_salary|floatformat:2 }}</td>
+                        <td class="right">{{ entry.income_tax|floatformat:2 }}</td>
+                        <td class="right">{{ entry.deductions|floatformat:2 }}</td>
+                        <td class="right">{{ entry.ssf_employee|floatformat:2 }}</td>
+                        <td class="right">{{ entry.pf_employee|floatformat:2 }}</td>
+                        <td class="right">{{ entry.employer_pf|floatformat:2 }}</td>
+                        <td class="right">{{ entry.total_deduction|floatformat:2 }}</td>
+                        <td class="right">{{ entry.net_salary|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                    <!-- Subtotal Row -->
+                    <tr class="subtotal-row">
+                        <td colspan="3" class="right">Subtotal</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'basic_salary'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'total_income'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'gross_salary'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'income_tax'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'deductions'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'ssf_employee'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'pf_employee'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'employer_pf'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'total_deduction'|floatformat:2 }}</td>
+                        <td class="right">{{ subtotals|get_item:group_key|get_item:'net_salary'|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                {% for entry in payrolls %}
+                <tr>
+                    <td style="width: 2%;">{{ forloop.counter }}</td>
+                    <td style="width: 5%;">{{ entry.staff.staffno }}</td>
+                    <td style="width: 15%;">{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
+                    <td class="right">{{ entry.basic_salary|floatformat:2 }}</td>
+                    <td class="right">{{ entry.total_income|floatformat:2 }}</td>
+                    <td class="right">{{ entry.gross_salary|floatformat:2 }}</td>
+                    <td class="right">{{ entry.income_tax|floatformat:2 }}</td>
+                    <td class="right">{{ entry.deductions|floatformat:2 }}</td>
+                    <td class="right">{{ entry.ssf_employee|floatformat:2 }}</td>
+                    <td class="right">{{ entry.pf_employee|floatformat:2 }}</td>
+                    <td class="right">{{ entry.employer_pf|floatformat:2 }}</td>
+                    <td class="right">{{ entry.total_deduction|floatformat:2 }}</td>
+                    <td class="right">{{ entry.net_salary|floatformat:2 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="13" style="text-align:center;">No payroll data found.</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+            
+            {% if payrolls or grouped_payrolls %}
+            <!-- Grand Total Row -->
+            <tr class="grand-total-row">
+                <td colspan="3" class="right">GRAND TOTAL</td>
+                <td class="right">{{ grand_total.basic_salary|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.total_income|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.gross_salary|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.income_tax|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.deductions|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.ssf_employee|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.pf_employee|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.employer_pf|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.total_deduction|floatformat:2 }}</td>
+                <td class="right">{{ grand_total.net_salary|floatformat:2 }}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</body>
+</html>

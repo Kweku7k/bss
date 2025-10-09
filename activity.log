@@ -193,3 +193,70 @@ INFO 2025-09-04 14:15:37,059 Adewale Onikosi has updated their Personal Informat
 INFO 2025-09-04 14:17:03,792 Adewale Onikosiiiijahgghkbhkfaskh has updated their Personal Information
 INFO 2025-09-04 14:17:21,951 Pending update for 20034 approved by Softlife.
 INFO 2025-09-15 07:52:20,868 Login Successful: Softlife
+INFO 2025-09-16 17:04:42,483 Login Successful: Softlife
+INFO 2025-09-16 19:45:59,223 Login Successful: Softlife
+INFO 2025-09-16 23:43:14,125 Login Successful: Softlife
+INFO 2025-09-17 07:18:52,516 Login Successful: Softlife
+INFO 2025-09-17 07:21:00,957 Company information updated for Samuel Attuah by Softlife
+INFO 2025-09-17 08:32:36,963 Educational Background for Philip Amoah has been created successfully by Softlife
+INFO 2025-09-17 09:00:33,342 Personal information updated for Richard Afari by Softlife
+INFO 2025-09-17 09:00:58,056 Educational Background for Richard Afari has been created successfully by Softlife
+INFO 2025-09-17 09:01:54,063 Educational Background updated for Richard Afari by Softlife
+INFO 2025-09-17 09:02:55,483 Company information updated for Richard Afari by Softlife
+INFO 2025-09-17 09:31:10,262 Login Successful: Softlife
+INFO 2025-09-23 13:22:40,736 Login Successful: Softlife
+INFO 2025-10-06 08:03:01,246 Login Successful: Softlife
+INFO 2025-10-06 08:05:05,315 Personal information updated for Adewale Onikosi by Softlife
+INFO 2025-10-06 09:10:46,472 Payroll for August 2025 has been finalised
+INFO 2025-10-06 11:30:11,761 Login Successful: Softlife
+INFO 2025-10-06 11:31:49,476 Payroll for August 2025 has been approved by Softlife.
+INFO 2025-10-06 13:30:23,900 Login Successful: Softlife
+INFO 2025-10-06 14:05:41,471 Company information updated for Vincent Nash by Softlife
+INFO 2025-10-06 15:36:55,893 Login Successful: Softlife
+INFO 2025-10-06 17:37:52,832 Login Successful: Softlife
+INFO 2025-10-06 19:55:35,307 Login Successful: Softlife
+INFO 2025-10-06 22:08:26,899 Login Successful: Softlife
+INFO 2025-10-07 03:39:00,858 Login Successful: Softlife
+INFO 2025-10-07 06:18:39,548 Login Successful: Softlife
+INFO 2025-10-07 10:35:16,160 Login Successful: Softlife
+INFO 2025-10-07 15:19:25,312 Login Successful: Softlife
+INFO 2025-10-07 16:13:14,377 Company information updated for Adewale Onikosi by Softlife
+INFO 2025-10-07 18:31:48,637 Login Successful: Softlife
+INFO 2025-10-07 18:59:24,400 Payroll for September 2025 has been finalised
+INFO 2025-10-07 20:34:03,948 Login Successful: Softlife
+INFO 2025-10-07 22:43:11,043 Login Successful: Softlife
+ERROR 2025-10-08 00:38:50,799 Error processing payroll for 30214: list indices must be integers or slices, not str
+ERROR 2025-10-08 00:49:54,017 Error processing payroll for 20170: list indices must be integers or slices, not str
+ERROR 2025-10-08 00:51:15,880 Error processing payroll for 74493: list indices must be integers or slices, not str
+ERROR 2025-10-08 00:53:16,140 Error processing payroll for 20034: list indices must be integers or slices, not str
+ERROR 2025-10-08 00:55:01,832 Error processing payroll for 36385: list indices must be integers or slices, not str
+ERROR 2025-10-08 00:58:26,386 Error processing payroll for 24367: list indices must be integers or slices, not str
+INFO 2025-10-08 01:01:35,959 Payroll for September 2025 has been processed
+INFO 2025-10-08 11:12:30,559 Login Successful: Softlife
+ERROR 2025-10-08 11:27:32,237 Error processing payroll for 30214: list indices must be integers or slices, not str
+ERROR 2025-10-08 12:01:20,146 Error processing payroll for 30214: list indices must be integers or slices, not str
+ERROR 2025-10-08 12:10:22,906 Error processing payroll for 20170: list indices must be integers or slices, not str
+ERROR 2025-10-08 12:11:27,542 Error processing payroll for 74493: list indices must be integers or slices, not str
+ERROR 2025-10-08 12:13:04,554 Error processing payroll for 20034: list indices must be integers or slices, not str
+ERROR 2025-10-08 12:14:32,153 Error processing payroll for 36385: list indices must be integers or slices, not str
+ERROR 2025-10-08 12:17:22,424 Error processing payroll for 24367: list indices must be integers or slices, not str
+INFO 2025-10-08 12:20:05,029 Payroll for September 2025 has been processed
+INFO 2025-10-08 13:28:48,410 Login Successful: Softlife
+ERROR 2025-10-08 14:51:38,274 Error processing payroll for 30214: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:03:25,184 Error processing payroll for 20170: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:04:50,941 Error processing payroll for 74493: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:06:56,119 Error processing payroll for 20034: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:08:43,648 Error processing payroll for 36385: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:12:13,950 Error processing payroll for 24367: list indices must be integers or slices, not str
+INFO 2025-10-08 15:15:15,985 Payroll for September 2025 has been processed
+ERROR 2025-10-08 15:36:47,905 Error processing payroll for 30214: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:48:23,587 Error processing payroll for 20170: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:49:42,371 Error processing payroll for 74493: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:51:42,894 Error processing payroll for 20034: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:53:27,071 Error processing payroll for 36385: list indices must be integers or slices, not str
+ERROR 2025-10-08 15:56:52,760 Error processing payroll for 24367: list indices must be integers or slices, not str
+INFO 2025-10-08 16:00:00,156 Payroll for September 2025 has been processed
+INFO 2025-10-08 16:00:46,968 Login Successful: Softlife
+INFO 2025-10-08 21:13:28,139 Login Successful: Softlife
+INFO 2025-10-08 21:47:25,688 Payroll for September 2025 has been processed
+INFO 2025-10-08 23:16:38,961 Login Successful: Softlife

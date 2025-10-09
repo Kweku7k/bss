@@ -22,13 +22,9 @@
     <div class="col-md-12">
         <div class="container">
             <div class="d-flex justify-content-between mb-3">
-                {% if report_for == "all" %}
-                    <h4 class="mb-3 fw-bold">📅 Deduction History Report</h4>
-                {% elif report_for and deduction_data %}
-                    <h4 class="mb-0">Deduction History for {{ deduction_data.0.staff.fname }} {{ deduction_data.0.staff.lname }}</h4>
-                {% else %}
-                    <h4 class="mb-0">Deduction History Report</h4>
-                {% endif %}
+                
+                
+                <h4 class="mb-3 fw-bold">💰 Deduction Report</h4>
 
                 {% if deduction_data %}
                     <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
@@ -87,21 +83,25 @@
                     <select name="deduction_type" id="deduction_type" class="form-control">
                         <option value="all">-- All Types --</option>
 
-                        <optgroup label="Statutory">
-                            {% for dtype in statutory_deductions %}
-                                <option value="{{ dtype }}" {% if dtype == selected_deduction_type %}selected{% endif %}>
-                                    {{ dtype }}
-                                </option>
-                            {% endfor %}
-                        </optgroup>
+                        {% if statutory_deductions %}
+                            <optgroup label="Statutory">
+                                {% for dtype in statutory_deductions %}
+                                    <option value="{{ dtype }}" {% if dtype == selected_deduction_type %}selected{% endif %}>
+                                        {{ dtype }}
+                                    </option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endif %}
 
-                        <optgroup label="Custom">
-                            {% for dtype in deduction_types %}
-                                <option value="{{ dtype }}" {% if dtype == selected_deduction_type %}selected{% endif %}>
-                                    {{ dtype }}
-                                </option>
-                            {% endfor %}
-                        </optgroup>
+                        {% if deduction_types %}
+                            <optgroup label="Custom">
+                                {% for dtype in deduction_types %}
+                                    <option value="{{ dtype }}" {% if dtype == selected_deduction_type %}selected{% endif %}>
+                                        {{ dtype }}
+                                    </option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endif %}
                     </select>
                 </div>
 
@@ -113,7 +113,7 @@
                         <option value="all" {% if report_for == 'all' %}selected{% endif %}>All Staff</option>
                         {% for emp in employees %}
                             <option value="{{ emp.pk }}" {% if report_for == emp.pk|stringformat:"s" %}selected{% endif %}>
-                                {{ emp.fname }} {{ emp.lname }} ({{ emp.staffno }})
+                                {{ emp.lname }} {{ emp.fname }} {{ emp.middlenames }} ({{ emp.staffno }})
                             </option>
                         {% endfor %}
                     </select>
@@ -133,7 +133,6 @@
                                 <th>Staffno</th>
                                 <th>Staff</th>
                                 <th>Deduction Type</th>
-                                <th>Month</th>
                                 <th>Amount</th>
                             </tr>
                         </thead>
@@ -142,16 +141,16 @@
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
                                     <td>{{ entry.staff.staffno }}</td>
-                                    <td>{{ entry.staff.fname }} {{ entry.staff.lname }} {{ entry.staff.middlenames }}</td>
+                                    <td>{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
                                     <td>{{ entry.deduction_type }}</td>
-                                    <td>{{ entry.for_month|date:"F Y" }}</td>
-                                    <td>{{ entry.amount }}</td>
+                                    <!-- <td>{{ entry.for_month|date:"F Y" }}</td> -->
+                                    <td class="text-end">{{ entry.amount }}</td>
                                 </tr>
                             {% endfor %}
 
                             <tr style="margin-top: 15px;">
-                                <td colspan="1"></td> 
-                                <td colspan="4" class="text-left fw-bold">
+                                <td colspan="3"></td> 
+                                <td class="text-left fw-bold">
                                     Total
                                 </td>
                                 <td class="fw-bold" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">

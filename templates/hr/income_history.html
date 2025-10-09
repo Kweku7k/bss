@@ -136,7 +136,6 @@
                                 <th>Staffno</th>
                                 <th>Staff</th>
                                 <th>Income Type</th>
-                                <th>Month</th>
                                 <th>Amount</th>
                             </tr>
                         </thead>
@@ -147,14 +146,13 @@
                                     <td>{{ entry.staff.staffno }}</td>
                                     <td>{{ entry.staff.fname }} {{ entry.staff.lname }} {{ entry.staff.middlenames }}</td>
                                     <td>{{ entry.income_type}}</td>
-                                    <td>{{ entry.for_month|date:"F Y" }}</td>
                                     <td class="text-end">{{ entry.amount}}</td>
                                 </tr>
                             {% endfor %}
 
                             <tr style="margin-top: 15px;">
-                                <td colspan="1"></td> 
-                                <td colspan="4" class="text-left fw-bold">
+                                <td colspan="3"></td> 
+                                <td class="text-left fw-bold">
                                     Total
                                 </td>
                                 <td class="fw-bold text-end" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">

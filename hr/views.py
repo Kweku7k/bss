@@ -3,7 +3,7 @@ import json
 from math import e
 import pprint
 import uuid
-from django.http import HttpResponseRedirect, JsonResponse, FileResponse
+from django.http import HttpResponseRedirect, JsonResponse, FileResponse, HttpResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse
 from hr.payroll_helper import PayrollCalculator # type: ignore
@@ -38,6 +38,8 @@ from dateutil.relativedelta import relativedelta
 from hr.utils.export import render_to_excel, render_to_pdf
 from bss.firebase import upload_file_to_firebase, delete_file_from_firebase
 import tempfile
+import pandas as pd
+
 
 
 
@@ -729,7 +731,6 @@ def report(request):
     }
 
     return render(request, 'hr/report.html', context)
-
 
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
@@ -3385,6 +3386,7 @@ def toggle_approval(request, payroll_id):
 
 
 ########## GENERATE PAYROLL INFORMATION ###############
+
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('finalise_payroll')
@@ -3409,110 +3411,277 @@ def generate_payroll(request):
                 messages.error(request, f"You must finalize payroll for {expected_next_month.strftime('%B %Y')} before proceeding.")
                 return redirect('payroll-post-payroll')
         
-        
         staff_list = Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname')
-        # staff_list = Employee.objects.filter(staffno="20034").exclude(companyinformation__active_status='Inactive').order_by('lname')
         
         for staff in staff_list:
             company_info = CompanyInformation.objects.filter(staffno=staff).first()
             if not company_info:
-                continue  # skip if company info is missing
-                
+                continue
                 
             try:
-                payroll = PayrollCalculator(staffno=staff, month=current_month_date)     
+                with transaction.atomic():
+                    payroll = PayrollCalculator(staffno=staff, month=current_month_date)     
 
-                # Get or create payroll record for this staff and month
-                payroll_obj, created = Payroll.objects.get_or_create(
-                    staffno=staff,
-                    month=current_month_date,
-                    defaults={
-                        'basic_salary': payroll.get_entitled_basic_salary(),
-                        'total_income': payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
-                        'gross_salary': payroll.get_gross_income(),
-                        'income_tax': payroll.get_income_tax()["tax"],
-                        'other_deductions': payroll.get_deductions()["total_deduction"],
-                        'ssf': payroll.get_ssnit_contribution()["amount"],
-                        'pf_employee': payroll.get_pf_contribution()["amount"], 
-                        'pf_employer': payroll.get_employer_pf_contribution(),
-                        'total_deduction': payroll.get_total_deductions(),
-                        'cost_center': company_info.cost_center,
-                        'paye_total_income': payroll.get_miscellaneous_and_benefit_in_kind(),
-                        'paye_total_emoluments': payroll.get_entitled_basic_salary() + payroll.get_miscellaneous_and_benefit_in_kind(),
-                        'total_relief': payroll.get_staff_relief()["total_relief"],
-                        'net_taxable_pay': payroll.get_taxable_income(),
-                        'net_salary': payroll.get_net_salary(),
-                    }
-                )
+                    # Get or create payroll record for this staff and month
+                    payroll_obj, created = Payroll.objects.get_or_create(
+                        staffno=staff,
+                        month=current_month_date,
+                        defaults={
+                            'basic_salary': payroll.get_entitled_basic_salary(),
+                            'total_income': payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
+                            'gross_salary': payroll.get_gross_income(),
+                            'income_tax': payroll.get_income_tax()["tax"],
+                            'other_deductions': payroll.get_deductions()["total_deduction"],
+                            'ssf_employee': payroll.get_ssnit_contribution()["amount"],
+                            'ssf_employer': payroll.get_employer_ssnit_contribution()["amount"],
+                            'pf_employee': payroll.get_pf_contribution()["amount"], 
+                            'pf_employer': payroll.get_employer_pf_contribution()["amount"],
+                            'total_deduction': payroll.get_total_deductions(),
+                            'cost_center': company_info.cost_center,
+                            'paye_total_income': payroll.get_miscellaneous_and_benefit_in_kind(),
+                            'paye_total_emoluments': payroll.get_entitled_basic_salary() + payroll.get_miscellaneous_and_benefit_in_kind(),
+                            'total_relief': payroll.get_staff_relief()["total_relief"],
+                            'net_taxable_pay': payroll.get_taxable_income(),
+                            'net_salary': payroll.get_net_salary(),
+                        }
+                    )
 
-                if not created:
-                    # Update existing record
-                    payroll_obj.basic_salary = payroll.get_entitled_basic_salary()
-                    payroll_obj.total_income = payroll.get_gross_income() - payroll.get_entitled_basic_salary()
-                    payroll_obj.gross_salary = payroll.get_gross_income()
-                    payroll_obj.income_tax = payroll.get_income_tax()["tax"]
-                    payroll_obj.other_deductions = payroll.get_deductions()["total_deduction"]
-                    payroll_obj.ssf = payroll.get_ssnit_contribution()["amount"]
-                    payroll_obj.pf_employee = payroll.get_pf_contribution()["amount"]
-                    payroll_obj.pf_employer = payroll.get_employer_pf_contribution()
-                    payroll_obj.total_deduction = payroll.get_total_deductions()
-                    payroll_obj.net_salary = payroll.get_net_salary()
-                    payroll_obj.cost_center = company_info.cost_center
-                    payroll_obj.paye_total_income = payroll.get_miscellaneous_and_benefit_in_kind()
-                    payroll_obj.paye_total_emoluments = payroll.get_entitled_basic_salary() + payroll.get_miscellaneous_and_benefit_in_kind()
-                    payroll_obj.total_relief = payroll.get_staff_relief()["total_relief"]
-                    payroll_obj.net_taxable_pay = payroll.get_taxable_income()
-                    payroll_obj.save()
+                    if not created:
+                        # Update existing record
+                        payroll_obj.basic_salary = payroll.get_entitled_basic_salary()
+                        payroll_obj.total_income = payroll.get_gross_income() - payroll.get_entitled_basic_salary()
+                        payroll_obj.gross_salary = payroll.get_gross_income()
+                        payroll_obj.income_tax = payroll.get_income_tax()["tax"]
+                        payroll_obj.other_deductions = payroll.get_deductions()["total_deduction"]
+                        payroll_obj.ssf_employee = payroll.get_ssnit_contribution()["amount"]
+                        payroll_obj.ssf_employer = payroll.get_employer_ssnit_contribution()["amount"]    
+                        payroll_obj.pf_employee = payroll.get_pf_contribution()["amount"]
+                        payroll_obj.pf_employer = payroll.get_employer_pf_contribution()["amount"]
+                        payroll_obj.total_deduction = payroll.get_total_deductions()
+                        payroll_obj.net_salary = payroll.get_net_salary()
+                        payroll_obj.cost_center = company_info.cost_center
+                        payroll_obj.paye_total_income = payroll.get_miscellaneous_and_benefit_in_kind()
+                        payroll_obj.paye_total_emoluments = payroll.get_entitled_basic_salary() + payroll.get_miscellaneous_and_benefit_in_kind()
+                        payroll_obj.total_relief = payroll.get_staff_relief()["total_relief"]
+                        payroll_obj.net_taxable_pay = payroll.get_taxable_income()
+                        payroll_obj.save()
                     
-                loan_deductions = payroll.get_active_loan_deductions()
-                
-                for loan in loan_deductions:
-                    monthly_payment = loan["monthly_installment"]
-                    loan_obj = StaffLoan.objects.filter(id=loan["id"]).first()
+                    # Track which income/deduction types we've processed
+                    processed_incomes = set()
+                    processed_deductions = set()
+                    processed_reliefs = set()
+                    processed_benefits = set()
                     
-                    if loan_obj:
-                        # Get or create loan payment record for this month
-                        loan_payment, created = LoanPayment.objects.get_or_create(
-                            loan=loan_obj,
-                            payment_date=current_month_date,
-                            defaults={'amount_paid': monthly_payment}
+                    print("About to push income deduction into their model")
+                    
+                    # Save/Update Basic Salary as income
+                    income_obj, _ = PayrollIncome.objects.update_or_create(
+                        payroll=payroll_obj,
+                        income_type='Basic Salary',
+                        defaults={'amount': payroll.get_entitled_basic_salary()}
+                    )
+                    processed_incomes.add('Basic Salary')
+                    
+                    # Save/Update Allowances/Incomes
+                    allowances = payroll.get_allowance_values()
+                    for income in allowances['incomes']:
+                        if income['entitled_amount'] > 0:
+                            income_obj, _ = PayrollIncome.objects.update_or_create(
+                                payroll=payroll_obj,
+                                income_type=income['income_type'],
+                                defaults={
+                                    'amount': income['entitled_amount'],
+                                    'percentage_of_basic': income.get('percentage_on_basic')
+                                }
+                            )
+                            processed_incomes.add(income['income_type'])
+                    
+                    # Delete incomes that are no longer applicable
+                    payroll_obj.incomes.exclude(income_type__in=processed_incomes).delete()
+                    
+                    # Save Deductions
+                    # 1. Income Tax
+                    # Save/Update Deductions
+                    # 1. Income Tax
+                    income_tax = payroll.get_income_tax()
+                    if income_tax['tax'] > 0:
+                        ded_obj, _ = PayrollDeduction.objects.update_or_create(
+                            payroll=payroll_obj,
+                            deduction_type='Income Tax',
+                            defaults={'amount': income_tax['tax']}
                         )
+                        processed_deductions.add('Income Tax')
+                    
+                    # 2. SSF Employee
+                    ssf_employee = payroll.get_ssnit_contribution()
+                    if ssf_employee['amount'] > 0:
+                        deduction_type = f'Social Security ({ssf_employee["rate"]}%)'
+                        ded_obj, _ = PayrollDeduction.objects.update_or_create(
+                            payroll=payroll_obj,
+                            deduction_type=deduction_type,
+                            defaults={
+                                'amount': ssf_employee['amount'],
+                                'rate': ssf_employee['rate']
+                            }
+                        )
+                        processed_deductions.add(deduction_type)
                         
-                        if created:
-                            # Update loan object
-                            loan_obj.months_left -= 1
-                            if loan_obj.months_left <= 0:
-                                loan_obj.is_active = False
-                            loan_obj.save()
-                        else:
-                            # Update existing loan payment record
-                            loan_payment.amount_paid = monthly_payment
-                            loan_payment.save()
+                    
+                    # 3. PF Employee
+                    pf_employee = payroll.get_pf_contribution()
+                    if pf_employee['amount'] > 0:
+                        deduction_type = f'Provident Fund ({pf_employee["rate"]}%)'
+                        ded_obj, _ = PayrollDeduction.objects.update_or_create(
+                            payroll=payroll_obj,
+                            deduction_type=deduction_type,
+                            defaults={
+                                'amount': pf_employee['amount'],
+                                'rate': pf_employee['rate']
+                            }
+                        )
+                        processed_deductions.add(deduction_type)
+                    
+                    # 4. Withholding Tax (Rent and others)
+                    tax_details = payroll.get_tax_for_taxable_income()
+                    
+                    # Rent Tax
+                    if tax_details['rent_tax'] > 0:
+                        ded_obj, _ = PayrollDeduction.objects.update_or_create(
+                            payroll=payroll_obj,
+                            deduction_type='WHT - Rent',
+                            defaults={
+                                'amount': tax_details['rent_tax']
+                                # 'rate': tax_details['rent_tax_detail']['tax_rate'] if tax_details['rent_tax_detail'] else None
+                            }
+                        )
+                        processed_deductions.add('WHT - Rent')
+                    
+                    #  Withholding Taxes
+                    if tax_details['total_tax'] > 0:
+                        ded_obj, _ = PayrollDeduction.objects.update_or_create(
+                            payroll=payroll_obj,
+                            deduction_type='Withholding Tax',
+                            defaults={
+                                'amount': tax_details['total_tax']
+                                # 'rate': tax_details['tax_breakdown']['tax_rate'] if tax_details['tax_breakdown'] else None
+                            }
+                        )
+                        processed_deductions.add('Withholding Tax')
+                    
+                    # 5. Other Deductions (including loans)
+                    deductions = payroll.get_deductions()
+                    for deduction in deductions['deductions']:
+                        if deduction['deductable_amount'] > 0:
+                            ded_obj, _ = PayrollDeduction.objects.update_or_create(
+                                payroll=payroll_obj,
+                                deduction_type=deduction['deduction_type'],
+                                defaults={'amount': deduction['deductable_amount']}
+                            )
+                            processed_deductions.add(deduction['deduction_type'])
+                    
+                    # Delete deductions that are no longer applicable
+                    payroll_obj.deductions.exclude(deduction_type__in=processed_deductions).delete()
+                    
+                    # Save Reliefs
+                    # Save/Update Reliefs
+                    reliefs = payroll.get_staff_relief()
+                    for relief in reliefs['relief_list']:
+                        if relief['amount'] > 0:
+                            rel_obj, _ = PayrollRelief.objects.update_or_create(
+                                payroll=payroll_obj,
+                                relief_type=relief['relief_type'],
+                                defaults={'amount': relief['amount']}
+                            )
+                            processed_reliefs.add(relief['relief_type'])
+                    
+                    # Delete reliefs that are no longer applicable
+                    payroll_obj.reliefs.exclude(relief_type__in=processed_reliefs).delete()
+                    
+                    # Save/Update Benefits in Kind
+                    bik = payroll.get_benefits_in_kind()['benefit_in_kind']
+                    if bik['rent_bik'] > 0:
+                        ben_obj, _ = PayrollBenefitInKind.objects.update_or_create(
+                            payroll=payroll_obj,
+                            benefit_type='Rent Benefit',
+                            defaults={'amount': bik['rent_bik']}
+                        )
+                        processed_benefits.add('Rent Benefit')
                         
-            except (TypeError, InvalidOperation):
+                    if bik['fuel_bik'] > 0:
+                        ben_obj, _ = PayrollBenefitInKind.objects.update_or_create(
+                            payroll=payroll_obj,
+                            benefit_type='Fuel Benefit',
+                            defaults={'amount': bik['fuel_bik']}
+                        )
+                        processed_benefits.add('Fuel Benefit')
+                        
+                    if bik['vechile_bik'] > 0:
+                        ben_obj, _ = PayrollBenefitInKind.objects.update_or_create(
+                            payroll=payroll_obj,
+                            benefit_type='Vehicle Benefit',
+                            defaults={'amount': bik['vechile_bik']}
+                        )
+                        processed_benefits.add('Vehicle Benefit')
+                        
+                    if bik['driver_bik'] > 0:
+                        ben_obj, _ = PayrollBenefitInKind.objects.update_or_create(
+                            payroll=payroll_obj,
+                            benefit_type='Driver Benefit',
+                            defaults={'amount': bik['driver_bik']}
+                        )
+                        processed_benefits.add('Driver Benefit')
+                    
+                    # Delete benefits that are no longer applicable
+                    payroll_obj.benefits_in_kind.exclude(benefit_type__in=processed_benefits).delete()
+                    
+                    # Handle Loan Payments
+                    loan_deductions = payroll.get_active_loan_deductions()
+                    for loan in loan_deductions:
+                        monthly_payment = loan["monthly_installment"]
+                        loan_obj = StaffLoan.objects.filter(id=loan["id"]).first()
+                        
+                        if loan_obj:
+                            loan_payment, created = LoanPayment.objects.get_or_create(
+                                loan=loan_obj,
+                                payment_date=current_month_date,
+                                defaults={'amount_paid': monthly_payment}
+                            )
+                            
+                            if created:
+                                loan_obj.months_left -= 1
+                                if loan_obj.months_left <= 0:
+                                    loan_obj.is_active = False
+                                loan_obj.save()
+                            else:
+                                loan_payment.amount_paid = monthly_payment
+                                loan_payment.save()
+                        
+            except (TypeError, InvalidOperation) as e:
                 skipped_staff.append(f"{staff.fname} {staff.lname} ({staff.staffno})")
+                logger.error(f"Error processing payroll for {staff.staffno}: {str(e)}")
                 continue
         
         if skipped_staff:
-            messages.error(request, f"The following staff were skipped due to missing basic salary: {', '.join(skipped_staff)}")
+            messages.error(request, f"The following staff were skipped due to errors: {', '.join(skipped_staff)}")
 
-        messages.success(request, f"Payroll for {current_month_date.strftime('%B %Y')} has been finalised you can update once not approved")   
-        logger.info(f"Payroll for {current_month_date.strftime('%B %Y')} has been finalised")     
+        messages.success(request, f"Payroll for {current_month_date.strftime('%B %Y')} has been processed. You can update once not approved")   
+        logger.info(f"Payroll for {current_month_date.strftime('%B %Y')} has been processed")     
         return redirect('payroll-post-payroll')
     
     payrolls_group = (
-        Payroll.objects.values('month').annotate(latest_id=Max('id'), staff_count=Count('staffno')).order_by('-month'))
+        Payroll.objects.values('month').annotate(
+            latest_id=Max('id'), 
+            staff_count=Count('staffno')
+        ).order_by('-month'))
 
     payrolls = []
     for item in payrolls_group:
         payroll = Payroll.objects.get(id=item['latest_id'])
         payroll.staff_count = item['staff_count']
         payrolls.append(payroll)
-
         
-    context = {"selected_month": selected_month, "payrolls":payrolls}
+    context = {"selected_month": selected_month, "payrolls": payrolls}
     return render(request, 'payroll/finalise_payroll.html', context)
-
 
 
 @login_required
@@ -3545,8 +3714,8 @@ def payroll_details(request, staffno):
             "deductions": payroll.get_deductions()["deductions"],
             "pf_employee": payroll.get_pf_contribution(),
             "ssf_employee": payroll.get_ssnit_contribution(),
-            "employer_ssf": payroll.get_employer_ssnit_contribution(),
-            "employer_pf": payroll.get_employer_pf_contribution(),
+            "employer_ssf": payroll.get_employer_ssnit_contribution()["amount"],
+            "employer_pf": payroll.get_employer_pf_contribution()["amount"],
             "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
             "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"],
             "benefits_in_kind": payroll.get_benefits_in_kind()["benefit_in_kind"],
@@ -3610,7 +3779,7 @@ def payroll_processing(request):
                     "incomes": payroll.get_allowance_values()["incomes"],
                     "deductions": payroll.get_deductions()["deductions"],
                     "ssf_employee": payroll.get_ssnit_contribution(),
-                    "employer_ssf": payroll.get_employer_ssnit_contribution(),
+                    "employer_ssf": payroll.get_employer_ssnit_contribution()["amount"],
                     "employer_pf": payroll.get_employer_pf_contribution(),
                     "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
                     "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"],
@@ -3639,6 +3808,9 @@ def payroll_processing(request):
     return render(request, "hr/payroll_processing.html", context)
 
 
+from decimal import Decimal
+from collections import defaultdict
+
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('generate_payroll_register')
@@ -3649,7 +3821,9 @@ def payroll_register(request):
     departments = Department.objects.all().order_by('dept_long_name')
     banks = Bank.objects.all().order_by('bank_short_name')
     directorate = Directorate.objects.all().order_by('direct_name')
-    selected_month = request.GET.get("month")
+    
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
     selected_staff_cat = request.GET.get("staff_cat", None)
     selected_campus = request.GET.get("campus", None)
     selected_school = request.GET.get("school", None) 
@@ -3658,85 +3832,290 @@ def payroll_register(request):
     selected_bank = request.GET.get("bank", None)    
         
     all_payrolls = []
-    filters = Q()
-
-    if selected_month:
-        current_month_date = date.fromisoformat(selected_month)
+    grouped_payrolls = defaultdict(list)
+    subtotals = defaultdict(lambda: {
+        'basic_salary': Decimal('0.00'),
+        'total_income': Decimal('0.00'),
+        'gross_salary': Decimal('0.00'),
+        'income_tax': Decimal('0.00'),
+        'deductions': Decimal('0.00'),
+        'ssf_employee': Decimal('0.00'),
+        'pf_employee': Decimal('0.00'),
+        'employer_pf': Decimal('0.00'),
+        'total_deduction': Decimal('0.00'),
+        'net_salary': Decimal('0.00'),
+    })
+    
+    grand_total = {
+        'basic_salary': Decimal('0.00'),
+        'total_income': Decimal('0.00'),
+        'gross_salary': Decimal('0.00'),
+        'income_tax': Decimal('0.00'),
+        'deductions': Decimal('0.00'),
+        'ssf_employee': Decimal('0.00'),
+        'pf_employee': Decimal('0.00'),
+        'employer_pf': Decimal('0.00'),
+        'total_deduction': Decimal('0.00'),
+        'net_salary': Decimal('0.00'),
+    }
+    
+    group_by_field = None
+    current_month_date = None
+    
+    if selected_month and selected_year:
+        current_month_date = date(int(selected_year), int(selected_month), 28)
         
-        if selected_staff_cat:
-            filters &= Q(companyinformation__staff_cat=selected_staff_cat)
-            print(selected_staff_cat)
-            
-        if selected_school:
-            filters &= Q(companyinformation__sch_fac_dir=selected_school)
-            print(selected_school)
-            
-        if selected_department:
-            filters &= Q(companyinformation__dept=selected_department)
-            print(selected_department)
-            
-        if selected_directorate:
-            filters &= Q(companyinformation__directorate=selected_directorate)
-            print(selected_directorate)
-            
-        if selected_bank:
-            filters &= Q(companyinformation__bank_name=selected_bank)
-            print(selected_bank)
-            
-        if selected_campus:
-            filters &= Q(companyinformation__campus=selected_campus)
-            print(selected_campus)
-            
-            
-        staff_list = Employee.objects.filter(filters).exclude(companyinformation__active_status='Inactive').order_by('lname')
+        # Check if payroll exists for this month
+        if not Payroll.objects.filter(month=current_month_date).exists():
+            messages.error(request, f"Payroll for {current_month_date.strftime('%B %Y')} has not been processed.")
+            return redirect('payroll-register')
         
-        print("Staff List", staff_list)
-        if not staff_list:
-            messages.error(request, "No staff found for the selected criteria.")
+        # Build the query for Payroll records
+        payroll_query = Payroll.objects.filter(month=current_month_date)
+        
+        # Handle "all" option for grouping and filtering
+        if selected_staff_cat == "all":
+            group_by_field = 'staff_cat'
+        elif selected_staff_cat and selected_staff_cat != "all":
+            payroll_query = payroll_query.filter(staffno__companyinformation__staff_cat=selected_staff_cat)
+            
+        if selected_school == "all":
+            group_by_field = 'school'
+        elif selected_school and selected_school != "all":
+            payroll_query = payroll_query.filter(staffno__companyinformation__sch_fac_dir=selected_school)
+            
+        if selected_department == "all":
+            group_by_field = 'department'
+        elif selected_department and selected_department != "all":
+            payroll_query = payroll_query.filter(staffno__companyinformation__dept=selected_department)
+            
+        if selected_directorate == "all":
+            group_by_field = 'directorate'
+        elif selected_directorate and selected_directorate != "all":
+            payroll_query = payroll_query.filter(staffno__companyinformation__directorate=selected_directorate)
+            
+        if selected_bank == "all":
+            group_by_field = 'bank'
+        elif selected_bank and selected_bank != "all":
+            payroll_query = payroll_query.filter(staffno__companyinformation__bank_name=selected_bank)
+            
+        if selected_campus == "all":
+            group_by_field = 'campus'
+        elif selected_campus and selected_campus != "all":
+            payroll_query = payroll_query.filter(staffno__companyinformation__campus=selected_campus)
+        
+        # Exclude inactive staff
+        payroll_query = payroll_query.exclude(
+            staffno__companyinformation__active_status='Inactive'
+        )
+        
+        # Prefetch related data for efficiency
+        payroll_query = payroll_query.select_related(
+            'staffno'
+        ).prefetch_related(
+            'staffno'
+        ).order_by('staffno__fname', 'staffno__lname')
+        
+        if not payroll_query.exists():
+            messages.error(request, "No payroll records found for the selected criteria.")
             return redirect('payroll-register')
 
-        for staff in staff_list:
-            company_info = CompanyInformation.objects.filter(staffno=staff).first()
+        for payroll_record in payroll_query:
+            staff = payroll_record.staffno
+            company_info = CompanyInformation.objects.get(staffno=staff)
+            
             if not company_info:
-                continue 
-
-            payroll = PayrollCalculator(staffno=staff, month=current_month_date)
-
+                continue
+            
+            # Use saved payroll data
             payroll_data = {
                 "staff": staff,
                 "company_info": company_info,
                 "month": current_month_date.strftime("%B %Y"),
-                "basic_salary": payroll.get_entitled_basic_salary(),
-                "total_income": payroll.get_gross_income() - payroll.get_entitled_basic_salary(),
-                "gross_salary": payroll.get_gross_income(),
-                "incomes": payroll.get_allowance_values()["incomes"],
-                "income_tax": payroll.get_income_tax(),
-                "deductions": payroll.get_deductions()["total_deduction"],
-                "ssf_employee": payroll.get_ssnit_contribution(),
-                "pf_employee": payroll.get_pf_contribution(),
-                "employer_pf": payroll.get_employer_pf_contribution(),
-                "total_deduction": payroll.get_total_deductions(),
-                "net_salary": payroll.get_net_salary(),
+                "basic_salary": payroll_record.basic_salary or Decimal('0.00'),
+                "total_income": payroll_record.total_income or Decimal('0.00'),
+                "gross_salary": payroll_record.gross_salary or Decimal('0.00'),
+                "income_tax": payroll_record.income_tax or Decimal('0.00'),
+                "deductions": payroll_record.other_deductions or Decimal('0.00'),
+                "ssf_employee": payroll_record.ssf_employee or Decimal('0.00'),
+                "pf_employee": payroll_record.pf_employee or Decimal('0.00'),
+                "employer_pf": payroll_record.pf_employer or Decimal('0.00'),
+                "total_deduction": payroll_record.total_deduction or Decimal('0.00'),
+                "net_salary": payroll_record.net_salary or Decimal('0.00'),
             }
-
-            all_payrolls.append(payroll_data)
             
-        messages.success(request, f"Payroll Register for {selected_month} has been generated succesfully")
+            # Determine group key
+            group_key = None
+            if group_by_field:
+                if group_by_field == 'staff_cat':
+                    group_key = company_info.staff_cat
+                elif group_by_field == 'school':
+                    group_key = company_info.sch_fac_dir
+                elif group_by_field == 'department':
+                    group_key = company_info.dept
+                elif group_by_field == 'directorate':
+                    group_key = company_info.directorate
+                elif group_by_field == 'bank':
+                    group_key = company_info.bank_name
+                elif group_by_field == 'campus':
+                    group_key = company_info.campus
+                    
+            if group_key:
+                grouped_payrolls[group_key].append(payroll_data)
+                # Update subtotals
+                subtotals[group_key]['basic_salary'] += payroll_data['basic_salary']
+                subtotals[group_key]['total_income'] += payroll_data['total_income']
+                subtotals[group_key]['gross_salary'] += payroll_data['gross_salary']
+                subtotals[group_key]['income_tax'] += payroll_data['income_tax']
+                subtotals[group_key]['deductions'] += payroll_data['deductions']
+                subtotals[group_key]['ssf_employee'] += payroll_data['ssf_employee']
+                subtotals[group_key]['pf_employee'] += payroll_data['pf_employee']
+                subtotals[group_key]['employer_pf'] += payroll_data['employer_pf']
+                subtotals[group_key]['total_deduction'] += payroll_data['total_deduction']
+                subtotals[group_key]['net_salary'] += payroll_data['net_salary']
+            else:
+                all_payrolls.append(payroll_data)
+            
+            # Update grand totals
+            grand_total['basic_salary'] += payroll_data['basic_salary']
+            grand_total['total_income'] += payroll_data['total_income']
+            grand_total['gross_salary'] += payroll_data['gross_salary']
+            grand_total['income_tax'] += payroll_data['income_tax']
+            grand_total['deductions'] += payroll_data['deductions']
+            grand_total['ssf_employee'] += payroll_data['ssf_employee']
+            grand_total['pf_employee'] += payroll_data['pf_employee']
+            grand_total['employer_pf'] += payroll_data['employer_pf']
+            grand_total['total_deduction'] += payroll_data['total_deduction']
+            grand_total['net_salary'] += payroll_data['net_salary']
+            
+        messages.success(request, f"Payroll Register for {current_month_date.strftime('%B %Y')} has been loaded successfully")
+    
+    # Export functionality
+    export_format = request.GET.get("format")
+    if export_format and (all_payrolls or grouped_payrolls) and current_month_date:
+        filename = f"Payroll Register {current_month_date.strftime('%b_%Y')}"
+        
+        if export_format == "pdf":
+            context = {
+                "payrolls": all_payrolls,
+                "grouped_payrolls": dict(grouped_payrolls),
+                "subtotals": dict(subtotals),
+                "grand_total": grand_total,
+                "selected_date": current_month_date.strftime('%B %Y'),
+                "date": datetime.now().strftime("%d %B, %Y"),
+                "group_by_field": group_by_field,
+            }
+            return render_to_pdf("export/payroll_register.html", context, f"{filename}.pdf")
+            
+        elif export_format == "excel":
+            rows = []
+            
+            if grouped_payrolls:
+                for group_key, group_data in grouped_payrolls.items():
+                    # Add group header
+                    rows.append({
+                        "Employee ID": f"--- {group_key} ---",
+                        "Employee Name": "",
+                        "Basic Salary": "",
+                        "Allowances": "",
+                        "Gross Salary": "",
+                        "Income Tax": "",
+                        "Deductions": "",
+                        "SSF Employee": "",
+                        "PF Employee": "",
+                        "PF Employer": "",
+                        "Total Deduction": "",
+                        "Net Pay": "",
+                    })
+                    
+                    # Add group data
+                    for entry in group_data:
+                        rows.append({
+                            "Employee ID": entry["staff"].staffno,
+                            "Employee Name": f"{entry['staff'].fname} {entry['staff'].lname}",
+                            "Basic Salary": float(entry["basic_salary"]),
+                            "Allowances": float(entry["total_income"]),
+                            "Gross Salary": float(entry["gross_salary"]),
+                            "Income Tax": float(entry["income_tax"]),
+                            "Deductions": float(entry["deductions"]),
+                            "SSF Employee": float(entry["ssf_employee"]),
+                            "PF Employee": float(entry["pf_employee"]),
+                            "PF Employer": float(entry["employer_pf"]),
+                            "Total Deduction": float(entry["total_deduction"]),
+                            "Net Pay": float(entry["net_salary"]),
+                        })
+                    
+                    # Add subtotal
+                    rows.append({
+                        "Employee ID": "",
+                        "Employee Name": f"Subtotal - {group_key}",
+                        "Basic Salary": float(subtotals[group_key]['basic_salary']),
+                        "Allowances": float(subtotals[group_key]['total_income']),
+                        "Gross Salary": float(subtotals[group_key]['gross_salary']),
+                        "Income Tax": float(subtotals[group_key]['income_tax']),
+                        "Deductions": float(subtotals[group_key]['deductions']),
+                        "SSF Employee": float(subtotals[group_key]['ssf_employee']),
+                        "PF Employee": float(subtotals[group_key]['pf_employee']),
+                        "PF Employer": float(subtotals[group_key]['employer_pf']),
+                        "Total Deduction": float(subtotals[group_key]['total_deduction']),
+                        "Net Pay": float(subtotals[group_key]['net_salary']),
+                    })
+                    rows.append({})  # Empty row for spacing
+            else:
+                for entry in all_payrolls:
+                    rows.append({
+                        "Employee ID": entry["staff"].staffno,
+                        "Employee Name": f"{entry['staff'].fname} {entry['staff'].lname}",
+                        "Basic Salary": float(entry["basic_salary"]),
+                        "Allowances": float(entry["total_income"]),
+                        "Gross Salary": float(entry["gross_salary"]),
+                        "Income Tax": float(entry["income_tax"]),
+                        "Deductions": float(entry["deductions"]),
+                        "SSF Employee": float(entry["ssf_employee"]),
+                        "PF Employee": float(entry["pf_employee"]),
+                        "PF Employer": float(entry["employer_pf"]),
+                        "Total Deduction": float(entry["total_deduction"]),
+                        "Net Pay": float(entry["net_salary"]),
+                    })
+            
+            # Add grand total
+            rows.append({
+                "Employee ID": "",
+                "Employee Name": "GRAND TOTAL",
+                "Basic Salary": float(grand_total['basic_salary']),
+                "Allowances": float(grand_total['total_income']),
+                "Gross Salary": float(grand_total['gross_salary']),
+                "Income Tax": float(grand_total['income_tax']),
+                "Deductions": float(grand_total['deductions']),
+                "SSF Employee": float(grand_total['ssf_employee']),
+                "PF Employee": float(grand_total['pf_employee']),
+                "PF Employer": float(grand_total['employer_pf']),
+                "Total Deduction": float(grand_total['total_deduction']),
+                "Net Pay": float(grand_total['net_salary']),
+            })
+            
+            return render_to_excel({"Payroll Register": rows}, f"{filename}.xlsx")
+    
     context = {
         "payrolls": all_payrolls,
+        "grouped_payrolls": dict(grouped_payrolls),
+        "subtotals": dict(subtotals),
+        "grand_total": grand_total,
         "selected_month": selected_month,
+        "selected_year": selected_year,
         "staff_categories": staff_categories,
         "campus": campus,
         "schools": schools,
         "departments": departments,
         "banks": banks,
-        "directorate":directorate,
+        "directorate": directorate,
         "selected_staff_cat": selected_staff_cat,
         "selected_campus": selected_campus, 
         "selected_school": selected_school,
         "selected_department": selected_department,
         "selected_bank": selected_bank,
-        "selected_directorate":selected_directorate,
+        "selected_directorate": selected_directorate,
+        "group_by_field": group_by_field,
     }
     return render(request, 'hr/payroll_register.html', context)
 
@@ -4021,10 +4400,27 @@ def payroll_history(request):
     selected_month = request.GET.get("filter_by_month")
     selected_year = request.GET.get("filter_by_year")
     staffno = request.GET.get("staffno")
+    
     payroll_data = []
+    totals = {
+        'basic_salary': Decimal('0.00'),
+        'total_income': Decimal('0.00'),
+        'gross_salary': Decimal('0.00'),
+        'income_tax': Decimal('0.00'),
+        'ssf_employee': Decimal('0.00'),
+        'pf_employee': Decimal('0.00'),
+        'pf_employer': Decimal('0.00'),
+        'other_deductions': Decimal('0.00'),
+        'total_deduction': Decimal('0.00'),
+        'net_salary': Decimal('0.00'),
+    }
     
     if selected_month and selected_year:
         current_month_date = date(int(selected_year), int(selected_month), 28)
+        
+        if not Payroll.objects.filter(month=current_month_date).exists():
+            messages.error(request, f"Payroll for {current_month_date.strftime('%B %Y')} has not been processed.")
+            return redirect('payroll-history')
         
         if staffno and staffno != "all":
             staff = get_object_or_404(Employee, pk=staffno)
@@ -4035,46 +4431,93 @@ def payroll_history(request):
             staff_list = []
 
         for staff in staff_list:
-            payrolls = Payroll.objects.filter(staffno=staff, month=current_month_date)
-            # payrolls = Payroll.objects.filter(staffno=staff).order_by('-month')
-            for p in payrolls:
-                payroll_data.append({
+            if not Payroll.objects.filter(staffno=staff, month__year=current_month_date.year, month__month=current_month_date.month).exists():
+                continue
+            
+            # payrolls = Payroll.objects.filter(staffno=staff, month=current_month_date)
+            payroll = Payroll.objects.filter(staffno=staff, month__year=current_month_date.year, month__month=current_month_date.month).first()
+            if payroll:
+                entry = {
                     "staff": staff,
-                    "payroll": p
-                })
+                    "basic_salary": payroll.basic_salary or Decimal('0.00'),
+                    "total_income": payroll.total_income or Decimal('0.00'),
+                    "gross_salary": payroll.gross_salary or Decimal('0.00'),
+                    "income_tax": payroll.income_tax or Decimal('0.00'),
+                    "ssf_employee": payroll.ssf_employee or Decimal('0.00'),
+                    "pf_employee": payroll.pf_employee or Decimal('0.00'),
+                    "pf_employer": payroll.pf_employer or Decimal('0.00'),
+                    "other_deductions": payroll.other_deductions or Decimal('0.00'),
+                    "total_deduction": payroll.total_deduction or Decimal('0.00'),
+                    "net_salary": payroll.net_salary or Decimal('0.00'),
+                    "for_month": current_month_date,
+                }
+                payroll_data.append(entry)
+                
+                # Calculate totals
+                totals['basic_salary'] += entry['basic_salary'] 
+                totals['total_income'] += entry['total_income']
+                totals['gross_salary'] += entry['gross_salary']
+                totals['income_tax'] += entry['income_tax']
+                totals['ssf_employee'] += entry['ssf_employee']
+                totals['pf_employee'] += entry['pf_employee']
+                totals['pf_employer'] += entry['pf_employer']
+                totals['other_deductions'] += entry['other_deductions']
+                totals['total_deduction'] += entry['total_deduction']
+                totals['net_salary'] += entry['net_salary']
+                
 
-        export_format = request.GET.get("format")
-        
+    export_format = request.GET.get("format")
+    if export_format and payroll_data:
+        filename = f"PAYROLL_HISTORY__{current_month_date.strftime('%b_%Y')}"
         if export_format == "pdf":
-            return render_to_pdf("hr/payroll_history.html", {
+            context = {
                 "payroll_data": payroll_data,
-                "report_for": staffno,
-            }, filename="payroll_history.pdf")
-
-        if export_format == "excel":
-            excel_data = {}
+                "totals": totals,
+                "selected_date": current_month_date.strftime('%B %Y'),
+                "date": datetime.now().strftime("%d %B, %Y")
+            }
+            return render_to_pdf("export/payroll_history.html", context, f"{filename}.pdf")
+        elif export_format == "excel":
+            rows = []
             for entry in payroll_data:
-                p = entry["payroll"]
-                sheet_name = f"{entry['staff'].fname}_{p.month.strftime('%Y-%m')}"
-                excel_data[sheet_name] = [{
-                    "Month": p.month,
-                    "Basic Salary": p.basic_salary or 0,
-                    "Total Income": p.total_income or 0,
-                    "Gross Salary": p.gross_salary or 0,
-                    "Income Tax": p.income_tax or 0,
-                    "SSF": p.ssf or 0,
-                    "PF Employee": p.pf_employee or 0,
-                    "PF Employer": p.pf_employer or 0,
-                    "Other Deductions": p.other_deductions or 0,
-                    "Total Deduction": p.total_deduction or 0,
-                    "Net Salary": p.net_salary or 0,
-                    "Cost Center": p.cost_center or "",
-                }]
+                staff = entry["staff"]
+                
+                rows.append({
+                    "Employee ID": staff.staffno,
+                    "Employee Name": f"{staff.lname} {staff.fname} {staff.middlenames}",
+                    "Basic Salary": entry["basic_salary"],
+                    "Total Income": entry["total_income"],
+                    "Gross Salary": entry["gross_salary"],
+                    "Income Tax": entry["income_tax"],
+                    "SSF Employee": entry["ssf_employee"],
+                    "PF Employee": entry["pf_employee"],
+                    "PF Employer": entry["pf_employer"],
+                    "Other Deductions": entry["other_deductions"],
+                    "Total Deduction": entry["total_deduction"],
+                    "Net Salary": entry["net_salary"],
+                })
+                
+            rows.append({
+                "Employee ID": "",
+                "Employee Name": "TOTAL",
+                "Basic Salary": totals['basic_salary'],
+                "Total Income": totals['total_income'],
+                "Gross Salary": totals['gross_salary'],
+                "Income Tax": totals['income_tax'],
+                "SSF Employee": totals['ssf_employee'],
+                "PF Employee": totals['pf_employee'],
+                "PF Employer": totals['pf_employer'],
+                "Other Deductions": totals['other_deductions'],
+                "Total Deduction": totals['total_deduction'],
+                "Net Salary": totals['net_salary'],
+            })
 
-            return render_to_excel(excel_data, filename="payroll_history.xlsx")
+            return render_to_excel({"PAYROLL History": rows}, f"{filename}.xlsx")
+
 
     return render(request, "hr/payroll_history.html", {
         "payroll_data": payroll_data,
+        "totals": totals,
         "employees": Employee.objects.all(),
         "report_for": staffno,
         "selected_month": selected_month,
@@ -4092,72 +4535,68 @@ def income_history(request):
     income_type_id = request.GET.get("income_type")
 
     income_data = []
-    total_amount = 0
+    total_amount = Decimal('0.00')
     
     statutory_types = ["Basic Salary"]
 
     if selected_month and selected_year:
-        selected_date = date(int(selected_year), int(selected_month), 1)
+        selected_date = date(int(selected_year), int(selected_month), 28)
 
         # ✅ only allow if payroll for selected month is approved
-        if not Payroll.objects.filter(month__year=selected_date.year, month__month=selected_date.month).exists():
+        if not Payroll.objects.filter(month=selected_date).exists():
             messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been proccessed")
             return redirect('income-history')
         
-        # staff selection
+        # Build the query - DO NOT use .first() here!
+        payroll_query = Payroll.objects.filter(month=selected_date)
+        
+        # Filter by staff
         if staffno and staffno != "all":
-            staff_list = [get_object_or_404(Employee, pk=staffno)]
+            payroll_query = payroll_query.filter(staffno__pk=staffno)
         elif staffno == "all":
-            staff_list = Employee.objects.all()
+            payroll_query = payroll_query.all()
         else:
-            staff_list = []
-
-        for staff in staff_list:
-            if not Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).exists():
-                continue
+            messages.error(request, "Please select a staff member or 'All Staff'")
+            return redirect('income-history')
             
-            incomes = StaffIncome.objects.filter(staffno=staff)
+        # Prefetch related income data
+        payroll_query = payroll_query.prefetch_related(
+            'incomes',
+            'staffno'
+        ).order_by('staffno__lname', 'staffno__fname')
+        
+        # Iterate through ALL payroll records in the queryset
+        for payroll_record in payroll_query:
+            staff = payroll_record.staffno
             
+            # Get incomes from PayrollIncome table
+            income_records = payroll_record.incomes.all()
+            
+            # Filter by income type if specified
             if income_type_id and income_type_id != "all":
-                if income_type_id not in statutory_types:
-                    incomes = incomes.filter(income_type=income_type_id)
-                else:
-                    incomes = incomes.filter(income_type=income_type_id)
+                income_records = income_records.filter(income_type=income_type_id)
+            
+            for income in income_records:
+                income_data.append({
+                    "staff": staff,
+                    "income_type": income.income_type,
+                    "amount": income.amount,
+                    "percentage_of_basic": income.percentage_of_basic,
+                    "for_month": selected_date,
+                })
+                total_amount += income.amount
                 
-            for income in incomes:
-                start = income.start_month
-                end = income.end_month or selected_date
-                if start <= selected_date <= end:
-                    income_data.append({
-                        "staff": staff,
-                        "income_type": str(income.income_type),
-                        "amount": income.amount or 0,
-                        "for_month": selected_date,
-                    })
-                    
-            payroll = Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).first()
-            if payroll:
-                payroll_income = [("Basic Salary", payroll.basic_salary)]
-                
-                for itype, amount in payroll_income:
-                    if amount and (income_type_id == "all" or not income_type_id or itype == income_type_id):
-                        income_data.append({
-                            "staff": staff,
-                            "income_type": itype,
-                            "amount": amount,
-                            "for_month": selected_date,
-                        })
-         
-        total_amount = sum(entry["amount"] for entry in income_data)
         # Export PDF/Excel
         export_format = request.GET.get("format")
         if export_format and income_data:
-            filename = f"{income_type_id.replace(' ', '_')}__{selected_date.strftime('%b_%Y')}"
+            itype_for_filename = (income_type_id or "All")
+            filename = f"{itype_for_filename} {selected_date.strftime('%b_%Y')}"
             if export_format == "pdf":
                 context = {
                     "income_data": income_data,
                     "total_amount": total_amount,
                     "selected_date": selected_date.strftime('%B %Y'),
+                    "date": datetime.now().strftime("%d %B, %Y")
                 }
                 return render_to_pdf("export/incomes.html", context, f"{filename}.pdf")
 
@@ -4168,14 +4607,21 @@ def income_history(request):
                         "Employee ID": entry["staff"].staffno,
                         "Employee": f"{entry['staff'].fname} {entry['staff'].lname} {entry['staff'].middlenames}",
                         "Income Type": entry["income_type"],
-                        # "Month": entry["for_month"].strftime("%B %Y"),
                         "Amount": entry["amount"],
                     })
+                    
+                rows.append({})  # Empty row
+                rows.append({
+                    "Employee ID": "",
+                    "Employee": "TOTAL",
+                    "Income Type": "",
+                    "Amount": float(total_amount),
+                })
                 return render_to_excel({"Income History": rows}, f"{filename}.xlsx")
                        
     context = {
         "income_data": income_data,
-        "employees": Employee.objects.all(),
+        "employees": Employee.objects.all().order_by('lname'),
         "income_types": list(IncomeType.objects.values_list("name", flat=True)),
         "statutory_incomes": statutory_types,
         "selected_month": selected_month,
@@ -4198,98 +4644,106 @@ def deduction_history(request):
     deduction_type_id = request.GET.get("deduction_type")
 
     deduction_data = []
-    total_amount = 0
+    total_amount = Decimal('0.00')
+    
+    statutory_types = ["Income Tax", "WHT - Rent", "Withholding Tax"]
 
-    # 👇 Statutory names
-    statutory_types = ["Income Tax", "SSF", "PF Employee", "PF Employer"]
 
     if selected_month and selected_year:
         selected_date = date(int(selected_year), int(selected_month), 28)
 
-        if not Payroll.objects.filter(month__year=selected_date.year, month__month=selected_date.month).exists():
+        # Check if payroll exists
+        if not Payroll.objects.filter(month=selected_date).exists():
             messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been processed.")
             return redirect('deduction-history')
 
+        # Build the query
+        payroll_query = Payroll.objects.filter(month=selected_date)
+        
+        # Filter by staff
         if staffno and staffno != "all":
-            staff_list = [get_object_or_404(Employee, pk=staffno)]
+            payroll_query = payroll_query.filter(staffno__pk=staffno)
         elif staffno == "all":
-            staff_list = Employee.objects.all()
+            payroll_query = payroll_query.all()
         else:
-            staff_list = []
-
-        for staff in staff_list:
-            if not Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).exists():
-                continue
-
-            # 👉 Custom deductions
-            deductions = StaffDeduction.objects.filter(staffno=staff)
-
-            if deduction_type_id and deduction_type_id != "all":
-                # Only filter custom deductions if not in statutory
-                if deduction_type_id not in statutory_types:
-                    deductions = deductions.filter(deduction_type=deduction_type_id)
-                else:
-                    deductions = deductions.filter(deduction_type=deduction_type_id)
+            messages.error(request, "Please select a staff member or 'All Staff'")
+            return redirect('deduction-history')
             
-            for deduction in deductions:
-                start = deduction.start_month
-                end = deduction.end_month or selected_date
-                if start <= selected_date <= end:
-                    deduction_data.append({
-                        "staff": staff,
-                        "deduction_type": str(deduction.deduction_type),
-                        "amount": deduction.amount or 0,
-                        "for_month": selected_date,
-                    })
-
-            # 👉 Statutory
-            payroll = Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).first()
-            if payroll:
-                payroll_deductions = [
-                    ("Income Tax", payroll.income_tax),
-                    ("SSF", payroll.ssf),
-                    ("PF Employee", payroll.pf_employee),
-                    ("PF Employer", payroll.pf_employer),
-                ]
-
-                for dtype, amount in payroll_deductions:
-                    if amount and (deduction_type_id == "all" or not deduction_type_id or dtype == deduction_type_id):
-                        deduction_data.append({
-                            "staff": staff,
-                            "deduction_type": dtype,
-                            "amount": amount,
-                            "for_month": selected_date,
-                        })
-                        
-        total_amount = sum(entry["amount"] for entry in deduction_data)
-               
+        # Prefetch related deduction data
+        payroll_query = payroll_query.prefetch_related(
+            'deductions',
+            'staffno'
+        ).order_by('staffno__lname', 'staffno__fname')
+        
+        # Iterate through ALL payroll records in the queryset
+        for payroll_record in payroll_query:
+            staff = payroll_record.staffno
+            
+            # Get deductions from PayrollDeduction table
+            # EXCLUDE SSF and PF deductions
+            deduction_records = payroll_record.deductions.exclude(
+                deduction_type__startswith="Social Security"
+            ).exclude(
+                deduction_type__startswith="Provident Fund"
+            )
+            
+            # Filter by deduction type if specified
+            if deduction_type_id and deduction_type_id != "all":
+                deduction_records = deduction_records.filter(deduction_type=deduction_type_id)
+            
+            for deduction in deduction_records:
+                # Format rate if it exists
+                rate_str = None
+                if deduction.rate:
+                    rate_str = f"{deduction.rate}"
+                
+                deduction_data.append({
+                    "staff": staff,
+                    "deduction_type": deduction.deduction_type,
+                    "amount": deduction.amount,
+                    "percentage": rate_str,
+                    "for_month": selected_date,
+                })
+                total_amount += deduction.amount
+                
         # Export PDF/Excel
         export_format = request.GET.get("format")
         if export_format and deduction_data:
-            filename = f"{deduction_type_id.replace(' ', '_')}__{selected_date.strftime('%b_%Y')}"
+            dtype_for_filename = (deduction_type_id or "All")
+            filename = f"{dtype_for_filename} {selected_date.strftime('%b_%Y')}"
+            
             if export_format == "pdf":
                 context = {
                     "deduction_data": deduction_data,
                     "total_amount": total_amount,
                     "selected_date": selected_date.strftime('%B %Y'),
+                    "date": datetime.now().strftime("%d %B, %Y")
                 }
                 return render_to_pdf("export/deductions.html", context, f"{filename}.pdf")
+                
             elif export_format == "excel":
                 rows = []
                 for entry in deduction_data:
                     rows.append({
-                        "Staff No": entry["staff"].staffno,
-                        "Staff": f"{entry['staff'].fname} {entry['staff'].lname}",
+                        "Employee ID": entry["staff"].staffno,
+                        "Employee": f"{entry['staff'].fname} {entry['staff'].lname}",
                         "Deduction Type": entry["deduction_type"],
-                        "Month": entry["for_month"].strftime("%B %Y"),
-                        "Amount": entry["amount"],
+                        "Amount": float(entry["amount"]),
                     })
+                    
+                rows.append({})  # Empty row
+                rows.append({
+                    "Employee ID": "",
+                    "Employee": "TOTAL",
+                    "Deduction Type": "",
+                    "Amount": float(total_amount),
+                })
                 return render_to_excel({"Deduction History": rows}, f"{filename}.xlsx")
     
-    # Send name lists only
+    
     context = {
         "deduction_data": deduction_data,
-        "employees": Employee.objects.all(),
+        "employees": Employee.objects.all().order_by('lname'),
         "deduction_types": list(DeductionType.objects.values_list("name", flat=True)),
         "statutory_deductions": statutory_types,
         "selected_month": selected_month,
@@ -4302,57 +4756,230 @@ def deduction_history(request):
     return render(request, "hr/deduction_history.html", context)
 
 
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_statutory_history')
+def statutory_history(request):
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
+    staffno = request.GET.get("staffno")
+    selected_type = request.GET.get("statutory_type")
+
+    statutory_rows = []
+    total_employee = Decimal('0.00')
+    total_employer = Decimal('0.00')
+    total_overall = Decimal('0.00')
+
+    if selected_month and selected_year and selected_type in ["ssf", "pf"]:
+        selected_date = date(int(selected_year), int(selected_month), 28)
+
+        # Check if payroll exists
+        if not Payroll.objects.filter(month=selected_date).exists():
+            messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been processed.")
+            return redirect('statutory-history')
+        
+        # Build the query
+        payroll_query = Payroll.objects.filter(month=selected_date)
+        
+        # Filter by contribution type
+        if selected_type == "ssf":
+            payroll_query = payroll_query.filter(
+                staffno__companyinformation__ssn_con=True
+            )
+        else:  # pf
+            payroll_query = payroll_query.filter(
+                staffno__companyinformation__pf_con=True
+            )
+        
+        # Filter by staff
+        if staffno and staffno != "all":
+            payroll_query = payroll_query.filter(staffno__pk=staffno)
+            
+            # Check if specific staff has the contribution enabled
+            if not payroll_query.exists():
+                if selected_type == "ssf":
+                    messages.error(request, "This staff doesn't pay SSF or no payroll found.")
+                else:
+                    messages.error(request, "This staff doesn't pay Provident Fund or no payroll found.")
+                return redirect('statutory-history')
+        elif staffno != "all":
+            messages.error(request, "Please select a staff member or 'All Staff'")
+            return redirect('statutory-history')
+        
+        # Prefetch related data for efficiency
+        payroll_query = payroll_query.select_related(
+            'staffno'
+        ).prefetch_related(
+            'staffno'
+        ).order_by('staffno__lname', 'staffno__fname')
+
+        # Process payroll records
+        for payroll_record in payroll_query:
+            staff = payroll_record.staffno
+            
+            employee_amt = Decimal('0.00')
+            employer_amt = Decimal('0.00')
+
+            if selected_type == "ssf":
+                employee_amt = payroll_record.ssf_employee or Decimal('0.00')
+                employer_amt = payroll_record.ssf_employer or Decimal('0.00')
+            else:  # pf
+                employee_amt = payroll_record.pf_employee or Decimal('0.00')
+                employer_amt = payroll_record.pf_employer or Decimal('0.00')
+
+            total_amt = employee_amt + employer_amt
+
+            statutory_rows.append({
+                "staff": staff,
+                "for_month": selected_date,
+                "employee": employee_amt,
+                "employer": employer_amt,
+                "total": total_amt,
+            })
+
+            total_employee += employee_amt
+            total_employer += employer_amt
+            total_overall += total_amt
+
+        # Export
+        export_format = request.GET.get("format")
+        if export_format and statutory_rows:
+            filename = f"{selected_type.upper()} {selected_date.strftime('%b_%Y')}"
+            if export_format == "pdf":
+                context = {
+                    "rows": statutory_rows,
+                    "selected_date": selected_date.strftime('%B %Y'),
+                    "type": selected_type,
+                    "totals": {
+                        "employee": total_employee,
+                        "employer": total_employer,
+                        "overall": total_overall,
+                    },
+                    "date": datetime.now().strftime("%d %B, %Y")
+                }
+                return render_to_pdf("export/statutory.html", context, f"{filename}.pdf")
+            elif export_format == "excel":
+                rows = []
+                for entry in statutory_rows:
+                    rows.append({
+                        "Staff No": entry["staff"].staffno,
+                        "Staff": f"{entry['staff'].fname} {entry['staff'].lname}",
+                        ("SSF Employee" if selected_type == "ssf" else "PF Employee"): float(entry["employee"]),
+                        ("SSF Employer" if selected_type == "ssf" else "PF Employer"): float(entry["employer"]),
+                        "Total": float(entry["total"]),
+                    })
+                # Totals row
+                rows.append({})
+                rows.append({
+                    "Staff No": "",
+                    "Staff": "TOTAL",
+                    ("SSF Employee" if selected_type == "ssf" else "PF Employee"): float(total_employee),
+                    ("SSF Employer" if selected_type == "ssf" else "PF Employer"): float(total_employer),
+                    "Total": float(total_overall),
+                })
+                sheet_name = "SSF History" if selected_type == "ssf" else "PF History"
+                return render_to_excel({sheet_name: rows}, f"{filename}.xlsx")
+
+
+    context = {
+        "rows": statutory_rows,
+        "employees": Employee.objects.all().order_by('lname'),
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+        "report_for": staffno,
+        "selected_type": selected_type,
+        "totals": {
+            "employee": total_employee,
+            "employer": total_employer,
+            "overall": total_overall,
+        }
+    }
+
+    return render(request, "hr/statutory_history.html", context)
+
+
+def payslip(request):
+    return render(request, "payroll/test.html")
 
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
-@tag_required('view_paye-history')
+@tag_required('view_paye_history')
 def paye_history(request):
     selected_month = request.GET.get("filter_by_month")
     selected_year = request.GET.get("filter_by_year")
     staffno = request.GET.get("staffno")
     
     paye_data = []
+    totals = {
+        'basic_salary': Decimal('0.00'),
+        'paye_total_income': Decimal('0.00'),
+        'paye_total_emoluments': Decimal('0.00'),
+        'ssf_employee': Decimal('0.00'),
+        'pf_employee': Decimal('0.00'),
+        'total_relief': Decimal('0.00'),
+        'net_taxable_pay': Decimal('0.00'),
+        'income_tax': Decimal('0.00'),
+    }
     
     if selected_month and selected_year:
-        selected_date = date(int(selected_year), int(selected_month), 1)
+        selected_date = date(int(selected_year), int(selected_month), 28)
 
-        if not Payroll.objects.filter(month__year=selected_date.year, month__month=selected_date.month).exists():
+        # Check if payroll exists for this month
+        if not Payroll.objects.filter(month=selected_date).exists():
             messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been processed.")
             return redirect('paye-history')
 
+        # Build the query
+        payroll_query = Payroll.objects.filter(month=selected_date)
+        
+        # Filter by staff
         if staffno and staffno != "all":
-            staff_list = [get_object_or_404(Employee, pk=staffno)]
+            payroll_query = payroll_query.filter(staffno__pk=staffno)
         elif staffno == "all":
-            staff_list = Employee.objects.all()
+            payroll_query = payroll_query.exclude(staffno__companyinformation__active_status='Inactive')
         else:
-            staff_list = []
+            messages.error(request, "Please select a staff member or 'All Staff'")
+            return redirect('paye-history')
+        
+        # Prefetch related data for efficiency
+        payroll_query = payroll_query.select_related('staffno').prefetch_related('staffno').order_by('staffno__lname', 'staffno__fname')
 
-        for staff in staff_list:
-            if not Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).exists():
-                continue
-
-            payroll = Payroll.objects.filter(staffno=staff, month__year=selected_date.year, month__month=selected_date.month).first()
-            if payroll:
-                paye_data.append({
-                    "staff": staff,
-                    "basic_salary": payroll.basic_salary or 0,
-                    "paye_total_income": payroll.paye_total_income or 0,
-                    "paye_total_emoluments": payroll.paye_total_emoluments or 0,
-                    "ssf": payroll.ssf or 0,
-                    "pf_employee": payroll.pf_employee or 0,
-                    "total_relief": payroll.total_relief or 0,
-                    "net_taxable_pay": payroll.net_taxable_pay or 0,
-                    "income_tax": payroll.income_tax or 0,
-                    "for_month": selected_date,
-                })
+        # Process all payroll records
+        for payroll in payroll_query:
+            staff = payroll.staffno
+            
+            entry = {
+                "staff": staff,
+                "basic_salary": payroll.basic_salary or Decimal('0.00'),
+                "paye_total_income": payroll.paye_total_income or Decimal('0.00'),
+                "paye_total_emoluments": payroll.paye_total_emoluments or Decimal('0.00'),
+                "ssf_employee": payroll.ssf_employee or Decimal('0.00'),
+                "pf_employee": payroll.pf_employee or Decimal('0.00'),
+                "total_relief": payroll.total_relief or Decimal('0.00'),
+                "net_taxable_pay": payroll.net_taxable_pay or Decimal('0.00'),
+                "income_tax": payroll.income_tax or Decimal('0.00'),
+                "for_month": selected_date,
+            }
+            paye_data.append(entry)
+            
+            # Calculate totals
+            totals['basic_salary'] += entry['basic_salary']
+            totals['paye_total_income'] += entry['paye_total_income']
+            totals['paye_total_emoluments'] += entry['paye_total_emoluments']
+            totals['ssf_employee'] += entry['ssf_employee']
+            totals['pf_employee'] += entry['pf_employee']
+            totals['total_relief'] += entry['total_relief']
+            totals['net_taxable_pay'] += entry['net_taxable_pay']
+            totals['income_tax'] += entry['income_tax']
     
     # Export PDF/Excel
     export_format = request.GET.get("format")
     if export_format and paye_data:
-        filename = f"PAYE__{selected_date.strftime('%b_%Y')}"
+        filename = f"PAYE {selected_date.strftime('%b_%Y')}"
         if export_format == "pdf":
             context = {
                 "paye_data": paye_data,
+                "totals": totals,
                 "selected_date": selected_date.strftime('%B %Y'),
                 "date": datetime.now().strftime("%d %B, %Y")
             }
@@ -4360,26 +4987,619 @@ def paye_history(request):
         elif export_format == "excel":
             rows = []
             for entry in paye_data:
+                staff = entry["staff"]
+                
                 rows.append({
-                    "Staff No": entry["staff"].staffno,
-                    "Staff": f"{entry['staff'].fname} {entry['staff'].lname}",
-                    "Basic Salary": entry["basic_salary"],
-                    "PAYE Total Income": entry["paye_total_income"],
-                    "PAYE Total Emoluments": entry["paye_total_emoluments"],
-                    "SSF": entry["ssf"],
+                    "Employee ID": staff.staffno,
+                    "Employee Name": f"{staff.lname} {staff.fname} {staff.middlenames}",
+                    "Tax ID": f"{staff.gcardno}",
+                    "Basic Wage": entry["basic_salary"],
+                    "Total Allowances": entry["paye_total_income"],
+                    "Total Emoluments": entry["paye_total_emoluments"],
+                    "SSF Employee": entry["ssf_employee"],
                     "PF Employee": entry["pf_employee"],
                     "Total Relief": entry["total_relief"],
                     "Net Taxable Pay": entry["net_taxable_pay"],
                     "Income Tax": entry["income_tax"],
                 })
+            # Add totals row to Excel
+            rows.append({
+                "Staff No": "",
+                "Staff": "TOTAL",
+                "Tax ID": "",
+                "Basic Wage": totals['basic_salary'],
+                "Total Allowances": totals['paye_total_income'],
+                "Total Emoluments": totals['paye_total_emoluments'],
+                "SSF Employee": totals['ssf_employee'],
+                "PF Employee": totals['pf_employee'],
+                "Total Relief": totals['total_relief'],
+                "Net Taxable Pay": totals['net_taxable_pay'],
+                "Income Tax": totals['income_tax'],
+            })
             return render_to_excel({"PAYE History": rows}, f"{filename}.xlsx")
     
     context = {
         "paye_data": paye_data,
-        "employees": Employee.objects.all(),
+        "totals": totals,
+        "employees": Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('fname'),
         "selected_month": selected_month,
         "selected_year": selected_year,
         "report_for": staffno,
     }
     
     return render(request, "hr/paye_history.html", context)
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_statutory_history')
+def payroll_allowances(request):
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
+    staffno = request.GET.get("staffno")
+    
+    allowances_data = []
+    grand_totals = {}
+    overall_total = Decimal('0.00')
+    
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 28)
+
+        # Check if payroll exists
+        if not Payroll.objects.filter(month=selected_date).exists():
+            messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been processed.")
+            return redirect('payroll-allowances')
+
+        # Build query
+        payroll_query = Payroll.objects.filter(month=selected_date)
+        
+        if staffno and staffno != "all":
+            payroll_query = payroll_query.filter(staffno__pk=staffno)
+        elif staffno == "all":
+            payroll_query = payroll_query.all()
+        else:
+            messages.error(request, "Please select a staff member or 'All Staff'")
+            return redirect('payroll-allowances')
+        
+        # Prefetch related data for efficiency
+        payroll_query = payroll_query.prefetch_related(
+            'incomes',
+            # 'benefits_in_kind',
+            'staffno'
+        ).order_by('staffno__lname', 'staffno__fname')
+
+        for payroll_record in payroll_query:
+            staff = payroll_record.staffno
+            company_info = CompanyInformation.objects.get(staffno=staff)
+            position = company_info.job_title if company_info else "N/A"
+            
+            employee_allowances = []
+            employee_total = Decimal('0.00')
+            
+            # Get all incomes from the saved records
+            for income in payroll_record.incomes.all():
+                employee_allowances.append({
+                    'type': income.income_type,
+                    'amount': income.amount
+                })
+                employee_total += income.amount
+                
+                # Update grand totals
+                grand_totals[income.income_type] = grand_totals.get(
+                    income.income_type, Decimal('0.00')
+                ) + income.amount
+            
+            # Add benefits in kind if needed
+            # for benefit in payroll_record.benefits_in_kind.all():
+            #     employee_allowances.append({
+            #         'type': f'{benefit.benefit_type} (BIK)',
+            #         'amount': benefit.amount
+            #     })
+            #     employee_total += benefit.amount
+                
+            #     # Update grand totals
+            #     grand_totals[f'{benefit.benefit_type} (BIK)'] = grand_totals.get(
+            #         f'{benefit.benefit_type} (BIK)', Decimal('0.00')
+            #     ) + benefit.amount
+            
+            if employee_allowances:
+                allowances_data.append({
+                    'staff': staff,
+                    'position': position,
+                    'allowances': employee_allowances,
+                    'total': employee_total,
+                    'for_month': selected_date,
+                })
+                overall_total += employee_total
+    
+    # Export functionality
+    export_format = request.GET.get("format")
+    if export_format and allowances_data:
+        filename = f"Payroll Allowances_{selected_date.strftime('%b_%Y')}"
+        
+        if export_format == "pdf":
+            context = {
+                "allowances_data": allowances_data,
+                "grand_totals": grand_totals,
+                "overall_total": overall_total,
+                "selected_date": selected_date.strftime('%B %Y'),
+                "date": datetime.now().strftime("%d %B, %Y"),
+                "report_type": "individual" if staffno != "all" else "all"
+            }
+            return render_to_pdf("export/payroll_allowances.html", context, f"{filename}.pdf")
+            
+        elif export_format == "excel":
+            rows = []
+            for entry in allowances_data:
+                # Add employee header
+                rows.append({
+                    "Employee ID": entry['staff'].staffno,
+                    "Employee Name": f"{entry['staff'].fname} {entry['staff'].lname}",
+                    "Position": entry['position'],
+                    "Type of Allowance": "",
+                    "Amount": ""
+                })
+                
+                # Add allowances
+                for allowance in entry['allowances']:
+                    rows.append({
+                        "Employee ID": "",
+                        "Employee Name": "",
+                        "Position": "",
+                        "Type of Allowance": allowance['type'],
+                        "Amount": float(allowance['amount'])
+                    })
+                
+                # Add employee total
+                rows.append({
+                    "Employee ID": "",
+                    "Employee Name": "",
+                    "Position": "",
+                    "Type of Allowance": "Total",
+                    "Amount": float(entry['total'])
+                })
+                
+                # Add empty row for spacing
+                rows.append({})
+            
+            # Add grand totals section
+            # rows.append({
+            #     "Employee ID": "GRAND TOTALS",
+            #     "Employee Name": "",
+            #     "Position": "",
+            #     "Type of Allowance": "",
+            #     "Amount": ""
+            # })
+            
+            # for allowance_type, total in sorted(grand_totals.items()):
+            #     rows.append({
+            #         "Employee ID": "",
+            #         "Employee Name": "",
+            #         "Position": "",
+            #         "Type of Allowance": allowance_type,
+            #         "Amount": float(total)
+            #     })
+            
+            # rows.append({
+            #     "Employee ID": "",
+            #     "Employee Name": "",
+            #     "Position": "",
+            #     "Type of Allowance": "OVERALL TOTAL",
+            #     "Amount": float(overall_total)
+            # })
+            
+            return render_to_excel({"Allowances Register": rows}, f"{filename}.xlsx")
+    
+    context = {
+        "allowances_data": allowances_data,
+        "grand_totals": grand_totals,
+        "overall_total": overall_total,
+        "employees": Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname'),
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+        "report_for": staffno,
+    }
+    
+    return render(request, "hr/payroll_allowances.html", context)
+
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('view_statutory_history')
+def payroll_deductions(request):
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
+    staffno = request.GET.get("staffno")
+    
+    deductions_data = []
+    grand_totals = {}
+    overall_total = Decimal('0.00')
+    
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 28)
+
+        # Check if payroll exists
+        if not Payroll.objects.filter(month=selected_date).exists():
+            messages.error(request, f"Payroll for {selected_date.strftime('%B %Y')} has not been processed.")
+            return redirect('payroll-deductions')
+
+        # Build query
+        payroll_query = Payroll.objects.filter(month=selected_date)
+        
+        if staffno and staffno != "all":
+            payroll_query = payroll_query.filter(staffno__pk=staffno)
+        elif staffno == "all":
+            payroll_query = payroll_query.all()
+        else:
+            messages.error(request, "Please select a staff member or 'All Staff'")
+            return redirect('payroll-deductions')
+        
+        # Prefetch related data for efficiency
+        payroll_query = payroll_query.prefetch_related(
+            'deductions',
+            'staffno'
+        ).order_by('staffno__lname', 'staffno__fname')
+
+        for payroll_record in payroll_query:
+            staff = payroll_record.staffno
+            company_info = CompanyInformation.objects.get(staffno=staff)
+            position = company_info.job_title if company_info else "N/A"
+            
+            employee_deductions = []
+            employee_total = Decimal('0.00')
+            
+            # Get all deductions from the saved records
+            for deduction in payroll_record.deductions.all():
+                employee_deductions.append({
+                    'type': deduction.deduction_type,
+                    'amount': deduction.amount
+                })
+                employee_total += deduction.amount
+                
+                # Update grand totals
+                grand_totals[deduction.deduction_type] = grand_totals.get(
+                    deduction.deduction_type, Decimal('0.00')
+                ) + deduction.amount
+            
+            if employee_deductions:
+                deductions_data.append({
+                    'staff': staff,
+                    'position': position,
+                    'deductions': employee_deductions,
+                    'total': employee_total,
+                    'for_month': selected_date,
+                })
+                overall_total += employee_total
+    
+    # Export functionality
+    export_format = request.GET.get("format")
+    if export_format and deductions_data:
+        filename = f"Payroll Deductions_{selected_date.strftime('%b_%Y')}"
+        
+        if export_format == "pdf":
+            context = {
+                "deductions_data": deductions_data,
+                "grand_totals": grand_totals,
+                "overall_total": overall_total,
+                "selected_date": selected_date.strftime('%B %Y'),
+                "date": datetime.now().strftime("%d %B, %Y"),
+                "report_type": "individual" if staffno != "all" else "all"
+            }
+            return render_to_pdf("export/payroll_deductions.html", context, f"{filename}.pdf")
+            
+        elif export_format == "excel":
+            rows = []
+            for entry in deductions_data:
+                # Add employee header
+                rows.append({
+                    "Employee ID": entry['staff'].staffno,
+                    "Employee Name": f"{entry['staff'].fname} {entry['staff'].lname}",
+                    "Position": entry['position'],
+                    "Type of Deduction": "",
+                    "Amount": ""
+                })
+                
+                # Add deductions
+                for deduction in entry['deductions']:
+                    rows.append({
+                        "Employee ID": "",
+                        "Employee Name": "",
+                        "Position": "",
+                        "Type of Deduction": deduction['type'],
+                        "Amount": float(deduction['amount'])
+                    })
+                
+                # Add employee total
+                rows.append({
+                    "Employee ID": "",
+                    "Employee Name": "",
+                    "Position": "",
+                    "Type of Deduction": "Total",
+                    "Amount": float(entry['total'])
+                })
+                
+                # Add empty row for spacing
+                rows.append({})
+            
+            # Add grand totals
+            # rows.append({
+            #     "Employee ID": "GRAND TOTALS",
+            #     "Employee Name": "",
+            #     "Position": "",
+            #     "Type of Deduction": "",
+            #     "Amount": ""
+            # })
+            
+            # for deduction_type, total in sorted(grand_totals.items()):
+            #     rows.append({
+            #         "Employee ID": "",
+            #         "Employee Name": "",
+            #         "Position": "",
+            #         "Type of Deduction": deduction_type,
+            #         "Amount": float(total)
+            #     })
+            
+            # rows.append({
+            #     "Employee ID": "",
+            #     "Employee Name": "",
+            #     "Position": "",
+            #     "Type of Deduction": "OVERALL TOTAL",
+            #     "Amount": float(overall_total)
+            # })
+            
+            return render_to_excel({"Deductions Register": rows}, f"{filename}.xlsx")
+    
+    context = {
+        "deductions_data": deductions_data,
+        "grand_totals": grand_totals,
+        "overall_total": overall_total,
+        "employees": Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname'),
+        "selected_month": selected_month,
+        "selected_year": selected_year,
+        "report_for": staffno,
+    }
+    
+    return render(request, "hr/payroll_deductions.html", context)
+
+
+
+###### HR REPORT ###########
+
+# Academic rank mapping
+ACADEMIC_RANKS = {
+    'Professor': ['Professor'],
+    'Associate Professor': ['Associate Professor'],
+    'Senior Lecturer': ['Senior Lecturer'],
+    'Lecturer': ['Lecturer'],
+    'Assistant Lecturer': ['Assistant Lecturer'],
+    'Tutor': ['Tutor']
+}
+
+# Qualification categories
+QUALIFICATION_CATEGORIES = ['PHD', 'M.PHIL', 'MSc./M.A/M.Ed.', 'OTHERS']
+
+AGE_BRACKETS = {
+    "Below 30 Yrs.": (0, 29),
+    "30 Yrs. - 40Yrs.": (30, 40),
+    "41Yrs - 50Yrs.": (41, 50),
+    "51 Yrs - 60 Yrs.": (51, 60),
+    "Above 60 Yrs": (61, 200),
+}
+
+AGE_COLUMNS = [
+    "Below 30 Yrs.",
+    "30 Yrs. - 40Yrs.",
+    "41Yrs - 50Yrs.",
+    "51 Yrs - 60 Yrs.",
+    "Above 60 Yrs"
+]
+
+def categorize_qualification(qualification):
+    """Categorize qualification into standard categories"""
+    if not qualification:
+        return "OTHERS"
+    
+    qual_upper = str(qualification).upper()
+    if 'PHD' in qual_upper or 'PH.D' in qual_upper:
+        return 'PHD'
+    elif 'M.PHIL' in qual_upper or 'MPHIL' in qual_upper:
+        return 'M.PHIL'
+    elif any(x in qual_upper for x in ['MSC', 'M.SC', 'MA', 'M.A', 'MED', 'M.ED', 'LLM']):
+        # LLM mapped to MSc./M.A/M.Ed./LLM earlier -- but for table grouping we map it with the MSc/MA/M.Ed. group
+        return 'MSc./M.A/M.Ed.'
+    else:
+        return 'OTHERS'
+
+def get_academic_rank(staff):
+    """Get academic rank from staff's company information"""
+    company_info = CompanyInformation.objects.filter(staffno=staff).first()
+    if company_info and company_info.rank:
+        # If rank exactly matches a key keep it; otherwise default to 'Lecturer'
+        return company_info.rank if company_info.rank in ACADEMIC_RANKS else 'Lecturer'
+    return 'Lecturer'
+
+def generate_academic_staff_table(school, dept, staff_qs):
+    """Generate TABLE 17 format data"""
+    data_rows = []
+    
+    # staff_matrix[gender][rank][qual_category] = count
+    staff_matrix = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+    
+    for staff in staff_qs:
+        # Normalize gender
+        gender = staff.gender if staff.gender in ['Male', 'Female'] else 'Male'
+        rank = get_academic_rank(staff)
+        
+        # Gather qualifications: heq + staff_school.certification entries
+        qualifications = set()
+        if getattr(staff, 'heq', None):
+            qualifications.add(staff.heq)
+        
+        # Staff_School entries (many possible)
+        staff_certs = Staff_School.objects.filter(staffno=staff)
+        for cert in staff_certs:
+            if cert.certification:
+                qualifications.add(cert.certification)
+        
+        # If no qualifications found, mark as OTHERS / Bachelor placeholder
+        if not qualifications:
+            qualifications = {'OTHERS'}
+        
+        # Categorize and count
+        for qual in qualifications:
+            qual_category = categorize_qualification(qual)
+            staff_matrix[gender][rank][qual_category] += 1
+    
+    # Build rows for Male and Female
+    for gender in ['Male', 'Female']:
+        row_data = {
+            'FACULTY': school.sch_fac_name,
+            'DEPARTMENT': dept.dept_long_name,
+            'GENDER': gender[0],  # M or F
+        }
+        
+        total_for_gender = 0
+        # For each rank and qualification category, create a column
+        for rank in ACADEMIC_RANKS.keys():
+            for qual in QUALIFICATION_CATEGORIES:
+                # column name formatting - keep it consistent and file-safe
+                col_name = f"{rank}_{qual}".replace(' ', '_').replace('.', '').replace('/', '_')
+                count = staff_matrix[gender][rank][qual]
+                row_data[col_name] = count
+                total_for_gender += count
+        
+        row_data['GRAND_TOTAL'] = total_for_gender
+        
+        # Include even if zero? your sample had 0 rows for genders with 0 - up to you.
+        # We'll include only rows where there is at least one staff OR you can comment this condition out to include zeros
+        if total_for_gender > 0:
+            data_rows.append(row_data)
+    
+    # Add department total row (GENDER = 'T') summing columns across genders
+    if data_rows:
+        total_row = {
+            'FACULTY': school.sch_fac_name,
+            'DEPARTMENT': dept.dept_long_name,
+            'GENDER': 'T',
+        }
+        grand_total = 0
+        for rank in ACADEMIC_RANKS.keys():
+            for qual in QUALIFICATION_CATEGORIES:
+                col_name = f"{rank}_{qual}".replace(' ', '_').replace('.', '').replace('/', '_')
+                total_count = sum(row.get(col_name, 0) for row in data_rows if row['DEPARTMENT'] == dept.dept_long_name)
+                total_row[col_name] = total_count
+                grand_total += total_count
+        total_row['GRAND_TOTAL'] = grand_total
+        data_rows.append(total_row)
+    
+    return data_rows
+
+def generate_age_distribution_table(school, dept, staff_qs, today):
+    """Generate TABLE 18 format data grouped by Gender and age brackets"""
+    data_rows = []
+    
+    # age_matrix[gender][age_bracket] = count
+    age_matrix = defaultdict(lambda: defaultdict(int))
+    
+    for staff in staff_qs:
+        # if not getattr(staff, 'dob', None):
+        #     continue
+        
+        gender = staff.gender if staff.gender in ['Male', 'Female'] else 'Male'
+        age = (today - staff.dob).days // 365
+        
+        age_bracket = "Above 60 Yrs"  # default
+        for label, (min_age, max_age) in AGE_BRACKETS.items():
+            if min_age <= age <= max_age:
+                age_bracket = label
+                break
+        
+        age_matrix[gender][age_bracket] += 1
+    
+    # Build a row per gender if there is at least one count
+    for gender in ['Male', 'Female']:
+        # If gender has no counts, still include a zero row? Your sample shows zero rows for some genders.
+        # We'll include rows only when total > 0 to avoid clutter; change if you want zeros included.
+        total = sum(age_matrix[gender].values())
+        if total == 0:
+            # Still append zero row if you want it visible - comment out the continue to include zeros
+            continue
+        
+        row_data = {
+            'DEPARTMENT': dept.dept_long_name,
+            'GENDER': gender,
+        }
+        grand = 0
+        for age_col in AGE_COLUMNS:
+            cnt = age_matrix[gender].get(age_col, 0)
+            row_data[age_col] = cnt
+            grand += cnt
+        row_data['GRAND TOTAL'] = grand
+        data_rows.append(row_data)
+    
+    return data_rows
+
+def generate_department_report(request):
+    """Main view: builds academic staff table and age distribution,
+       writes both into one Excel sheet (Academic Staff Report)"""
+    today = date.today()
+    schools = School_Faculty.objects.all()
+    
+    academic_staff_data = []
+    age_distribution_data = []
+    
+    for school in schools:
+        departments = Department.objects.filter(sch_fac=school)
+        
+        for dept in departments:
+            # only company info for this department; exclude inactive at company level
+            company_info = CompanyInformation.objects.filter(dept=dept).exclude(active_status='Inactive')
+            staff_ids = company_info.values_list("staffno_id", flat=True)
+            
+            # staff_qs - keep consistent with your existing code (uses staffno field)
+            staff_qs = Employee.objects.filter(staffno__in=staff_ids)
+            
+            # If no staff, skip early
+            if not staff_qs.exists():
+                continue
+            
+            # Use all staff_qs as academic_staff (previous filtering caused empty set)
+            academic_staff = staff_qs
+            
+            # Build TABLE 17 rows and extend master list
+            dept_academic_rows = generate_academic_staff_table(school, dept, academic_staff)
+            academic_staff_data.extend(dept_academic_rows)
+            
+            # Build TABLE 18 rows and extend master list
+            dept_age_rows = generate_age_distribution_table(school, dept, academic_staff, today)
+            age_distribution_data.extend(dept_age_rows)
+    
+    # Build DataFrames
+    df_academic = pd.DataFrame(academic_staff_data)
+    df_age = pd.DataFrame(age_distribution_data)
+    
+    # Prepare Excel response
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="department_report.xlsx"'
+    
+    with pd.ExcelWriter(response, engine="openpyxl") as writer:
+        sheet_name = "Academic Staff Report"
+        # Write academic table first
+        if not df_academic.empty:
+            df_academic.to_excel(writer, sheet_name=sheet_name, index=False, startrow=0)
+            start_row = len(df_academic) + 3
+        else:
+            start_row = 0
+        
+        # Add a small title above the age table for clarity
+        if not df_age.empty:
+            # write a title row (we write a one-row dataframe as title)
+            title_df = pd.DataFrame([{"DEPARTMENT": "", "GENDER": "", **{c: "" for c in AGE_COLUMNS}, "GRAND TOTAL": ""}])
+            # Instead of title_df, we can write a custom label; pandas ExcelWriter doesn't directly write raw text easily,
+            # so we'll just leave the two blank rows and write the age table.
+            df_age.to_excel(writer, sheet_name=sheet_name, index=False, startrow=start_row)
+    
+    return response

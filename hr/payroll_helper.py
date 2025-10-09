@@ -187,11 +187,12 @@ class PayrollCalculator:
     def get_employer_ssnit_contribution(self):
         company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
         if not company_info.ssn_con:
-            return Decimal("0.00")
+            return {"amount": Decimal("0.00"), "rate": None}
         settings = self.get_settings()
-        extimated_ssnit = self.get_entitled_basic_salary() * (Decimal(settings.employer_ssnit_rate) / 100)
+        rate = Decimal(settings.employer_ssnit_rate or "0.00")   
+        extimated_ssnit = self.get_entitled_basic_salary() * (rate / 100)
         print("Employer SSNIT Value: ", extimated_ssnit)
-        return round(extimated_ssnit, 2)
+        return {"amount": round(extimated_ssnit, 2), "rate": rate}
         
 
     def get_pf_contribution(self):
@@ -220,11 +221,12 @@ class PayrollCalculator:
     def get_employer_pf_contribution(self):
         company_info = CompanyInformation.objects.filter(staffno=self.staffno).first()
         if not company_info.pf_con:
-            return Decimal("0.00")
+            return {"amount": Decimal("0.00"), "rate": None}
         settings = self.get_settings()
-        extimated_pf = self.get_entitled_basic_salary() * (Decimal(settings.employer_pf_rate) / 100)
+        rate = Decimal(settings.employer_pf_rate)
+        extimated_pf = self.get_entitled_basic_salary() * (rate / 100)
         print("Employer PF Value: ", extimated_pf)
-        return round(extimated_pf, 2)
+        return {"amount": round(extimated_pf, 2), "rate": rate}
     
 
     def get_taxable_income(self):

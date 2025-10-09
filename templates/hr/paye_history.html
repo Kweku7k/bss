@@ -18,16 +18,21 @@
 </div>
 {% endif %}
 
+<style>
+    th {
+        font-size: 14px;
+    }
+</style>
+
 <div class="row">
     <div class="col-md-12">
         <div class="container">
             <div class="d-flex justify-content-between mb-3">
-                {% if report_for == "all" %}
-                    <h4 class="mb-3 fw-bold">📅 PAYE History Report</h4>
-                {% elif report_for and paye_data %}
-                    <h4 class="mb-0">PAYE History for {{ paye_data.0.staff.fname }} {{ paye_data.0.staff.lname }}</h4>
+            
+                {% if report_for and paye_data %}
+                    <h4 class="mb-3 fw-bold">💰 PAYE Report for {{ paye_data.0.staff.fname }} {{ paye_data.0.staff.lname }}</h4>
                 {% else %}
-                    <h4 class="mb-0">PAYE History Report</h4>
+                    <h4 class="mb-3 fw-bold">💰 PAYE Report</h4>
                 {% endif %}
 
                 {% if paye_data %}
@@ -37,7 +42,7 @@
                         <input type="hidden" name="staffno" value="{{ report_for }}">
 
                         <label for="format" class="form-label mb-0">Export</label>
-                        <select name="format" id="format" class="form-select form-select-sm" style="width: auto;">
+                        <select name="format" id="format" class="form-select form-select-sm" style="width: auto;" required>
                             <option value="">Select format</option>
                             <option value="pdf">PDF</option>
                             <option value="excel">Excel</option>
@@ -101,57 +106,56 @@
 
             {% if report_for and paye_data %}
                 <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-sm">
-                        <thead>
+                    <table class="table table-sm">
+                        <thead class="table-secondary">
                             <tr>
                                 <th>#</th>
-                                <th>Staff</th>
-                                <th>Tax ID No.</th>
+                                <th>Employee Name</th>
+                                <th>Tax ID</th>
                                 <th>Basic Wage</th>
                                 <th>Total Allowances</th>
                                 <th>Total Emoluments</th>
-                                <th>SSF</th>
+                                <th>SSF Employee</th>
                                 <th>PF Employee</th>
                                 <th>Relief</th>
                                 <th>Net Taxable Pay</th>
                                 <th>Tax Deductible</th>
-                                <th>Tax Deductible & IRS </th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for entry in paye_data %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
-                                    <td>{{ entry.staff.fname }} {{ entry.staff.lname }} {{ entry.staff.middlenames }}</td>
-                                    <td>{{ entry.staff.gcardno }}</td>
-                                    <td>{{ entry.basic_salary }}</td>
-                                    <td>{{ entry.paye_total_income }}</td>
-                                    <td>{{ entry.paye_total_emoluments }}</td>
-                                    <td>{{ entry.ssf }}</td>
-                                    <td>{{ entry.pf_employee }}</td>
-                                    <td>{{ entry.total_relief }}</td>
-                                    <td>{{ entry.net_taxable_pay }}</td>
-                                    <td>{{ entry.income_tax }}</td>
-                                    <td>{{ entry.income_tax }}</td>
+                                    <td>{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
+                                    <td>{{ entry.staff.gcardno|default:"-" }}</td>
+                                    <td class="text-end">{{ entry.basic_salary|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.paye_total_income|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.paye_total_emoluments|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.ssf_employee|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.pf_employee|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.total_relief|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.net_taxable_pay|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.income_tax|floatformat:2 }}</td>
                                 </tr>
                             {% endfor %}
 
-                            {% comment %} <tr style="margin-top: 15px;">
-                                <td colspan="1"></td> 
-                                <td colspan="4" class="text-left fw-bold">
-                                    Total
-                                </td>
-                                <td class="fw-bold" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">
-                                    {{ total_amount|floatformat:2 }}
-                                </td>
-                            </tr> {% endcomment %}
-
-
+                            <!-- Totals Row -->
+                            <tr class="table-active fw-bold">
+                                <td colspan="3" class="text-end">Total</td>
+                                <td class="text-end">{{ totals.basic_salary|floatformat:2 }}</td>
+                                <td class="text-end">{{ totals.paye_total_income|floatformat:2 }}</td>
+                                <td class="text-end">{{ totals.paye_total_emoluments|floatformat:2 }}</td>
+                                <td class="text-end">{{ totals.ssf_employee|floatformat:2 }}</td>
+                                <td class="text-end">{{ totals.pf_employee|floatformat:2 }}</td>
+                                <td class="text-end">{{ totals.total_relief|floatformat:2 }}</td>
+                                <td class="text-end">{{ totals.net_taxable_pay|floatformat:2 }}</td>
+                                <td class="text-end">{{ totals.income_tax|floatformat:2 }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             {% elif report_for %} 
-                <p class="text-danger">No PAYEE records found for the selected month.</p>
+                <p class="text-danger">No PAYE records found for the selected month.</p>
             {% endif %}
 
         </div>

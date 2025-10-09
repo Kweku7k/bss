@@ -129,6 +129,34 @@
 
             </div>
             {% if payroll_data %}
+
+            <hr>
+            <div class="row">
+                <div class="col-md-3">
+                  <p><strong>Basic Salary:</strong><span class="text-primary fw-bold">  GH₵{{ payroll_data.basic_salary }}<span/></p>
+                </div>
+                <div class="col-md-3">
+                    <p><strong>Gross Pay:</strong> GH₵{{ payroll_data.gross_salary }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p><strong>Taxable Pay:</strong> GH₵{{ payroll_data.taxable_income }}</p>
+                </div>
+                <div class="col-md-3">
+                    <p><strong>Net Salary:</strong> <span class="text-success fw-bold">GH₵{{ payroll_data.net_salary }}</span></p>
+                </div>
+            </div>
+        
+            <div class="row">
+                <div class="col-md-4">
+                    <p><strong>SSF Contribution Employer:</strong> GH₵{{ payroll_data.employer_ssf }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>PF Contribution Employer:</strong> GH₵{{ payroll_data.employer_pf }}</p>
+                </div>
+                <div class="col-md-4">
+                    <p><strong>Days:</strong> 28 days</p>
+                </div>
+            </div>
             <hr>
             <div class="row">
                 <div class="col-md-6">
@@ -292,32 +320,7 @@
                 {% endif %}
             </div>
 
-
-
             <hr>
-            <div class="row">
-                <div class="col-md-3">
-                  <p><strong>Basic Salary:</strong><span class="text-primary fw-bold">  GH₵{{ payroll_data.basic_salary }}<span/></p>
-                </div>
-                <div class="col-md-3">
-                    <p><strong>Gross Pay:</strong> GH₵{{ payroll_data.gross_salary }}</p>
-                </div>
-                <div class="col-md-3">
-                    <p><strong>Taxable Pay:</strong> GH₵{{ payroll_data.taxable_income }}</p>
-                </div>
-                <div class="col-md-3">
-                    <p><strong>Net Salary:</strong> <span class="text-success fw-bold">GH₵{{ payroll_data.net_salary }}</span></p>
-                </div>
-            </div>
-        
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>SSF Contribution Employer:</strong> GH₵{{ payroll_data.employer_ssf }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>PF Contribution Employer:</strong> GH₵{{ payroll_data.employer_pf }}</p>
-                </div>
-            </div>
             {% endif %}
         </div>
     </div>

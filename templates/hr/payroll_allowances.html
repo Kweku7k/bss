@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
 
-
 {% if messages %}
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     {% for message in messages %}
@@ -23,23 +22,16 @@
     <div class="col-md-12">
         <div class="container">
             <div class="d-flex justify-content-between mb-3">
-                {% if report_for == "all" %}
-                    <h4 class="mb-3 fw-bold">📅 Payroll History Report</h4>
-                {% elif report_for and payroll_data %}
-                    <h4 class="mb-0">Payroll History for {{ payroll_data.0.staff.fname }} {{ payroll_data.0.staff.lname }}</h4>
-                {% else %}
-                    <h4 class="mb-0">Payroll History Report</h4>
-                {% endif %}
-                
+                <h4 class="mb-3 fw-bold">💰 Payroll Allowances</h4>
 
-                {% if payroll_data %}
+                {% if allowances_data %}
                     <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
                         <input type="hidden" name="filter_by_month" value="{{ selected_month }}">
                         <input type="hidden" name="filter_by_year" value="{{ selected_year }}">
                         <input type="hidden" name="staffno" value="{{ report_for }}">
 
                         <label for="format" class="form-label mb-0">Export</label>
-                        <select name="format" id="format" class="form-select form-select-sm" style="width: auto;">
+                        <select name="format" id="format" class="form-select form-select-sm" style="width: auto;" required>
                             <option value="">Select format</option>
                             <option value="pdf">PDF</option>
                             <option value="excel">Excel</option>
@@ -48,7 +40,6 @@
                     </form>
                 {% endif %}
             </div>
-
 
             <form method="get" class="row g-2 mb-4">
                 <div class="col">
@@ -82,6 +73,7 @@
                         <option value="2030" {% if selected_year == '2030' %}selected{% endif %}>2030</option>
                     </select>
                 </div>
+
                 <div class="col">
                     <label for="staffno" class="form-label">Select Staff</label>
                     <select name="staffno" id="staffno" class="form-control" required>
@@ -89,79 +81,105 @@
                         <option value="all" {% if report_for == 'all' %}selected{% endif %}>All Staff</option>
                         {% for emp in employees %}
                             <option value="{{ emp.pk }}" {% if report_for == emp.pk|stringformat:"s" %}selected{% endif %}>
-                                {{ emp.fname }} {{ emp.lname }} ({{ emp.staffno }})
+                                {{ emp.lname }} {{ emp.fname }} {{ emp.middlenames }} ({{ emp.staffno }})
                             </option>
                         {% endfor %}
                     </select>
                 </div>
+
                 <div class="col d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">Generate</button>
                 </div>
             </form>
 
-
-
-            {% if report_for and payroll_data %}
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Staff</th>
-                                <th>Basic Salary</th>
-                                <th>Total Income</th>
-                                <th>Gross Salary</th>
-                                <th>Income Tax</th>
-                                <th>SSF Employee</th>
-                                <th>PF Employee</th>
-                                <th>PF Employer</th>
-                                <th>Other Deductions</th>
-                                <th>Total Deduction</th>
-                                <th>Net Salary</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for entry in payroll_data %}
+            {% if report_for and allowances_data %}
+                <h5 class="mb-3">Payroll Allowances for {{ allowances_data.0.for_month|date:"F Y" }}</h5>
+                
+                <!-- Table Style Layout -->
+                <div class="card shadow-sm">
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>{{ forloop.counter }}</td>
-                                    <td>{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
-                                    <td class="text-end">{{ entry.basic_salary|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.total_income|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.gross_salary|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.income_tax|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.ssf_employee|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.pf_employee|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.pf_employer|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.other_deductions|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.total_deduction|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.net_salary|floatformat:2 }}</td>
+                                    <th style="width: 12%;">Employee ID</th>
+                                    <th style="width: 25%;">Employee Name</th>
+                                    <th style="width: 23%;">Position</th>
+                                    <th style="width: 25%;">Type of Allowance</th>
+                                    <th style="width: 15%;" class="text-end">Amount</th>
                                 </tr>
-                            {% endfor %}
-
-                            <!-- Totals Row -->
-                            <tr class="table-active fw-bold">
-                                <td colspan="2" class="text-end">Total</td>
-                                <td class="text-end">{{ totals.basic_salary|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.total_income|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.gross_salary|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.income_tax|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.ssf_employee|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.pf_employee|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.pf_employer|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.other_deductions|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.total_deduction|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.net_salary|floatformat:2 }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {% for entry in allowances_data %}
+                                    <!-- Employee Header Row -->
+                                    <tr class="table-secondary fw-bold">
+                                        <td>{{ entry.staff.staffno }}</td>
+                                        <td>{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
+                                        <td>{{ entry.position }}</td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+                                    
+                                    <!-- Allowance Details -->
+                                    {% for allowance in entry.allowances %}
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>{{ allowance.type }}</td>
+                                        <td class="text-end">{{ allowance.amount|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                    
+                                    <!-- Employee Total Row -->
+                                    <tr class="fw-bold">
+                                        <td colspan="3"></td>
+                                        <td>Total:</td>
+                                        <td class="text-end">{{ entry.total|floatformat:2 }}</td>
+                                    </tr>
+                                    
+                                    <!-- Spacing Row -->
+                                    <tr class="border-0">
+                                        <td colspan="5" style="height: 20px; background: transparent;"></td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            {% elif report_for %}
-                <p class="text-danger">No payroll records found for the selected month.</p>
-            {% endif %}
 
+                <!-- Grand Totals -->
+                <!-- <div class="card bg-dark text-white mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Grand Totals Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <table class="table table-dark table-sm mb-0">
+                                    <tbody>
+                                        {% for allowance_type, total in grand_totals.items %}
+                                        <tr>
+                                            <td style="width: 70%;">{{ allowance_type }}</td>
+                                            <td class="text-end">{{ total|floatformat:2 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="bg-primary p-3 rounded text-center">
+                                    <h6 class="mb-1">OVERALL TOTAL</h6>
+                                    <h3 class="mb-0">{{ overall_total|floatformat:2 }}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            {% elif report_for %}
+                <p class="text-danger">No allowance records found for the selected period.</p>
+            {% endif %}
         </div>
     </div>
 </div>
-
 
 {% endblock %}

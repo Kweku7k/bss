@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Allowances Register - {{ selected_date }}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+        body { 
+            font-family: Poppins, sans-serif; 
+            font-size: 11px; 
+            color: #222; 
+            margin: 0;
+            padding: 0;
+        }
+
+        h2 { 
+            margin: 0 0 8px 0; 
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .meta { 
+            margin: 0 0 12px 0; 
+            color: #555; 
+            text-align: center;
+            font-size: 10.5px;
+        }
+
+        .employee-section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 10px;
+        }
+
+        th, td { 
+            /* border: 0.6px solid #888;  */
+            padding: 3px 4px; 
+            vertical-align: middle;
+        }
+
+        th { 
+            font-weight: bold; 
+            text-align: left;
+            border-bottom: 2px solid #000;
+        }
+
+        .right { 
+            text-align: right;
+        }
+
+        .total-row td { 
+            background: #fafafa; 
+            font-weight: bold; 
+            border-top: 1px solid #555;
+        }
+
+        tr.spacing-row td {
+            border: none;
+            height: 10px;
+            background: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Payroll Allowances Register - {{ selected_date }}</h2>
+    <p class="meta">Generated on: {{ date }}</p>
+
+    <div class="employee-section">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 12%;">Employee ID</th>
+                    <th style="width: 28%;">Employee Name</th>
+                    <th style="width: 25%;">Position</th>
+                    <th style="width: 20%;">Type of Allowance</th>
+                    <th style="width: 15%;">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in allowances_data %}
+                    <!-- Employee Header -->
+                    <tr style="background: #f2f2f2; font-weight: bold;">
+                        <td>{{ entry.staff.staffno }}</td>
+                        <td>{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
+                        <td>{{ entry.position }}</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+
+                    <!-- Allowance Details -->
+                    {% for allowance in entry.allowances %}
+                    <tr>
+                        <td colspan="3"></td>
+                        <td style="width: 20%;">{{ allowance.type }}</td>
+                        <td style="width: 15%;">{{ allowance.amount|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+
+                    <!-- Total Row -->
+                    <tr class="total-row">
+                        <td colspan="3"></td>
+                        <td style="width: 20%;">Total:</td>
+                        <td style="width: 15%;">{{ entry.total|floatformat:2 }}</td>
+                    </tr>
+
+                    <!-- Spacing Row -->
+                    <tr class="spacing-row">
+                        <td colspan="5"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

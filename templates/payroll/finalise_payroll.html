@@ -99,7 +99,7 @@
                                 </form>
                             </td>
                             <td>
-                                <a href="{% url 'payroll-history' %}?filter_by_month={{ payroll.month.month }}&filter_by_year={{ payroll.month.year }}&staffno=all" 
+                                <a href="{% url 'payroll-register' %}?filter_by_month={{ payroll.month.month }}&filter_by_year={{ payroll.month.year }}&staffno=all" 
                                 class="text-decoration-none">
                                     <i class="bi bi-eye" title="View payroll for {{ payroll.month|date:'F Y' }}"></i>
                                 </a>

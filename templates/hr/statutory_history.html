@@ -2,7 +2,6 @@
 {% load static %}
 {% block content %}
 
-
 {% if messages %}
 <div class="toast-container position-fixed bottom-0 end-0 p-3">
     {% for message in messages %}
@@ -23,32 +22,25 @@
     <div class="col-md-12">
         <div class="container">
             <div class="d-flex justify-content-between mb-3">
-                {% if report_for == "all" %}
-                    <h4 class="mb-3 fw-bold">📅 Payroll History Report</h4>
-                {% elif report_for and payroll_data %}
-                    <h4 class="mb-0">Payroll History for {{ payroll_data.0.staff.fname }} {{ payroll_data.0.staff.lname }}</h4>
-                {% else %}
-                    <h4 class="mb-0">Payroll History Report</h4>
-                {% endif %}
-                
+                <h4 class="mb-3 fw-bold">💰 Statutory Report</h4>
 
-                {% if payroll_data %}
-                    <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
-                        <input type="hidden" name="filter_by_month" value="{{ selected_month }}">
-                        <input type="hidden" name="filter_by_year" value="{{ selected_year }}">
-                        <input type="hidden" name="staffno" value="{{ report_for }}">
+                {% if rows %}
+                <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="filter_by_month" value="{{ selected_month }}">
+                    <input type="hidden" name="filter_by_year" value="{{ selected_year }}">
+                    <input type="hidden" name="staffno" value="{{ report_for }}">
+                    <input type="hidden" name="statutory_type" value="{{ selected_type }}">
 
-                        <label for="format" class="form-label mb-0">Export</label>
-                        <select name="format" id="format" class="form-select form-select-sm" style="width: auto;">
-                            <option value="">Select format</option>
-                            <option value="pdf">PDF</option>
-                            <option value="excel">Excel</option>
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-success">Download</button>
-                    </form>
+                    <label for="format" class="form-label mb-0">Export</label>
+                    <select name="format" id="format" class="form-select form-select-sm" style="width: auto;" required>
+                        <option value="">Select format</option>
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-success">Download</button>
+                </form>
                 {% endif %}
             </div>
-
 
             <form method="get" class="row g-2 mb-4">
                 <div class="col">
@@ -82,6 +74,16 @@
                         <option value="2030" {% if selected_year == '2030' %}selected{% endif %}>2030</option>
                     </select>
                 </div>
+
+                <div class="col">
+                    <label for="statutory_type" class="form-label">Type</label>
+                    <select name="statutory_type" id="statutory_type" class="form-control" required>
+                        <option value="">-- Select --</option>
+                        <option value="ssf" {% if selected_type == 'ssf' %}selected{% endif %}>SSF</option>
+                        <option value="pf" {% if selected_type == 'pf' %}selected{% endif %}>Provident Fund</option>
+                    </select>
+                </div>
+
                 <div class="col">
                     <label for="staffno" class="form-label">Select Staff</label>
                     <select name="staffno" id="staffno" class="form-control" required>
@@ -94,74 +96,55 @@
                         {% endfor %}
                     </select>
                 </div>
+
                 <div class="col d-flex align-items-end">
                     <button type="submit" class="btn btn-primary w-100">Generate</button>
                 </div>
             </form>
 
-
-
-            {% if report_for and payroll_data %}
+            {% if report_for and rows %}
                 <div class="table-responsive">
                     <table class="table table-bordered table-striped table-sm">
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Staffno</th>
                                 <th>Staff</th>
-                                <th>Basic Salary</th>
-                                <th>Total Income</th>
-                                <th>Gross Salary</th>
-                                <th>Income Tax</th>
-                                <th>SSF Employee</th>
-                                <th>PF Employee</th>
-                                <th>PF Employer</th>
-                                <th>Other Deductions</th>
-                                <th>Total Deduction</th>
-                                <th>Net Salary</th>
+                                <th>{% if selected_type == 'ssf' %}SSF Employee{% else %}PF Employee{% endif %}</th>
+                                <th>{% if selected_type == 'ssf' %}SSF Employer{% else %}PF Employer{% endif %}</th>
+                                <th>Total</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for entry in payroll_data %}
+                            {% for entry in rows %}
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
+                                    <td>{{ entry.staff.staffno }}</td>
                                     <td>{{ entry.staff.lname }} {{ entry.staff.fname }} {{ entry.staff.middlenames }}</td>
-                                    <td class="text-end">{{ entry.basic_salary|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.total_income|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.gross_salary|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.income_tax|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.ssf_employee|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.pf_employee|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.pf_employer|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.other_deductions|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.total_deduction|floatformat:2 }}</td>
-                                    <td class="text-end">{{ entry.net_salary|floatformat:2 }}</td>
+                                    <td class="text-end">{{ entry.employee }}</td>
+                                    <td class="text-end">{{ entry.employer }}</td>
+                                    <td class="text-end">{{ entry.total }}</td>
                                 </tr>
                             {% endfor %}
 
-                            <!-- Totals Row -->
-                            <tr class="table-active fw-bold">
-                                <td colspan="2" class="text-end">Total</td>
-                                <td class="text-end">{{ totals.basic_salary|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.total_income|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.gross_salary|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.income_tax|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.ssf_employee|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.pf_employee|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.pf_employer|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.other_deductions|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.total_deduction|floatformat:2 }}</td>
-                                <td class="text-end">{{ totals.net_salary|floatformat:2 }}</td>
+                            <tr style="margin-top: 15px;">
+                                <td colspan="2"></td> 
+                                <td class="text-left fw-bold">Total</td>
+                                <td class="fw-bold text-end" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">{{ totals.employee|floatformat:2 }}</td>
+                                <td class="fw-bold text-end" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">{{ totals.employer|floatformat:2 }}</td>
+                                <td class="fw-bold text-end" style="border-top: 1px solid #000; border-bottom: 1px solid #000; text-align: center;">{{ totals.overall|floatformat:2 }}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             {% elif report_for %}
-                <p class="text-danger">No payroll records found for the selected month.</p>
+                <p class="text-danger">No records found for the selected month.</p>
             {% endif %}
 
         </div>
     </div>
 </div>
 
-
 {% endblock %}
+
+
