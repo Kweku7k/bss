@@ -56,10 +56,29 @@
                                             <h6 class="text-muted">Remaining:</h6>
                                             <h6 class="fw-bold text-success">₵{{ item.remaining }}</h6>
                                         </div>
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="text-muted">Surcharge:</h6>
-                                            <h6 class="fw-bold text-danger">₵{{ item.surcharge }}</h6>
-                                        </div>
+
+                                        {% if item.gross_surcharge > 0 %}
+                                            <hr>
+                                            <h6 class="text-danger mb-2">Surcharge Details:</h6>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <h6 class="text-muted">Total Surcharge:</h6>
+                                                <h6 class="fw-bold">₵{{ item.gross_surcharge }}</h6>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <h6 class="text-muted">Paid:</h6>
+                                                <h6 class="fw-bold text-success">₵{{ item.surcharge_paid }}</h6>
+                                            </div>
+                                            <div class="d-flex justify-content-between mb-1">
+                                                <h6 class="text-muted">Balance:</h6>
+                                                <h6 class="fw-bold text-danger">₵{{ item.surcharge_balance }}</h6>
+                                            </div>
+                                            {% if item.monthly_deduction > 0 %}
+                                            <div class="d-flex justify-content-between">
+                                                <h6 class="text-muted">Monthly Deduction:</h6>
+                                                <h6 class="fw-bold text-warning">₵{{ item.monthly_deduction }}</h6>
+                                            </div>
+                                            {% endif %}
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -97,7 +116,7 @@
                                     <td>{{ transaction.payment_type }}</td>
                                     <td>{{ transaction.nature }}</td>
                                     <td>{{ transaction.date_attended }}</td>
-                                    <td>{{ transaction.treatment_cost }}</td>
+                                    <td>₵{{ transaction.treatment_cost }}</td>
                                     <td>{{ transaction.academic_year }}</td>
                                     <td class="text-end">
                                         <a class="btn btn-sm btn-info bi-pencil-square" href="{% url 'edit-medical-transaction' transaction.id staff.staffno %}"></a>
@@ -108,6 +127,52 @@
                         </table>
                     {% else %}
                         <p>No medical transactions for this staff.</p>
+                    {% endif %}
+
+
+                    <!-- Active Surcharges Section -->
+                    {% if active_surcharges %}
+                    <h5 class="mt-4"><b>Active Surcharge Payment Plans</b></h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Transaction</th>
+                                    <th>Total</th>
+                                    <th>Paid</th>
+                                    <th>Balance</th>
+                                    <th>Monthly</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for surcharge in active_surcharges %}
+                                <tr>
+                                    <td>{{ surcharge.created_date|date:"Y-m-d" }}</td>
+                                    <td>{{ surcharge.medical_transaction.nature }}</td>
+                                    <td>₵{{ surcharge.total_amount }}</td>
+                                    <td>₵{{ surcharge.amount_paid }}</td>
+                                    <td>₵{{ surcharge.balance }}</td>
+                                    <td>₵{{ surcharge.monthly_deduction|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if surcharge.status == 'active' %}success{% elif surcharge.status == 'completed' %}secondary{% else %}warning{% endif %}">
+                                            {{ surcharge.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        {% if surcharge.status == 'pending' %}
+                                        <a href="{% url 'manage-surcharge' surcharge.id %}" class="btn btn-sm btn-primary">Setup Plan</a>
+                                        {% else %}
+                                        <a href="{% url 'manage-surcharge' surcharge.id %}" class="btn btn-sm btn-info">View</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     {% endif %}
 
 
@@ -213,6 +278,3 @@
       toast{{ forloop.counter }}.show();
    {% endfor %}
 </script>
-
-
-{% comment %} {% endblock %} {% endcomment %}

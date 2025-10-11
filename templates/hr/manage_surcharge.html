@@ -1,0 +1,231 @@
+{% extends "base.html" %} 
+{% load static %}
+{% block content %}
+{% load custom_filters %}
+
+
+{% if messages %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        {% for message in messages %}
+        <div id="toast{{ forloop.counter }}" class="toast show bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+            <div class="toast-header text-white bg-{{ message.tags }}">
+                <strong class="me-auto">{{ message.tags|title }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-white">
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="container">
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="mb-3 fw-bold">Manage Medical Surcharge</h4>
+            </div>
+
+            <div class="col-lg-4 col-md-12 mb-2">
+                <div class="card mb-3 p-3 shadow-sm border-0">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">Surcharge Summary for {{ surcharge.staffno.lname}} {{ surcharge.staffno.fname}}</h5>
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="text-muted">Total Surcharge:</h6>
+                            <h6 class="fw-bold text-danger">₵{{ surcharge.total_amount }}</h6>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="text-muted">Amount Paid:</h6>
+                            <h6 class="fw-bold text-success">₵{{ surcharge.amount_paid }}</h6>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="text-muted">Balance:</h6>
+                            <h6 class="fw-bold text-dark">₵{{ surcharge.balance }}</h6>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <h6 class="text-muted">Status:</h6>
+                            <span class="badge bg-{% if surcharge.status == 'completed' %}secondary{% elif surcharge.status == 'active' %}success{% elif surcharge.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                {{ surcharge.get_status_display }}
+                            </span>
+                        </div>
+                        {% if surcharge.status == 'active' %}
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Installments:</strong> {{ surcharge.installments }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Monthly Deduction:</strong> ₵{{ surcharge.monthly_deduction }}</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="">
+                <!-- Action Tabs -->
+                <ul class="nav nav-tabs" id="surchargeTab" role="tablist">
+                    {% if surcharge.status == 'pending' %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="setup-tab" data-bs-toggle="tab" data-bs-target="#setup" type="button">
+                            <i class="bi bi-gear"></i> Setup Payment Plan
+                        </button>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if surcharge.status == 'active' %}active{% endif %}" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button">
+                            <i class="bi bi-clock-history"></i> Payment History
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content mt-3" id="surchargeTabContent">
+                    <!-- Setup Payment Plan Tab -->
+                    {% if surcharge.status == 'pending' %}
+                    <div class="tab-pane fade show active" id="setup" role="tabpanel">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Setup Payment Plan</h5>
+                                <form method="POST" action="">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="setup_plan">
+                                    
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Number of Installments</label>
+                                            <select name="installments" class="form-select" id="installments" required>
+                                                <option value="1">1 Month (Full Payment)</option>
+                                                <option value="2">2 Months</option>
+                                                <option value="3">3 Months</option>
+                                                <option value="4">4 Months</option>
+                                                <option value="6">6 Months</option>
+                                                <option value="12">12 Months</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <label class="form-label" for="monthly_deduction">Monthly Deduction Amount</label>
+                                            <input type="text" class="form-control" name="monthly_deduction" id="monthly_amount" readonly>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label for="is_active" class="form-label">Activate Now?</label>
+                                            <select name="is_active" class="form-control">
+                                                <option value="True">Yes</option>
+                                                <option value="False" selected>No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle"></i> Activate Payment Plan
+                                        </button>
+                                        <a href="{% url 'medical-transaction' surcharge.staffno.staffno %}" class="btn btn-secondary">
+                                            <i class="bi bi-arrow-left"></i> Back
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+
+                    <!-- Payment History Tab -->
+                    <div class="tab-pane fade {% if surcharge.status == 'active' %}show active{% endif %}" id="history" role="tabpanel">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Payment History</h5>
+                                
+                                {% if payments %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Date</th>
+                                                <th>Amount</th>
+                                                <th>Method</th>
+                                                <th>Reference</th>
+                                                <th>Month</th>
+                                                <th>Processed By</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for payment in payments %}
+                                            <tr>
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ payment.payment_date|date:"Y-m-d" }}</td>
+                                                <td class="text-success"><strong>₵{{ payment.amount }}</strong></td>
+                                                <td>
+                                                    <span class="badge bg-info">{{ payment.get_payment_method_display }}</span>
+                                                </td>
+                                                <td>{{ payment.reference_number|default:"-" }}</td>
+                                                <td>{{ payment.payment_month }}</td>
+                                                <td>{{ payment.processed_by.username|default:"System" }}</td>
+                                                <td>
+                                                    {% if forloop.first and surcharge.status == 'active' %}
+                                                    <button class="btn btn-sm btn-danger" onclick="reversePayment({{ payment.id }})">
+                                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                                    </button>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot>
+                                            <tr class="table-active">
+                                                <th colspan="2">Total Paid:</th>
+                                                <th class="text-success">₵{{ surcharge.amount_paid }}</th>
+                                                <th colspan="5"></th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                {% else %}
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle"></i> No payments recorded yet.
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Calculate monthly payment amount
+    document.getElementById('installments')?.addEventListener('change', function() {
+        const balance = {{ surcharge.balance }};
+        const installments = parseInt(this.value);
+        const monthlyAmount = (balance / installments).toFixed(2);
+        document.getElementById('monthly_amount').value = '₵' + monthlyAmount;
+    });
+
+    // Trigger calculation on page load
+    window.addEventListener('load', function() {
+        const installmentsSelect = document.getElementById('installments');
+        if (installmentsSelect) {
+            installmentsSelect.dispatchEvent(new Event('change'));
+        }
+    });
+
+     // Loop through and show all the toasts for each message
+   {% for message in messages %}
+      const toastEl{{ forloop.counter }} = document.getElementById('toast{{ forloop.counter }}');
+      const toast{{ forloop.counter }} = new bootstrap.Toast(toastEl{{ forloop.counter }});
+      toast{{ forloop.counter }}.show();
+   {% endfor %}
+</script>
+
+
+{% endblock %}

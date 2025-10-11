@@ -646,7 +646,64 @@ class LoanPayment(models.Model):
 
     def __str__(self):
         return f"{self.loan.staffno} paid {self.amount_paid} on {self.payment_date}"
-            
+          
+          
+  ####### STAFF MEDICAL SURCHARGE #########
+class MedicalSurcharge(models.Model):
+    """Track medical surcharges as loan-like transactions"""
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('active', 'Active'),
+        ('completed', 'Completed'),
+    ]
+    
+    staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE)
+    medical_transaction = models.ForeignKey(Medical, blank=False, null=False, on_delete=models.CASCADE)
+    total_amount = models.DecimalField(max_digits=10, null=True, blank=True, decimal_places=2)
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    installments = models.IntegerField(default=1)
+    monthly_deduction = models.DecimalField(max_digits=10, null=True, blank=True, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    academic_year = models.CharField(max_length=10)
+    created_date = models.DateTimeField(auto_now_add=True)
+    start_deduction_date = models.DateField(null=True, blank=True)
+    end_deduction_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=False)
+    
+    def calculate_balance(self):
+        total = Decimal(self.total_amount)
+        amount = Decimal(self.amount_paid)
+        return Decimal(total - amount)
+    
+    def save(self, *args, **kwargs):
+        self.balance = self.calculate_balance()
+        if self.balance <= 0:
+            self.status = 'completed'
+        super().save(*args, **kwargs)
+    
+    class Meta:
+        ordering = ['-created_date']
+
+
+class MedicalSurchargePayment(models.Model):
+    """Track payments made against surcharges"""
+    
+    surcharge = models.ForeignKey(MedicalSurcharge, blank=False, null=False, on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(max_digits=10, blank=False, null=False, decimal_places=2)
+    payment_date = models.DateField()
+    created_date = models.DateTimeField(auto_now_add=True)
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # Update surcharge payment info
+        self.surcharge.amount_paid = self.surcharge.payments.aggregate(models.Sum('amount'))['amount__sum'] or Decimal('0.00')
+        self.surcharge.save()        
+
+
+
+
+  
     
 class Payroll(models.Model):
     staffno = models.ForeignKey(Employee, blank=False, null=False, on_delete=models.CASCADE)

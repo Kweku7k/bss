@@ -1795,14 +1795,23 @@ def medical_transaction(request, staffno):
         if ent:
             used = ent.get_amount_used(staff)
             remaining = ent.get_remaining_amount(staff)
-            surcharge = ent.get_surcharge(staff)
+            # surcharge = ent.get_surcharge(staff)
+            surcharge_details = ent.get_surcharge_details(staff)
+            
+            
             treatment_summary.append({
                 'type': ttype,
                 'entitlement': ent.entitlement,
                 'used': used,
                 'remaining': remaining,
-                'surcharge': surcharge
+                'gross_surcharge': surcharge_details['gross_surcharge'],
+                'surcharge_paid': surcharge_details['total_paid'],
+                'surcharge_balance': surcharge_details['balance'],
+                'monthly_deduction': surcharge_details['monthly_deduction'],
             })
+            
+    # Get active surcharges for this staff
+    active_surcharges = MedicalSurcharge.objects.filter(staffno=staff, status__in=['pending', 'active'])
 
     # Load beneficiaries
     bene_list = Kith.objects.filter(staffno=staff).annotate(
@@ -1839,6 +1848,9 @@ def medical_transaction(request, staffno):
             medical_transaction.patient_name = patient_name
             medical_transaction.staff_cat = company_info.staff_cat
             medical_transaction.save()
+            
+            # Check if this transaction creates a surcharge
+            check_and_create_surcharge(medical_transaction)
 
             messages.success(request, f'Medical transaction created for {staff_fullname}.')
             return redirect('medical-transaction', staffno=staffno)
@@ -1866,8 +1878,89 @@ def medical_transaction(request, staffno):
         'MEDICALTYPE': ChoicesMedicalType.objects.all().values_list("name", "name"),
         'BENE': final_bene_list,
         'active_year': active_year_value,
+        'active_surcharges': active_surcharges,
     }
     return render(request, 'hr/medical.html', context)
+
+
+
+def check_and_create_surcharge(medical_transaction):
+    """Automatically create surcharge record if transaction exceeds entitlement"""
+    staff = medical_transaction.staffno
+    company_info = CompanyInformation.objects.get(staffno=staff)
+    
+    # Get entitlement for this treatment type
+    entitlement = MedicalEntitlement.objects.filter(
+        staff_cat=company_info.staff_cat,
+        treatment_type=medical_transaction.nature,
+        academic_year=medical_transaction.academic_year
+    ).first()
+    
+    if entitlement:
+        total_used = Medical.objects.filter(
+            staffno=staff,
+            nature=medical_transaction.nature,
+            academic_year=medical_transaction.academic_year
+        ).aggregate(models.Sum('treatment_cost'))['treatment_cost__sum'] or 0
+        
+        if total_used > entitlement.entitlement:
+            # Calculate the surcharge amount for this specific transaction
+            previous_used = total_used - medical_transaction.treatment_cost
+            
+            if previous_used < entitlement.entitlement:
+                # This transaction caused the surcharge
+                surcharge_amount = total_used - entitlement.entitlement
+            else:
+                # Already in surcharge, this entire transaction is surcharge
+                surcharge_amount = medical_transaction.treatment_cost
+            
+            # Create surcharge record if it doesn't exist
+            if surcharge_amount > 0:
+                MedicalSurcharge.objects.create(
+                    staffno=staff,
+                    medical_transaction=medical_transaction,
+                    total_amount=surcharge_amount,
+                    balance=surcharge_amount,
+                    academic_year=medical_transaction.academic_year,
+                    status='pending'
+                )
+
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+def manage_medical_surcharge(request, surcharge_id):
+    """Manage surcharge installments and payment plans"""
+    surcharge = get_object_or_404(MedicalSurcharge, pk=surcharge_id)
+    
+    if request.method == 'POST':
+        installments = int(request.POST.get('installments', 1))
+        is_active = request.POST.get('is_active')
+        monthly_deduction = request.POST.get('monthly_deduction')
+        
+        # 🧹 Remove ₵ and whitespace
+        if isinstance(monthly_deduction, str):
+            monthly_deduction = monthly_deduction.replace("₵", "").strip()
+
+        # Convert to Decimal
+        monthly_deduction = Decimal(monthly_deduction)
+        
+        if installments > 0 and is_active:
+            surcharge.installments = installments
+            surcharge.monthly_deduction = monthly_deduction
+            surcharge.is_active = is_active
+            surcharge.status = 'active'
+            surcharge.save()
+            
+            messages.success(request, f'Surcharge payment plan created: {installments} installments of ₵{monthly_deduction}')
+            return redirect('medical-transaction', staffno=surcharge.staffno.staffno)
+    
+    context = {
+        'surcharge': surcharge,
+        'payments': surcharge.payments.all().order_by('-payment_date')
+    }
+    return render(request, 'hr/manage_surcharge.html', context)
+
 
 
 
@@ -3690,8 +3783,8 @@ def generate_payroll(request):
 def payroll_details(request, staffno):
     staff = Employee.objects.get(pk=staffno)
     company_info = CompanyInformation.objects.get(staffno=staff)
-    selected_month = request.GET.get("month")
-    selected_year = request.GET.get("year")
+    selected_month = request.GET.get("filter_by_month")
+    selected_year = request.GET.get("filter_by_year")
     payroll_data = {}
     
 
@@ -3723,6 +3816,23 @@ def payroll_details(request, staffno):
         }
         messages.success(request, f"Payslip for {staff.fname} has been generated")        
 
+    
+    # Export functionality
+    export_format = request.GET.get("format")
+    if export_format and payroll_data:
+        filename = f"Payslip {staff.fname} {staff.lname} {selected_date.strftime('%B %Y')}"
+        
+        if export_format == "pdf":
+            context = {
+                'staff': staff,
+                'company_info': company_info,
+                'payroll_data': payroll_data,
+                "selected_month": selected_month,
+                "selected_year": selected_year,
+            }
+            
+        return render_to_pdf('export/payslip.html', context, f"{filename}.pdf")
+    
     context = {
         'staff': staff,
         'company_info': company_info,
@@ -3807,9 +3917,6 @@ def payroll_processing(request):
 
     return render(request, "hr/payroll_processing.html", context)
 
-
-from decimal import Decimal
-from collections import defaultdict
 
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])

@@ -62,6 +62,7 @@ urlpatterns = [
     
     path('medical_transaction/<str:staffno>', views.medical_transaction, name="medical-transaction"),
     path('edit_medical_transaction/<str:med_id>/<str:staffno>', views.edit_medical_transaction, name="edit-medical-transaction"),
+    path('medical/surcharge/<int:surcharge_id>/manage/', views.manage_medical_surcharge, name='manage-surcharge'),
     
     # path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     # path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),

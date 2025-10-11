@@ -1,7 +1,8 @@
 from decimal import Decimal
+import stat
 from django.db.models import Sum, Q
 from django.contrib import messages
-from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType, StaffLoan, StaffRelief
+from .models import ContributionRate, TaxBand, CompanyInformation, StaffIncome, StaffDeduction, IncomeType, StaffLoan, StaffRelief, MedicalSurcharge
 
 class PayrollCalculator:
     def __init__(self, staffno, month):
@@ -118,6 +119,25 @@ class PayrollCalculator:
         print("Loan details", loan_deductions)
         return loan_deductions
 
+    
+    def get_active_surcharge_deductions(self):
+
+        active_surcharges = MedicalSurcharge.objects.filter(staffno=self.staffno, is_active=True, status='active' )
+        surcharge_deductions = []
+
+        for surcharge in active_surcharges:
+            if surcharge.balance > 0:
+                deduction_amount = min(surcharge.monthly_deduction, surcharge.balance)
+                surcharge_deductions.append({
+                    'staffno': surcharge.staffno.staffno,
+                    'staff': f"{surcharge.staffno.fname} {surcharge.staffno.lname}",
+                    'deduction_type': f"Medical Surcharge {surcharge.medical_transaction.nature}",
+                    'amount': Decimal(deduction_amount),
+                    'surcharge_id': surcharge.id,
+                })
+
+        print("Surcharge details", surcharge_deductions)
+        return surcharge_deductions
     
     
     def get_tax_for_taxable_income(self):
@@ -286,6 +306,16 @@ class PayrollCalculator:
                 "meta": loan["meta"]
             })
             total_deduction += loan["monthly_installment"]
+            
+            
+        # Add Surcharge deductions as standalone entries
+        for surcharge in self.get_active_surcharge_deductions():
+            deduction_list.append({
+                "deduction_type": surcharge["deduction_type"],
+                "deductable_amount": surcharge["amount"],
+                "surcharge_id": surcharge["surcharge_id"]
+            })
+            total_deduction += surcharge["amount"]
         
         print(f"Staff Deductions: {round(total_deduction, 2)}")
         return {"deductions": deduction_list, "total_deduction": round(total_deduction, 2)}
