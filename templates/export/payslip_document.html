@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payslip - {{ selected_date }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Print/Export specific styles */
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        @media print {
+            body {
+                background-color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 0 !important;
+            }
+            
+            .payslip-container {
+                box-shadow: none !important;
+                margin: 0 !important;
+                max-width: none !important;
+                width: 100% !important;
+                padding: 20px !important;
+            }
+
+            .table-header,
+            .table-row,
+            .total-row,
+            .net-pay-row {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr 1fr 1fr !important;
+            }
+
+            .employee-info {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+            }
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 40px 20px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .payslip-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 50px 60px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            page-break-inside: avoid;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .header .company-name {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .header .address {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .employee-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px 40px;
+            margin-bottom: 50px;
+            margin-top: 50px;
+        }
+
+        .info-row {
+            display: flex;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        .info-label {
+            min-width: 140px;
+        }
+
+        .info-colon {
+            margin-right: 5px;
+        }
+
+        .earnings-deductions {
+            margin-bottom: 40px;
+        }
+
+        /* Fallback table layout for better export compatibility */
+        .earnings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .earnings-table th,
+        .earnings-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .earnings-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .earnings-table .amount-col {
+            text-align: right;
+        }
+
+        .earnings-table .total-row {
+            font-weight: bold;
+            border-top: 2px solid black;
+        }
+
+        .earnings-table .net-row {
+            font-weight: bold;
+        }
+
+        /* Hide table on screen, show on print */
+        .earnings-table {
+            display: none;
+        }
+
+        @media print {
+            .table-header,
+            .table-row,
+            .total-row,
+            .net-pay-row {
+                display: none !important;
+            }
+            
+            .earnings-table {
+                display: table !important;
+            }
+        }
+
+        .table-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            font-weight: bold;
+            font-size: 18px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid black;
+            margin-bottom: 15px;
+            page-break-inside: avoid;
+        }
+
+        .table-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            padding: 8px 0;
+            font-size: 16px;
+            page-break-inside: avoid;
+        }
+
+        .col-2 {
+            text-align: right;
+            padding-right: 20px;
+        }
+
+        .col-4 {
+            text-align: right;
+        }
+
+        .total-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            padding: 15px 0 8px 0;
+            font-weight: bold;
+            font-size: 16px;
+            border-top: 2px solid black;
+            margin-top: 10px;
+        }
+
+        .net-pay-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            padding: 8px 0;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .amount-in-words {
+            text-align: center;
+            margin: 50px 0;
+        }
+
+        .amount-in-words .amount {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .amount-in-words .words {
+            font-size: 16px;
+        }
+
+        .signatures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-top: 60px;
+            margin-bottom: 80px;
+        }
+
+        .signature-block {
+            text-align: center;
+        }
+
+        .signature-label {
+            font-size: 16px;
+            margin-bottom: 60px;
+        }
+
+        .signature-line {
+            border-top: 1px solid black;
+            margin-top: 20px;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 16px;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    {% if payrolls %}
+    {% for payroll in payrolls %}
+    <div class="payslip-container">
+        <div class="header">
+            <h1>Central University</h1>
+            <div class="company-name">Payslip for {{ selected_date }}</div>
+        </div>
+
+        <div class="employee-info">
+            <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-colon">:</span>
+                <span>{{ payroll.staff.fname }} {{ payroll.staff.lname }} {{ payroll.staff.middlenames }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Employee Id</span>
+                <span class="info-colon">:</span>
+                <span>{{ payroll.staff.staffno }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">SS No.</span>
+                <span class="info-colon">:</span>
+                <span>{{ payroll.staff.ssnitno|default:'' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Job Title</span>
+                <span class="info-colon">:</span>
+                <span>{{ payroll.company_info.job_title|default:'' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Grade</span>
+                <span class="info-colon">:</span>
+                <span>{{ payroll.company_info.grade|default:'' }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Notch</span>
+                <span class="info-colon">:</span>
+                <span>{{ payroll.company_info.notch|default:'' }}</span>
+            </div>
+        </div>
+
+        <div class="earnings-deductions">
+            <!-- Grid layout for screen display -->
+            <div class="table-header">
+                <div>Earnings</div>
+                <div class="col-2">Amount</div>
+                <div>Deductions</div>
+                <div class="col-4">Amount</div>
+            </div>
+
+            <!-- Basic Salary Row -->
+            <div class="table-row">
+                <div>Basic Salary</div>
+                <div class="col-2">{{ payroll.basic_salary }}</div>
+                {% if payroll.income_tax and payroll.income_tax.tax %}
+                <div>Income Tax</div>
+                <div class="col-4">{{ payroll.income_tax.tax }}</div>
+                {% else %}
+                <div></div>
+                <div class="col-4"></div>
+                {% endif %}
+            </div>
+
+            <!-- Additional Incomes -->
+            {% for income in payroll.incomes %}
+            <div class="table-row">
+                <div>{{ income.income_type }}{% if income.percentage_on_basic %} ({{ income.percentage_on_basic }}%){% endif %}</div>
+                <div class="col-2">{{ income.entitled_amount }}</div>
+                {% if forloop.counter == 1 %}
+                    {% if payroll.ssf_employee and payroll.ssf_employee.amount and payroll.ssf_employee.rate %}
+                    <div>Social Security ({{ payroll.ssf_employee.rate }}%)</div>
+                    <div class="col-4">{{ payroll.ssf_employee.amount }}</div>
+                    {% else %}
+                    <div></div>
+                    <div class="col-4"></div>
+                    {% endif %}
+                {% else %}
+                <div></div>
+                <div class="col-4"></div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- SSF Employee if no additional incomes -->
+            {% if not payroll.incomes %}
+                {% if payroll.ssf_employee and payroll.ssf_employee.amount and payroll.ssf_employee.rate %}
+                <div class="table-row">
+                    <div></div>
+                    <div class="col-2"></div>
+                    <div>Social Security ({{ payroll.ssf_employee.rate }}%)</div>
+                    <div class="col-4">{{ payroll.ssf_employee.amount }}</div>
+                </div>
+                {% endif %}
+            {% endif %}
+
+            <!-- PF Employee -->
+            {% if payroll.pf_employee and payroll.pf_employee.rate and payroll.pf_employee.amount %}
+            <div class="table-row">
+                <div></div>
+                <div class="col-2"></div>
+                <div>PF Employee ({{ payroll.pf_employee.rate }}%)</div>
+                <div class="col-4">{{ payroll.pf_employee.amount }}</div>
+            </div>
+            {% endif %}
+
+            <!-- Withholding Tax -->
+            {% if payroll.withholding_tax %}
+            <div class="table-row">
+                <div></div>
+                <div class="col-2"></div>
+                <div>Withholding Tax</div>
+                <div class="col-4">{{ payroll.withholding_tax }}</div>
+            </div>
+            {% endif %}
+
+            <!-- Withholding Rent Tax -->
+            {% if payroll.withholding_rent_tax %}
+            <div class="table-row">
+                <div></div>
+                <div class="col-2"></div>
+                <div>Withholding Rent Tax</div>
+                <div class="col-4">{{ payroll.withholding_rent_tax }}</div>
+            </div>
+            {% endif %}
+
+            <!-- Additional Deductions -->
+            {% for deduction in payroll.deductions %}
+            <div class="table-row">
+                <div></div>
+                <div class="col-2"></div>
+                <div>{{ deduction.deduction_type }}{% if deduction.percentage_on_basic %} ({{ deduction.percentage_on_basic }}%){% endif %}</div>
+                <div class="col-4">{{ deduction.deductable_amount }}</div>
+            </div>
+            {% endfor %}
+
+            <div class="total-row">
+                <div>Total Earnings</div>
+                <div class="col-2">{{ payroll.total_income }}</div>
+                <div>Total Deductions</div>
+                <div class="col-4">{{ payroll.total_deduction }}</div>
+            </div>
+
+            <div class="net-pay-row">
+                <div></div>
+                <div></div>
+                <div>Net Pay</div>
+                <div class="col-4">{{ payroll.net_salary }}</div>
+            </div>
+
+            <!-- Table layout for export/print -->
+            <table class="earnings-table">
+                <thead>
+                    <tr>
+                        <th>Earnings</th>
+                        <th class="amount-col">Amount</th>
+                        <th>Deductions</th>
+                        <th class="amount-col">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Basic Salary Row -->
+                    <tr>
+                        <td>Basic Salary</td>
+                        <td class="amount-col">{{ payroll.basic_salary }}</td>
+                        {% if payroll.income_tax and payroll.income_tax.tax %}
+                        <td>Income Tax</td>
+                        <td class="amount-col">{{ payroll.income_tax.tax }}</td>
+                        {% else %}
+                        <td></td>
+                        <td class="amount-col"></td>
+                        {% endif %}
+                    </tr>
+
+                    <!-- Additional Incomes -->
+                    {% for income in payroll.incomes %}
+                    <tr>
+                        <td>{{ income.income_type }}{% if income.percentage_on_basic %} ({{ income.percentage_on_basic }}%){% endif %}</td>
+                        <td class="amount-col">{{ income.entitled_amount }}</td>
+                        {% if forloop.counter == 1 %}
+                            {% if payroll.ssf_employee and payroll.ssf_employee.amount and payroll.ssf_employee.rate %}
+                            <td>Social Security ({{ payroll.ssf_employee.rate }}%)</td>
+                            <td class="amount-col">{{ payroll.ssf_employee.amount }}</td>
+                            {% else %}
+                            <td></td>
+                            <td class="amount-col"></td>
+                            {% endif %}
+                        {% else %}
+                        <td></td>
+                        <td class="amount-col"></td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+
+                    <!-- SSF Employee if no additional incomes -->
+                    {% if not payroll.incomes %}
+                        {% if payroll.ssf_employee and payroll.ssf_employee.amount and payroll.ssf_employee.rate %}
+                        <tr>
+                            <td></td>
+                            <td class="amount-col"></td>
+                            <td>Social Security ({{ payroll.ssf_employee.rate }}%)</td>
+                            <td class="amount-col">{{ payroll.ssf_employee.amount }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endif %}
+
+                    <!-- PF Employee -->
+                    {% if payroll.pf_employee and payroll.pf_employee.rate and payroll.pf_employee.amount %}
+                    <tr>
+                        <td></td>
+                        <td class="amount-col"></td>
+                        <td>PF Employee ({{ payroll.pf_employee.rate }}%)</td>
+                        <td class="amount-col">{{ payroll.pf_employee.amount }}</td>
+                    </tr>
+                    {% endif %}
+
+                    <!-- Withholding Tax -->
+                    {% if payroll.withholding_tax %}
+                    <tr>
+                        <td></td>
+                        <td class="amount-col"></td>
+                        <td>Withholding Tax</td>
+                        <td class="amount-col">{{ payroll.withholding_tax }}</td>
+                    </tr>
+                    {% endif %}
+
+                    <!-- Withholding Rent Tax -->
+                    {% if payroll.withholding_rent_tax %}
+                    <tr>
+                        <td></td>
+                        <td class="amount-col"></td>
+                        <td>Withholding Rent Tax</td>
+                        <td class="amount-col">{{ payroll.withholding_rent_tax }}</td>
+                    </tr>
+                    {% endif %}
+
+                    <!-- Additional Deductions -->
+                    {% for deduction in payroll.deductions %}
+                    <tr>
+                        <td></td>
+                        <td class="amount-col"></td>
+                        <td>{{ deduction.deduction_type }}{% if deduction.percentage_on_basic %} ({{ deduction.percentage_on_basic }}%){% endif %}</td>
+                        <td class="amount-col">{{ deduction.deductable_amount }}</td>
+                    </tr>
+                    {% endfor %}
+
+                    <tr class="total-row">
+                        <td>Total Earnings</td>
+                        <td class="amount-col">{{ payroll.total_income }}</td>
+                        <td>Total Deductions</td>
+                        <td class="amount-col">{{ payroll.total_deduction }}</td>
+                    </tr>
+                    <tr class="net-row">
+                        <td></td>
+                        <td class="amount-col"></td>
+                        <td>Net Pay</td>
+                        <td class="amount-col">{{ payroll.net_salary }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="amount-in-words">
+            <div class="amount">{{ payroll.net_salary }}</div>
+            <div class="words">{{ payroll.net_salary|floatformat:0|default:"Zero" }} Ghana Cedis</div>
+        </div>
+
+        <div class="signatures">
+            <div class="signature-block">
+                <div class="signature-label">Employer Signature</div>
+                <div class="signature-line"></div>
+            </div>
+            <div class="signature-block">
+                <div class="signature-label">Employee Signature</div>
+                <div class="signature-line"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            This is system generated payslip
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+        <div class="alert alert-info">
+            <p class="mb-0">Please select a month to view all Staff Payslips.</p>
+        </div>
+    {% endif %}
+</body>
+</html>

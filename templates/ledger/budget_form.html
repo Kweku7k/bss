@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-{% if budget %}edit{% else %}plus{% endif %}"></i> {{ title }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="budgetForm">
+                        {% csrf_token %}
+                        
+                        <!-- Budget Header -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.name.id_for_label }}">Budget Name *</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger">{{ form.name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.fiscal_year.id_for_label }}">Fiscal Year *</label>
+                                    {{ form.fiscal_year }}
+                                    {% if form.fiscal_year.errors %}
+                                        <div class="text-danger">{{ form.fiscal_year.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.currency.id_for_label }}">Currency *</label>
+                                    {{ form.currency }}
+                                    {% if form.currency.errors %}
+                                        <div class="text-danger">{{ form.currency.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.total_budget.id_for_label }}">Total Budget Amount *</label>
+                                    {{ form.total_budget }}
+                                    {% if form.total_budget.errors %}
+                                        <div class="text-danger">{{ form.total_budget.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.status.id_for_label }}">Status</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                        <div class="text-danger">{{ form.status.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.description.id_for_label }}">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Budget Lines -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-list"></i> Budget Line Items
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> 
+                                    <strong>Budget Lines:</strong> Allocate specific amounts to different accounts for detailed budget tracking.
+                                </div>
+                                
+                                {{ formset.management_form }}
+                                <div id="budget-lines">
+                                    {% for line_form in formset %}
+                                    <div class="budget-line row mb-3 p-3 border rounded bg-light">
+                                        <div class="col-md-5">
+                                            <div class="form-group">
+                                                <label>Account *</label>
+                                                {{ line_form.account }}
+                                                {% if line_form.account.errors %}
+                                                    <div class="text-danger">{{ line_form.account.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Allocated Amount *</label>
+                                                {{ line_form.allocated_amount }}
+                                                {% if line_form.allocated_amount.errors %}
+                                                    <div class="text-danger">{{ line_form.allocated_amount.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                {{ line_form.description }}
+                                                {% if line_form.description.errors %}
+                                                    <div class="text-danger">{{ line_form.description.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <button type="button" class="btn btn-danger btn-sm remove-line" style="display: block;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <button type="button" id="add-line" class="btn btn-outline-primary">
+                                            <i class="fas fa-plus"></i> Add Budget Line
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Budget Summary -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">
+                                            <i class="fas fa-calculator"></i> Budget Summary
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Total Budget:</strong>
+                                            </div>
+                                            <div class="col-6 text-right">
+                                                <span id="total-budget" class="h6">{{ form.total_budget.value|default:"0.00" }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Total Allocated:</strong>
+                                            </div>
+                                            <div class="col-6 text-right">
+                                                <span id="total-allocated" class="h6">0.00</span>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Remaining:</strong>
+                                            </div>
+                                            <div class="col-6 text-right">
+                                                <span id="remaining" class="h6">0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Debug Information -->
+                        <div class="alert alert-info">
+                            <small>
+                                <strong>Debug Info:</strong> 
+                                Total Forms: <span id="debug-total-forms">{{ formset.total_form_count }}</span> | 
+                                Current Lines: <span id="debug-line-count">{{ formset.total_form_count }}</span>
+                            </small>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% if budget %}Update{% else %}Create{% endif %} Budget
+                            </button>
+                            <a href="{% url 'ledger:budget_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Budget Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Budget Planning:</h6>
+                    <ul class="small">
+                        <li>Set realistic budget amounts</li>
+                        <li>Allocate funds to specific accounts</li>
+                        <li>Review and approve before activation</li>
+                        <li>Monitor spending against budget</li>
+                    </ul>
+                    
+                    <h6>Budget Status:</h6>
+                    <ul class="small">
+                        <li><strong>Draft:</strong> Can be edited</li>
+                        <li><strong>Approved:</strong> Ready for use</li>
+                        <li><strong>Active:</strong> Currently in use</li>
+                        <li><strong>Closed:</strong> No longer active</li>
+                    </ul>
+                    
+                    <h6>Budget Lines:</h6>
+                    <ul class="small">
+                        <li>Allocate amounts to specific accounts</li>
+                        <li>Track spending by account</li>
+                        <li>Monitor utilization percentages</li>
+                        <li>Generate detailed reports</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let lineCount = {{ formset.total_form_count|default:1 }};
+    
+    // Add line functionality
+    document.getElementById('add-line').addEventListener('click', function() {
+        const container = document.getElementById('budget-lines');
+        const template = container.children[0].cloneNode(true);
+        
+        // Update form indices
+        const newIndex = lineCount;
+        template.innerHTML = template.innerHTML.replace(/form-0/g, `form-${newIndex}`);
+        template.innerHTML = template.innerHTML.replace(/id_form-0/g, `id_form-${newIndex}`);
+        template.innerHTML = template.innerHTML.replace(/name="form-0/g, `name="form-${newIndex}`);
+        
+        // Clear values
+        template.querySelectorAll('input, select').forEach(input => {
+            if (input.type !== 'hidden') {
+                input.value = '';
+            }
+        });
+        
+        // Show remove button
+        template.querySelector('.remove-line').style.display = 'block';
+        
+        container.appendChild(template);
+        lineCount++;
+        
+        // Update management form
+        const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+        if (totalForms) {
+            totalForms.value = lineCount;
+        }
+        
+        // Update debug info
+        document.getElementById('debug-total-forms').textContent = lineCount;
+        document.getElementById('debug-line-count').textContent = lineCount;
+        
+        updateTotals();
+    });
+    
+    // Remove line functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-line') || e.target.closest('.remove-line')) {
+            const line = e.target.closest('.budget-line');
+            if (line) {
+                line.remove();
+                updateTotals();
+            }
+        }
+    });
+    
+    // Update totals when values change
+    document.addEventListener('input', function(e) {
+        if (e.target.name.includes('allocated_amount') || e.target.name.includes('total_budget')) {
+            updateTotals();
+        }
+    });
+    
+    function updateTotals() {
+        let totalAllocated = 0;
+        
+        document.querySelectorAll('input[name$="-allocated_amount"]').forEach(input => {
+            totalAllocated += parseFloat(input.value) || 0;
+        });
+        
+        const totalBudget = parseFloat(document.getElementById('{{ form.total_budget.id_for_label }}').value) || 0;
+        const remaining = totalBudget - totalAllocated;
+        
+        document.getElementById('total-allocated').textContent = totalAllocated.toFixed(2);
+        document.getElementById('remaining').textContent = remaining.toFixed(2);
+        
+        // Color code the remaining amount
+        const remainingElement = document.getElementById('remaining');
+        if (remaining < 0) {
+            remainingElement.style.color = 'red';
+        } else {
+            remainingElement.style.color = 'green';
+        }
+    }
+    
+    // Initial totals calculation
+    updateTotals();
+});
+</script>
+{% endblock %}

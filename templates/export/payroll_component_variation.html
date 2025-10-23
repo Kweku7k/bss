@@ -1,0 +1,218 @@
+<!-- templates/export/payroll_variation.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Payroll Variation Report</title>
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 1cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 18pt;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .text-success {
+            color: #28a745;
+        }
+        .text-danger {
+            color: #dc3545;
+        }
+        .summary-box {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+        .summary-box h3 {
+            margin: 0 0 10px 0;
+            font-size: 14pt;
+        }
+        .summary-row {
+            display: inline-block;
+            width: 48%;
+            margin-bottom: 5px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 9pt;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+        .badge-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .badge-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .badge-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 9pt;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Payroll {{ component_type|title }} Variation Analysis</h1>
+        <p>{{ prev_date }} vs {{ curr_date }}</p>
+        <p>Generated on: {{ generated_date }}</p>
+    </div>
+
+    <div class="summary-box">
+        <h3>Overall Summary</h3>
+        <div class="summary-row">
+            <div class="summary-item">
+                <strong>Staff Analyzed:</strong><br>
+                {{ staff_summary.total_staff_prev }} → {{ staff_summary.total_staff_curr }}
+            </div>
+            <div class="summary-item">
+                <strong>Staff with Changes:</strong><br>
+                {{ staff_summary.staff_with_changes }}
+            </div>
+            <div class="summary-item">
+                <strong>New {{ component_type|title }}:</strong> {{ staff_summary.new_components }}<br>
+                <strong>Removed {{ component_type|title }}:</strong> {{ staff_summary.removed_components }}
+            </div>
+        </div>
+        <div style="margin-top: 10px;">
+            <strong>Total {{ prev_date }}:</strong> {{ staff_summary.total_prev_amount|floatformat:2 }} |
+            <strong>Total {{ curr_date }}:</strong> {{ staff_summary.total_curr_amount|floatformat:2 }} |
+            <strong>Variation:</strong> 
+            <span class="{% if staff_summary.total_variation > 0 %}text-success{% else %}text-danger{% endif %}">
+                {{ staff_summary.total_variation|floatformat:2 }}
+            </span>
+        </div>
+    </div>
+
+    {% if component_summary %}
+        <h3>{{ component_type|title }} Type Summary</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>{{ component_type|title }} Type</th>
+                    <th class="text-right">{{ prev_date }}</th>
+                    <th class="text-right">{{ curr_date }}</th>
+                    <th class="text-right">Difference</th>
+                    <th class="text-right">% Change</th>
+                    <th class="text-center">Staff Affected</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comp_type, data in component_summary.items %}
+                    <tr>
+                        <td>{{ comp_type }}</td>
+                        <td class="text-right">{{ data.total_prev|floatformat:2 }}</td>
+                        <td class="text-right">{{ data.total_curr|floatformat:2 }}</td>
+                        <td class="text-right {% if data.total_diff > 0 %}text-success{% elif data.total_diff < 0 %}text-danger{% endif %}">
+                            {{ data.total_diff|floatformat:2 }}
+                        </td>
+                        <td class="text-right">{{ data.percentage }}%</td>
+                        <td class="text-center">{{ data.staff_count }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <div class="page-break"></div>
+
+    <h3>Staff Details</h3>
+    {% for entry in variation_data %}
+        {% if entry.has_changes or show_all %}
+            <div class="staff-header">
+                {{ entry.staff.staffno }} - {{ entry.staff.fname }} {{ entry.staff.lname }}
+                {% if entry.company_info %}
+                    ({{ entry.company_info.dept.dept_short_name|default:"No Dept" }})
+                {% endif %}
+                - Total: {{ entry.total_prev|floatformat:2 }} → {{ entry.total_curr|floatformat:2 }}
+                <span class="{% if entry.total_diff > 0 %}text-success{% elif entry.total_diff < 0 %}text-danger{% endif %}">
+                    ({{ entry.total_diff|floatformat:2 }})
+                </span>
+            </div>
+            
+            {% if entry.variations %}
+                <table class="component-table">
+                    <thead>
+                        <tr>
+                            <th>{{ component_type|title }} Type</th>
+                            <th class="text-right">{{ prev_date }}</th>
+                            <th class="text-right">{{ curr_date }}</th>
+                            <th class="text-right">Difference</th>
+                            <th class="text-right">%</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for var in entry.variations %}
+                            <tr>
+                                <td>{{ var.type }}</td>
+                                <td class="text-right">{{ var.prev_amount|floatformat:2 }}</td>
+                                <td class="text-right">{{ var.curr_amount|floatformat:2 }}</td>
+                                <td class="text-right {% if var.difference > 0 %}text-success{% elif var.difference < 0 %}text-danger{% endif %}">
+                                    {{ var.difference|floatformat:2 }}
+                                </td>
+                                <td class="text-right">{{ var.percentage }}%</td>
+                                <td class="text-center">
+                                    {% if var.status == 'new' %}
+                                        <span class="badge badge-success">New</span>
+                                    {% elif var.status == 'removed' %}
+                                        <span class="badge badge-danger">Removed</span>
+                                    {% elif var.status == 'modified' %}
+                                        <span class="badge badge-warning">Modified</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
+        {% endif %}
+    {% endfor %}
+
+    <div class="footer">
+        <p>This is a system-generated report</p>
+    </div>
+</body>
+</html>

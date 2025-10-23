@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-{% if account %}edit{% else %}plus{% endif %}"></i> {{ title }}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.code.id_for_label }}">Account Code *</label>
+                                    {{ form.code }}
+                                    {% if form.code.errors %}
+                                        <div class="text-danger">{{ form.code.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Enter 4-10 digit numeric code (e.g., 1000, 1100, 1110)
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.name.id_for_label }}">Account Name *</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger">{{ form.name.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.type.id_for_label }}">Account Type *</label>
+                                    {{ form.type }}
+                                    {% if form.type.errors %}
+                                        <div class="text-danger">{{ form.type.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.currency.id_for_label }}">Currency *</label>
+                                    {{ form.currency }}
+                                    {% if form.currency.errors %}
+                                        <div class="text-danger">{{ form.currency.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.parent.id_for_label }}">Parent Account</label>
+                                    {{ form.parent }}
+                                    {% if form.parent.errors %}
+                                        <div class="text-danger">{{ form.parent.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Select a parent account for hierarchical organization
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.description.id_for_label }}">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active Account
+                                </label>
+                            </div>
+                            {% if form.is_active.errors %}
+                                <div class="text-danger">{{ form.is_active.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {% if account %}Update{% else %}Create{% endif %} Account
+                            </button>
+                            <a href="{% url 'ledger:chart_of_accounts' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Account Types Guide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><span class="badge badge-primary">ASSET</span></h6>
+                        <p class="small">Resources owned by the university (Cash, Equipment, Buildings)</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge badge-warning">LIABILITY</span></h6>
+                        <p class="small">Debts and obligations (Payables, Deposits, Loans)</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge badge-success">EQUITY</span></h6>
+                        <p class="small">Ownership interest (Retained Earnings, Capital)</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge badge-info">INCOME</span></h6>
+                        <p class="small">Revenue sources (Tuition, Fees, Grants)</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge badge-danger">EXPENSE</span></h6>
+                        <p class="small">Costs and expenditures (Salaries, Utilities, Supplies)</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6><span class="badge badge-secondary">HEADER</span></h6>
+                        <p class="small">Grouping accounts for organization (no transactions)</p>
+                    </div>
+                </div>
+            </div>
+            
+            {% if account %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-chart-bar"></i> Account Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-primary">{{ account.children.count }}</h6>
+                            <small>Child Accounts</small>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-info">{{ account.journallines.count }}</h6>
+                            <small>Transactions</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update parent choices based on account type
+    const typeSelect = document.getElementById('{{ form.type.id_for_label }}');
+    const parentSelect = document.getElementById('{{ form.parent.id_for_label }}');
+    
+    function updateParentChoices() {
+        const accountType = typeSelect.value;
+        const currentAccountId = '{{ account.id|default:"" }}';
+        
+        // Fetch updated parent choices via AJAX
+        fetch(`/ledger/api/parent-accounts/?type=${accountType}&exclude=${currentAccountId}`)
+            .then(response => response.json())
+            .then(data => {
+                parentSelect.innerHTML = '<option value="">No Parent</option>';
+                data.accounts.forEach(account => {
+                    const option = document.createElement('option');
+                    option.value = account.id;
+                    option.textContent = `${account.code} - ${account.name}`;
+                    parentSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error:', error));
+    }
+    
+    typeSelect.addEventListener('change', updateParentChoices);
+});
+</script>
+{% endblock %}

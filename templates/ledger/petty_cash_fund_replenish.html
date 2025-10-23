@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Replenish {{ fund.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus-circle"></i> Replenish {{ fund.name }}
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{% url 'ledger:petty_cash_fund_detail' fund.id %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to Fund
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="replenishForm">
+                        {% csrf_token %}
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Current Balance:</strong> {{ fund.account.currency.code }} {{ fund.current_balance|floatformat:2 }}<br>
+                            <strong>Maximum Amount:</strong> {{ fund.account.currency.code }} {{ fund.max_amount|floatformat:2 }}<br>
+                            <strong>Remaining Capacity:</strong> {{ fund.account.currency.code }} {{ max_amount|floatformat:2 }}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="amount">Amount to Add *</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">{{ fund.account.currency.code }}</span>
+                                </div>
+                                <input type="number" 
+                                       class="form-control" 
+                                       id="amount" 
+                                       name="amount" 
+                                       step="0.01" 
+                                       min="0.01" 
+                                       max="{{ max_amount }}"
+                                       required>
+                            </div>
+                            <small class="form-text text-muted">
+                                Maximum amount you can add: {{ fund.account.currency.code }} {{ max_amount|floatformat:2 }}
+                            </small>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-plus"></i> Add Funds
+                            </button>
+                            <a href="{% url 'ledger:petty_cash_fund_detail' fund.id %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Fund Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>Fund Name:</strong></td>
+                            <td>{{ fund.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Account:</strong></td>
+                            <td>{{ fund.account.code }} - {{ fund.account.name }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Custodian:</strong></td>
+                            <td>{{ fund.custodian.get_full_name|default:fund.custodian.username }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Current Balance:</strong></td>
+                            <td class="text-primary">{{ fund.account.currency.code }} {{ fund.current_balance|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Maximum Amount:</strong></td>
+                            <td class="text-info">{{ fund.account.currency.code }} {{ fund.max_amount|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Utilization:</strong></td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {% if fund.get_utilization_percentage > 80 %}bg-warning{% else %}bg-success{% endif %}" 
+                                         role="progressbar" style="width: {{ fund.get_utilization_percentage }}%">
+                                        {{ fund.get_utilization_percentage|floatformat:1 }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb"></i> Replenishment Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>When to Replenish:</h6>
+                    <ul class="small">
+                        <li>Fund balance is low</li>
+                        <li>Regular scheduled replenishment</li>
+                        <li>After major disbursements</li>
+                        <li>End of accounting period</li>
+                    </ul>
+                    
+                    <h6>Best Practices:</h6>
+                    <ul class="small">
+                        <li>Don't exceed maximum fund amount</li>
+                        <li>Keep detailed records</li>
+                        <li>Reconcile before replenishing</li>
+                        <li>Use proper authorization</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Note:</strong> Replenishment should be done through proper accounting procedures.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('replenishForm');
+    const amountInput = document.getElementById('amount');
+    const maxAmount = {{ max_amount }};
+    
+    form.addEventListener('submit', function(e) {
+        const amount = parseFloat(amountInput.value);
+        
+        if (amount <= 0) {
+            e.preventDefault();
+            alert('Amount must be greater than 0');
+            return false;
+        }
+        
+        if (amount > maxAmount) {
+            e.preventDefault();
+            alert(`Amount cannot exceed remaining capacity of {{ fund.account.currency.code }} ${maxAmount.toFixed(2)}`);
+            return false;
+        }
+        
+        if (!confirm(`Are you sure you want to add {{ fund.account.currency.code }} ${amount.toFixed(2)} to this fund?`)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    
+    // Update preview when amount changes
+    amountInput.addEventListener('input', function() {
+        const amount = parseFloat(this.value) || 0;
+        const newBalance = {{ fund.current_balance }} + amount;
+        
+        // You can add a preview element here if needed
+        console.log(`New balance would be: {{ fund.account.currency.code }} ${newBalance.toFixed(2)}`);
+    });
+});
+</script>
+{% endblock %}

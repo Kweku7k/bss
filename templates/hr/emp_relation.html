@@ -155,9 +155,9 @@
                                 <input type="text" class="form-control" name="residential" {% if emp_relation %} value="{{ emp_relation.residential }}" {% else %} value="" {% endif %}>
                             </div>
                             <div class="col-md-4">
-                                <label for="status" class="form-label">Status</label>
+                                <label for="status" class="form-label">Living Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="" disabled selected>Select Relationship Status</option>
+                                    <option value="" disabled selected>Select</option>
                                     {% for key, value in STATUS %}
                                     <option value="{{ key }}" {% if key == emp_relation.status %} selected {% endif %}>{{ value }}</option>
                                     {% endfor %}

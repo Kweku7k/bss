@@ -62,7 +62,7 @@ urlpatterns = [
     
     path('medical_transaction/<str:staffno>', views.medical_transaction, name="medical-transaction"),
     path('edit_medical_transaction/<str:med_id>/<str:staffno>', views.edit_medical_transaction, name="edit-medical-transaction"),
-    path('medical/surcharge/<int:surcharge_id>/manage/', views.manage_medical_surcharge, name='manage-surcharge'),
+    path('medical/surcharge/<str:staffno>/<int:surcharge_id>/manage/', views.manage_medical_surcharge, name='manage-surcharge'),
     
     # path('staff_education/<str:staffno>', views.staff_education,name="staff-education"),
     # path('edit_staff_education/<str:sch_id>/<str:staffno>', views.edit_staff_education,name="edit-staff-education"),
@@ -138,7 +138,8 @@ urlpatterns = [
     path('payroll/<str:staffno>', views.payroll_details, name="payroll-details"),
     path("payroll/processing/", views.payroll_processing, name="payroll-processing"),
     path('settings/<str:staffno>', views.staff_settings, name="staff-settings"),
-    path('staff/<str:staffno>/mark-dormant/', views.mark_dormant, name='mark-dormant'),  
+    path('staff/<str:staffno>/mark-dormant/', views.mark_dormant, name='mark-dormant'), 
+    path('payslip-test/', views.payslip_test, name='payslip-test'),
     
     # Roles and permission
     path('create_groups/', views.create_groups, name='create-groups'),
@@ -174,6 +175,7 @@ urlpatterns = [
     path('statutory_history/', views.statutory_history, name='statutory-history'),
     path('payroll_allowances/', views.payroll_allowances, name='payroll-allowances'),
     path('payroll_deductions/', views.payroll_deductions, name='payroll-deductions'),
+    path('payroll/variation/', views.payroll_variation, name='payroll-variation'),
  
     
     path('payroll/register/', views.payroll_register, name='payroll-register'),

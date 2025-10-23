@@ -1,0 +1,252 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profit & Loss Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line"></i> Profit & Loss Report
+                    </h3>
+                    <div class="card-tools">
+                        <div class="btn-group" role="group">
+                            <button onclick="window.print()" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                            <button onclick="exportToPDF()" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-file-pdf"></i> Export PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Report Filters -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <form method="get" class="form-inline">
+                                <div class="form-group mr-2">
+                                    <label for="start_date" class="mr-2">From:</label>
+                                    <input type="date" name="start_date" class="form-control" 
+                                           value="{{ form.start_date.value|default:start_date }}">
+                                </div>
+                                <div class="form-group mr-2">
+                                    <label for="end_date" class="mr-2">To:</label>
+                                    <input type="date" name="end_date" class="form-control" 
+                                           value="{{ form.end_date.value|default:end_date }}">
+                                </div>
+                                <div class="form-group mr-2">
+                                    <label for="currency" class="mr-2">Currency:</label>
+                                    <select name="currency" class="form-control">
+                                        <option value="">All Currencies</option>
+                                        {% for currency in currencies %}
+                                        <option value="{{ currency.id }}" {% if form.currency.value == currency.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ currency.code }} - {{ currency.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Generate Report
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if report_data %}
+                    <!-- Profit & Loss Statement -->
+                    <div class="report-container">
+                        <div class="text-center mb-4">
+                            <h2>{{ organization_name|default:"University ERP" }}</h2>
+                            <h4>Profit & Loss Statement</h4>
+                            <p>For the period {{ start_date|date:"F d, Y" }} to {{ end_date|date:"F d, Y" }}</p>
+                        </div>
+
+                        <div class="row">
+                            <!-- Income -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-arrow-up"></i> INCOME
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table table-sm mb-0">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Account</th>
+                                                    <th class="text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for income in report_data.income %}
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{ income.code }}</strong><br>
+                                                        <small>{{ income.name }}</small>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <strong>{{ income.balance|floatformat:2 }}</strong>
+                                                        {% if income.currency != base_currency %}
+                                                        <br><small class="text-muted">{{ income.base_balance|floatformat:2 }} {{ base_currency.code }}</small>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot class="thead-dark">
+                                                <tr>
+                                                    <th>TOTAL INCOME</th>
+                                                    <th class="text-right">{{ report_data.total_income|floatformat:2 }}</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Expenses -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-danger text-white">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-arrow-down"></i> EXPENSES
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-0">
+                                        <table class="table table-sm mb-0">
+                                            <thead class="thead-light">
+                                                <tr>
+                                                    <th>Account</th>
+                                                    <th class="text-right">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for expense in report_data.expenses %}
+                                                <tr>
+                                                    <td>
+                                                        <strong>{{ expense.code }}</strong><br>
+                                                        <small>{{ expense.name }}</small>
+                                                    </td>
+                                                    <td class="text-right">
+                                                        <strong>{{ expense.balance|floatformat:2 }}</strong>
+                                                        {% if expense.currency != base_currency %}
+                                                        <br><small class="text-muted">{{ expense.base_balance|floatformat:2 }} {{ base_currency.code }}</small>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot class="thead-dark">
+                                                <tr>
+                                                    <th>TOTAL EXPENSES</th>
+                                                    <th class="text-right">{{ report_data.total_expenses|floatformat:2 }}</th>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Net Profit/Loss -->
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <h5>Total Income</h5>
+                                                <h3 class="text-success">{{ report_data.total_income|floatformat:2 }}</h3>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <h5>Total Expenses</h5>
+                                                <h3 class="text-danger">{{ report_data.total_expenses|floatformat:2 }}</h3>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="text-center">
+                                            <h4>Net {% if report_data.net_profit >= 0 %}Profit{% else %}Loss{% endif %}</h4>
+                                            <h2 class="{% if report_data.net_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                                {{ report_data.net_profit|floatformat:2 }}
+                                            </h2>
+                                            {% if base_currency %}
+                                            <small class="text-muted">Base Currency: {{ base_currency.code }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profit Margin -->
+                        {% if report_data.total_income > 0 %}
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="alert alert-info">
+                                    <h5 class="alert-heading">
+                                        <i class="fas fa-percentage"></i> Profit Margin Analysis
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <strong>Gross Profit Margin:</strong><br>
+                                            {{ report_data.gross_profit_margin|floatformat:2 }}%
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Net Profit Margin:</strong><br>
+                                            {{ report_data.net_profit_margin|floatformat:2 }}%
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>Expense Ratio:</strong><br>
+                                            {{ report_data.expense_ratio|floatformat:2 }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> 
+                        Select date range and click "Generate Report" to view the Profit & Loss Statement.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .card-tools, .btn, .form-inline {
+        display: none !important;
+    }
+    .report-container {
+        font-size: 12px;
+    }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}
+
+.report-container {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+}
+</style>
+
+<script>
+function exportToPDF() {
+    // Simple PDF export using browser print
+    window.print();
+}
+</script>
+{% endblock %}

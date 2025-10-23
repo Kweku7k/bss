@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Exchange Rate{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus"></i> Create New Exchange Rate
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.from_currency.id_for_label }}">From Currency *</label>
+                                    {{ form.from_currency }}
+                                    {% if form.from_currency.errors %}
+                                        <div class="text-danger">{{ form.from_currency.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.to_currency.id_for_label }}">To Currency *</label>
+                                    {{ form.to_currency }}
+                                    {% if form.to_currency.errors %}
+                                        <div class="text-danger">{{ form.to_currency.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.rate.id_for_label }}">Exchange Rate *</label>
+                                    {{ form.rate }}
+                                    {% if form.rate.errors %}
+                                        <div class="text-danger">{{ form.rate.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">
+                                        Rate to convert from currency to base currency
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.effective_date.id_for_label }}">Effective Date *</label>
+                                    {{ form.effective_date }}
+                                    {% if form.effective_date.errors %}
+                                        <div class="text-danger">{{ form.effective_date.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active Exchange Rate
+                                </label>
+                            </div>
+                            {% if form.is_active.errors %}
+                                <div class="text-danger">{{ form.is_active.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Exchange Rate
+                            </button>
+                            <a href="{% url 'ledger:exchange_rate_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Exchange Rate Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Exchange Rate:</h6>
+                    <ul class="small">
+                        <li>Rate to convert FROM currency TO base currency</li>
+                        <li>Example: 1 USD = 12.50 GHS</li>
+                        <li>Use 6 decimal places for precision</li>
+                    </ul>
+                    
+                    <h6>Effective Date:</h6>
+                    <ul class="small">
+                        <li>Date when this rate becomes effective</li>
+                        <li>Used for historical reporting</li>
+                        <li>Can be set for future dates</li>
+                    </ul>
+                    
+                    <h6>Active Status:</h6>
+                    <ul class="small">
+                        <li>Only active rates are used for conversions</li>
+                        <li>Inactive rates are kept for historical records</li>
+                        <li>Multiple rates can exist for the same currency pair</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb"></i> Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small">
+                        <li>Set up exchange rates for all active currencies</li>
+                        <li>Update rates regularly for accuracy</li>
+                        <li>Use historical rates for past transactions</li>
+                        <li>Base currency typically has rate of 1.000000</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

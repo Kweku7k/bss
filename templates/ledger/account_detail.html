@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ account.code }} - {{ account.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line"></i> {{ account.code }} - {{ account.name }}
+                    </h3>
+                    <div class="card-tools">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'ledger:account_edit' account.id %}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <a href="{% url 'ledger:reports_ledger_detail' %}?account={{ account.id }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-chart-bar"></i> Ledger Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Account Information</h5>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>Code:</strong></td>
+                                    <td>{{ account.code }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Name:</strong></td>
+                                    <td>{{ account.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Type:</strong></td>
+                                    <td><span class="badge badge-info">{{ account.type }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Currency:</strong></td>
+                                    <td><span class="badge badge-secondary">{{ account.currency.code }}</span> {{ account.currency.name }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Parent:</strong></td>
+                                    <td>
+                                        {% if account.parent %}
+                                            <a href="{% url 'ledger:account_detail' account.parent.id %}">{{ account.parent.code }} - {{ account.parent.name }}</a>
+                                        {% else %}
+                                            <em>Root Account</em>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td>
+                                        {% if account.is_active %}
+                                            <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Account Balance</h5>
+                            {% if balance %}
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <h6 class="text-primary">{{ balance.opening_balance|floatformat:2 }}</h6>
+                                            <small>Opening Balance</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="text-success">{{ balance.closing_balance|floatformat:2 }}</h6>
+                                            <small>Current Balance</small>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <h6 class="text-info">{{ balance.total_debit|floatformat:2 }}</h6>
+                                            <small>Total Debits</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="text-warning">{{ balance.total_credit|floatformat:2 }}</h6>
+                                            <small>Total Credits</small>
+                                        </div>
+                                    </div>
+                                    {% if balance.base_closing_balance != balance.closing_balance %}
+                                    <hr>
+                                    <div class="text-center">
+                                        <h6 class="text-muted">{{ balance.base_closing_balance|floatformat:2 }}</h6>
+                                        <small>Base Currency Balance</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i> No balance information available.
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if account.description %}
+                    <div class="mt-3">
+                        <h5>Description</h5>
+                        <p>{{ account.description }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Child Accounts -->
+            {% if account.children.exists %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-sitemap"></i> Child Accounts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>Currency</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for child in account.children.all %}
+                                <tr>
+                                    <td><strong>{{ child.code }}</strong></td>
+                                    <td>{{ child.name }}</td>
+                                    <td><span class="badge badge-info">{{ child.type }}</span></td>
+                                    <td><span class="badge badge-secondary">{{ child.currency.code }}</span></td>
+                                    <td>
+                                        {% if child.is_active %}
+                                            <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                            <span class="badge badge-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'ledger:account_detail' child.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Recent Transactions -->
+            {% if recent_transactions %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-history"></i> Recent Transactions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Journal</th>
+                                    <th>Description</th>
+                                    <th>Debit</th>
+                                    <th>Credit</th>
+                                    <th>Currency</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for transaction in recent_transactions %}
+                                <tr>
+                                    <td>{{ transaction.journal.date }}</td>
+                                    <td>
+                                        <a href="{% url 'ledger:journal_detail' transaction.journal.id %}">
+                                            {{ transaction.journal.reference_no }}
+                                        </a>
+                                    </td>
+                                    <td>{{ transaction.description|default:transaction.journal.description }}</td>
+                                    <td class="text-right">
+                                        {% if transaction.debit > 0 %}
+                                            {{ transaction.debit|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-right">
+                                        {% if transaction.credit > 0 %}
+                                            {{ transaction.credit|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td><span class="badge badge-secondary">{{ transaction.currency.code }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="text-center">
+                        <a href="{% url 'ledger:reports_ledger_detail' %}?account={{ account.id }}" class="btn btn-outline-primary">
+                            <i class="fas fa-chart-bar"></i> View Full Ledger Report
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Account Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-primary">{{ account.children.count }}</h6>
+                            <small>Child Accounts</small>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-info">{{ account.journallines.count }}</h6>
+                            <small>Transactions</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-success">{{ account.created_at|date:"M d, Y" }}</h6>
+                            <small>Created</small>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-warning">{{ account.updated_at|date:"M d, Y" }}</h6>
+                            <small>Last Updated</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-cogs"></i> Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'ledger:account_edit' account.id %}" class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Edit Account
+                        </a>
+                        <a href="{% url 'ledger:reports_ledger_detail' %}?account={{ account.id }}" class="btn btn-info">
+                            <i class="fas fa-chart-bar"></i> Ledger Report
+                        </a>
+                        <a href="{% url 'ledger:journal_create' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> New Journal Entry
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

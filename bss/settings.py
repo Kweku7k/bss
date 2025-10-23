@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'hr.apps.HrConfig',
     'leave.apps.LeaveConfig',
     'setup.apps.SetupConfig',
+    'ledger.apps.LedgerConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

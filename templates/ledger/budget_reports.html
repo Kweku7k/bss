@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Budget Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar"></i> Budget Reports
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{% url 'ledger:budget_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to Budgets
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filters -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <form method="get" class="form-inline">
+                                <div class="form-group mr-2">
+                                    <label for="fiscal_year" class="mr-2">Fiscal Year:</label>
+                                    <input type="text" name="fiscal_year" class="form-control" 
+                                           value="{{ fiscal_year }}" placeholder="e.g., 2024">
+                                </div>
+                                <div class="form-group mr-2">
+                                    <label for="budget" class="mr-2">Budget:</label>
+                                    <select name="budget" class="form-control">
+                                        <option value="">All Budgets</option>
+                                        {% for budget in budgets %}
+                                        <option value="{{ budget.id }}" {% if budget_id == budget.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ budget.name }} ({{ budget.fiscal_year }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search"></i> Filter
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    {% if selected_budget %}
+                    <!-- Budget Detail Report -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h5 class="card-title">
+                                <i class="fas fa-pie-chart"></i> {{ selected_budget.name }} - Detailed Report
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="card bg-primary text-white">
+                                        <div class="card-body text-center">
+                                            <h4>{{ selected_budget.total_budget|floatformat:2 }}</h4>
+                                            <small>Total Budget</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-info text-white">
+                                        <div class="card-body text-center">
+                                            <h4>{{ selected_budget.total_allocated|floatformat:2 }}</h4>
+                                            <small>Total Allocated</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-success text-white">
+                                        <div class="card-body text-center">
+                                            <h4>{{ selected_budget.total_spent|floatformat:2 }}</h4>
+                                            <small>Total Spent</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-warning text-white">
+                                        <div class="card-body text-center">
+                                            <h4>{{ selected_budget.utilization_percentage|floatformat:1 }}%</h4>
+                                            <small>Utilization</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive mt-3">
+                                <table class="table table-striped table-hover">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Account</th>
+                                            <th>Allocated</th>
+                                            <th>Spent</th>
+                                            <th>Remaining</th>
+                                            <th>Utilization</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for line in selected_budget.lines.all %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ line.account.code }}</strong><br>
+                                                <small>{{ line.account.name }}</small>
+                                            </td>
+                                            <td class="text-right">{{ line.allocated_amount|floatformat:2 }}</td>
+                                            <td class="text-right">{{ line.spent_amount|floatformat:2 }}</td>
+                                            <td class="text-right">{{ line.remaining_amount|floatformat:2 }}</td>
+                                            <td class="text-right">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar {% if line.utilization_percentage > 100 %}bg-danger{% elif line.utilization_percentage > 80 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                         role="progressbar" style="width: {{ line.utilization_percentage }}%">
+                                                        {{ line.utilization_percentage|floatformat:1 }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if line.utilization_percentage > 100 %}
+                                                    <span class="badge badge-danger">Over Budget</span>
+                                                {% elif line.utilization_percentage > 80 %}
+                                                    <span class="badge badge-warning">Near Limit</span>
+                                                {% else %}
+                                                    <span class="badge badge-success">On Track</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Budget Summary Report -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title">
+                                <i class="fas fa-list"></i> Budget Summary Report
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="thead-dark">
+                                        <tr>
+                                            <th>Budget Name</th>
+                                            <th>Fiscal Year</th>
+                                            <th>Currency</th>
+                                            <th>Total Budget</th>
+                                            <th>Total Allocated</th>
+                                            <th>Total Spent</th>
+                                            <th>Utilization</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for budget in budgets %}
+                                        <tr>
+                                            <td>
+                                                <strong>{{ budget.name }}</strong>
+                                                {% if budget.description %}
+                                                <br><small class="text-muted">{{ budget.description|truncatechars:50 }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ budget.fiscal_year }}</td>
+                                            <td><span class="badge badge-secondary">{{ budget.currency.code }}</span></td>
+                                            <td class="text-right">{{ budget.total_budget|floatformat:2 }}</td>
+                                            <td class="text-right">{{ budget.total_allocated|floatformat:2 }}</td>
+                                            <td class="text-right">{{ budget.total_spent|floatformat:2 }}</td>
+                                            <td class="text-right">
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar {% if budget.utilization_percentage > 100 %}bg-danger{% elif budget.utilization_percentage > 80 %}bg-warning{% else %}bg-success{% endif %}" 
+                                                         role="progressbar" style="width: {{ budget.utilization_percentage }}%">
+                                                        {{ budget.utilization_percentage|floatformat:1 }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {% if budget.status == 'DRAFT' %}
+                                                    <span class="badge badge-warning">Draft</span>
+                                                {% elif budget.status == 'APPROVED' %}
+                                                    <span class="badge badge-success">Approved</span>
+                                                {% elif budget.status == 'ACTIVE' %}
+                                                    <span class="badge badge-primary">Active</span>
+                                                {% elif budget.status == 'CLOSED' %}
+                                                    <span class="badge badge-secondary">Closed</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">{{ budget.status }}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{% url 'ledger:budget_detail' budget.id %}" 
+                                                       class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="?budget={{ budget.id }}" 
+                                                       class="btn btn-sm btn-outline-info">
+                                                        <i class="fas fa-chart-bar"></i>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="9" class="text-center">
+                                                <div class="alert alert-info">
+                                                    <i class="fas fa-info-circle"></i> No budgets found.
+                                                    <a href="{% url 'ledger:budget_create' %}" class="alert-link">Create your first budget</a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

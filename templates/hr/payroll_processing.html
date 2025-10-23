@@ -2,6 +2,33 @@
 {% load static %}
 {% block content %}
 
+<style>
+.payslips-container {
+    margin-top: 2rem;
+}
+
+.payslip-card {
+    page-break-inside: avoid;
+    margin-bottom: 2rem !important;
+}
+
+.payslip-card .card {
+    border: 1px solid #e9ecef;
+    border-radius: 0.5rem;
+}
+
+.payslip-card .card-body {
+    padding: 1.5rem;
+}
+
+@media print {
+    .payslip-card {
+        page-break-after: always;
+        margin-bottom: 0 !important;
+    }
+}
+</style>
+
 
 <div class="container mt-5">
     {% if messages %}
@@ -25,10 +52,27 @@
             {% include "partials/_sidebar.html" %} 
         </div> {% endcomment %}
 
-        <div class="col-md-12 ">
+        <div class="col-md-12">
             <div class="row mb-4">
-                <div class="col-5">
-                    <h4 class="mb-3 fw-bold">📅 Process Monthly Payroll</h4>
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-3 fw-bold">📅 Process Monthly Payroll</h4>
+                        
+                        {% if payrolls %}
+                            <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
+                                <input type="hidden" name="month" value="{{ selected_month }}">
+                                <input type="hidden" name="year" value="{{ selected_year }}">
+        
+                                <label for="format" class="form-label mb-0">Export</label>
+                                <select name="format" id="format" class="form-select form-select-sm" style="width: auto;" required>
+                                    <option value="">Select format</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="excel">Excel</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-success">Download</button>
+                            </form>
+                        {% endif %}
+                    </div>
                     <form method="get" id="payrollForm" class="row g-2 mb-4">
                         <div class="col">
                             <label for="month" class="form-label">Month</label>
@@ -74,19 +118,17 @@
             </div>
 
             {% if payrolls %}
-                {% for payroll_data in payrolls %}
-                    <div class="card shadow border-0 mb-5 p-3">
-                        <div class="card-body">
-
-                            <div class="text-center mb-4">
-                                <img src="/media/images/fav.png" alt="Logo" width="80">
-                                <h3 class="fw-bold text-uppercase">Central University</h3>
-                                <h5 class="text-muted">Payslip for {{ payroll_data.month }}</h5>
-                            </div>
-
-                            <button onclick="window.print()" class="btn btn-outline-secondary text-end mb-3">
-                                🖨️ Print Payslip
-                            </button>
+                <div class="payslips-container">
+                    <h5 class="mb-3 text-primary">Generated Payslips ({{ payrolls|length }} staff)</h5>
+                    {% for payroll_data in payrolls %}
+                        <div class="payslip-card mb-4">
+                            <div class="card shadow border-0 p-3">
+                                <div class="card-body">
+                                    <div class="text-center mb-4">
+                                        <img src="/media/images/fav.png" alt="Logo" width="80">
+                                        <h3 class="fw-bold text-uppercase">Central University</h3>
+                                        <h5 class="text-muted">Payslip for {{ payroll_data.month }}</h5>
+                                    </div>
 
                             <hr/>
                             <div class="row">
@@ -128,6 +170,33 @@
 
                             <hr>
                             <div class="row">
+                                <div class="col-md-3">
+                                <p><strong>Basic Salary:</strong><span class="text-primary fw-bold">  GH₵{{ payroll_data.basic_salary }}<span/></p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Gross Pay:</strong> GH₵{{ payroll_data.gross_salary }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Taxable Pay:</strong> GH₵{{ payroll_data.taxable_income }}</p>
+                                </div>
+                                <div class="col-md-3">
+                                    <p><strong>Net Salary:</strong> <span class="text-success fw-bold">GH₵{{ payroll_data.net_salary }}</span></p>
+                                </div>
+                            </div>
+                        
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p><strong>SSF Contribution Employer:</strong> GH₵{{ payroll_data.employer_ssf }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p><strong>PF Contribution Employer:</strong> GH₵{{ payroll_data.employer_pf }}</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <p><strong>Days:</strong> 28 days</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
                                 <div class="col-md-6">
                                     <h5 class="fw-bold">Allowances / Special Earnings</h5>
                                     <table class="table table-bordered table-striped">
@@ -144,7 +213,7 @@
                                             </tr>
                                             {% for income in payroll_data.incomes %}
                                             <tr>
-                                                <td>{{ income.income_type }}  {% if income.percentage_on_basic %}({{ income.percentage_on_basic }}%){% endif %}</td>
+                                                <td>{{ income.income_type }} {% if income.percentage_on_basic %}({{ income.percentage_on_basic }}%){% endif %}</td>
                                                 <td class="text-end">{{ income.entitled_amount }}</td>
                                             </tr>
                                             {% empty %}
@@ -152,7 +221,7 @@
                                             {% endfor %}
                                         </tbody>
                                     </table>
-                                    <p><strong>Total Allowances:</strong> GH₵{{ payroll_data.total_income }}</p>
+                                    <p><strong>Total Allowances:</strong>GH₵{{ payroll_data.total_income }}</p>
                                 </div>
                         
                                 <div class="col-md-6">
@@ -165,24 +234,28 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {% if payroll_data.income_tax %}
+                                            {% if payroll_data.income_tax and payroll_data.income_tax.tax %}
                                             <tr>
                                                 <td>Income Tax</td>
                                                 <td class="text-end">{{ payroll_data.income_tax.tax }}</td>
                                             </tr>
                                             {% endif %}
-                                            {% if payroll_data.ssf_employee %}
+        
+                                            {% if payroll_data.ssf_employee and payroll_data.ssf_employee.amount and payroll_data.ssf_employee.rate %}
                                             <tr>
                                                 <td>Social Security ({{ payroll_data.ssf_employee.rate }}%)</td>
                                                 <td class="text-end">{{ payroll_data.ssf_employee.amount }}</td>
                                             </tr>
                                             {% endif %}
-                                            {% if payroll_data.pf_employee %}
+        
+                                            {% if payroll_data.pf_employee and payroll_data.pf_employee.rate and payroll_data.pf_employee.amount %}
                                             <tr>
                                                 <td>PF Employee ({{ payroll_data.pf_employee.rate }}%)</td>
                                                 <td class="text-end">{{ payroll_data.pf_employee.amount }}</td>
                                             </tr>
                                             {% endif %}
+        
+                                        
                                             {% if payroll_data.withholding_tax %}
                                             <tr>
                                                 <td>Withholding Tax</td>
@@ -195,7 +268,7 @@
                                                 <td class="text-end">{{ payroll_data.withholding_rent_tax }}</td>
                                             </tr>
                                             {% endif %}
-
+                                            
                                             {% for deduction in payroll_data.deductions %}
                                             <tr>
                                                 <td>{{ deduction.deduction_type }} {% if deduction.percentage_on_basic %}({{ deduction.percentage_on_basic }}%){% endif %}</td>
@@ -207,66 +280,88 @@
                                         </tbody>
                                     </table>
                                     <p><strong>Total Deductions:</strong><span class="text-danger fw-bold"> GH₵{{ payroll_data.total_deduction }} </span></p>
-                                </div>
+                                </div>            
                             </div>
-                            
-                            <div class="row">
-                                <div class="col-md-6">
-                                <h5 class="fw-bold">Benefits In Kind</h5>
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Type</th>
-                                            <th class="text-end">Amount (GH₵)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% if payroll_data.benefits_in_kind.rent_bik %}
-                                        <tr>
-                                            <td>Rent Element</td>
-                                            <td class="text-end">{{ payroll_data.benefits_in_kind.rent_bik }}</td>
-                                        </tr>
-                                        {% endif %}
-
-                                        {% if payroll_data.benefits_in_kind.fuel_bik %}
-                                        <tr>
-                                            <td>Fuel</td>
-                                            <td class="text-end">{{ payroll_data.benefits_in_kind.fuel_bik }}</td>
-                                        </tr>
-                                        {% endif %}
-                                    </tbody>
-                                </table>
-
-                                <p><strong>Total Benefits In Kind:</strong> GH₵{{ payroll_data.benefits_in_kind.total_bik }}</p>
-                                </div>
+        
+                            <div class="row mt-4">
+                                {% if payroll_data.benefits_in_kind and payroll_data.benefits_in_kind.total_bik and payroll_data.benefits_in_kind.total_bik > 0 %}
+                                    <div class="col-md-6">
+                                        <h5 class="fw-bold">Benefits In Kind</h5>
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Type</th>
+                                                    <th class="text-end">Amount (GH₵)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% if payroll_data.benefits_in_kind.rent_bik and payroll_data.benefits_in_kind.rent_bik > 0 %}
+                                                <tr>
+                                                    <td>Rent Element</td>
+                                                    <td class="text-end">{{ payroll_data.benefits_in_kind.rent_bik }}</td>
+                                                </tr>
+                                                {% endif %}
+        
+                                                {% if payroll_data.benefits_in_kind.fuel_bik and payroll_data.benefits_in_kind.fuel_bik > 0 %}
+                                                <tr>
+                                                    <td>Fuel</td>
+                                                    <td class="text-end">{{ payroll_data.benefits_in_kind.fuel_bik }}</td>
+                                                </tr>
+                                                {% endif %}
+        
+                                                {% if payroll_data.benefits_in_kind.vechile_bik and payroll_data.benefits_in_kind.vechile_bik > 0 %}
+                                                <tr>
+                                                    <td>Vechile Allowance</td>
+                                                    <td class="text-end">{{ payroll_data.benefits_in_kind.vechile_bik }}</td>
+                                                </tr>
+                                                {% endif %}
+        
+                                                {% if payroll_data.benefits_in_kind.driver_bik and payroll_data.benefits_in_kind.driver_bik > 0 %}
+                                                <tr>
+                                                    <td>Drivers Allowance</td>
+                                                    <td class="text-end">{{ payroll_data.benefits_in_kind.driver_bik }}</td>
+                                                </tr>
+                                                {% endif %}
+        
+                                                
+                                            </tbody>
+                                        </table>
+        
+                                        <p><strong>Total Benefits In Kind:</strong> GH₵{{ payroll_data.benefits_in_kind.total_bik }}</p>
+                                    </div>
+                                {% endif %}
+        
+                                {% if payroll_data.loan_details %}
+                                    <div class="col-md-6">
+                                        <h5 class="fw-bold">Loan Details</h5>
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Loan Type</th>
+                                                    <th class="text-end">Principal (GH₵)</th>
+                                                    <th class="text-end">Paid (GH₵)</th>
+                                                    <th class="text-end">Outstanding (GH₵)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for loan in payroll_data.loan_details %}
+                                                    <tr>
+                                                        <td>{{ loan.type }}</td>
+                                                        <td class="text-end">{{ loan.meta.principal_amount }}</td>
+                                                        <td class="text-end">{{ loan.meta.amount_paid }}</td>
+                                                        <td class="text-end">{{ loan.meta.outstanding_balance }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                {% endif %}
                             </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-md-3">
-                                <p><strong>Basic Salary:</strong><span class="text-primary fw-bold">  GH₵{{ payroll_data.basic_salary }}<span/></p>
-                                </div>
-                                <div class="col-md-3">
-                                    <p><strong>Gross Pay:</strong> GH₵{{ payroll_data.gross_salary }}</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <p><strong>Taxable Pay:</strong> GH₵{{ payroll_data.taxable_income }}</p>
-                                </div>
-                                <div class="col-md-3">
-                                    <p><strong>Net Salary:</strong> <span class="text-success fw-bold">GH₵{{ payroll_data.net_salary }}</span></p>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <p><strong>SSF Contribution Employer:</strong> GH₵{{ payroll_data.employer_ssf }}</p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong>PF Contribution Employer:</strong> GH₵{{ payroll_data.employer_pf }}</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                </div>
             {% else %}
                 <p class="text-start">Please select a month to view all Staff Payslips.</p>
             {% endif %}

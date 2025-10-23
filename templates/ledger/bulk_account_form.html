@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bulk Create Accounts{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-upload"></i> Bulk Create Accounts
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.account_data.id_for_label }}">Account Data</label>
+                            {{ form.account_data }}
+                            {% if form.account_data.errors %}
+                                <div class="text-danger">{{ form.account_data.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                {{ form.account_data.help_text }}
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-upload"></i> Create Accounts
+                            </button>
+                            <a href="{% url 'ledger:chart_of_accounts' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> CSV Format Guide
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Required Columns:</h6>
+                    <ul class="small">
+                        <li><strong>Code:</strong> 4-10 digit numeric code</li>
+                        <li><strong>Name:</strong> Account name</li>
+                        <li><strong>Type:</strong> ASSET, LIABILITY, EQUITY, INCOME, EXPENSE, or HEADER</li>
+                        <li><strong>Currency:</strong> Currency code (e.g., GHS, USD, EUR)</li>
+                    </ul>
+                    
+                    <h6>Optional Columns:</h6>
+                    <ul class="small">
+                        <li><strong>Parent Code:</strong> Code of parent account</li>
+                        <li><strong>Description:</strong> Account description</li>
+                    </ul>
+                    
+                    <h6>Example:</h6>
+                    <pre class="small bg-light p-2">Code,Name,Type,Parent Code,Currency,Description
+1000,Assets,HEADER,,GHS,Root asset category
+1100,Cash,ASSET,1000,GHS,Cash accounts
+1110,Cash at Office,ASSET,1100,GHS,Main office petty cash
+2000,Liabilities,HEADER,,GHS,Root liability category
+2100,Accounts Payable,LIABILITY,2000,GHS,Vendor payables</pre>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb"></i> Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="small">
+                        <li>Create header accounts first, then child accounts</li>
+                        <li>Use consistent numbering (1000, 1100, 1110, etc.)</li>
+                        <li>Parent codes must exist before creating child accounts</li>
+                        <li>Account codes must be unique</li>
+                        <li>All accounts will be created as active by default</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-download"></i> Sample Template
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="small">Download a sample CSV template to get started:</p>
+                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="downloadTemplate()">
+                        <i class="fas fa-download"></i> Download Template
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function downloadTemplate() {
+    const csvContent = "Code,Name,Type,Parent Code,Currency,Description\n" +
+        "1000,Assets,HEADER,,GHS,Root asset category\n" +
+        "1100,Cash,ASSET,1000,GHS,Cash accounts\n" +
+        "1110,Cash at Office,ASSET,1100,GHS,Main office petty cash\n" +
+        "1120,Bank Account,ASSET,1100,GHS,Main bank account\n" +
+        "1200,Equipment,ASSET,1000,GHS,Fixed assets\n" +
+        "1210,Computers,ASSET,1200,GHS,Computer equipment\n" +
+        "2000,Liabilities,HEADER,,GHS,Root liability category\n" +
+        "2100,Accounts Payable,LIABILITY,2000,GHS,Vendor payables\n" +
+        "2200,Student Deposits,LIABILITY,2000,GHS,Student advance payments\n" +
+        "3000,Equity,HEADER,,GHS,Root equity category\n" +
+        "3100,Retained Earnings,EQUITY,3000,GHS,Accumulated profits\n" +
+        "4000,Income,HEADER,,GHS,Root income category\n" +
+        "4100,Tuition Income,INCOME,4000,GHS,Student tuition fees\n" +
+        "4200,Other Income,INCOME,4000,GHS,Miscellaneous income\n" +
+        "5000,Expenses,HEADER,,GHS,Root expense category\n" +
+        "5100,Salaries,EXPENSE,5000,GHS,Staff salaries\n" +
+        "5200,Utilities,EXPENSE,5000,GHS,Electricity and water\n" +
+        "5300,Supplies,EXPENSE,5000,GHS,Office supplies";
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chart_of_accounts_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Account{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title text-danger">
+                        <i class="fas fa-exclamation-triangle"></i> Confirm Account Deletion
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-warning"></i> Warning!</h5>
+                        <p>You are about to delete the following account:</p>
+                    </div>
+                    
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5>{{ account.code }} - {{ account.name }}</h5>
+                            <p class="mb-1"><strong>Type:</strong> {{ account.type }}</p>
+                            {% if account.parent %}
+                            <p class="mb-1"><strong>Parent:</strong> {{ account.parent.code }} - {{ account.parent.name }}</p>
+                            {% endif %}
+                            {% if account.description %}
+                            <p class="mb-1"><strong>Description:</strong> {{ account.description }}</p>
+                            {% endif %}
+                            <p class="mb-0"><strong>Status:</strong> 
+                                {% if account.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-danger mt-3">
+                        <h6><i class="fas fa-ban"></i> This action cannot be undone!</h6>
+                        <p class="mb-0">Once deleted, this account and all its data will be permanently removed from the system.</p>
+                    </div>
+                    
+                    <form method="post" class="mt-3">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Yes, Delete Account
+                            </button>
+                            <a href="{% url 'ledger:chart_of_accounts' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

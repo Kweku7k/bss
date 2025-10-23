@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Petty Cash Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-cash"></i> Petty Cash Management
+                    </h3>
+                    <div class="card-tools">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'ledger:petty_cash_fund_create' %}" class="btn btn-success btn-sm">
+                                <i class="fas fa-plus"></i> Create Fund
+                            </a>
+                            <a href="{% url 'ledger:petty_cash_voucher_create' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> New Voucher
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for fund in funds %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card {% if fund.is_active %}border-success{% else %}border-secondary{% endif %}">
+                                <div class="card-header">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-wallet"></i> {{ fund.name }}
+                                        {% if fund.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <h6 class="text-primary">{{ fund.current_balance|floatformat:2 }}</h6>
+                                            <small>Current Balance</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="text-info">{{ fund.max_amount|floatformat:2 }}</h6>
+                                            <small>Max Amount</small>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <h6 class="text-success">{{ fund.account.currency.code }}</h6>
+                                            <small>Currency</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="text-warning">{{ fund.custodian.get_full_name|default:fund.custodian.username }}</h6>
+                                            <small>Custodian</small>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <div class="text-center">
+                                        <h6 class="text-info">{{ fund.vouchers.count }}</h6>
+                                        <small>Total Vouchers</small>
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="btn-group w-100" role="group">
+                                        <a href="{% url 'ledger:petty_cash_fund_detail' fund.id %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                        <a href="{% url 'ledger:petty_cash_voucher_create' %}?fund={{ fund.id }}" class="btn btn-outline-success btn-sm">
+                                            <i class="bi bi-plus"></i> Voucher
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-info text-center">
+                                <i class="fas fa-info-circle"></i> No petty cash funds found.
+                                <br>
+                                <small>Contact your administrator to set up petty cash funds.</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Vouchers -->
+    {% if recent_vouchers %}
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-receipt"></i> Recent Vouchers
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Voucher #</th>
+                                    <th>Fund</th>
+                                    <th>Amount</th>
+                                    <th>Currency</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for voucher in recent_vouchers %}
+                                <tr>
+                                    <td><strong>{{ voucher.voucher_no }}</strong></td>
+                                    <td>{{ voucher.fund.name }}</td>
+                                    <td class="text-right">{{ voucher.amount|floatformat:2 }}</td>
+                                    <td><span class="badge bg-secondary">{{ voucher.currency.code }}</span></td>
+                                    <td>
+                                        {% if voucher.status == 'PENDING' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif voucher.status == 'APPROVED' %}
+                                            <span class="badge bg-success">Approved</span>
+                                        {% elif voucher.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ voucher.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ voucher.date }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            {% if voucher.status == 'PENDING' and user == voucher.fund.custodian %}
+                                            <a href="{% url 'ledger:petty_cash_voucher_approve' voucher.id %}" 
+                                               class="btn btn-sm btn-outline-success"
+                                               title="Approve Voucher" data-bs-toggle="tooltip" data-bs-placement="top"
+                                               onclick="return confirm('Are you sure you want to approve this voucher?')">
+                                                <i class="bi bi-check"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

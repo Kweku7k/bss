@@ -1929,20 +1929,18 @@ def check_and_create_surcharge(medical_transaction):
 
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
-def manage_medical_surcharge(request, surcharge_id):
+def manage_medical_surcharge(request, staffno, surcharge_id):
     """Manage surcharge installments and payment plans"""
-    surcharge = get_object_or_404(MedicalSurcharge, pk=surcharge_id)
+    surcharge = get_object_or_404(MedicalSurcharge, pk=surcharge_id, staffno=staffno)
     
     if request.method == 'POST':
         installments = int(request.POST.get('installments', 1))
         is_active = request.POST.get('is_active')
         monthly_deduction = request.POST.get('monthly_deduction')
         
-        # 🧹 Remove ₵ and whitespace
         if isinstance(monthly_deduction, str):
             monthly_deduction = monthly_deduction.replace("₵", "").strip()
 
-        # Convert to Decimal
         monthly_deduction = Decimal(monthly_deduction)
         
         if installments > 0 and is_active:
@@ -1957,7 +1955,8 @@ def manage_medical_surcharge(request, surcharge_id):
     
     context = {
         'surcharge': surcharge,
-        'payments': surcharge.payments.all().order_by('-payment_date')
+        'staff': surcharge.staffno,
+        'payments': surcharge.payments.all().order_by('payment_date')
     }
     return render(request, 'hr/manage_surcharge.html', context)
 
@@ -3748,6 +3747,24 @@ def generate_payroll(request):
                             else:
                                 loan_payment.amount_paid = monthly_payment
                                 loan_payment.save()
+                    
+                    # Handle Medical Surcharge Payments
+                    surcharge_deductions = payroll.get_active_surcharge_deductions()
+                    for surcharge in surcharge_deductions:
+                        surcharge_obj = MedicalSurcharge.objects.filter(id=surcharge["surcharge_id"]).first()
+                        
+                        if surcharge_obj:
+                            # Create payment record
+                            surcharge_payment, created = MedicalSurchargePayment.objects.get_or_create(
+                                surcharge=surcharge_obj,
+                                payment_date=current_month_date,
+                                defaults={'amount': surcharge["amount"]}
+                            )
+                            
+                            if not created:
+                                # Update existing payment if needed
+                                surcharge_payment.amount = surcharge["amount"]
+                                surcharge_payment.save()
                         
             except (TypeError, InvalidOperation) as e:
                 skipped_staff.append(f"{staff.fname} {staff.lname} ({staff.staffno})")
@@ -3890,7 +3907,7 @@ def payroll_processing(request):
                     "deductions": payroll.get_deductions()["deductions"],
                     "ssf_employee": payroll.get_ssnit_contribution(),
                     "employer_ssf": payroll.get_employer_ssnit_contribution()["amount"],
-                    "employer_pf": payroll.get_employer_pf_contribution(),
+                    "employer_pf": payroll.get_employer_pf_contribution()["amount"],
                     "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
                     "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"],
                     "benefits_in_kind": payroll.get_benefits_in_kind()["benefit_in_kind"],
@@ -3909,6 +3926,20 @@ def payroll_processing(request):
         if all_payrolls:
             messages.success(request, f"Payslips for {selected_date.strftime('%B %Y')} have been generated successfully.")
 
+    # Export functionality
+    export_format = request.GET.get("format")
+    if export_format and all_payrolls and selected_month and selected_year:
+        filename = f"Payroll_Processing_{selected_date.strftime('%b_%Y')}"
+        
+        if export_format == "pdf":
+            context = {
+                "payrolls": all_payrolls,
+                "selected_date": selected_date.strftime('%B %Y'),
+                "date": datetime.now().strftime("%d %B, %Y"),
+                "total_staff": len(all_payrolls),
+            }
+            return render_to_pdf("export/payslip_document.html", context, f"{filename}.pdf")
+            
     context = {
         "payrolls": all_payrolls,
         "selected_month": selected_month,
@@ -3917,6 +3948,10 @@ def payroll_processing(request):
 
     return render(request, "hr/payroll_processing.html", context)
 
+
+
+def payslip_test(request):
+    return render(request, "export/payslip_document.html")
 
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
@@ -5468,6 +5503,340 @@ def payroll_deductions(request):
     }
     
     return render(request, "hr/payroll_deductions.html", context)
+
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('payroll_component_variation')
+def payroll_variation(request):
+    # Get filter parameters
+    prev_month = request.GET.get("prev_month")
+    prev_year = request.GET.get("prev_year")
+    curr_month = request.GET.get("curr_month")
+    curr_year = request.GET.get("curr_year")
+    staffno = request.GET.get("staffno")
+    component_type = request.GET.get("component_type")
+    
+    variation_data = []
+    component_summary = {}
+    staff_summary = {
+        'total_staff_prev': 0,
+        'total_staff_curr': 0,
+        'staff_with_changes': 0,
+        'new_components': 0,
+        'removed_components': 0,
+        'total_prev_amount': Decimal('0.00'),
+        'total_curr_amount': Decimal('0.00'),
+        'total_variation': Decimal('0.00'),
+    }
+    
+    if all([prev_month, prev_year, curr_month, curr_year]):
+        prev_date = date(int(prev_year), int(prev_month), 28)
+        curr_date = date(int(curr_year), int(curr_month), 28)
+        
+        # Validate dates
+        if prev_date >= curr_date:
+            messages.error(request, "Previous month must be earlier than current month.")
+            return redirect('payroll-component-variation')
+        
+        # Check if payrolls exist
+        if not Payroll.objects.filter(month=prev_date).exists():
+            messages.error(request, f"Payroll for {prev_date.strftime('%B %Y')} has not been processed.")
+            return redirect('payroll-component-variation')
+            
+        if not Payroll.objects.filter(month=curr_date).exists():
+            messages.error(request, f"Payroll for {curr_date.strftime('%B %Y')} has not been processed.")
+            return redirect('payroll-component-variation')
+        
+        # Build queries
+        prev_query = Payroll.objects.filter(month=prev_date)
+        curr_query = Payroll.objects.filter(month=curr_date)
+        
+        if staffno and staffno != "all":
+            prev_query = prev_query.filter(staffno__pk=staffno)
+            curr_query = curr_query.filter(staffno__pk=staffno)
+        
+        # Prefetch related data based on component type
+        if component_type == "allowances":
+            prev_query = prev_query.prefetch_related('incomes', 'staffno')
+            curr_query = curr_query.prefetch_related('incomes', 'staffno')
+        else:  # deductions
+            prev_query = prev_query.prefetch_related('deductions', 'staffno')
+            curr_query = curr_query.prefetch_related('deductions', 'staffno')
+        
+        # Get all payroll records
+        prev_payrolls = {p.staffno.pk: p for p in prev_query}
+        curr_payrolls = {p.staffno.pk: p for p in curr_query}
+        
+        all_staff_ids = set(prev_payrolls.keys()) | set(curr_payrolls.keys())
+        
+        for staff_id in all_staff_ids:
+            prev_payroll = prev_payrolls.get(staff_id)
+            curr_payroll = curr_payrolls.get(staff_id)
+            
+            staff_variation = {
+                'staff': None,
+                'company_info': None,
+                'prev_components': {},
+                'curr_components': {},
+                'variations': [],
+                'total_prev': Decimal('0.00'),
+                'total_curr': Decimal('0.00'),
+                'total_diff': Decimal('0.00'),
+                'has_changes': False,
+            }
+            
+            # Get staff info
+            if prev_payroll:
+                staff_variation['staff'] = prev_payroll.staffno
+                staff_variation['company_info'] = CompanyInformation.objects.filter(staffno=prev_payroll.staffno).first()
+            elif curr_payroll:
+                staff_variation['staff'] = curr_payroll.staffno
+                staff_variation['company_info'] = CompanyInformation.objects.filter(staffno=curr_payroll.staffno).first()
+            
+            # Get components based on type
+            if component_type == "allowances":
+                if prev_payroll:
+                    for income in prev_payroll.incomes.all():
+                        staff_variation['prev_components'][income.income_type] = income.amount
+                        staff_variation['total_prev'] += income.amount
+                        
+                if curr_payroll:
+                    for income in curr_payroll.incomes.all():
+                        staff_variation['curr_components'][income.income_type] = income.amount
+                        staff_variation['total_curr'] += income.amount
+            else:  # deductions
+                if prev_payroll:
+                    for deduction in prev_payroll.deductions.all():
+                        staff_variation['prev_components'][deduction.deduction_type] = deduction.amount
+                        staff_variation['total_prev'] += deduction.amount
+                        
+                if curr_payroll:
+                    for deduction in curr_payroll.deductions.all():
+                        staff_variation['curr_components'][deduction.deduction_type] = deduction.amount
+                        staff_variation['total_curr'] += deduction.amount
+            
+            # Calculate variations
+            all_component_types = set(staff_variation['prev_components'].keys()) | set(staff_variation['curr_components'].keys())
+            
+            for comp_type in all_component_types:
+                prev_amount = staff_variation['prev_components'].get(comp_type, Decimal('0.00'))
+                curr_amount = staff_variation['curr_components'].get(comp_type, Decimal('0.00'))
+                diff = curr_amount - prev_amount
+                
+                if prev_amount > 0 and curr_amount > 0:
+                    status = 'modified' if diff != 0 else 'unchanged'
+                elif prev_amount > 0 and curr_amount == 0:
+                    status = 'removed'
+                    staff_summary['removed_components'] += 1
+                elif prev_amount == 0 and curr_amount > 0:
+                    status = 'new'
+                    staff_summary['new_components'] += 1
+                else:
+                    continue
+                
+                
+                
+                percentage = calculate_percentage_change(prev_amount, curr_amount)
+                
+                variation = {
+                    'type': comp_type,
+                    'prev_amount': prev_amount,
+                    'curr_amount': curr_amount,
+                    'difference': diff,
+                    'percentage': percentage,
+                    'status': status
+                }
+                
+                staff_variation['variations'].append(variation)
+                
+                # Update component summary
+                if comp_type not in component_summary:
+                    component_summary[comp_type] = {
+                        'total_prev': Decimal('0.00'),
+                        'total_curr': Decimal('0.00'),
+                        'total_diff': Decimal('0.00'),
+                        'staff_count': 0,
+                        'variations': []
+                    }
+                
+                component_summary[comp_type]['total_prev'] += prev_amount
+                component_summary[comp_type]['total_curr'] += curr_amount
+                component_summary[comp_type]['total_diff'] += diff
+                if diff != 0:
+                    component_summary[comp_type]['staff_count'] += 1
+                
+                if diff != 0:
+                    staff_variation['has_changes'] = True
+            
+            # Calculate total difference
+            staff_variation['total_diff'] = staff_variation['total_curr'] - staff_variation['total_prev']
+            staff_variation['total_percentage'] = calculate_percentage_change(
+                staff_variation['total_prev'], 
+                staff_variation['total_curr']
+            )
+            
+            # Sort variations by absolute difference
+            staff_variation['variations'].sort(key=lambda x: abs(x['difference']), reverse=True)
+            
+            # Update staff summary
+            if prev_payroll:
+                staff_summary['total_staff_prev'] += 1
+            if curr_payroll:
+                staff_summary['total_staff_curr'] += 1
+            if staff_variation['has_changes']:
+                staff_summary['staff_with_changes'] += 1
+            
+            staff_summary['total_prev_amount'] += staff_variation['total_prev']
+            staff_summary['total_curr_amount'] += staff_variation['total_curr']
+            staff_summary['total_variation'] += staff_variation['total_diff']
+            
+            # Only add to variation_data if there are changes or if viewing all
+            if staff_variation['has_changes'] or request.GET.get('show_all'):
+                variation_data.append(staff_variation)
+        
+        # Sort variation data by total difference
+        variation_data.sort(key=lambda x: abs(x['total_diff']), reverse=True)
+        
+        # Calculate percentages for component summary
+        for comp_type, data in component_summary.items():
+            data['percentage'] = calculate_percentage_change(data['total_prev'], data['total_curr'])
+    
+    # Export functionality
+    export_format = request.GET.get("format")
+    if export_format and variation_data:
+        filename = f"Payroll_{component_type.title()}_Variation_{prev_date.strftime('%b%Y')}_vs_{curr_date.strftime('%b%Y')}"
+        
+        if export_format == "pdf":
+            context = {
+                "variation_data": variation_data,
+                "component_summary": component_summary,
+                "staff_summary": staff_summary,
+                "prev_date": prev_date.strftime('%B %Y'),
+                "curr_date": curr_date.strftime('%B %Y'),
+                "component_type": component_type,
+                "generated_date": datetime.now().strftime("%d %B, %Y"),
+                "show_all": request.GET.get('show_all'),
+            }
+            return render_to_pdf("export/payroll_component_variation.html", context, f"{filename}.pdf")
+            
+        elif export_format == "excel":
+            return export_component_variation_to_excel(
+                variation_data, component_summary, staff_summary, 
+                prev_date, curr_date, component_type, filename
+            )
+    
+    context = {
+        "variation_data": variation_data,
+        "component_summary": dict(sorted(component_summary.items(), key=lambda x: abs(x[1]['total_diff']), reverse=True)),
+        "staff_summary": staff_summary,
+        "employees": Employee.objects.exclude(companyinformation__active_status='Inactive').order_by('lname'),
+        "prev_month": prev_month,
+        "prev_year": prev_year,
+        "curr_month": curr_month,
+        "curr_year": curr_year,
+        "staffno": staffno,
+        "component_type": component_type,
+        "prev_date": prev_date.strftime('%B %Y') if prev_month else None,
+        "curr_date": curr_date.strftime('%B %Y') if curr_month else None,
+        "show_all": request.GET.get('show_all'),
+    }
+    
+    return render(request, 'payroll/variation.html', context)
+
+
+def export_component_variation_to_excel(variation_data, component_summary, staff_summary, 
+                                       prev_date, curr_date, component_type, filename):
+    """Export component variation analysis to Excel"""
+    workbook_data = {}
+    
+    # Summary Sheet
+    summary_rows = [
+        {"Description": "STAFF SUMMARY", "Value": ""},
+        {"Description": f"Total Staff ({prev_date.strftime('%b %Y')})", "Value": staff_summary['total_staff_prev']},
+        {"Description": f"Total Staff ({curr_date.strftime('%b %Y')})", "Value": staff_summary['total_staff_curr']},
+        {"Description": "Staff with Changes", "Value": staff_summary['staff_with_changes']},
+        {"Description": f"New {component_type.title()}", "Value": staff_summary['new_components']},
+        {"Description": f"Removed {component_type.title()}", "Value": staff_summary['removed_components']},
+        {"Description": "", "Value": ""},
+        {"Description": "AMOUNT SUMMARY", "Value": ""},
+        {"Description": f"Total {prev_date.strftime('%b %Y')}", "Value": float(staff_summary['total_prev_amount'])},
+        {"Description": f"Total {curr_date.strftime('%b %Y')}", "Value": float(staff_summary['total_curr_amount'])},
+        {"Description": "Total Variation", "Value": float(staff_summary['total_variation'])},
+        {"Description": "Variation %", "Value": calculate_percentage_change(staff_summary['total_prev_amount'], staff_summary['total_curr_amount'])},
+    ]
+    workbook_data["Summary"] = summary_rows
+    
+    # Component Summary Sheet
+    component_rows = []
+    for comp_type, data in sorted(component_summary.items(), key=lambda x: abs(x[1]['total_diff']), reverse=True):
+        component_rows.append({
+            f"{component_type.title()} Type": comp_type,
+            f"{prev_date.strftime('%b %Y')} Total": float(data['total_prev']),
+            f"{curr_date.strftime('%b %Y')} Total": float(data['total_curr']),
+            "Difference": float(data['total_diff']),
+            "% Change": data['percentage'],
+            "Staff Affected": data['staff_count']
+        })
+    workbook_data[f"{component_type.title()} Summary"] = component_rows
+    
+    # Staff Details Sheet
+    detail_rows = []
+    for entry in variation_data:
+        # Add staff header
+        detail_rows.append({
+            "Staff ID": entry['staff'].staffno if entry['staff'] else "Unknown",
+            "Staff Name": f"{entry['staff'].fname} {entry['staff'].lname}" if entry['staff'] else "Unknown",
+            "Department": entry['company_info'].dept if entry['company_info'] and entry['company_info'].dept else "-",
+            f"{component_type.title()} Type": "",
+            f"{prev_date.strftime('%b %Y')}": float(entry['total_prev']),
+            f"{curr_date.strftime('%b %Y')}": float(entry['total_curr']),
+            "Difference": float(entry['total_diff']),
+            "% Change": entry['total_percentage'],
+            "Status": "TOTAL"
+        })
+        
+        # Add component details
+        for var in entry['variations']:
+            detail_rows.append({
+                "Staff ID": "",
+                "Staff Name": "",
+                "Department": "",
+                f"{component_type.title()} Type": var['type'],
+                f"{prev_date.strftime('%b %Y')}": float(var['prev_amount']),
+                f"{curr_date.strftime('%b %Y')}": float(var['curr_amount']),
+                "Difference": float(var['difference']),
+                "% Change": var['percentage'],
+                "Status": var['status'].upper()
+            })
+        
+        # Add empty row for spacing
+        detail_rows.append({})
+    
+    workbook_data["Staff Details"] = detail_rows
+    
+    return render_to_excel(workbook_data, f"{filename}.xlsx")
+
+
+def calculate_percentage_change(previous_amount, current_amount):
+    if previous_amount is None or current_amount is None:
+        return Decimal('0.00')
+    
+    prev = Decimal(str(previous_amount))
+    curr = Decimal(str(current_amount))
+    
+    if prev == 0:
+        if curr > 0:
+            return Decimal('100.00')
+        else:
+            return Decimal('0.00')
+    
+    percentage = ((curr - prev) / prev) * 100
+    return percentage.quantize(Decimal('0.01'))
+
+
+
 
 
 

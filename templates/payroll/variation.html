@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+{% if messages %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    {% for message in messages %}
+    <div id="toast{{ forloop.counter }}" class="toast show bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+        <div class="toast-header text-white bg-{{ message.tags }}">
+            <strong class="me-auto">{{ message.tags|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body text-white">
+            {{ message }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="container">
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="mb-3 fw-bold">💰 Payroll {{ component_type|title }} Variation Analysis</h4>
+
+                {% if variation_data %}
+                    <form method="get" id="exportForm" class="d-flex align-items-center gap-2">
+                        <input type="hidden" name="prev_month" value="{{ prev_month }}">
+                        <input type="hidden" name="prev_year" value="{{ prev_year }}">
+                        <input type="hidden" name="curr_month" value="{{ curr_month }}">
+                        <input type="hidden" name="curr_year" value="{{ curr_year }}">
+                        <input type="hidden" name="staffno" value="{{ staffno }}">
+                        <input type="hidden" name="component_type" value="{{ component_type }}">
+                        <input type="hidden" name="show_all" value="{{ show_all }}">
+                        
+                        <label for="format" class="form-label mb-0">Export</label>
+                        <select name="format" id="format" class="form-select form-select-sm" style="width: auto;" required>
+                            <option value="">Select format</option>
+                            <option value="pdf">PDF</option>
+                            <option value="excel">Excel</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="mdi mdi-download me-1"></i> Download
+                        </button>
+                    </form>
+                {% endif %}
+                    
+            </div>
+
+            <form method="get" class="card p-3 g-2 mb-4">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Component Type</label>
+                            <select name="component_type" class="form-select" required>
+                                <option value="">-- Choose --</option>
+                                <option value="allowances" {% if component_type == 'allowances' %}selected{% endif %}>
+                                    Allowances
+                                </option>
+                                <option value="deductions" {% if component_type == 'deductions' %}selected{% endif %}>
+                                    Deductions
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label for="prev_month" class="form-label">Previous Month</label>
+                            <select name="prev_month" id="prev_month" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="1" {% if prev_month == '1' %}selected{% endif %}>January</option>
+                                <option value="2" {% if prev_month == '2' %}selected{% endif %}>February</option>
+                                <option value="3" {% if prev_month == '3' %}selected{% endif %}>March</option>
+                                <option value="4" {% if prev_month == '4' %}selected{% endif %}>April</option>
+                                <option value="5" {% if prev_month == '5' %}selected{% endif %}>May</option>
+                                <option value="6" {% if prev_month == '6' %}selected{% endif %}>June</option>
+                                <option value="7" {% if prev_month == '7' %}selected{% endif %}>July</option>
+                                <option value="8" {% if prev_month == '8' %}selected{% endif %}>August</option>
+                                <option value="9" {% if prev_month == '9' %}selected{% endif %}>September</option>
+                                <option value="10" {% if prev_month == '10' %}selected{% endif %}>October</option>
+                                <option value="11" {% if prev_month == '11' %}selected{% endif %}>November</option>
+                                <option value="12" {% if prev_month == '12' %}selected{% endif %}>December</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label for="prev_year" class="form-label">Previous Year</label>
+                            <select name="prev_year" id="prev_year" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="2025" {% if prev_year == '2025' %}selected{% endif %}>2025</option>
+                                <option value="2026" {% if prev_year == '2026' %}selected{% endif %}>2026</option>
+                                <option value="2027" {% if prev_year == '2027' %}selected{% endif %}>2027</option>
+                                <option value="2028" {% if prev_year == '2028' %}selected{% endif %}>2028</option>
+                                <option value="2029" {% if prev_year == '2029' %}selected{% endif %}>2029</option>
+                                <option value="2030" {% if curr_year == '2030' %}selected{% endif %}>2030</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label for="curr_month" class="form-label">Current Month</label>
+                            <select name="curr_month" id="curr_month" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="1" {% if curr_month == '1' %}selected{% endif %}>January</option>
+                                <option value="2" {% if curr_month == '2' %}selected{% endif %}>February</option>
+                                <option value="3" {% if curr_month == '3' %}selected{% endif %}>March</option>
+                                <option value="4" {% if curr_month == '4' %}selected{% endif %}>April</option>
+                                <option value="5" {% if curr_month == '5' %}selected{% endif %}>May</option>
+                                <option value="6" {% if curr_month == '6' %}selected{% endif %}>June</option>
+                                <option value="7" {% if curr_month == '7' %}selected{% endif %}>July</option>
+                                <option value="8" {% if curr_month == '8' %}selected{% endif %}>August</option>
+                                <option value="9" {% if curr_month == '9' %}selected{% endif %}>September</option>
+                                <option value="10" {% if curr_month == '10' %}selected{% endif %}>October</option>
+                                <option value="11" {% if curr_month == '11' %}selected{% endif %}>November</option>
+                                <option value="12" {% if curr_month == '12' %}selected{% endif %}>December</option>
+                            </select>
+                        </div>
+                    </div>
+            
+                    <div class="col-md-2">
+                        <div class="mb-3">
+                            <label for="curr_year" class="form-label">Current Year</label>
+                            <select name="curr_year" id="curr_year" class="form-select" required>
+                                <option value="">Select</option>
+                                <option value="2025" {% if curr_year == '2025' %}selected{% endif %}>2025</option>
+                                <option value="2026" {% if curr_year == '2026' %}selected{% endif %}>2026</option>
+                                <option value="2027" {% if curr_year == '2027' %}selected{% endif %}>2027</option>
+                                <option value="2028" {% if curr_year == '2028' %}selected{% endif %}>2028</option>
+                                <option value="2029" {% if curr_year == '2029' %}selected{% endif %}>2029</option>
+                                <option value="2030" {% if curr_year == '2030' %}selected{% endif %}>2030</option>
+                            </select>
+                        </div>
+                    </div>
+                <!-- </div> -->
+                
+                <!-- <div class="row mt-3"> -->
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Staff Selection</strong></label>
+                            <select name="staffno" class="form-select" style="width: 100%;" required>
+                                <option value="">-- Choose --</option>
+                                <option value="all" {% if staffno == 'all' %}selected{% endif %}>
+                                    All Staff
+                                </option>
+                                {% for employee in employees %}
+                                    <option value="{{ employee.pk }}" 
+                                            {% if staffno == employee.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ employee.fname }} {{ employee.lname }} ({{ employee.staffno }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" name="show_all" 
+                                        id="show_all" {% if show_all %}checked{% endif %}>
+                                <label class="form-check-label" for="show_all">
+                                    Show staff with no changes
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary w-100">Analyze Variations</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+                    
+            {% if variation_data %}        
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title text-dark mb-0">Overall Summary: {{ prev_date }} vs {{ curr_date }}</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h6 class="text-muted mb-1">Total {{ prev_date }}</h6>
+                                            <h4 class="text-primary mb-0">₵{{ staff_summary.total_prev_amount|floatformat:2 }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h6 class="text-muted mb-1">Total {{ curr_date }}</h6>
+                                            <h4 class="text-primary mb-0">₵{{ staff_summary.total_curr_amount|floatformat:2 }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <h6 class="text-muted mb-1">Total Variation</h6>
+                                            <h4 class="{% if staff_summary.total_variation > 0 %}text-success{% else %}text-danger{% endif %} mb-0">₵{{ staff_summary.total_variation|floatformat:2 }}</h4>
+                                            <!-- <small class="text-muted">
+                                                ({% widthratio staff_summary.total_variation staff_summary.total_prev_amount 100 %}%)
+                                            </small> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Component Type Summary -->
+                {% if component_summary %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title text-dark mb-0"> {{ component_type|title }} Type Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>{{ component_type|title }} Type</th>
+                                                    <th class="text-end">{{ prev_date }}</th>
+                                                    <th class="text-end">{{ curr_date }}</th>
+                                                    <th class="text-end">Difference</th>
+                                                    <th class="text-end">% Change</th>
+                                                    <th class="text-center">Staff Affected</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for comp_type, data in component_summary.items %}
+                                                    <tr>
+                                                        <td><strong>{{ comp_type }}</strong></td>
+                                                        <td class="text-end">₵{{ data.total_prev|floatformat:2 }}</td>
+                                                        <td class="text-end">₵{{ data.total_curr|floatformat:2 }}</td>
+                                                        <td class="text-end {% if data.total_diff > 0 %}text-success{% elif data.total_diff < 0 %}text-danger{% endif %}">
+                                                            <strong>₵{{ data.total_diff|floatformat:2 }}</strong>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <span class="badge {% if data.total_diff > 0 %}bg-success{% elif data.total_diff < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                                {{ data.percentage }}%
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <span class="badge bg-primary">{{ data.staff_count }}</span>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                <!-- Staff Details -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title text-dark mb-0">Staff Variation Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="accordion" id="staffAccordion">
+                                    {% for entry in variation_data %}
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                                                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" 
+                                                        data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}"
+                                                        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
+                                                    <div class="row w-100">
+                                                        <div class="col-md-4">
+                                                            <strong>{{ entry.staff.staffno }}</strong> - 
+                                                            {{ entry.staff.fname }} {{ entry.staff.lname }}
+                                                        </div>
+                                                        <div class="col-md-2 text-end">
+                                                            Total: ₵{{ entry.total_prev|floatformat:2 }}
+                                                        </div>
+                                                        <div class="col-md-2 text-end">
+                                                            → ₵{{ entry.total_curr|floatformat:2 }}
+                                                        </div>
+                                                        <div class="col-md-2 text-end">
+                                                            <span class="{% if entry.total_diff > 0 %}text-success{% elif entry.total_diff < 0 %}text-danger{% endif %}">
+                                                                ₵{{ entry.total_diff|floatformat:2 }}
+                                                                ({{ entry.total_percentage }}%)
+                                                            </span>
+                                                        </div>
+                                                        <div class="col-md-2 text-end">
+                                                            {% if entry.has_changes %}
+                                                                <span class="badge bg-warning">Changed</span>
+                                                            {% else %}
+                                                                <span class="badge bg-secondary">No Change</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            </h2>
+                                            
+                                            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" 
+                                                    aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#staffAccordion">
+                                                <div class="accordion-body">
+                                                    {% if entry.variations %}
+                                                        <div class="table-responsive">
+                                                            <table class="table table-striped table-hover">
+                                                                <thead class="table-light">
+                                                                    <tr>
+                                                                        <th>{{ component_type|title }} Type</th>
+                                                                        <th class="text-end">{{ prev_date }}</th>
+                                                                        <th class="text-end">{{ curr_date }}</th>
+                                                                        <th class="text-end">Difference</th>
+                                                                        <th class="text-end">%</th>
+                                                                        <th class="text-center">Status</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {% for var in entry.variations %}
+                                                                        <tr>
+                                                                            <td><strong>{{ var.type }}</strong></td>
+                                                                            <td class="text-end">₵{{ var.prev_amount|floatformat:2 }}</td>
+                                                                            <td class="text-end">₵{{ var.curr_amount|floatformat:2 }}</td>
+                                                                            <td class="text-end {% if var.difference > 0 %}text-success{% elif var.difference < 0 %}text-danger{% endif %}">
+                                                                                <strong>₵{{ var.difference|floatformat:2 }}</strong>
+                                                                            </td>
+                                                                            <td class="text-end">
+                                                                                <span class="badge {% if var.difference > 0 %}bg-success{% elif var.difference < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                                                    {{ var.percentage }}%
+                                                                                </span>
+                                                                            </td>
+                                                                            <td class="text-center">
+                                                                                {% if var.status == 'new' %}
+                                                                                    <span class="badge bg-success">New</span>
+                                                                                {% elif var.status == 'removed' %}
+                                                                                    <span class="badge bg-danger">Removed</span>
+                                                                                {% elif var.status == 'modified' %}
+                                                                                    <span class="badge bg-warning">Modified</span>
+                                                                                {% else %}
+                                                                                    <span class="badge bg-secondary">Unchanged</span>
+                                                                                {% endif %}
+                                                                            </td>
+                                                                        </tr>
+                                                                    {% endfor %}
+                                                                </tbody>
+                                                                <tfoot class="table-light">
+                                                                    <tr class="fw-bold">
+                                                                        <td>TOTAL</td>
+                                                                        <td class="text-end">
+                                                                            <strong>₵{{ entry.total_prev|floatformat:2 }}</strong>
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            <strong>₵{{ entry.total_curr|floatformat:2 }}</strong>
+                                                                        </td>
+                                                                        <td class="text-end {% if entry.total_diff > 0 %}text-success{% elif entry.total_diff < 0 %}text-danger{% endif %}">
+                                                                            <strong>₵{{ entry.total_diff|floatformat:2 }}</strong>
+                                                                        </td>
+                                                                        <td class="text-end">
+                                                                            <span class="badge {% if entry.total_diff > 0 %}bg-success{% elif entry.total_diff < 0 %}bg-danger{% else %}bg-secondary{% endif %}">
+                                                                                {{ entry.total_percentage }}%
+                                                                            </span>
+                                                                        </td>
+                                                                        <td></td>
+                                                                    </tr>
+                                                                </tfoot>
+                                                            </table>
+                                                        </div>
+                                                    {% else %}
+                                                        <div class="alert alert-info mb-0">
+                                                            <i class="mdi mdi-information me-1"></i>
+                                                            No variations found for this staff member.
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    
+    // Auto-expand first few accordions if there are less than 5 entries
+    {% if variation_data|length <= 5 %}
+        {% for entry in variation_data %}
+            if ({{ forloop.counter }} <= 3) {
+                $('#collapse{{ forloop.counter }}').addClass('show');
+            }
+        {% endfor %}
+    {% endif %}
+    
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

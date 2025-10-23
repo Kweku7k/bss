@@ -40,7 +40,7 @@
                     <h5><b>Medical Entitlements</b></h5>
                     <div class="row">
                         {% for item in treatment_summary %}
-                            <div class="col-lg-4 col-md-12 mb-2">
+                            <div class="col-lg-6 col-md-12 mb-2">
                                 <div class="card mb-3 p-3 shadow-sm border-0">
                                     <div class="card-body">
                                         <h5 class="card-title text-primary mb-3">{{ item.type }}</h5>
@@ -163,9 +163,9 @@
                                     </td>
                                     <td class="text-end">
                                         {% if surcharge.status == 'pending' %}
-                                        <a href="{% url 'manage-surcharge' surcharge.id %}" class="btn btn-sm btn-primary">Setup Plan</a>
+                                        <a href="{% url 'manage-surcharge' staff.staffno surcharge.id %}" class="btn btn-sm btn-primary">Setup Plan</a>
                                         {% else %}
-                                        <a href="{% url 'manage-surcharge' surcharge.id %}" class="btn btn-sm btn-info">View</a>
+                                        <a href="{% url 'manage-surcharge' staff.staffno surcharge.id %}" class="btn btn-sm btn-info">View</a>
                                         {% endif %}
                                     </td>
                                 </tr>

@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include('hr.urls')),
     path('leave/', include('leave.urls')),
     path('setup/', include('setup.urls')),
+    path('ledger/', include('ledger.urls')),
     path('admin/', admin.site.urls),
     path('medical/', include('medical.urls')),
 ]

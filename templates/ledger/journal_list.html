@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Journal Entries{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="bi bi-journal-text"></i> Journal Entries
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{% url 'ledger:journal_create' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> New Journal Entry
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Filters -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <form method="get" class="form-inline">
+                                <div class="form-group mr-2">
+                                    <input type="text" name="search" class="form-control" 
+                                           placeholder="Search..." value="{{ search }}">
+                                </div>
+                                <div class="form-group mr-2">
+                                    <select name="status" class="form-control">
+                                        <option value="">All Statuses</option>
+                                        {% for value, label in status_choices %}
+                                        <option value="{{ value }}" {% if status == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group mr-2">
+                                    <select name="source_module" class="form-control">
+                                        <option value="">All Modules</option>
+                                        {% for value, label in source_choices %}
+                                        <option value="{{ value }}" {% if source_module == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search"></i> Filter
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Journal Entries Table -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Reference</th>
+                                    <th>Date</th>
+                                    <th>Source</th>
+                                    <th>Status</th>
+                                    <th>Total Debit</th>
+                                    <th>Total Credit</th>
+                                    <th>Created By</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for journal in page_obj %}
+                                <tr>
+                                    <td><strong>{{ journal.reference_no }}</strong></td>
+                                    <td>{{ journal.date }}</td>
+                                    <!-- <td>{{ journal.description|truncatechars:50 }}</td> -->
+                                    <td>
+                                        <span class="badge bg-secondary">{{ journal.source_module }}</span>
+                                    </td>
+                                    <td>
+                                        {% if journal.status == 'DRAFT' %}
+                                            <span class="badge bg-warning">{{ journal.status }}</span>
+                                        {% elif journal.status == 'POSTED' %}
+                                            <span class="badge bg-success">{{ journal.status }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ journal.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-right">{{ journal.get_total_debit|floatformat:2 }}</td>
+                                    <td class="text-right">{{ journal.get_total_credit|floatformat:2 }}</td>
+                                    <td>{{ journal.created_by.get_full_name|default:journal.created_by.username }}</td>
+                                    <td>
+                                        <a href="{% url 'ledger:journal_detail' journal.id %}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        {% if journal.status == 'DRAFT' %}
+                                        <a href="{% url 'ledger:journal_post' journal.id %}" 
+                                           class="btn btn-sm btn-success"
+                                           onclick="return confirm('Are you sure you want to post this journal entry?')">
+                                            <i class="bi bi-check-lg"></i> Post
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="text-center">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No journal entries found.
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav aria-label="Journal entries pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if source_module %}&source_module={{ source_module }}{% endif %}">First</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if source_module %}&source_module={{ source_module }}{% endif %}">Previous</a>
+                            </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if source_module %}&source_module={{ source_module }}{% endif %}">Next</a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if status %}&status={{ status }}{% endif %}{% if source_module %}&source_module={{ source_module }}{% endif %}">Last</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

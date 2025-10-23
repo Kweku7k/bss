@@ -1,401 +1,498 @@
- {% load static %}
- {% load group_tags %}
+{% load static %}
+{% load group_tags %}
 
-  <!-- ======= Sidebar ======= -->
-  <aside id="sidebar" class="sidebar">
+ <!-- ======= Sidebar ======= -->
+ <aside id="sidebar" class="sidebar">
 
-    <ul class="sidebar-nav" id="sidebar-nav">
+   <ul class="sidebar-nav" id="sidebar-nav">
 
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'landing' %}">
-          <i class="bi bi-grid"></i>
-          <span>Dashboard</span>
-        </a>
-      </li><!-- End Dashboard Nav -->
+     <li class="nav-item">
+       <a class="nav-link collapsed" href="{% url 'landing' %}">
+         <i class="bi bi-grid"></i>
+         <span>Dashboard</span>
+       </a>
+     </li><!-- End Dashboard Nav -->
 
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#choices-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-link"></i><span>Choices</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="choices-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{% url 'choices-gender' %}">
-              <i class="bi bi-circle"></i><span>Gender</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-suffix' %}">
-              <i class="bi bi-circle"></i><span>Suffix</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-marital-status' %}">
-              <i class="bi bi-circle"></i><span>Marital Status</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-ethnic-group' %}">
-              <i class="bi bi-circle"></i><span>Ethnic Group</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-region' %}">
-              <i class="bi bi-circle"></i><span>Region</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-religion' %}">
-              <i class="bi bi-circle"></i><span>Religion</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-denomination' %}">
-              <i class="bi bi-circle"></i><span>Denomination</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-id-type' %}">
-              <i class="bi bi-circle"></i><span>ID Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-hpq' %}">
-              <i class="bi bi-circle"></i><span>Professional Qualifications</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-leave-type' %}">
-              <i class="bi bi-circle"></i><span>Leave Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-exit-type' %}">
-              <i class="bi bi-circle"></i><span>Exit Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-staff-status' %}">
-              <i class="bi bi-circle"></i><span>Staff Status</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-dependants' %}">
-              <i class="bi bi-circle"></i><span>Dependants</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-relation-status' %}">
-              <i class="bi bi-circle"></i><span>Relation Status</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-medical-treatment' %}">
-              <i class="bi bi-circle"></i><span>Medical Treatment Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-medical-payment-type' %}">
-              <i class="bi bi-circle"></i><span>Medical Payment Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-contribution' %}">
-              <i class="bi bi-circle"></i><span>Contribution Type</span>
-            </a>
-          </li>
-        </ul>
-      </li>
+     <li class="nav-item">
+       <a class="nav-link collapsed" data-bs-target="#choices-nav" data-bs-toggle="collapse" href="#">
+         <i class="bi bi-link"></i><span>Choices</span><i class="bi bi-chevron-down ms-auto"></i>
+       </a>
+       <ul id="choices-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+         <li>
+           <a href="{% url 'choices-gender' %}">
+             <i class="bi bi-circle"></i><span>Gender</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-suffix' %}">
+             <i class="bi bi-circle"></i><span>Suffix</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-marital-status' %}">
+             <i class="bi bi-circle"></i><span>Marital Status</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-ethnic-group' %}">
+             <i class="bi bi-circle"></i><span>Ethnic Group</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-region' %}">
+             <i class="bi bi-circle"></i><span>Region</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-religion' %}">
+             <i class="bi bi-circle"></i><span>Religion</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-denomination' %}">
+             <i class="bi bi-circle"></i><span>Denomination</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-id-type' %}">
+             <i class="bi bi-circle"></i><span>ID Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-hpq' %}">
+             <i class="bi bi-circle"></i><span>Professional Qualifications</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-leave-type' %}">
+             <i class="bi bi-circle"></i><span>Leave Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-exit-type' %}">
+             <i class="bi bi-circle"></i><span>Exit Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-staff-status' %}">
+             <i class="bi bi-circle"></i><span>Staff Status</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-dependants' %}">
+             <i class="bi bi-circle"></i><span>Dependants</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-relation-status' %}">
+             <i class="bi bi-circle"></i><span>Relation Status</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-medical-treatment' %}">
+             <i class="bi bi-circle"></i><span>Medical Treatment Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-medical-payment-type' %}">
+             <i class="bi bi-circle"></i><span>Medical Payment Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-contribution' %}">
+             <i class="bi bi-circle"></i><span>Contribution Type</span>
+           </a>
+         </li>
+       </ul>
+     </li>
 
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#setup-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-gear"></i><span>Setup</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="setup-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{% url 'add-title' %}">
-              <i class="bi bi-circle"></i><span>Titles</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-school' %}">
-              <i class="bi bi-circle"></i><span>Schools</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-qualification' %}">
-              <i class="bi bi-circle"></i><span>Qualifications</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-staffcategory' %}">
-              <i class="bi bi-circle"></i><span>Staff Categories</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-contract' %}">
-              <i class="bi bi-circle"></i><span>Contract Types</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-bank' %}">
-              <i class="bi bi-circle"></i><span>Banks</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-bankbranch' %}">
-              <i class="bi bi-circle"></i><span>Bank Branches</span>
-            </a>
-          </li>
+     <li class="nav-item">
+       <a class="nav-link collapsed" data-bs-target="#setup-nav" data-bs-toggle="collapse" href="#">
+         <i class="bi bi-gear"></i><span>Setup</span><i class="bi bi-chevron-down ms-auto"></i>
+       </a>
+       <ul id="setup-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+         <li>
+           <a href="{% url 'add-title' %}">
+             <i class="bi bi-circle"></i><span>Titles</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-school' %}">
+             <i class="bi bi-circle"></i><span>Schools</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-qualification' %}">
+             <i class="bi bi-circle"></i><span>Qualifications</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-staffcategory' %}">
+             <i class="bi bi-circle"></i><span>Staff Categories</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-contract' %}">
+             <i class="bi bi-circle"></i><span>Contract Types</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-bank' %}">
+             <i class="bi bi-circle"></i><span>Banks</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-bankbranch' %}">
+             <i class="bi bi-circle"></i><span>Bank Branches</span>
+           </a>
+         </li>
+        
+         <li>
+           <a href="{% url 'add-rank' %}">
+             <i class="bi bi-circle"></i><span>Job Title</span>
+           </a>
+         </li>
+
+         <li>
+           <a href="{% url 'add-jobtitle' %}">
+             <i class="bi bi-circle"></i><span>Staff Rank</span>
+           </a>
+         </li>
+
+         <li>
+           <a href="{% url 'academic-year' %}">
+             <i class="bi bi-circle"></i><span>Academic Year</span>
+           </a>
+         </li>
+
+         <li>
+           <a href="{% url 'salary-scale' %}">
+             <i class="bi bi-circle"></i><span>Salary Scale</span>
+           </a>
+         </li>
+
+         <li>
+           <a href="{% url 'add-profbody' %}">
+             <i class="bi bi-circle"></i><span>Professional Bodies</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-directorate' %}">
+             <i class="bi bi-circle"></i><span>Directorate</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-unit' %}">
+             <i class="bi bi-circle"></i><span>Unit</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-dept' %}">
+             <i class="bi bi-circle"></i><span>Departments</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-campus' %}">
+             <i class="bi bi-circle"></i><span>Campus</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-hosp' %}">
+             <i class="bi bi-circle"></i><span>Hospitals</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-contribution-rate' %}">
+             <i class="bi bi-circle"></i><span>Contribution Rate</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-income-type' %}">
+             <i class="bi bi-circle"></i><span>Income Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-deduction-type' %}">
+             <i class="bi bi-circle"></i><span>Deduction Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'relief-type' %}">
+             <i class="bi bi-circle"></i><span>Relief Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'choices-loan-type' %}">
+             <i class="bi bi-circle"></i><span>Loan Type</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'add-tax-band' %}">
+             <i class="bi bi-circle"></i><span>Tax Band</span>
+           </a>
+         </li>
+       </ul>
+     </li><!-- End Components Nav -->
+     <li class="nav-item">
+       <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+         <i class="bi bi-people-fill"></i><span>Staff Affairs</span><i class="bi bi-chevron-down ms-auto"></i>
+       </a>
+       <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
          
-          <li>
-            <a href="{% url 'add-rank' %}">
-              <i class="bi bi-circle"></i><span>Job Title</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{% url 'add-jobtitle' %}">
-              <i class="bi bi-circle"></i><span>Staff Rank</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{% url 'academic-year' %}">
-              <i class="bi bi-circle"></i><span>Academic Year</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{% url 'salary-scale' %}">
-              <i class="bi bi-circle"></i><span>Salary Scale</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{% url 'add-profbody' %}">
-              <i class="bi bi-circle"></i><span>Professional Bodies</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-directorate' %}">
-              <i class="bi bi-circle"></i><span>Directorate</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-unit' %}">
-              <i class="bi bi-circle"></i><span>Unit</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-dept' %}">
-              <i class="bi bi-circle"></i><span>Departments</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-campus' %}">
-              <i class="bi bi-circle"></i><span>Campus</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-hosp' %}">
-              <i class="bi bi-circle"></i><span>Hospitals</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-contribution-rate' %}">
-              <i class="bi bi-circle"></i><span>Contribution Rate</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-income-type' %}">
-              <i class="bi bi-circle"></i><span>Income Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-deduction-type' %}">
-              <i class="bi bi-circle"></i><span>Deduction Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'relief-type' %}">
-              <i class="bi bi-circle"></i><span>Relief Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'choices-loan-type' %}">
-              <i class="bi bi-circle"></i><span>Loan Type</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'add-tax-band' %}">
-              <i class="bi bi-circle"></i><span>Tax Band</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- End Components Nav -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-people-fill"></i><span>Staff Affairs</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          
-          <li>
-            <a href="{% url 'allstaff' %}">
-              <i class="bi bi-person-plus-fill"></i><span>All Employees</span>
-            </a>
-          </li>
-          <li>
-            <a href="{% url 'newstaff' %}">
-              <i class="bi bi-person-plus-fill"></i><span>Add New Employees</span>
-            </a>
-          </li>
-          {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
-            <li>
-              <a href="{% url 'bulk_upload' %}">
-                <i class="bi bi-person-plus-fill"></i><span>Bulk Upload</span>
-              </a>
-            </li>
-          {% endif %}
-          <li>
-            <a href="{% url 'dormant-staff' %}">
-              <i class="bi bi-person-plus-fill"></i><span>Inactive Staff</span>
-            </a>
-          </li>
-        </ul>
-      </li>
+         <li>
+           <a href="{% url 'allstaff' %}">
+             <i class="bi bi-person-plus-fill"></i><span>All Employees</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'newstaff' %}">
+             <i class="bi bi-person-plus-fill"></i><span>Add New Employees</span>
+           </a>
+         </li>
+         {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
+           <li>
+             <a href="{% url 'bulk_upload' %}">
+               <i class="bi bi-person-plus-fill"></i><span>Bulk Upload</span>
+             </a>
+           </li>
+         {% endif %}
+         <li>
+           <a href="{% url 'dormant-staff' %}">
+             <i class="bi bi-person-plus-fill"></i><span>Inactive Staff</span>
+           </a>
+         </li>
+       </ul>
+     </li>
+    
      
-      
-      {% comment %} {% if 'superadmin' in user_groups or 'leave' in user_groups %} {% endcomment %}
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-toggle="collapse" href="#leave-nav" aria-expanded="false">
-                <i class="bi bi-menu-button-wide"></i>
-                <span>Leave</span>
-                <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="leave-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="{% url 'leave-entitlement' %}">
-                        <i class="bi bi-circle"></i><span>Leave Entitlements</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{% url 'leave-report' %}">
-                        <i class="bi bi-circle"></i><span>Report</span>
-                    </a>       
-                </li>
-                <li>
-                    <a href="{% url 'leave-form' %}">
-                        <i class="bi bi-circle"></i><span>Leave Form</span>
-                    </a>
-                </li>
-            </ul>
+     {% comment %} {% if 'superadmin' in user_groups or 'leave' in user_groups %} {% endcomment %}
+       <li class="nav-item">
+           <a class="nav-link collapsed" data-bs-toggle="collapse" href="#leave-nav" aria-expanded="false">
+               <i class="bi bi-menu-button-wide"></i>
+               <span>Leave</span>
+               <i class="bi bi-chevron-down ms-auto"></i>
+           </a>
+           <ul id="leave-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+               <li>
+                   <a href="{% url 'leave-entitlement' %}">
+                       <i class="bi bi-circle"></i><span>Leave Entitlements</span>
+                   </a>
+               </li>
+               <li>
+                   <a href="{% url 'leave-report' %}">
+                       <i class="bi bi-circle"></i><span>Report</span>
+                   </a>       
+               </li>
+               <li>
+                   <a href="{% url 'leave-form' %}">
+                       <i class="bi bi-circle"></i><span>Leave Form</span>
+                   </a>
+               </li>
+           </ul>
+       </li>
+       {% comment %} {% endif %} {% endcomment %}
+
+     <li class="nav-item">
+       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#medical-nav" aria-expanded="false">
+         <i class="bi bi-h-circle-fill"></i>
+         <span>Medicals</span>
+         <i class="bi bi-chevron-down ms-auto"></i>
+       </a>
+       <ul id="medical-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+         <li>
+           <a href="{% url 'medical-entitlement' %}">
+             <i class="bi bi-circle"></i><span>Medical Entitlements</span>
+           </a>
+         </li>
+
+         <li>
+           <a href="{% url 'medical-report' %}">
+             <i class="bi bi-circle"></i><span>Medical Report</span>
+           </a>       
+         </li>
+         
+       </ul>
+     </li>
+
+     <li class="nav-item">
+       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#payroll-nav" aria-expanded="false">
+         <i class="bi bi-coin"></i>
+         <span>Payroll</span>
+         <i class="bi bi-chevron-down ms-auto"></i>
+       </a>
+       <ul id="payroll-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+         <li>
+           <a href="{% url 'payroll-processing' %}">
+             <i class="bi bi-coin"></i>
+             <span>Payroll Processing</span>
+           </a>
+         </li>
+
+         <li>
+           <a href="{% url 'payroll-register' %}">
+             <i class="bi bi-circle"></i><span>Payroll Register</span>
+           </a>       
+         </li>
+         <li>
+           <a href="{% url 'payroll-bank-sheet' %}">
+             <i class="bi bi-circle"></i><span>Bank Sheet</span>
+           </a>       
+         </li>
+         <li>
+           <a href="{% url 'payroll-salary-increment' %}">
+             <i class="bi bi-circle"></i><span>Salary Increment</span>
+           </a>       
+         </li>
+         <li>
+           <a href="{% url 'payroll-post-payroll' %}">
+             <i class="bi bi-circle"></i><span>Finalise Payroll</span>
+           </a>       
+         </li>
+         <li>
+           <a href="{% url 'payroll-report' %}">
+             <i class="bi bi-circle"></i><span>Report</span>
+           </a>       
+         </li>
+         <li>
+           <a href="{% url 'payroll-variation' %}">
+             <i class="bi bi-circle"></i><span>Audit Variation</span>
+           </a>       
+         </li>
+
+       </ul>
+     </li>
+
+     <li class="nav-item">
+       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#ledger-nav" aria-expanded="false">
+         <i class="bi bi-journal-bookmark"></i>
+         <span>General Ledger</span>
+         <i class="bi bi-chevron-down ms-auto"></i>
+       </a>
+       <ul id="ledger-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+         <li>
+           <a href="{% url 'ledger:chart_of_accounts' %}">
+             <i class="bi bi-diagram-3"></i>
+             <span>Chart of Accounts</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:account_create' %}">
+             <i class="bi bi-plus-circle"></i>
+             <span>Add Account</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:bulk_account_create' %}">
+             <i class="bi bi-upload"></i>
+             <span>Bulk Create Accounts</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:currency_list' %}">
+             <i class="bi bi-coin"></i>
+             <span>Currency Management</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:journal_list' %}">
+             <i class="bi bi-journal-text"></i>
+             <span>Journal Entries</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:petty_cash_funds' %}">
+             <i class="bi bi-cash-coin"></i>
+             <span>Petty Cash</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:reports_trial_balance' %}">
+             <i class="bi bi-graph-up"></i>
+             <span>Trial Balance</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:reports_balance_sheet' %}">
+             <i class="bi bi-bar-chart"></i>
+             <span>Balance Sheet</span>
+           </a>
+         </li>
+         <li>
+           <a href="{% url 'ledger:reports_profit_loss' %}">
+             <i class="bi bi-pie-chart"></i>
+             <span>Profit & Loss</span>
+           </a>
+         </li>
+       </ul>
+     </li>
+
+     <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-toggle="collapse" href="#budget-nav" aria-expanded="false">
+        <i class="bi bi-pie-chart"></i>
+        <span>Budget Management</span>
+        <i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="budget-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li>
+          <a href="{% url 'ledger:budget_create' %}">
+            <i class="bi bi-plus-circle"></i>
+            <span>Create Budget</span>
+          </a>
         </li>
-        {% comment %} {% endif %} {% endcomment %}
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-toggle="collapse" href="#medical-nav" aria-expanded="false">
-          <i class="bi bi-h-circle-fill"></i>
-          <span>Medicals</span>
-          <i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="medical-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{% url 'medical-entitlement' %}">
-              <i class="bi bi-circle"></i><span>Medical Entitlements</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{% url 'medical-report' %}">
-              <i class="bi bi-circle"></i><span>Medical Report</span>
-            </a>       
-          </li>
-          
-        </ul>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-toggle="collapse" href="#payroll-nav" aria-expanded="false">
-          <i class="bi bi-coin"></i>
-          <span>Payroll</span>
-          <i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="payroll-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{% url 'payroll-processing' %}">
-              <i class="bi bi-coin"></i>
-              <span>Payroll Processing</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{% url 'payroll-register' %}">
-              <i class="bi bi-circle"></i><span>Payroll Register</span>
-            </a>       
-          </li>
-          <li>
-            <a href="{% url 'payroll-bank-sheet' %}">
-              <i class="bi bi-circle"></i><span>Bank Sheet</span>
-            </a>       
-          </li>
-          <li>
-            <a href="{% url 'payroll-salary-increment' %}">
-              <i class="bi bi-circle"></i><span>Salary Increment</span>
-            </a>       
-          </li>
-          <li>
-            <a href="{% url 'payroll-post-payroll' %}">
-              <i class="bi bi-circle"></i><span>Finalise Payroll</span>
-            </a>       
-          </li>
-          <li>
-            <a href="{% url 'payroll-report' %}">
-              <i class="bi bi-circle"></i><span>Report</span>
-            </a>       
-          </li>
-
-        </ul>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{% url 'report' %}">
-          <i class="bi bi-search"></i>
-          <span>Advanced Search</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-toggle="collapse" href="#settings" aria-expanded="false">
-            <i class="bi bi-menu-button-wide"></i>
-            <span>Settings</span>
-            <i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="settings" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{% url 'profile' %}">
-                  <i class="bi bi-person"></i><span>Profile</span>
-                </a>
-            </li>
-            {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
-              <li class="nav-item">
-                <a class="nav-link collapsed" href="{% url 'manage-users' %}">
-                  <i class="bi bi-person"></i><span>Manage Users</span>
-                </a>
-              </li>
-              <li>
-                  <a href="{% url 'logs' %}">
-                      <i class="bi bi-circle"></i><span>Logs</span>
-                  </a>       
-              </li>
-            {% endif %}
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="{% url 'logout' %}">
-                  <i class="bi bi-box-arrow-in-right"></i><span>Logout</span>
-                </a>
-            </li>
-        </ul>
+        <li>
+          <a href="{% url 'ledger:budget_list' %}">
+            <i class="bi bi-list-ul"></i>
+            <span>Budget List</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'ledger:budget_reports' %}">
+            <i class="bi bi-graph-up"></i>
+            <span>Budget Reports</span>
+          </a>
+        </li>
+      </ul>
     </li>
 
-    </ul>
+     <li class="nav-item">
+       <a class="nav-link collapsed" href="{% url 'report' %}">
+         <i class="bi bi-search"></i>
+         <span>Advanced Search</span>
+       </a>
+     </li>
 
-  </aside><!-- End Sidebar-->
+     <li class="nav-item">
+       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#settings" aria-expanded="false">
+           <i class="bi bi-menu-button-wide"></i>
+           <span>Settings</span>
+           <i class="bi bi-chevron-down ms-auto"></i>
+       </a>
+       <ul id="settings" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+           <li class="nav-item">
+               <a class="nav-link collapsed" href="{% url 'profile' %}">
+                 <i class="bi bi-person"></i><span>Profile</span>
+               </a>
+           </li>
+           {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
+             <li class="nav-item">
+               <a class="nav-link collapsed" href="{% url 'manage-users' %}">
+                 <i class="bi bi-person"></i><span>Manage Users</span>
+               </a>
+             </li>
+             <li>
+                 <a href="{% url 'logs' %}">
+                     <i class="bi bi-circle"></i><span>Logs</span>
+                 </a>       
+             </li>
+           {% endif %}
+           <li class="nav-item">
+               <a class="nav-link collapsed" href="{% url 'logout' %}">
+                 <i class="bi bi-box-arrow-in-right"></i><span>Logout</span>
+               </a>
+           </li>
+       </ul>
+   </li>
+
+   </ul>
+
+ </aside><!-- End Sidebar-->

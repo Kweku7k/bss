@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Currency Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-coins"></i> Currency Management
+                    </h3>
+                    <div class="card-tools">
+                        <div class="btn-group" role="group">
+                            <a href="{% url 'ledger:currency_create' %}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Add Currency
+                            </a>
+                            <a href="{% url 'ledger:exchange_rate_list' %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-exchange-alt"></i> Exchange Rates
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th>Symbol</th>
+                                    <th>Decimal Places</th>
+                                    <th>Base Currency</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for currency in currencies %}
+                                <tr>
+                                    <td><strong>{{ currency.code }}</strong></td>
+                                    <td>{{ currency.name }}</td>
+                                    <td>{{ currency.symbol }}</td>
+                                    <td>{{ currency.decimal_places }}</td>
+                                    <td>
+                                        {% if currency.is_base_currency %}
+                                            <span class="badge bg-success">Base</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Not Base</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if currency.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ currency.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'ledger:currency_edit' currency.id %}" 
+                                               class="btn btn-sm btn-outline-warning">
+                                                <i class="bi bi-pen-fill"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle"></i> No currencies found.
+                                            <a href="{% url 'ledger:currency_create' %}" class="alert-link">Create your first currency</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

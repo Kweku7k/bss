@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Journal Entry{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus"></i> Create New Journal Entry
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{% url 'ledger:journal_list' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="journalForm">
+                        {% csrf_token %}
+                        
+                        <!-- Journal Header -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.date.id_for_label }}">Date *</label>
+                                    {{ form.date }}
+                                    {% if form.date.errors %}
+                                        <div class="text-danger">{{ form.date.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="{{ form.source_module.id_for_label }}">Source Module *</label>
+                                    {{ form.source_module }}
+                                    {% if form.source_module.errors %}
+                                        <div class="text-danger">{{ form.source_module.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Reference</label>
+                                    <input type="text" class="form-control" value="Auto-generated" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <label for="{{ form.description.id_for_label }}">Description *</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Journal Lines -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-list"></i> Journal Lines
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> 
+                                    <strong>Remember:</strong> Total debits must equal total credits for the journal to be balanced.
+                                </div>
+                                
+                                {{ formset.management_form }}
+                                <div id="journal-lines">
+                                    {% for line_form in formset %}
+                                    <div class="journal-line row mb-3 p-3 border rounded bg-light">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Account *</label>
+                                                {{ line_form.account }}
+                                                {% if line_form.account.errors %}
+                                                    <div class="text-danger">{{ line_form.account.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Debit</label>
+                                                {{ line_form.debit }}
+                                                {% if line_form.debit.errors %}
+                                                    <div class="text-danger">{{ line_form.debit.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Credit</label>
+                                                {{ line_form.credit }}
+                                                {% if line_form.credit.errors %}
+                                                    <div class="text-danger">{{ line_form.credit.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Currency</label>
+                                                {{ line_form.currency }}
+                                                {% if line_form.currency.errors %}
+                                                    <div class="text-danger">{{ line_form.currency.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label>Description</label>
+                                                {{ line_form.description }}
+                                                {% if line_form.description.errors %}
+                                                    <div class="text-danger">{{ line_form.description.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+                                            <div class="form-group">
+                                                <label>&nbsp;</label>
+                                                <button type="button" class="btn btn-danger btn-sm remove-line" style="display: none;">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <button type="button" id="add-line" class="btn btn-outline-primary">
+                                            <i class="fas fa-plus"></i> Add Line
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Totals -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">
+                                            <i class="fas fa-calculator"></i> Journal Totals
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Total Debit:</strong>
+                                            </div>
+                                            <div class="col-6 text-right">
+                                                <span id="total-debit" class="h6">0.00</span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Total Credit:</strong>
+                                            </div>
+                                            <div class="col-6 text-right">
+                                                <span id="total-credit" class="h6">0.00</span>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <strong>Difference:</strong>
+                                            </div>
+                                            <div class="col-6 text-right">
+                                                <span id="difference" class="h6">0.00</span>
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-2">
+                                            <span id="balance-status" class="badge badge-secondary">Not Balanced</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Journal Entry
+                            </button>
+                            <a href="{% url 'ledger:journal_list' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Journal Entry Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Double-Entry Bookkeeping:</h6>
+                    <ul class="small">
+                        <li>Every transaction affects at least two accounts</li>
+                        <li>Total debits must equal total credits</li>
+                        <li>Assets and Expenses increase with debits</li>
+                        <li>Liabilities, Equity, and Income increase with credits</li>
+                    </ul>
+                    
+                    <h6>Journal Entry Rules:</h6>
+                    <ul class="small">
+                        <li>Each line must have either debit OR credit (not both)</li>
+                        <li>At least two lines are required</li>
+                        <li>Description should be clear and specific</li>
+                        <li>Use appropriate source module</li>
+                    </ul>
+                    
+                    <h6>Common Transactions:</h6>
+                    <ul class="small">
+                        <li><strong>Cash Sale:</strong> Debit Cash, Credit Income</li>
+                        <li><strong>Purchase:</strong> Debit Expense, Credit Cash/Payable</li>
+                        <li><strong>Payment:</strong> Debit Payable, Credit Cash</li>
+                        <li><strong>Deposit:</strong> Debit Bank, Credit Cash</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let lineCount = {{ formset.total_form_count|default:2 }};
+    
+    // Add line functionality
+    document.getElementById('add-line').addEventListener('click', function() {
+        const container = document.getElementById('journal-lines');
+        const template = container.children[0].cloneNode(true);
+        
+        // Update form indices
+        const newIndex = lineCount;
+        template.innerHTML = template.innerHTML.replace(/form-0/g, `form-${newIndex}`);
+        template.innerHTML = template.innerHTML.replace(/id_form-0/g, `id_form-${newIndex}`);
+        template.innerHTML = template.innerHTML.replace(/name="form-0/g, `name="form-${newIndex}`);
+        
+        // Clear values
+        template.querySelectorAll('input, select').forEach(input => {
+            if (input.type !== 'hidden') {
+                input.value = '';
+            }
+        });
+        
+        // Show remove button
+        template.querySelector('.remove-line').style.display = 'block';
+        
+        container.appendChild(template);
+        lineCount++;
+        
+        // Update management form
+        const totalForms = document.getElementById('id_form-TOTAL_FORMS');
+        if (totalForms) {
+            totalForms.value = lineCount;
+        }
+        
+        updateTotals();
+    });
+    
+    // Remove line functionality
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-line') || e.target.closest('.remove-line')) {
+            const line = e.target.closest('.journal-line');
+            if (line) {
+                const deleteCheckbox = line.querySelector('input[name$="-DELETE"]');
+                if (deleteCheckbox) {
+                    if (deleteCheckbox.checked) {
+                        // Undo deletion
+                        deleteCheckbox.checked = false;
+                        line.style.opacity = '1';
+                        line.style.backgroundColor = '';
+                        line.querySelector('.remove-line').innerHTML = '<i class="fas fa-trash"></i>';
+                        line.querySelector('.remove-line').classList.remove('btn-warning');
+                        line.querySelector('.remove-line').classList.add('btn-danger');
+                    } else {
+                        // Mark for deletion
+                        deleteCheckbox.checked = true;
+                        line.style.opacity = '0.5';
+                        line.style.backgroundColor = '#f8f9fa';
+                        line.querySelector('.remove-line').innerHTML = '<i class="fas fa-undo"></i> Undo';
+                        line.querySelector('.remove-line').classList.remove('btn-danger');
+                        line.querySelector('.remove-line').classList.add('btn-warning');
+                    }
+                } else {
+                    // For dynamically added lines, we can remove them
+                    line.remove();
+                }
+                updateTotals();
+            }
+        }
+    });
+    
+    // Update totals when values change
+    document.addEventListener('input', function(e) {
+        if (e.target.name.includes('debit') || e.target.name.includes('credit')) {
+            updateTotals();
+        }
+        
+        // Show remove button when account is selected
+        if (e.target.name.includes('account') && e.target.value) {
+            const line = e.target.closest('.journal-line');
+            const removeBtn = line.querySelector('.remove-line');
+            if (removeBtn) {
+                removeBtn.style.display = 'block';
+            }
+        }
+    });
+    
+    function updateTotals() {
+        let totalDebit = 0;
+        let totalCredit = 0;
+        
+        document.querySelectorAll('input[name$="-debit"]').forEach(input => {
+            totalDebit += parseFloat(input.value) || 0;
+        });
+        
+        document.querySelectorAll('input[name$="-credit"]').forEach(input => {
+            totalCredit += parseFloat(input.value) || 0;
+        });
+        
+        document.getElementById('total-debit').textContent = totalDebit.toFixed(2);
+        document.getElementById('total-credit').textContent = totalCredit.toFixed(2);
+        
+        const difference = totalDebit - totalCredit;
+        const differenceElement = document.getElementById('difference');
+        const statusElement = document.getElementById('balance-status');
+        
+        differenceElement.textContent = difference.toFixed(2);
+        
+        // Color code the difference and status
+        if (Math.abs(difference) < 0.01) {
+            differenceElement.style.color = 'green';
+            statusElement.textContent = 'Balanced';
+            statusElement.className = 'badge badge-success';
+        } else {
+            differenceElement.style.color = 'red';
+            statusElement.textContent = 'Not Balanced';
+            statusElement.className = 'badge badge-danger';
+        }
+    }
+    
+    // Initial totals calculation
+    updateTotals();
+    
+    // Set default date to today
+    const dateInput = document.getElementById('{{ form.date.id_for_label }}');
+    if (dateInput && !dateInput.value) {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+    }
+});
+</script>
+{% endblock %}
+

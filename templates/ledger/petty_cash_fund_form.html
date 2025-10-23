@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Petty Cash Fund{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus"></i> Create Petty Cash Fund
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{% url 'ledger:petty_cash_funds' %}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left"></i> Back to Petty Cash
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="fundForm">
+                        {% csrf_token %}
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.name.id_for_label }}">Fund Name *</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="text-danger">{{ form.name.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">e.g., "Main Office Petty Cash"</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.max_amount.id_for_label }}">Maximum Amount *</label>
+                                    {{ form.max_amount }}
+                                    {% if form.max_amount.errors %}
+                                        <div class="text-danger">{{ form.max_amount.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Maximum amount this fund can hold</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.account.id_for_label }}">Cash Account *</label>
+                                    {{ form.account }}
+                                    {% if form.account.errors %}
+                                        <div class="text-danger">{{ form.account.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Select the cash account for this fund</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.custodian.id_for_label }}">Custodian *</label>
+                                    {{ form.custodian }}
+                                    {% if form.custodian.errors %}
+                                        <div class="text-danger">{{ form.custodian.errors }}</div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Person responsible for this fund</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                    Active Fund
+                                </label>
+                            </div>
+                            <small class="form-text text-muted">Only active funds can be used for vouchers</small>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Create Fund
+                            </button>
+                            <a href="{% url 'ledger:petty_cash_funds' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i> Petty Cash Fund Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6>Fund Setup:</h6>
+                    <ul class="small">
+                        <li>Each fund needs a unique name</li>
+                        <li>Assign a responsible custodian</li>
+                        <li>Set appropriate maximum amount</li>
+                        <li>Link to a cash account</li>
+                    </ul>
+                    
+                    <h6>Account Requirements:</h6>
+                    <ul class="small">
+                        <li>Must be an ASSET type account</li>
+                        <li>Should be a cash account</li>
+                        <li>Account must be active</li>
+                        <li>Consider separate accounts per fund</li>
+                    </ul>
+                    
+                    <h6>Best Practices:</h6>
+                    <ul class="small">
+                        <li>Use descriptive fund names</li>
+                        <li>Set reasonable maximum amounts</li>
+                        <li>Assign experienced custodians</li>
+                        <li>Regular reconciliation</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb"></i> Quick Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Tip:</strong> Create separate funds for different departments or purposes.
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Note:</strong> The custodian will be responsible for managing this fund.
+                    </div>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Success:</strong> After creation, you can start creating vouchers for this fund.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add form validation
+    const form = document.getElementById('fundForm');
+    form.addEventListener('submit', function(e) {
+        const maxAmount = parseFloat(document.getElementById('{{ form.maximum_amount.id_for_label }}').value);
+        if (maxAmount <= 0) {
+            e.preventDefault();
+            alert('Maximum amount must be greater than 0');
+            return false;
+        }
+    });
+    
+    // Auto-suggest account based on fund name
+    const nameInput = document.getElementById('{{ form.name.id_for_label }}');
+    const accountSelect = document.getElementById('{{ form.account.id_for_label }}');
+    
+    if (nameInput && accountSelect) {
+        nameInput.addEventListener('input', function() {
+            const fundName = nameInput.value.toLowerCase();
+            
+            // You can add logic here to suggest accounts based on fund name
+            // For example, if fund name contains "office", suggest office-related accounts
+        });
+    }
+});
+</script>
+{% endblock %}
