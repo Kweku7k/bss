@@ -27,17 +27,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="tax_rate" class="col-form-label">Tax Rate (%)</label>
+                        <label for="tax_rate" class="col-form-label">WHT-Rent Rate (%)</label>
                         <input type="number" name="tax_rate" class="form-control" max="100" min="0" step="0.01" {% if income %} value="{{ income.tax_rate }}" {% else %} value="" {% endif %}>
                     </div>
 
                     <div class="form-group">
-                        <label for="bik_rate" class="col-form-label">BIK Rate (%)</label>
+                        <label for="bik_rate" class="col-form-label">Benefits in Kind Rate (%)</label>
                         <input type="number" name="bik_rate" class="form-control" max="100" min="0" step="0.01" {% if income %} value="{{ income.bik_rate }}" {% else %} value="" {% endif %}>
                     </div>
 
                     <div class="form-group">
-                        <label for="bik_cap" class="col-form-label">BIK Max (Ghc)</label>
+                        <label for="bik_cap" class="col-form-label">Benefits in Kind Max (Ghc)</label>
                         <input type="number" name="bik_cap" class="form-control" step="0.01" {% if income %} value="{{ income.bik_cap }}" {% endif %}>
                     </div>
                     
