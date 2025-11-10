@@ -120,7 +120,6 @@ DATABASES = {
     }
 }
 
-print("Database configuration:")
 
 AUTH_PASSWORD_VALIDATORS = [
     {

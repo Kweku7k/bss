@@ -1,0 +1,459 @@
+{% extends "base.html" %} 
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .dropdown-menu {
+        border: 1px solid #dee2e6;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    .dropdown-item {
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.15s ease-in-out;
+    }
+    .dropdown-item:hover {
+        background-color: #e9ecef;
+    }
+    .dropdown-item.disabled {
+        cursor: default;
+        background-color: transparent;
+    }
+    .is-valid {
+        border-color: #198754;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        {% for message in messages %}
+        <div id="toast{{ forloop.counter }}" class="toast show bg-{{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+            <div class="toast-header text-white bg-{{ message.tags }}">
+                <strong class="me-auto">{{ message.tags|title }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body text-white">
+                {{ message }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="">
+            <h4 class="mb-4 fw-bold"><i class="bi bi-diagram-3"></i> Payroll Account Mapping Setup</h4>
+            
+            <div class="alert alert-info">
+                <strong><i class="bi bi-info-circle"></i> Information:</strong>
+                This page allows you to map payroll items (salaries, allowances, deductions) to GL accounts. 
+                These mappings are required before generating payroll journals.
+            </div>
+
+            <!-- Available Allowances and Deductions -->
+            {% if available_allowances or available_deductions %}
+            <div class="row mb-4">
+                {% if available_allowances %}
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-cash-stack"></i> Available Allowances</h6>
+                        </div>
+                        <div class="card-body">
+                            <small class="text-muted">Set up account mappings for these allowances:</small>
+                            <ul class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
+                                {% for allowance in available_allowances %}
+                                <li class="list-group-item py-1 px-2 small">
+                                    {{ allowance }}
+                                    {% for mapping in mappings %}
+                                        {% if mapping.account_type == 'allowance' and mapping.sub_type == allowance %}
+                                            <span class="badge bg-success float-end"><i class="bi bi-check"></i> Mapped</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if available_deductions %}
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="bi bi-dash-circle"></i> Available Deductions</h6>
+                        </div>
+                        <div class="card-body">
+                            <small class="text-muted">Set up account mappings for these deductions:</small>
+                            <ul class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
+                                {% for deduction in available_deductions %}
+                                <li class="list-group-item py-1 px-2 small">
+                                    {{ deduction }}
+                                    {% if deduction in loan_types %}
+                                        <span class="badge bg-info float-end me-1">Loan</span>
+                                    {% elif "Medical Surcharge" in deduction %}
+                                        <span class="badge bg-secondary float-end me-1">Medical</span>
+                                    {% endif %}
+                                    {% for mapping in mappings %}
+                                        {% if mapping.account_type == 'other_deduction' and mapping.sub_type == deduction %}
+                                            <span class="badge bg-success float-end"><i class="bi bi-check"></i> Mapped</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Add New Mapping Form -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-plus-circle"></i> Add/Update Mapping</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="payroll_mapping_form">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="account_type" class="form-label">Account Type *</label>
+                                <select name="account_type" id="account_type" class="form-control" required>
+                                    <option value="">Select...</option>
+                                    {% for value, label in account_type_choices %}
+                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="sub_type" class="form-label">Sub Type</label>
+                                <input type="text" name="sub_type" id="sub_type_input" class="form-control" 
+                                       placeholder="e.g., Housing Allowance" list="sub_type_datalist">
+                                <datalist id="sub_type_datalist">
+                                    {% for allowance in available_allowances %}
+                                    <option value="{{ allowance }}">
+                                    {% endfor %}
+                                    {% for deduction in available_deductions %}
+                                    <option value="{{ deduction }}">
+                                    {% endfor %}
+                                </datalist>
+                                <small class="text-muted" id="sub_type_hint">For allowances/deductions</small>
+                            </div>
+
+                            <div class="col-md-3 mb-3 position-relative">
+                                <label for="debit_account" class="form-label">Debit Account *</label>
+                                <input type="text" id="debit_account_search" class="form-control" 
+                                       placeholder="Type to search..." autocomplete="off" required>
+                                <input type="hidden" name="debit_account" id="debit_account_value" required>
+                                <div id="debit_account_dropdown" class="dropdown-menu w-100" style="max-height: 200px; overflow-y: auto;"></div>
+                            </div>
+
+                            <div class="col-md-3 mb-3 position-relative">
+                                <label for="credit_account" class="form-label">Credit Account *</label>
+                                <input type="text" id="credit_account_search" class="form-control" 
+                                       placeholder="Type to search..." autocomplete="off" required>
+                                <input type="hidden" name="credit_account" id="credit_account_value" required>
+                                <div id="credit_account_dropdown" class="dropdown-menu w-100" style="max-height: 200px; overflow-y: auto;"></div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="description_template" class="form-label">Description Template *</label>
+                                <input type="text" name="description_template" id="description_template" 
+                                       class="form-control" required
+                                       placeholder="e.g., Consolidated Basic Salary - {month} {year}">
+                                <small class="text-muted">Use {month} and {year} as placeholders</small>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-success" id="submit_button">
+                                <i class="bi bi-save"></i> Save Mapping
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Existing Mappings -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="bi bi-list-ul"></i> Existing Mappings</h5>
+                </div>
+                <div class="card-body">
+                    {% if mappings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Account Type</th>
+                                    <th>Sub Type</th>
+                                    <th>Debit Account</th>
+                                    <th>Credit Account</th>
+                                    <th>Description Template</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mapping in mappings %}
+                                <tr>
+                                    <td><strong>{{ mapping.get_account_type_display }}</strong></td>
+                                    <td>{{ mapping.sub_type|default:"-" }}</td>
+                                    <td>
+                                        {% if mapping.debit_account %}
+                                        <span class="badge bg-primary">
+                                            {{ mapping.debit_account.code }} - {{ mapping.debit_account.name }}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-danger">Not Set</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if mapping.credit_account %}
+                                        <span class="badge bg-success">
+                                            {{ mapping.credit_account.code }} - {{ mapping.credit_account.name }}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-danger">Not Set</span>
+                                        {% endif %}
+                                    </td>
+                                    <td><small>{{ mapping.description_template }}</small></td>
+                                    <td>
+                                        {% if mapping.is_active %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle"></i> Active</span>
+                                        {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'delete-payroll-mapping' mapping.id %}" 
+                                           class="btn btn-sm btn-danger"
+                                           onclick="return confirm('Are you sure you want to delete this mapping?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning text-center">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>No mappings configured yet.</strong> Please add mappings above.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{{ available_allowances|json_script:"allowance-options-data" }}
+{{ available_deductions|json_script:"deduction-options-data" }}
+{{ accounts_for_js|json_script:"accounts-data" }}
+
+<script>
+const mappingForm = document.getElementById('payroll_mapping_form');
+if (mappingForm) {
+    mappingForm.addEventListener('submit', function () {
+        const submitButton = document.getElementById('submit_button');
+        if (submitButton && !submitButton.disabled) {
+            submitButton.disabled = true;
+            submitButton.classList.add('disabled');
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
+        }
+    });
+}
+
+// Update sub_type field based on account_type selection
+const allowanceOptions = JSON.parse(document.getElementById('allowance-options-data').textContent);
+const deductionOptions = JSON.parse(document.getElementById('deduction-options-data').textContent);
+const accounts = JSON.parse(document.getElementById('accounts-data').textContent);
+
+document.getElementById('account_type').addEventListener('change', function() {
+    const accountType = this.value;
+    const subTypeInput = document.getElementById('sub_type_input');
+    const subTypeHint = document.getElementById('sub_type_hint');
+    const datalist = document.getElementById('sub_type_datalist');
+    
+    // Clear the datalist
+    datalist.innerHTML = '';
+    
+    if (accountType === 'allowance') {
+        subTypeHint.textContent = 'Select or type an allowance name';
+        subTypeInput.placeholder = 'e.g., Housing Allowance';
+        subTypeInput.required = true;
+        
+        allowanceOptions.forEach(value => {
+            const optionEl = document.createElement('option');
+            optionEl.value = value;
+            datalist.appendChild(optionEl);
+        });
+    } else if (accountType === 'other_deduction') {
+        subTypeHint.textContent = 'Select or type a deduction name';
+        subTypeInput.placeholder = 'e.g., Staff Welfare Dues';
+        subTypeInput.required = true;
+        
+        deductionOptions.forEach(value => {
+            const optionEl = document.createElement('option');
+            optionEl.value = value;
+            datalist.appendChild(optionEl);
+        });
+    } else {
+        subTypeHint.textContent = 'Leave blank for main category mapping';
+        subTypeInput.placeholder = 'Leave blank';
+        subTypeInput.required = false;
+    }
+});
+
+function createSearchableDropdown(searchInputId, dropdownId, hiddenInputId) {
+    const searchInput = document.getElementById(searchInputId);
+    const dropdown = document.getElementById(dropdownId);
+    const hiddenInput = document.getElementById(hiddenInputId);
+    let currentFocus = -1;
+    
+    // Show dropdown on focus
+    searchInput.addEventListener('focus', function() {
+        filterAccounts(searchInput.value, dropdown, searchInput, hiddenInput);
+        dropdown.classList.add('show');
+    });
+    
+    // Filter as user types
+    searchInput.addEventListener('input', function() {
+        currentFocus = -1;
+        filterAccounts(this.value, dropdown, searchInput, hiddenInput);
+        dropdown.classList.add('show');
+        // Clear selection when user types
+        if (hiddenInput.value && searchInput.value !== searchInput.dataset.selected) {
+            hiddenInput.value = '';
+            searchInput.classList.remove('is-valid');
+        }
+    });
+    
+    // Keyboard navigation
+    searchInput.addEventListener('keydown', function(e) {
+        const items = dropdown.getElementsByClassName('dropdown-item');
+        const activeItems = Array.from(items).filter(item => !item.classList.contains('disabled'));
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentFocus++;
+            if (currentFocus >= activeItems.length) currentFocus = 0;
+            setActive(activeItems, currentFocus);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            currentFocus--;
+            if (currentFocus < 0) currentFocus = activeItems.length - 1;
+            setActive(activeItems, currentFocus);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentFocus > -1 && activeItems[currentFocus]) {
+                activeItems[currentFocus].click();
+            }
+        } else if (e.key === 'Escape') {
+            dropdown.classList.remove('show');
+        }
+    });
+    
+    function setActive(items, index) {
+        items.forEach((item, i) => {
+            if (i === index) {
+                item.classList.add('active', 'bg-primary', 'text-white');
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.classList.remove('active', 'bg-primary', 'text-white');
+            }
+        });
+    }
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.remove('show');
+            currentFocus = -1;
+        }
+    });
+}
+
+function filterAccounts(searchTerm, dropdown, searchInput, hiddenInput) {
+    const filtered = accounts.filter(account => 
+        account.display.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    
+    dropdown.innerHTML = '';
+    
+    if (filtered.length === 0) {
+        dropdown.innerHTML = '<div class="dropdown-item text-muted disabled">No accounts found</div>';
+    } else {
+        // Limit to first 50 results for performance
+        filtered.slice(0, 50).forEach(account => {
+            const item = document.createElement('a');
+            item.href = '#';
+            item.className = 'dropdown-item';
+            item.textContent = account.display;
+            item.dataset.id = account.id;
+            item.dataset.display = account.display;
+            
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                searchInput.value = this.dataset.display;
+                searchInput.dataset.selected = this.dataset.display;
+                hiddenInput.value = this.dataset.id;
+                searchInput.classList.add('is-valid');
+                dropdown.classList.remove('show');
+            });
+            
+            dropdown.appendChild(item);
+        });
+        
+        if (filtered.length > 50) {
+            dropdown.innerHTML += '<div class="dropdown-item text-muted disabled">...and ' + (filtered.length - 50) + ' more. Keep typing to narrow down.</div>';
+        }
+    }
+}
+
+// Initialize searchable dropdowns
+createSearchableDropdown('debit_account_search', 'debit_account_dropdown', 'debit_account_value');
+createSearchableDropdown('credit_account_search', 'credit_account_dropdown', 'credit_account_value');
+
+// Form validation before submit
+document.querySelector('form').addEventListener('submit', function(e) {
+    const debitValue = document.getElementById('debit_account_value').value;
+    const creditValue = document.getElementById('credit_account_value').value;
+    
+    if (!debitValue || !creditValue) {
+        e.preventDefault();
+        alert('Please select both Debit and Credit accounts from the dropdown');
+        return false;
+    }
+});
+
+// Disable submit button while form is submitting
+document.getElementById('payroll_mapping_form').addEventListener('submit', function() {
+    const submitButton = document.getElementById('submit_button');
+    const originalButtonText = submitButton.textContent;
+    submitButton.textContent = 'Saving...';
+    submitButton.disabled = true;
+
+    // Re-enable button after successful submission
+    this.addEventListener('animationend', function() {
+        submitButton.textContent = originalButtonText;
+        submitButton.disabled = false;
+    }, { once: true });
+});
+</script>
+
+{% endblock %}
+

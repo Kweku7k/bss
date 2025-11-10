@@ -14,7 +14,7 @@ from leave.models import *
 from medical.models import *
 from django.db.models import Q
 from .forms import *
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from django.db import connection # type: ignore
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
@@ -497,7 +497,6 @@ def dormant_staff(request):
     }
 
     return render(request, 'hr/dormant_staff.html', context)
-  
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 def report(request): 
@@ -731,7 +730,6 @@ def report(request):
     }
 
     return render(request, 'hr/report.html', context)
-
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('add_staff')
@@ -932,7 +930,6 @@ def company_info(request,staffno):
         'COSTCENTERS': departments.values_list('dept_long_name', 'dept_long_name').union(directorate.values_list('direct_name', 'direct_name')),
     }
     return render(request,'hr/company_info.html',context)
-
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('edit_staff')
@@ -1319,9 +1316,6 @@ def delete_emp_relation(request,emp_id,staffno):
     return redirect('emp-relation', staffno)
 
 # END OF EMPLOYEE RELATIONSHIP 
-
-
-
 # Write a function for bulk upload csv format
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
@@ -1528,15 +1522,11 @@ def bulk_upload(request):
         form = CSVUploadForm()
 
     return render(request, 'hr/upload.html', {'form': form})
-
-
 def download_csv(request):
     file_path = os.path.join(settings.MEDIA_ROOT, 'docs/sample_format.csv')
     response = FileResponse(open(file_path, 'rb'), content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="sample_format.csv"'
     return response
-
-
 ####### EDUCATIONAL BACKGROUND #################
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
@@ -1760,7 +1750,6 @@ def edit_leave_transaction(request, staffno, lt_id):
 ######################################################################
 ### Staff Medical views
 ######################################################################
-
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('record_medical_bill')
@@ -2250,8 +2239,6 @@ def delete_post_address(request,post_id,staffno):
 ######################################################################
 ### End of Staff Postal Address
 ######################################################################
-
-
 ######################################################################
 ### Staff Vehicle
 ######################################################################
@@ -2323,7 +2310,6 @@ def staffbank(request,staffno):
             submitted = True
     context = {'form':form,'staffbanks':staffbanks,'staff':staff,'bank_list':bank_list,'submitted':submitted,'bank_branches':bank_branches}
     return render(request,'hr/staffbank.html',context)
-
 def edit_staffbank(request,bk_id,staffno):
     bank_list = Bank.objects.all()
     bank_branches = BankBranch.objects.all()
@@ -2342,8 +2328,6 @@ def edit_staffbank(request,bk_id,staffno):
 
     context = {'bank_branches':bank_branches,'pkno':pkno,'form':form,'staffbanks':staffbanks,'coy_count':coy_count,'staffbank':staffbank,'staff':staff,'bank_list':bank_list}
     return render(request, 'hr/staffbank.html', context)
-
-
 def delete_staffbank(request,bk_id,staffno):
     staffbank = StaffBank.objects.get(pk=bk_id)
     # bank = bank.coy_name
@@ -2750,8 +2734,6 @@ def disapprove_renewal(request, renewal_id):
         return redirect('staff-details', staffno=renewal.staffno.staffno)
 
     return redirect('landing')
-
-
 # View for adding new promotion history
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
@@ -3095,11 +3077,7 @@ def edit_user_permissions(request, user_id):
         'current_group_ids': current_group_ids,
         'current_tag_ids': current_tag_ids,
     })
-
-
-
 ######## Staff Documents ###########
-
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('record_staff_documents')
@@ -3141,9 +3119,6 @@ def create_staff_document(request, staffno):
 
     context = {'form': form, 'staff': staff, 'staff_documents': staff_documents, 'staff_document_count': staff_document_count}
     return render(request, 'hr/upload_staff_document.html', context)
-
-
-
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('delete_staff_document')
@@ -3245,8 +3220,6 @@ def edit_staff_income(request, staffno, income_id):
     context = {'form':form,'staff_incomes':staff_incomes,'staff_income':staff_income, 'staff':staff,'company_info':company_info,'submitted':submitted,'staff_income_count':staff_income_count, 'income_types':income_types}
     
     return render(request, 'hr/staff_income.html', context)
-
-
 ############ STAFF DEDUCTIONS #############
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
@@ -3593,8 +3566,6 @@ def generate_payroll(request):
                     
                     # Save Deductions
                     # 1. Income Tax
-                    # Save/Update Deductions
-                    # 1. Income Tax
                     income_tax = payroll.get_income_tax()
                     if income_tax['tax'] > 0:
                         ded_obj, _ = PayrollDeduction.objects.update_or_create(
@@ -3725,7 +3696,6 @@ def generate_payroll(request):
                     
                     # Delete benefits that are no longer applicable
                     payroll_obj.benefits_in_kind.exclude(benefit_type__in=processed_benefits).delete()
-                    
                     # Handle Loan Payments
                     loan_deductions = payroll.get_active_loan_deductions()
                     for loan in loan_deductions:
@@ -3858,9 +3828,6 @@ def payroll_details(request, staffno):
         "selected_year": selected_year,
     }
     return render(request, 'hr/payrol.html', context)
-
-
-
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('process_all_payroll')
@@ -3947,9 +3914,6 @@ def payroll_processing(request):
     }
 
     return render(request, "hr/payroll_processing.html", context)
-
-
-
 def payslip_test(request):
     return render(request, "export/payslip_document.html")
 
@@ -4131,7 +4095,6 @@ def payroll_register(request):
             grand_total['net_salary'] += payroll_data['net_salary']
             
         messages.success(request, f"Payroll Register for {current_month_date.strftime('%B %Y')} has been loaded successfully")
-    
     # Export functionality
     export_format = request.GET.get("format")
     if export_format and (all_payrolls or grouped_payrolls) and current_month_date:
@@ -4531,9 +4494,6 @@ def loan_history(request):
         "selected_month": selected_month,
         "selected_year": selected_year,
     })
-
-
-
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('view_payroll_history')
@@ -4665,8 +4625,6 @@ def payroll_history(request):
         "selected_month": selected_month,
         "selected_year": selected_year,
     })
-    
-    
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('view_income_history')
@@ -4896,8 +4854,6 @@ def deduction_history(request):
     }
 
     return render(request, "hr/deduction_history.html", context)
-
-
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('view_statutory_history')
@@ -5170,8 +5126,6 @@ def paye_history(request):
     }
     
     return render(request, "hr/paye_history.html", context)
-
-
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('view_statutory_history')
@@ -5343,9 +5297,6 @@ def payroll_allowances(request):
     }
     
     return render(request, "hr/payroll_allowances.html", context)
-
-
-
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('view_statutory_history')
@@ -5841,7 +5792,6 @@ def calculate_percentage_change(previous_amount, current_amount):
 
 
 ###### HR REPORT ###########
-
 # Academic rank mapping
 ACADEMIC_RANKS = {
     'Professor': ['Professor'],
@@ -5970,7 +5920,6 @@ def generate_academic_staff_table(school, dept, staff_qs):
         data_rows.append(total_row)
     
     return data_rows
-
 def generate_age_distribution_table(school, dept, staff_qs, today):
     """Generate TABLE 18 format data grouped by Gender and age brackets"""
     data_rows = []
@@ -6079,3 +6028,1048 @@ def generate_department_report(request):
             df_age.to_excel(writer, sheet_name=sheet_name, index=False, startrow=start_row)
     
     return response
+# =====================================================
+# PAYROLL JOURNAL VIEWS
+# =====================================================
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+def payroll_summary(request):
+    """
+    Display overall payroll summary for a selected month
+    """
+    selected_month = request.GET.get("month")
+    selected_year = request.GET.get("year")
+    
+    context = {
+        'summary_data': None,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+    }
+    
+    if selected_month and selected_year:
+        # Create the date for the first day of the selected month
+        selected_date = date(int(selected_year), int(selected_month), 28)
+        
+        # Get all approved payrolls for that month
+        payrolls = Payroll.objects.filter(
+            month=selected_date,
+            is_approved=True
+        )
+        
+        if payrolls.exists():
+            # Calculate overall totals
+            total_basic = payrolls.aggregate(Sum('basic_salary'))['basic_salary__sum'] or Decimal('0.00')
+            total_gross = payrolls.aggregate(Sum('gross_salary'))['gross_salary__sum'] or Decimal('0.00')
+            total_net = payrolls.aggregate(Sum('net_salary'))['net_salary__sum'] or Decimal('0.00')
+            total_paye = payrolls.aggregate(Sum('income_tax'))['income_tax__sum'] or Decimal('0.00')
+            total_ssf_employee = payrolls.aggregate(Sum('ssf_employee'))['ssf_employee__sum'] or Decimal('0.00')
+            total_ssf_employer = payrolls.aggregate(Sum('ssf_employer'))['ssf_employer__sum'] or Decimal('0.00')
+            total_pf_employee = payrolls.aggregate(Sum('pf_employee'))['pf_employee__sum'] or Decimal('0.00')
+            total_pf_employer = payrolls.aggregate(Sum('pf_employer'))['pf_employer__sum'] or Decimal('0.00')
+            total_other_deductions = payrolls.aggregate(Sum('other_deductions'))['other_deductions__sum'] or Decimal('0.00')
+            total_relief = payrolls.aggregate(Sum('total_relief'))['total_relief__sum'] or Decimal('0.00')
+            
+            # Get all income types and their totals
+            income_breakdown = {}
+            for payroll in payrolls:
+                for income in payroll.incomes.all():
+                    if income.income_type and income.income_type.strip().lower() == 'basic salary':
+                        continue
+                    if income.income_type not in income_breakdown:
+                        income_breakdown[income.income_type] = Decimal('0.00')
+                    income_breakdown[income.income_type] += income.amount
+            
+            # Get all deduction types and their totals
+            deduction_breakdown = {}
+            for payroll in payrolls:
+                for deduction in payroll.deductions.all():
+                    if deduction.deduction_type not in deduction_breakdown:
+                        deduction_breakdown[deduction.deduction_type] = Decimal('0.00')
+                    deduction_breakdown[deduction.deduction_type] += deduction.amount
+
+            # Extract statutory deductions that are displayed separately
+            def extract_total(breakdown, predicate):
+                total = Decimal('0.00')
+                for original_key in list(breakdown.keys()):
+                    normalized_key = (original_key or '').strip().lower()
+                    if predicate(normalized_key):
+                        total += breakdown.pop(original_key)
+                return total
+
+            # Remove standard statutory items from the "other deductions" list
+            extract_total(deduction_breakdown, lambda key: key == 'income tax')
+            extract_total(deduction_breakdown, lambda key: key.startswith('social security'))
+            extract_total(deduction_breakdown, lambda key: key.startswith('provident fund'))
+            total_wht_general = extract_total(deduction_breakdown, lambda key: key == 'withholding tax')
+            total_wht_rent = extract_total(deduction_breakdown, lambda key: key == 'wht - rent')
+
+            # Remaining deductions are displayed as detailed "Other Deductions"
+            other_deductions_breakdown = OrderedDict(
+                sorted(deduction_breakdown.items(), key=lambda item: item[0])
+            )
+            total_other_deductions = sum(other_deductions_breakdown.values(), Decimal('0.00'))
+            
+            staff_count = payrolls.count()
+            
+            # Check if journal has been generated for this month
+            payroll_journal = PayrollJournal.objects.filter(month=selected_date).first()
+            
+            context['summary_data'] = {
+                'month': selected_date,
+                'staff_count': staff_count,
+                'total_basic': total_basic,
+                'total_gross': total_gross,
+                'total_net': total_net,
+                'total_paye': total_paye,
+                'total_ssf_employee': total_ssf_employee,
+                'total_ssf_employer': total_ssf_employer,
+                'total_pf_employee': total_pf_employee,
+                'total_pf_employer': total_pf_employer,
+                'total_wht_general': total_wht_general,
+                'total_wht_rent': total_wht_rent,
+                'total_other_deductions': total_other_deductions,
+                'total_relief': total_relief,
+                'income_breakdown': income_breakdown,
+                'deduction_breakdown': deduction_breakdown,
+                'other_deductions_breakdown': other_deductions_breakdown,
+                'payroll_journal': payroll_journal,
+            }
+    
+    # Handle export
+    export_format = request.GET.get("format")
+    if export_format == "pdf" and context['summary_data']:
+        return render_to_pdf("hr/payroll_summary.html", context, filename=f"payroll_summary_{selected_month}_{selected_year}.pdf")
+    
+    if export_format == "excel" and context['summary_data']:
+        # Create Excel export
+        data = context['summary_data']
+        df_data = []
+        
+        # Basic summary
+        df_data.append({'Description': 'Staff Count', 'Amount': data['staff_count']})
+        df_data.append({'Description': 'Total Basic Salary', 'Amount': float(data['total_basic'])})
+        
+        # Income breakdown
+        for income_type, amount in data['income_breakdown'].items():
+            df_data.append({'Description': f'Total {income_type}', 'Amount': float(amount)})
+        
+        df_data.append({'Description': 'Total Gross Salary', 'Amount': float(data['total_gross'])})
+        df_data.append({'Description': '', 'Amount': ''})  # Blank row
+        
+        # Deductions
+        df_data.append({'Description': 'DEDUCTIONS', 'Amount': ''})
+        df_data.append({'Description': 'Total PAYE', 'Amount': float(data['total_paye'])})
+        df_data.append({'Description': 'Total SSF Employee', 'Amount': float(data['total_ssf_employee'])})
+        df_data.append({'Description': 'Total PF Employee', 'Amount': float(data['total_pf_employee'])})
+        if data['total_wht_general']:
+            df_data.append({'Description': 'Total Withholding Tax', 'Amount': float(data['total_wht_general'])})
+        if data['total_wht_rent']:
+            df_data.append({'Description': 'Total WHT - Rent', 'Amount': float(data['total_wht_rent'])})
+        if data['other_deductions_breakdown']:
+            df_data.append({'Description': 'Other Deductions', 'Amount': ''})
+            for deduction_type, amount in data['other_deductions_breakdown'].items():
+                df_data.append({'Description': f'  {deduction_type}', 'Amount': float(amount)})
+        df_data.append({'Description': 'Total Other Deductions', 'Amount': float(data['total_other_deductions'])})
+        df_data.append({'Description': '', 'Amount': ''})  # Blank row
+        
+        # Employer contributions
+        df_data.append({'Description': 'EMPLOYER CONTRIBUTIONS', 'Amount': ''})
+        df_data.append({'Description': 'Total SSF Employer', 'Amount': float(data['total_ssf_employer'])})
+        df_data.append({'Description': 'Total PF Employer', 'Amount': float(data['total_pf_employer'])})
+        df_data.append({'Description': '', 'Amount': ''})  # Blank row
+        
+        df_data.append({'Description': 'Total Net Salary', 'Amount': float(data['total_net'])})
+        
+        df = pd.DataFrame(df_data)
+        response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        response["Content-Disposition"] = f'attachment; filename="payroll_summary_{selected_month}_{selected_year}.xlsx"'
+        
+        with pd.ExcelWriter(response, engine="openpyxl") as writer:
+            df.to_excel(writer, sheet_name="Payroll Summary", index=False)
+        
+        return response
+    
+    return render(request, "hr/payroll_summary.html", context)
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+def payroll_account_mapping(request):
+    """
+    Setup page for mapping payroll items to GL accounts
+    """
+    from ledger.models import Account
+    
+    if request.method == "POST":
+        account_type = request.POST.get('account_type')
+        sub_type = request.POST.get('sub_type', '')
+        debit_account_id = request.POST.get('debit_account')
+        credit_account_id = request.POST.get('credit_account')
+        description_template = request.POST.get('description_template')
+        
+        debit_account = Account.objects.get(id=debit_account_id) if debit_account_id else None
+        credit_account = Account.objects.get(id=credit_account_id) if credit_account_id else None
+        
+        # Create or update mapping
+        mapping, created = PayrollAccountMapping.objects.update_or_create(
+            account_type=account_type,
+            sub_type=sub_type if sub_type else None,
+            defaults={
+                'debit_account': debit_account,
+                'credit_account': credit_account,
+                'description_template': description_template,
+                'created_by': request.user,
+            }
+        )
+        
+        messages.success(request, f"Mapping for {mapping} has been {'created' if created else 'updated'} successfully!")
+        logger.info(f"User {request.user} {'created' if created else 'updated'} payroll account mapping: {mapping}")
+        
+        return redirect('payroll-account-mapping')
+    
+    # Get all accounts for dropdown
+    accounts = Account.objects.filter(type__in=['ASSET', 'LIABILITY', 'EXPENSE']).order_by('code')
+    mappings = PayrollAccountMapping.objects.all()
+    
+    # Get all income types (allowances) from IncomeType configuration table
+    all_income_types = IncomeType.objects.values_list('name', flat=True).order_by('name')
+    # Exclude "Basic Salary" from allowances as it has its own mapping
+    available_allowances = [inc for inc in all_income_types if inc and inc.lower() != 'basic salary']
+    
+    # Get all deduction types from DeductionType configuration table
+    all_deduction_types = DeductionType.objects.values_list('name', flat=True).order_by('name')
+    # Exclude statutory deductions (they have their own mappings)
+    statutory_deductions = ['income tax', 'social security', 'provident fund']
+    regular_deductions = [
+        ded for ded in all_deduction_types 
+        if ded and not any(stat_ded in ded.lower() for stat_ded in statutory_deductions)
+    ]
+    
+    # Get all loan types from ChoicesLoanType configuration table
+    loan_types = list(ChoicesLoanType.objects.values_list('name', flat=True).order_by('name'))
+    
+    # Get all medical surcharge types from ChoicesMedicalTreatment configuration table
+    # Format: "Medical Surcharge {treatment_type}"
+    medical_treatments = ChoicesMedicalTreatment.objects.values_list('name', flat=True).order_by('name')
+    medical_surcharge_types = [f"Medical Surcharge {treatment}" for treatment in medical_treatments]
+    
+    # Special statutory deductions calculated automatically
+    # withholding_types = ['Withholding Tax', 'WHT - Rent']
+    
+    # Combine all deduction types and remove duplicates while preserving order
+    all_deductions = list(regular_deductions) + loan_types + medical_surcharge_types
+    # Remove duplicates while preserving order
+    seen = set()
+    available_deductions = []
+    for ded in all_deductions:
+        if ded not in seen:
+            seen.add(ded)
+            available_deductions.append(ded)
+    
+    accounts_for_js = [
+        {
+            'id': account.id,
+            'code': account.code,
+            'name': account.name,
+            'display': f"{account.code} - {account.name}",
+        }
+        for account in accounts
+    ]
+    
+    context = {
+        'accounts': accounts,
+        'accounts_for_js': accounts_for_js,
+        'mappings': mappings,
+        'account_type_choices': PayrollAccountMapping.ACCOUNT_TYPE_CHOICES,
+        'available_allowances': available_allowances,
+        'available_deductions': available_deductions,
+        'loan_types': loan_types,
+        'medical_surcharge_types': medical_surcharge_types,
+    }
+    
+    return render(request, "hr/payroll_account_mapping.html", context)
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+def delete_payroll_mapping(request, mapping_id):
+    """Delete a payroll account mapping"""
+    mapping = get_object_or_404(PayrollAccountMapping, id=mapping_id)
+    mapping.delete()
+    messages.success(request, f"Mapping deleted successfully!")
+    logger.info(f"User {request.user} deleted payroll account mapping: {mapping}")
+    return redirect('payroll-account-mapping')
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+def preview_payroll_journal(request):
+    """
+    Preview the journal entries that will be created for a specific payroll month
+    """
+    from ledger.models import Account, Journal, JournalLine, Currency
+    from django.core.exceptions import ValidationError
+    from calendar import month_name
+    
+    selected_month = request.GET.get("month")
+    selected_year = request.GET.get("year")
+    
+    context = {
+        'preview_data': None,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+        'errors': [],
+    }
+    
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 28)
+        month_str = month_name[int(selected_month)]
+        
+        # Check if journal already exists
+        existing_journal = PayrollJournal.objects.filter(month=selected_date).first()
+        if existing_journal:
+            context['errors'].append(f"A journal has already been generated for {month_str} {selected_year}.")
+            context['existing_journal'] = existing_journal
+            if existing_journal.journal:
+                context['existing_journal_status'] = existing_journal.journal.status
+                context['existing_journal_id'] = existing_journal.journal.id
+            context['existing_is_posted'] = existing_journal.is_posted
+            return render(request, "hr/preview_payroll_journal.html", context)
+        
+        # Get all approved payrolls for that month
+        payrolls = Payroll.objects.filter(
+            month=selected_date,
+            is_approved=True
+        )
+        
+        if not payrolls.exists():
+            context['errors'].append(f"No approved payrolls found for {month_str} {selected_year}.")
+            return render(request, "hr/preview_payroll_journal.html", context)
+        
+        # Check if all required mappings are set up
+        required_mappings = ['basic_salary', 'ssf_employee', 'ssf_employer', 'pf_employee', 'pf_employer', 'paye', 'net_salary']
+        missing_mappings = []
+        
+        for mapping_type in required_mappings:
+            mapping = PayrollAccountMapping.objects.filter(account_type=mapping_type, is_active=True).first()
+            if not mapping or not mapping.debit_account or not mapping.credit_account:
+                missing_mappings.append(mapping_type.replace('_', ' ').title())
+        
+        if missing_mappings:
+            context['errors'].append(f"Missing account mappings for: {', '.join(missing_mappings)}. Please configure them first.")
+            return render(request, "hr/preview_payroll_journal.html", context)
+        
+        # Calculate all totals
+        total_basic = payrolls.aggregate(Sum('basic_salary'))['basic_salary__sum'] or Decimal('0.00')
+        total_paye = payrolls.aggregate(Sum('income_tax'))['income_tax__sum'] or Decimal('0.00')
+        total_ssf_employee = payrolls.aggregate(Sum('ssf_employee'))['ssf_employee__sum'] or Decimal('0.00')
+        total_ssf_employer = payrolls.aggregate(Sum('ssf_employer'))['ssf_employer__sum'] or Decimal('0.00')
+        total_pf_employee = payrolls.aggregate(Sum('pf_employee'))['pf_employee__sum'] or Decimal('0.00')
+        total_pf_employer = payrolls.aggregate(Sum('pf_employer'))['pf_employer__sum'] or Decimal('0.00')
+        
+        total_wht_general = PayrollDeduction.objects.filter(
+            payroll__in=payrolls,
+            deduction_type='Withholding Tax'
+        ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        
+        total_wht_rent = PayrollDeduction.objects.filter(
+            payroll__in=payrolls,
+            deduction_type='WHT - Rent'
+        ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        total_other_deductions = payrolls.aggregate(Sum('other_deductions'))['other_deductions__sum'] or Decimal('0.00')
+        total_net = payrolls.aggregate(Sum('net_salary'))['net_salary__sum'] or Decimal('0.00')
+        
+        # Get all income types and their totals (allowances) - each separately
+        # Exclude "Basic Salary" as it's handled separately
+        income_breakdown = {}
+        for payroll in payrolls:
+            for income in payroll.incomes.all():
+                # Skip "Basic Salary" as it's already handled separately
+                if income.income_type.lower() == 'basic salary':
+                    continue
+                if income.income_type not in income_breakdown:
+                    income_breakdown[income.income_type] = Decimal('0.00')
+                income_breakdown[income.income_type] += income.amount
+        
+        # Get all deduction types and their totals - each separately (matching hard copy format)
+        # Exclude statutory deductions (Income Tax, SSF, PF) as they're handled separately
+        statutory_deductions = ['income tax', 'social security', 'provident fund', 'withholding tax', 'wht - rent']
+        deduction_breakdown = {}
+        for payroll in payrolls:
+            for deduction in payroll.deductions.all():
+                # Skip statutory deductions as they're handled separately
+                deduction_lower = deduction.deduction_type.lower()
+                if any(stat_ded in deduction_lower for stat_ded in statutory_deductions):
+                    continue
+                if deduction.deduction_type not in deduction_breakdown:
+                    deduction_breakdown[deduction.deduction_type] = Decimal('0.00')
+                deduction_breakdown[deduction.deduction_type] += deduction.amount
+        
+        # Build journal line preview - matching hard copy format
+        all_lines = []
+        line_number = 1
+        
+        # DEBIT: Consolidated Basic Salary (Line 1)
+        basic_mapping = PayrollAccountMapping.objects.get(account_type='basic_salary', is_active=True)
+        all_lines.append({
+            'line_number': line_number,
+            'account': basic_mapping.debit_account,
+            'description': basic_mapping.description_template.format(month=month_str, year=selected_year),
+            'debit': total_basic,
+            'credit': Decimal('0.00'),
+        })
+        line_number += 1
+        
+        # DEBIT: All allowances (incomes) - each as separate line (matching hard copy)
+        for income_type, amount in sorted(income_breakdown.items()):
+            if amount > 0:  # Only include if amount > 0
+                # Try to find specific mapping for this allowance
+                allowance_mapping = PayrollAccountMapping.objects.filter(
+                    account_type='allowance',
+                    sub_type=income_type,
+                    is_active=True
+                ).first()
+                
+                if allowance_mapping and allowance_mapping.debit_account:
+                    all_lines.append({
+                        'line_number': line_number,
+                        'account': allowance_mapping.debit_account,
+                        'description': income_type,  # Use the income type name directly
+                        'debit': amount,
+                        'credit': Decimal('0.00'),
+                    })
+                    line_number += 1
+                else:
+                    # Use generic allowance mapping or create a default one
+                    generic_mapping = PayrollAccountMapping.objects.filter(
+                        account_type='allowance',
+                        sub_type__isnull=True,
+                        is_active=True
+                    ).first()
+                    if generic_mapping and generic_mapping.debit_account:
+                        all_lines.append({
+                            'line_number': line_number,
+                            'account': generic_mapping.debit_account,
+                            'description': income_type,
+                            'debit': amount,
+                            'credit': Decimal('0.00'),
+                        })
+                        line_number += 1
+                    else:
+                        context['errors'].append(f"No mapping found for allowance: {income_type}. Please set it up in Account Mapping.")
+        
+        # DEBIT: Employer contributions - separate lines
+        if total_ssf_employer > 0:
+            ssf_employer_mapping = PayrollAccountMapping.objects.get(account_type='ssf_employer', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': ssf_employer_mapping.debit_account,
+                'description': ssf_employer_mapping.description_template.format(month=month_str, year=selected_year),
+                'debit': total_ssf_employer,
+                'credit': Decimal('0.00'),
+            })
+            line_number += 1
+        
+        if total_pf_employer > 0:
+            pf_employer_mapping = PayrollAccountMapping.objects.get(account_type='pf_employer', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': pf_employer_mapping.debit_account,
+                'description': "Provident Fund-Employer",
+                'debit': total_pf_employer,
+                'credit': Decimal('0.00'),
+            })
+            line_number += 1
+        
+        # CREDIT: SSF (Total = Employee + Employer combined)
+        total_ssf = total_ssf_employee + total_ssf_employer
+        if total_ssf > 0:
+            ssf_employee_mapping = PayrollAccountMapping.objects.get(account_type='ssf_employee', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': ssf_employee_mapping.credit_account,
+                'description': f"S.S.F (13%)",
+                'debit': Decimal('0.00'),
+                'credit': total_ssf,
+            })
+            line_number += 1
+        
+        # CREDIT: PAYE / Income Tax
+        if total_paye > 0:
+            paye_mapping = PayrollAccountMapping.objects.get(account_type='paye', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': paye_mapping.credit_account,
+                'description': "Income Tax",
+                'debit': Decimal('0.00'),
+                'credit': total_paye,
+            })
+            line_number += 1
+        
+        # CREDIT: PF Employee (separate line)
+        if total_pf_employee > 0:
+            pf_employee_mapping = PayrollAccountMapping.objects.get(account_type='pf_employee', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': pf_employee_mapping.credit_account,
+                'description': "Provident Fund-Employee",
+                'debit': Decimal('0.00'),
+                'credit': total_pf_employee,
+            })
+            line_number += 1
+        
+        if total_pf_employer > 0:
+            pf_employer_credit_mapping = PayrollAccountMapping.objects.get(account_type='pf_employer', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': pf_employer_credit_mapping.credit_account,
+                'description': "Provident Fund-Employer",
+                'debit': Decimal('0.00'),
+                'credit': total_pf_employer,
+            })
+            line_number += 1
+            
+            
+        # CREDIT: Withholding Tax (Non-rent)
+        if total_wht_general > 0:
+            wht_general_mapping = PayrollAccountMapping.objects.get(account_type='wht_general', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': wht_general_mapping.credit_account,
+                'description': wht_general_mapping.description_template.format(month=month_str, year=selected_year),
+                'debit': Decimal('0.00'),
+                'credit': total_wht_general,
+            })
+            line_number += 1
+        
+        # CREDIT: Withholding Tax (Rent)
+        if total_wht_rent > 0:
+            wht_rent_mapping = PayrollAccountMapping.objects.get(account_type='wht_rent', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': wht_rent_mapping.credit_account,
+                'description': wht_rent_mapping.description_template.format(month=month_str, year=selected_year),
+                'debit': Decimal('0.00'),
+                'credit': total_wht_rent,
+            })
+            line_number += 1
+        
+        # CREDIT: All other deductions - each as separate line (matching hard copy format)
+        for deduction_type, amount in sorted(deduction_breakdown.items()):
+            if amount > 0:  # Only include if amount > 0
+                # Try to find specific mapping for this deduction
+                deduction_mapping = PayrollAccountMapping.objects.filter(
+                    account_type='other_deduction',
+                    sub_type=deduction_type,
+                    is_active=True
+                ).first()
+                
+                if deduction_mapping and deduction_mapping.credit_account:
+                    all_lines.append({
+                        'line_number': line_number,
+                        'account': deduction_mapping.credit_account,
+                        'description': deduction_type,  # Use the deduction type name directly
+                        'debit': Decimal('0.00'),
+                        'credit': amount,
+                    })
+                    line_number += 1
+                else:
+                    # Use generic other deduction mapping
+                    generic_deduction_mapping = PayrollAccountMapping.objects.filter(
+                        account_type='other_deduction',
+                        sub_type__isnull=True,
+                        is_active=True
+                    ).first()
+                    if generic_deduction_mapping and generic_deduction_mapping.credit_account:
+                        all_lines.append({
+                            'line_number': line_number,
+                            'account': generic_deduction_mapping.credit_account,
+                            'description': deduction_type,
+                            'debit': Decimal('0.00'),
+                            'credit': amount,
+                        })
+                        line_number += 1
+                    else:
+                        context['errors'].append(f"No mapping found for deduction: {deduction_type}. Please set it up in Account Mapping.")
+        
+        # CREDIT: Net Salary Payable (Bank/Cash Payment)
+        if total_net > 0:
+            net_salary_mapping = PayrollAccountMapping.objects.get(account_type='net_salary', is_active=True)
+            all_lines.append({
+                'line_number': line_number,
+                'account': net_salary_mapping.credit_account,
+                'description': "Total Net Salary (Bank/Cash Payment)",
+                'debit': Decimal('0.00'),
+                'credit': total_net,
+            })
+            line_number += 1
+        
+        # Calculate totals
+        total_debits = sum(line['debit'] for line in all_lines)
+        total_credits = sum(line['credit'] for line in all_lines)
+        
+        context['preview_data'] = {
+            'month': selected_date,
+            'month_name': month_str,
+            'year': selected_year,
+            'reference': f"PAYROLL-{month_str.upper()}-{selected_year}",
+            'staff_count': payrolls.count(),
+            'journal_lines': all_lines,
+            'total_debits': total_debits,
+            'total_credits': total_credits,
+            'is_balanced': total_debits == total_credits,
+            'auto_submit': True,
+        }
+    
+    return render(request, "hr/preview_payroll_journal.html", context)
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+@transaction.atomic
+def generate_payroll_journal(request):
+    """
+    Generate and post the journal entry for a specific payroll month
+    """
+    from ledger.models import Account, Journal, JournalLine, Currency
+    from django.core.exceptions import ValidationError
+    from calendar import month_name, monthrange
+    
+    if request.method != "POST":
+        return redirect('preview-payroll-journal')
+    
+    selected_month = request.POST.get("month")
+    selected_year = request.POST.get("year")
+    
+    if not selected_month or not selected_year:
+        messages.error(request, "Please select a month and year.")
+        return redirect('preview-payroll-journal')
+    
+    selected_date = date(int(selected_year), int(selected_month), 1)
+    month_str = month_name[int(selected_month)]
+    
+    # Check if journal already exists
+    existing_journal = PayrollJournal.objects.filter(month=selected_date).first()
+    if existing_journal:
+        messages.error(request, f"A journal has already been generated for {month_str} {selected_year}.")
+        return redirect('payroll-journal-history')
+    
+    # Get all approved payrolls for that month
+    payrolls = Payroll.objects.filter(
+        month=selected_date,
+        is_approved=True
+    )
+    
+    if not payrolls.exists():
+        messages.error(request, f"No approved payrolls found for {month_str} {selected_year}.")
+        return redirect('preview-payroll-journal')
+    
+    try:
+        # Calculate all totals
+        total_basic = payrolls.aggregate(Sum('basic_salary'))['basic_salary__sum'] or Decimal('0.00')
+        total_paye = payrolls.aggregate(Sum('income_tax'))['income_tax__sum'] or Decimal('0.00')
+        total_ssf_employee = payrolls.aggregate(Sum('ssf_employee'))['ssf_employee__sum'] or Decimal('0.00')
+        total_ssf_employer = payrolls.aggregate(Sum('ssf_employer'))['ssf_employer__sum'] or Decimal('0.00')
+        total_pf_employee = payrolls.aggregate(Sum('pf_employee'))['pf_employee__sum'] or Decimal('0.00')
+        total_pf_employer = payrolls.aggregate(Sum('pf_employer'))['pf_employer__sum'] or Decimal('0.00')
+        
+        total_wht_general = PayrollDeduction.objects.filter(
+            payroll__in=payrolls,
+            deduction_type='Withholding Tax'
+        ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        
+        total_wht_rent = PayrollDeduction.objects.filter(
+            payroll__in=payrolls,
+            deduction_type='WHT - Rent'
+        ).aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        total_other_deductions = payrolls.aggregate(Sum('other_deductions'))['other_deductions__sum'] or Decimal('0.00')
+        total_net = payrolls.aggregate(Sum('net_salary'))['net_salary__sum'] or Decimal('0.00')
+        
+        # Get all income types and their totals (allowances) - each separately
+        # Exclude "Basic Salary" as it's handled separately
+        income_breakdown = {}
+        for payroll in payrolls:
+            for income in payroll.incomes.all():
+                # Skip "Basic Salary" as it's already handled separately
+                if income.income_type.lower() == 'basic salary':
+                    continue
+                if income.income_type not in income_breakdown:
+                    income_breakdown[income.income_type] = Decimal('0.00')
+                income_breakdown[income.income_type] += income.amount
+        
+        # Get all deduction types and their totals - each separately (matching hard copy format)
+        # Exclude statutory deductions (Income Tax, SSF, PF) as they're handled separately
+        statutory_deductions = ['income tax', 'social security', 'provident fund', 'withholding tax', 'wht - rent']
+        deduction_breakdown = {}
+        for payroll in payrolls:
+            for deduction in payroll.deductions.all():
+                # Skip statutory deductions as they're handled separately
+                deduction_lower = deduction.deduction_type.lower()
+                if any(stat_ded in deduction_lower for stat_ded in statutory_deductions):
+                    continue
+                if deduction.deduction_type not in deduction_breakdown:
+                    deduction_breakdown[deduction.deduction_type] = Decimal('0.00')
+                deduction_breakdown[deduction.deduction_type] += deduction.amount
+        
+        # Get the last day of the month for journal date
+        last_day = monthrange(int(selected_year), int(selected_month))[1]
+        journal_date = date(int(selected_year), int(selected_month), last_day)
+        
+        # Create the journal entry
+        reference = f"PAYROLL-{month_str.upper()}-{selected_year}"
+        base_currency = Currency.objects.filter(is_base_currency=True).first()
+        journal = Journal.objects.create(
+            reference=reference,
+            date=journal_date,
+            description=f"CONSOLIDATED PAYROLL JOURNAL FOR {month_str}, {selected_year}",
+            source_module='PAYROLL',
+            status='DRAFT',
+            created_by=request.user,
+        )
+        
+        # Create PayrollJournal record
+        payroll_journal = PayrollJournal.objects.create(
+            month=selected_date,
+            journal=journal,
+            reference=reference,
+            staff_count=payrolls.count(),
+            is_posted=False,
+            created_by=request.user,
+        )
+        
+        # DEBIT LINES - matching hard copy format
+        line_number = 1
+        
+        # DEBIT: Consolidated Basic Salary
+        basic_mapping = PayrollAccountMapping.objects.get(account_type='basic_salary', is_active=True)
+        JournalLine.objects.create(
+            journal=journal,
+            line_number=line_number,
+            account=basic_mapping.debit_account,
+            description=basic_mapping.description_template.format(month=month_str, year=selected_year),
+            debit=total_basic,
+            credit=Decimal('0.00'),
+            date=journal_date,
+            currency=base_currency,
+            exchange_rate=Decimal('1.0'),
+        )
+        line_number += 1
+        
+        # DEBIT: All allowances (incomes) - each as separate line
+        for income_type, amount in sorted(income_breakdown.items()):
+            if amount > 0:
+                allowance_mapping = PayrollAccountMapping.objects.filter(
+                    account_type='allowance',
+                    sub_type=income_type,
+                    is_active=True
+                ).first()
+                
+                if allowance_mapping and allowance_mapping.debit_account:
+                    JournalLine.objects.create(
+                        journal=journal,
+                        line_number=line_number,
+                        account=allowance_mapping.debit_account,
+                        description=income_type,  # Use income type name directly
+                        debit=amount,
+                        credit=Decimal('0.00'),
+                        date=journal_date,
+                        currency=base_currency,
+                        exchange_rate=Decimal('1.0'),
+                    )
+                    line_number += 1
+                else:
+                    # Try generic allowance mapping
+                    generic_mapping = PayrollAccountMapping.objects.filter(
+                        account_type='allowance',
+                        sub_type__isnull=True,
+                        is_active=True
+                    ).first()
+                    if generic_mapping and generic_mapping.debit_account:
+                        JournalLine.objects.create(
+                            journal=journal,
+                            line_number=line_number,
+                            account=generic_mapping.debit_account,
+                            description=income_type,
+                            debit=amount,
+                            credit=Decimal('0.00'),
+                            date=journal_date,
+                            currency=base_currency,
+                            exchange_rate=Decimal('1.0'),
+                        )
+                        line_number += 1
+        
+        # DEBIT: Employer contributions - separate lines
+        if total_ssf_employer > 0:
+            ssf_employer_mapping = PayrollAccountMapping.objects.get(account_type='ssf_employer', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=ssf_employer_mapping.debit_account,
+                description=ssf_employer_mapping.description_template.format(month=month_str, year=selected_year),
+                debit=total_ssf_employer,
+                credit=Decimal('0.00'),
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        if total_pf_employer > 0:
+            pf_employer_mapping = PayrollAccountMapping.objects.get(account_type='pf_employer', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=pf_employer_mapping.debit_account,
+                description="Provident Fund-Employer",
+                debit=total_pf_employer,
+                credit=Decimal('0.00'),
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        # CREDIT LINES
+        
+        # CREDIT: SSF (Total = Employee + Employer combined)
+        total_ssf = total_ssf_employee + total_ssf_employer
+        if total_ssf > 0:
+            ssf_employee_mapping = PayrollAccountMapping.objects.get(account_type='ssf_employee', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=ssf_employee_mapping.credit_account,
+                description="S.S.F (13%)",
+                debit=Decimal('0.00'),
+                credit=total_ssf,
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        # CREDIT: PAYE / Income Tax
+        if total_paye > 0:
+            paye_mapping = PayrollAccountMapping.objects.get(account_type='paye', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=paye_mapping.credit_account,
+                description="Income Tax",
+                debit=Decimal('0.00'),
+                credit=total_paye,
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        # CREDIT: PF Employee (separate line)
+        if total_pf_employee > 0:
+            pf_employee_mapping = PayrollAccountMapping.objects.get(account_type='pf_employee', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=pf_employee_mapping.credit_account,
+                description="Provident Fund-Employee",
+                debit=Decimal('0.00'),
+                credit=total_pf_employee,
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        if total_pf_employer > 0:
+            pf_employer_credit_mapping = PayrollAccountMapping.objects.get(account_type='pf_employer', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=pf_employer_credit_mapping.credit_account,
+                description="Provident Fund-Employer",
+                debit=Decimal('0.00'),
+                credit=total_pf_employer,
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        # CREDIT: Withholding Tax (Non-rent)
+        if total_wht_general > 0:
+            wht_general_mapping = PayrollAccountMapping.objects.get(account_type='wht_general', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=wht_general_mapping.credit_account,
+                description=wht_general_mapping.description_template.format(month=month_str, year=selected_year),
+                debit=Decimal('0.00'),
+                credit=total_wht_general,
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        # CREDIT: Withholding Tax (Rent)
+        if total_wht_rent > 0:
+            wht_rent_mapping = PayrollAccountMapping.objects.get(account_type='wht_rent', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=wht_rent_mapping.credit_account,
+                description=wht_rent_mapping.description_template.format(month=month_str, year=selected_year),
+                debit=Decimal('0.00'),
+                credit=total_wht_rent,
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        # CREDIT: All other deductions - each as separate line (matching hard copy format)
+        for deduction_type, amount in sorted(deduction_breakdown.items()):
+            if amount > 0:
+                deduction_mapping = PayrollAccountMapping.objects.filter(
+                    account_type='other_deduction',
+                    sub_type=deduction_type,
+                    is_active=True
+                ).first()
+                
+                if deduction_mapping and deduction_mapping.credit_account:
+                    JournalLine.objects.create(
+                        journal=journal,
+                        line_number=line_number,
+                        account=deduction_mapping.credit_account,
+                        description=deduction_type,  # Use deduction type name directly
+                        debit=Decimal('0.00'),
+                        credit=amount,
+                        date=journal_date,
+                        currency=base_currency,
+                        exchange_rate=Decimal('1.0'),
+                    )
+                    line_number += 1
+                else:
+                    # Try generic deduction mapping
+                    generic_deduction_mapping = PayrollAccountMapping.objects.filter(
+                        account_type='other_deduction',
+                        sub_type__isnull=True,
+                        is_active=True
+                    ).first()
+                    if generic_deduction_mapping and generic_deduction_mapping.credit_account:
+                        JournalLine.objects.create(
+                            journal=journal,
+                            line_number=line_number,
+                            account=generic_deduction_mapping.credit_account,
+                            description=deduction_type,
+                            debit=Decimal('0.00'),
+                            credit=amount,
+                            date=journal_date,
+                            currency=base_currency,
+                            exchange_rate=Decimal('1.0'),
+                        )
+                        line_number += 1
+        
+        # CREDIT: Net Salary Payable (Bank/Cash Payment)
+        if total_net > 0:
+            net_salary_mapping = PayrollAccountMapping.objects.get(account_type='net_salary', is_active=True)
+            JournalLine.objects.create(
+                journal=journal,
+                line_number=line_number,
+                account=net_salary_mapping.credit_account,
+                description="Total Net Salary (Bank/Cash Payment)",
+                debit=Decimal('0.00'),
+                credit=total_net,
+                date=journal_date,
+                currency=base_currency,
+                exchange_rate=Decimal('1.0'),
+            )
+            line_number += 1
+        
+        # Calculate and update totals
+        journal_lines = journal.lines.all()
+        total_debits = sum(line.debit for line in journal_lines)
+        total_credits = sum(line.credit for line in journal_lines)
+        
+        payroll_journal.total_debit = total_debits
+        payroll_journal.total_credit = total_credits
+        payroll_journal.save()
+        
+        # Submit journal for approval (auto-submit) and log approval entry
+        try:
+            journal.submit_for_approval(request.user)
+        except ValidationError as ve:
+            messages.error(request, ve)
+            raise
+
+        # Update all payrolls to mark as journalized
+        payrolls.update(is_journalized=True, payroll_journal=payroll_journal)
+
+        messages.success(request, f"Payroll journal for {month_str} {selected_year} has been generated and submitted for approval.")
+        logger.info(f"User {request.user} generated payroll journal (pending approval): {reference}")
+
+        return redirect('payroll-journal-history')
+        
+    except Exception as e:
+        messages.error(request, f"Error generating journal: {str(e)}")
+        logger.error(f"Error generating payroll journal: {str(e)}")
+        return redirect('preview-payroll-journal')
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin'])
+def payroll_journal_history(request):
+    """
+    View all generated payroll journals
+    """
+    journals = PayrollJournal.objects.select_related(
+        'journal',
+        'journal__created_by',
+        'journal__submitted_by',
+        'journal__approved_by',
+        'journal__posted_by'
+    ).order_by('-month')
+    
+    # Filter by month/year if provided
+    selected_month = request.GET.get("month")
+    selected_year = request.GET.get("year")
+    
+    if selected_month and selected_year:
+        selected_date = date(int(selected_year), int(selected_month), 1)
+        journals = journals.filter(month=selected_date)
+    
+    context = {
+        'journals': journals,
+        'selected_month': selected_month,
+        'selected_year': selected_year,
+    }
+    
+    return render(request, "hr/payroll_journal_history.html", context)
+
+
+@login_required
+def user_manual(request):
+    """
+    Display the user manual in the application
+    """
+    import os
+    
+    manual_path = os.path.join(settings.BASE_DIR, 'USER_MANUAL.md')
+    
+    try:
+        import markdown
+    except ImportError:
+        html_content = (
+            "<h3>Markdown library is not installed. "
+            "Please install the 'markdown' package from requirement.txt.</h3>"
+        )
+    else:
+        try:
+            with open(manual_path, 'r', encoding='utf-8') as f:
+                manual_content = f.read()
+                # Convert markdown to HTML
+                html_content = markdown.markdown(manual_content, extensions=['tables', 'fenced_code'])
+        except FileNotFoundError:
+            html_content = "<h3>User Manual not found. Please contact your administrator.</h3>"
+    
+    context = {
+        'manual_content': html_content,
+    }
+    
+    return render(request, "hr/user_manual.html", context)

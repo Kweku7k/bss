@@ -725,6 +725,8 @@ class Payroll(models.Model):
     net_taxable_pay = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     cost_center = models.CharField('Cost Center', max_length=100, blank=True, null=True)
     is_approved = models.BooleanField(default=False)
+    is_journalized = models.BooleanField(default=False, help_text="Whether this payroll has been posted to journal")
+    payroll_journal = models.ForeignKey('PayrollJournal', on_delete=models.SET_NULL, null=True, blank=True, related_name='payrolls')
     created = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.staffno} - {self.month}"
@@ -798,3 +800,70 @@ class PayrollBenefitInKind(models.Model):
         
     def __str__(self):
         return f"{self.payroll.staffno} - {self.benefit_type}: {self.amount}"
+
+
+class PayrollAccountMapping(models.Model):
+    """
+    Maps payroll items (salary, allowances, deductions) to GL accounts.
+    This is a configuration table set up by the finance officer.
+    """
+    ACCOUNT_TYPE_CHOICES = [
+        ('basic_salary', 'Basic Salary'),
+        ('allowance', 'Allowance'),
+        ('ssf_employee', 'SSF Employee Contribution'),
+        ('ssf_employer', 'SSF Employer Contribution'),
+        ('pf_employee', 'PF Employee Contribution'),
+        ('pf_employer', 'PF Employer Contribution'),
+        ('paye', 'PAYE (Income Tax)'),
+        ('wht_general', 'Withholding Tax'),
+        ('wht_rent', 'WHT - Rent'),
+        ('other_deduction', 'Other Deductions'),
+        ('net_salary', 'Net Salary Payable'),
+    ]
+    
+    account_type = models.CharField(max_length=50, choices=ACCOUNT_TYPE_CHOICES)
+    sub_type = models.CharField(max_length=100, blank=True, null=True, help_text="For allowances or deductions (e.g., 'Housing Allowance')")
+    debit_account = models.ForeignKey('ledger.Account', on_delete=models.SET_NULL, null=True, blank=True, related_name='payroll_debit_mappings')
+    credit_account = models.ForeignKey('ledger.Account', on_delete=models.SET_NULL, null=True, blank=True, related_name='payroll_credit_mappings')
+    description_template = models.CharField(max_length=255, help_text="Template for journal line description (use {month} and {year} placeholders)")
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True)
+    
+    class Meta:
+        db_table = 'payroll_account_mapping'
+        unique_together = ['account_type', 'sub_type']
+        ordering = ['account_type', 'sub_type']
+        
+    def __str__(self):
+        if self.sub_type:
+            return f"{self.get_account_type_display()} - {self.sub_type}"
+        return self.get_account_type_display()
+
+
+class PayrollJournal(models.Model):
+    """
+    Links a monthly payroll batch to its generated journal entry in the ledger.
+    """
+    month = models.DateField(help_text="First day of the payroll month")
+    journal = models.ForeignKey('ledger.Journal', on_delete=models.SET_NULL, null=True, blank=True, related_name='payroll_journals')
+    reference = models.CharField(max_length=100, unique=True, help_text="e.g., PAYROLL-JAN-2025")
+    total_debit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    total_credit = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    staff_count = models.IntegerField(default=0)
+    notes = models.TextField(blank=True, null=True)
+    is_posted = models.BooleanField(default=False, help_text="Whether the journal has been posted to ledger")
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(get_user_model(), on_delete=models.SET_NULL, null=True, blank=True, related_name='created_payroll_journals')
+    
+    class Meta:
+        db_table = 'payroll_journal'
+        ordering = ['-month']
+        
+    def __str__(self):
+        return f"{self.reference} - {self.month.strftime('%B %Y')}"
+    
+    def is_balanced(self):
+        """Check if debits equal credits"""
+        return self.total_debit == self.total_credit

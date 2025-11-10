@@ -66,6 +66,66 @@ class ExchangeRate(models.Model):
     def clean(self):
         if self.from_currency == self.to_currency:
             raise ValidationError("From currency and to currency cannot be the same.")
+    
+    @staticmethod
+    def get_rate(from_currency, to_currency, as_of_date):
+        """
+        Get exchange rate for converting from_currency to to_currency on a specific date.
+        Returns the rate or None if not found.
+        """
+        from datetime import datetime
+        if isinstance(as_of_date, str):
+            as_of_date = datetime.strptime(as_of_date, '%Y-%m-%d').date()
+        
+        # If currencies are the same, return 1
+        if from_currency == to_currency:
+            return Decimal('1.0')
+        
+        # Check if from_currency is base currency
+        base_currency = Currency.objects.filter(is_base_currency=True).first()
+        
+        # Look for direct rate on or before the date
+        rate_obj = ExchangeRate.objects.filter(
+            from_currency=from_currency,
+            to_currency=to_currency,
+            effective_date__lte=as_of_date,
+            is_active=True
+        ).order_by('-effective_date').first()
+        
+        if rate_obj:
+            return rate_obj.rate
+        
+        # Try inverse rate
+        inverse_rate = ExchangeRate.objects.filter(
+            from_currency=to_currency,
+            to_currency=from_currency,
+            effective_date__lte=as_of_date,
+            is_active=True
+        ).order_by('-effective_date').first()
+        
+        if inverse_rate:
+            return Decimal('1.0') / inverse_rate.rate
+        
+        # Try cross rate through base currency
+        if base_currency:
+            rate_to_base = ExchangeRate.objects.filter(
+                from_currency=from_currency,
+                to_currency=base_currency,
+                effective_date__lte=as_of_date,
+                is_active=True
+            ).order_by('-effective_date').first()
+            
+            rate_from_base = ExchangeRate.objects.filter(
+                from_currency=base_currency,
+                to_currency=to_currency,
+                effective_date__lte=as_of_date,
+                is_active=True
+            ).order_by('-effective_date').first()
+            
+            if rate_to_base and rate_from_base:
+                return rate_to_base.rate * rate_from_base.rate
+        
+        return None
 
 
 # Account Types Choices
@@ -81,8 +141,18 @@ ACCOUNT_TYPES = [
 # Journal Status Choices
 JOURNAL_STATUS = [
     ('DRAFT', 'Draft'),
+    ('PENDING_APPROVAL', 'Pending Approval'),
+    ('APPROVED', 'Approved'),
+    ('REJECTED', 'Rejected'),
     ('POSTED', 'Posted'),
     ('CANCELLED', 'Cancelled'),
+]
+
+JOURNAL_APPROVAL_ACTIONS = [
+    ('SUBMITTED', 'Submitted'),
+    ('APPROVED', 'Approved'),
+    ('REJECTED', 'Rejected'),
+    ('POSTED', 'Posted'),
 ]
 
 # Source Module Choices
@@ -147,11 +217,27 @@ class Journal(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     reference_no = models.CharField(max_length=20, unique=True, help_text="Auto-generated reference number")
     date = models.DateField(help_text="Transaction date")
-    description = models.TextField(help_text="Transaction description")
+    description = models.TextField(blank=True, null=True, help_text="Transaction description (optional)")
     source_module = models.CharField(max_length=50, choices=SOURCE_MODULES, 
                                     help_text="Module that created this entry")
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=20, choices=JOURNAL_STATUS, default='DRAFT')
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    submitted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='submitted_journals'
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='approved_journals'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     posted_at = models.DateTimeField(null=True, blank=True)
@@ -164,7 +250,8 @@ class Journal(models.Model):
         verbose_name_plural = 'Journal Entries'
 
     def __str__(self):
-        return f"{self.reference_no} - {self.description[:50]}"
+        desc = self.description or ''
+        return f"{self.reference_no} - {desc[:50]}"
 
     @property
     def total_debit(self):
@@ -188,13 +275,13 @@ class Journal(models.Model):
 
     @property
     def balance_difference(self):
-        """Calculate the difference between total debits and credits"""
-        return self.total_debit - self.total_credit
+        """Calculate the difference between total base debits and credits"""
+        return self.total_base_debit - self.total_base_credit
 
     @property
-    def is_balanced(self):
-        """Check if the journal entry is balanced (debits = credits)"""
-        return abs(self.balance_difference) < Decimal('0.01')
+    def entered_balance_difference(self):
+        """Difference between original (entered) debits and credits"""
+        return self.total_debit - self.total_credit
 
     @property
     def unique_currencies(self):
@@ -225,6 +312,13 @@ class Journal(models.Model):
             if abs(total_debit - total_credit) > Decimal('0.01'):  # Allow for small rounding differences
                 raise ValidationError("Journal entries must balance (total debits = total credits)")
 
+            total_base_debit = sum(line.base_debit for line in self.lines.all())
+            total_base_credit = sum(line.base_credit for line in self.lines.all())
+            if abs(total_base_debit - total_base_credit) > Decimal('0.01'):
+                raise ValidationError(
+                    "Journal entries must balance in base currency (total base debits = total base credits)"
+                )
+
     def get_total_debit(self):
         return sum(line.debit for line in self.lines.all())
 
@@ -232,7 +326,62 @@ class Journal(models.Model):
         return sum(line.credit for line in self.lines.all())
 
     def is_balanced(self):
-        return abs(self.get_total_debit() - self.get_total_credit()) <= Decimal('0.01')
+        return abs(self.total_base_debit - self.total_base_credit) <= Decimal('0.01')
+
+    def submit_for_approval(self, user):
+        """Move journal to pending approval state."""
+        if self.status not in ['DRAFT', 'REJECTED']:
+            raise ValidationError("Only draft or rejected journals can be submitted for approval.")
+        if not self.is_balanced():
+            raise ValidationError("Cannot submit an unbalanced journal for approval.")
+
+        self.status = 'PENDING_APPROVAL'
+        self.submitted_at = timezone.now()
+        self.submitted_by = user
+        self.save(update_fields=['status', 'submitted_at', 'submitted_by', 'updated_at'])
+        JournalApproval.objects.create(
+            journal=self,
+            action='SUBMITTED',
+            actor=user,
+            comment="Journal submitted for approval."
+        )
+
+    def approve(self, user):
+        """Approve a journal entry."""
+        if self.status != 'PENDING_APPROVAL':
+            raise ValidationError("Only journals pending approval can be approved.")
+        self.status = 'APPROVED'
+        self.approved_at = timezone.now()
+        self.approved_by = user
+        self.save(update_fields=['status', 'approved_at', 'approved_by', 'updated_at'])
+        JournalApproval.objects.create(
+            journal=self,
+            action='APPROVED',
+            actor=user,
+            comment="Journal approved."
+        )
+
+    def reject(self, user, reason=None):
+        """Reject a journal entry."""
+        if self.status != 'PENDING_APPROVAL':
+            raise ValidationError("Only journals pending approval can be rejected.")
+        self.status = 'REJECTED'
+        self.approved_at = None
+        self.approved_by = None
+        self.save(update_fields=['status', 'approved_at', 'approved_by', 'updated_at'])
+        JournalApproval.objects.create(
+            journal=self,
+            action='REJECTED',
+            actor=user,
+            comment=reason or "Journal rejected."
+        )
+        if reason:
+            JournalComment.objects.create(
+                journal=self,
+                author=user,
+                comment=reason,
+                is_system=True
+            )
 
 
 class JournalLine(models.Model):
@@ -240,7 +389,8 @@ class JournalLine(models.Model):
     Journal Line - Individual debit/credit entries within a journal
     """
     journal = models.ForeignKey(Journal, related_name='lines', on_delete=models.CASCADE)
-    account = models.ForeignKey(Account, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='journallines')
+    date = models.DateField(help_text="Line transaction date", null=True, blank=True)
     debit = models.DecimalField(max_digits=12, decimal_places=2, default=0, 
                                validators=[MinValueValidator(0)])
     credit = models.DecimalField(max_digits=12, decimal_places=2, default=0, 
@@ -252,6 +402,8 @@ class JournalLine(models.Model):
                                    help_text="Debit amount in base currency")
     base_credit = models.DecimalField(max_digits=12, decimal_places=2, default=0, 
                                     help_text="Credit amount in base currency")
+    cost_center = models.CharField(max_length=200, blank=True, null=True, 
+                                  help_text="Cost center (Department/Directorate)")
     description = models.TextField(blank=True, help_text="Line description")
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -269,15 +421,24 @@ class JournalLine(models.Model):
         if self.debit == 0 and self.credit == 0:
             raise ValidationError("A journal line must have either debit or credit amount")
         
-        # Validate currency matches account currency
-        if self.account and self.currency and self.account.currency != self.currency:
-            raise ValidationError("Journal line currency must match account currency")
+        # Note: Removed strict currency matching validation to support multi-currency transactions
+        # Accounts can receive transactions in any currency with proper exchange rate conversion
 
     def save(self, *args, **kwargs):
+        # Set default currency to base currency if not specified
+        if not self.currency:
+            base_currency = Currency.objects.filter(is_base_currency=True).first()
+            if base_currency:
+                self.currency = base_currency
+                self.exchange_rate = Decimal('1.0')
+        
+        if self.exchange_rate:
+            self.exchange_rate = Decimal(str(self.exchange_rate)).quantize(Decimal('0.01'))
+
         # Calculate base currency amounts
         if self.currency and self.exchange_rate:
-            self.base_debit = self.debit * self.exchange_rate
-            self.base_credit = self.credit * self.exchange_rate
+            self.base_debit = (self.debit * self.exchange_rate).quantize(Decimal('0.01'))
+            self.base_credit = (self.credit * self.exchange_rate).quantize(Decimal('0.01'))
         else:
             self.base_debit = self.debit
             self.base_credit = self.credit
@@ -326,11 +487,44 @@ class LedgerBalance(models.Model):
 
     def update_balance(self, debit_amount=0, credit_amount=0, base_debit_amount=0, base_credit_amount=0):
         """Update the balance when new transactions are posted"""
-        self.total_debit += debit_amount
-        self.total_credit += credit_amount
-        self.base_total_debit += base_debit_amount
-        self.base_total_credit += base_credit_amount
+        self.total_debit += Decimal(debit_amount)
+        self.total_credit += Decimal(credit_amount)
+        self.base_total_debit += Decimal(base_debit_amount)
+        self.base_total_credit += Decimal(base_credit_amount)
         self.save()
+
+
+class JournalApproval(models.Model):
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='approvals')
+    action = models.CharField(max_length=20, choices=JOURNAL_APPROVAL_ACTIONS)
+    actor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Journal Approval'
+        verbose_name_plural = 'Journal Approvals'
+
+    def __str__(self):
+        return f"{self.journal.reference_no} - {self.action}"
+
+
+class JournalComment(models.Model):
+    journal = models.ForeignKey(Journal, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    comment = models.TextField()
+    is_system = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at']
+        verbose_name = 'Journal Comment'
+        verbose_name_plural = 'Journal Comments'
+
+    def __str__(self):
+        author = self.author.get_full_name() if self.author else "System"
+        return f"{self.journal.reference_no} - {author}"
 
 
 class PettyCashFund(models.Model):

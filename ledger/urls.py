@@ -8,6 +8,7 @@ urlpatterns = [
     path('accounts/', views.chart_of_accounts, name='chart_of_accounts'),
     path('accounts/create/', views.account_create, name='account_create'),
     path('accounts/bulk-create/', views.bulk_account_create, name='bulk_account_create'),
+    path('accounts/csv-upload/', views.csv_account_upload, name='csv_account_upload'),
     path('accounts/<int:account_id>/', views.account_detail, name='account_detail'),
     path('accounts/<int:account_id>/edit/', views.account_edit, name='account_edit'),
     path('accounts/<int:account_id>/delete/', views.account_delete, name='account_delete'),
@@ -16,7 +17,11 @@ urlpatterns = [
     path('journals/', views.journal_list, name='journal_list'),
     path('journals/create/', views.journal_create, name='journal_create'),
     path('journals/<uuid:journal_id>/', views.journal_detail, name='journal_detail'),
+    path('journals/<uuid:journal_id>/edit/', views.journal_edit, name='journal_edit'),
     path('journals/<uuid:journal_id>/post/', views.journal_post, name='journal_post'),
+    path('journals/<uuid:journal_id>/submit/', views.journal_submit_for_approval, name='journal_submit_for_approval'),
+    path('journals/<uuid:journal_id>/review/', views.journal_review, name='journal_review'),
+    path('journals/<uuid:journal_id>/comments/', views.journal_add_comment, name='journal_add_comment'),
     
     # Petty Cash
     path('petty-cash/', views.petty_cash_funds, name='petty_cash_funds'),
@@ -51,6 +56,8 @@ urlpatterns = [
     
     # API endpoints
     path('api/parent-accounts/', views.api_parent_accounts, name='api_parent_accounts'),
-    # path('api/account/<int:account_id>/balance/', views.api_account_balance, name='api_account_balance'),
     path('api/fund/<int:fund_id>/balance/', views.api_fund_balance, name='api_fund_balance'),
+    path('api/exchange-rate/', views.api_exchange_rate, name='api_exchange_rate'),
+    path('api/cost-centers/', views.api_cost_centers, name='api_cost_centers'),
+    path('api/account/<int:account_id>/info/', views.api_account_info, name='api_account_info'),
 ]

@@ -358,6 +358,11 @@
              <i class="bi bi-circle"></i><span>Audit Variation</span>
            </a>       
          </li>
+         <li>
+          <a href="{% url 'payroll-account-mapping' %}">
+            <i class="bi bi-circle"></i><span>Account Mapping</span>
+          </a>       
+        </li>
 
        </ul>
      </li>
@@ -399,19 +404,19 @@
              <span>Journal Entries</span>
            </a>
          </li>
-         <li>
+         <!-- <li>
            <a href="{% url 'ledger:petty_cash_funds' %}">
              <i class="bi bi-cash-coin"></i>
              <span>Petty Cash</span>
            </a>
-         </li>
+         </li> -->
          <li>
            <a href="{% url 'ledger:reports_trial_balance' %}">
              <i class="bi bi-graph-up"></i>
              <span>Trial Balance</span>
            </a>
          </li>
-         <li>
+         <!-- <li>
            <a href="{% url 'ledger:reports_balance_sheet' %}">
              <i class="bi bi-bar-chart"></i>
              <span>Balance Sheet</span>
@@ -422,11 +427,11 @@
              <i class="bi bi-pie-chart"></i>
              <span>Profit & Loss</span>
            </a>
-         </li>
+         </li> -->
        </ul>
      </li>
 
-     <li class="nav-item">
+     <!-- <li class="nav-item">
       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#budget-nav" aria-expanded="false">
         <i class="bi bi-pie-chart"></i>
         <span>Budget Management</span>
@@ -452,7 +457,7 @@
           </a>
         </li>
       </ul>
-    </li>
+    </li> -->
 
      <li class="nav-item">
        <a class="nav-link collapsed" href="{% url 'report' %}">
@@ -484,15 +489,20 @@
                      <i class="bi bi-circle"></i><span>Logs</span>
                  </a>       
              </li>
-           {% endif %}
-           <li class="nav-item">
-               <a class="nav-link collapsed" href="{% url 'logout' %}">
-                 <i class="bi bi-box-arrow-in-right"></i><span>Logout</span>
-               </a>
-           </li>
-       </ul>
-   </li>
+          {% endif %}
+          <li class="nav-item">
+              <a class="nav-link collapsed" href="{% url 'user-manual' %}">
+                <i class="bi bi-book"></i><span>User Manual</span>
+              </a>
+          </li>
+          <li class="nav-item">
+              <a class="nav-link collapsed" href="{% url 'logout' %}">
+                <i class="bi bi-box-arrow-in-right"></i><span>Logout</span>
+              </a>
+          </li>
+      </ul>
+  </li>
 
-   </ul>
+  </ul>
 
- </aside><!-- End Sidebar-->
+</aside><!-- End Sidebar-->

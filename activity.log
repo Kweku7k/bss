@@ -293,3 +293,437 @@ INFO 2025-10-23 12:42:12,273 Login Successful: Softlife
 INFO 2025-10-23 14:44:29,038 Login Successful: Softlife
 INFO 2025-10-23 16:44:44,662 Login Successful: Softlife
 INFO 2025-10-23 21:00:22,370 Login Successful: Softlife
+INFO 2025-10-29 15:20:10,575 Login Successful: Softlife
+INFO 2025-11-03 11:48:53,714 Login Successful: Softlife
+INFO 2025-11-03 13:23:04,099 CSV Upload started by user: Softlife
+INFO 2025-11-03 13:23:04,101 File name: central_university_chart_of_accounts.csv, Size: 24419 bytes
+INFO 2025-11-03 13:23:04,104 Successfully decoded CSV file with 337 lines
+INFO 2025-11-03 13:23:04,104 CSV Headers found: Code, Description, Type, Currency, Parent Code, Name
+INFO 2025-11-03 13:23:04,105 Starting to process CSV rows...
+INFO 2025-11-03 13:23:04,143 Row 2: Updated account 10000 - Assets
+INFO 2025-11-03 13:23:04,170 Row 3: Updated account 10100 - Fixed Assets
+INFO 2025-11-03 13:23:04,193 Row 4: Updated account 10300 - Land & Buildings
+INFO 2025-11-03 13:23:04,216 Row 5: Updated account 10340 - Accumm. Depreciation (Land & Building)
+INFO 2025-11-03 13:23:04,241 Row 6: Updated account 10400 - Office Equipments
+INFO 2025-11-03 13:23:04,261 Row 7: Updated account 10440 - Accumm. Depreciation (Office Equipment)
+INFO 2025-11-03 13:23:04,280 Row 8: Updated account 10441 - Laboratory Equipment
+INFO 2025-11-03 13:23:04,299 Row 9: Updated account 10442 - Accumm. Depr (Lab. Equip)
+INFO 2025-11-03 13:23:04,321 Row 10: Updated account 10443 - Studio Equipment
+INFO 2025-11-03 13:23:04,349 Row 11: Updated account 10444 - Accumm. Depreciation (Studio Equipment)
+INFO 2025-11-03 13:23:04,374 Row 12: Updated account 10450 - Motor Vehicle
+INFO 2025-11-03 13:23:04,398 Row 13: Updated account 10460 - Accumm. Depreciation (Motor Vehicle)
+INFO 2025-11-03 13:23:04,423 Row 14: Updated account 10500 - Fixtures & Fittings
+INFO 2025-11-03 13:23:04,456 Row 15: Updated account 10540 - Accumm. Depreciation (Furniture & Fittings)
+INFO 2025-11-03 13:23:04,478 Row 16: Updated account 10550 - Plant & Machinery
+INFO 2025-11-03 13:23:04,504 Row 17: Updated account 10560 - Accumm. Depreciation (Plant & Machinery)
+INFO 2025-11-03 13:23:04,532 Row 18: Updated account 10600 - Library Books/Academic Gowns
+INFO 2025-11-03 13:23:04,557 Row 19: Updated account 10640 - Accumm. Depr (Library Books & Academic Gowns)
+INFO 2025-11-03 13:23:04,584 Row 20: Updated account 10650 - Computer Software/Internet Facilities
+INFO 2025-11-03 13:23:04,609 Row 21: Updated account 10670 - Accumm. Depreciation (Computer Software)
+INFO 2025-11-03 13:23:04,637 Row 22: Updated account 10700 - Computers Hardware & Accessories
+INFO 2025-11-03 13:23:04,661 Row 23: Updated account 10740 - Accumm. Depreciation (Computer Hardware)
+INFO 2025-11-03 13:23:04,686 Row 24: Updated account 10750 - Investment
+INFO 2025-11-03 13:23:04,711 Row 25: Updated account 10751 - Interest Receivable
+INFO 2025-11-03 13:23:04,744 Row 26: Updated account 10752 - Interest Receivable - Unibank Investment 5
+INFO 2025-11-03 13:23:04,771 Row 27: Updated account 10753 - Interest Receivable-Ofori Atta Student Schol. Fund
+INFO 2025-11-03 13:23:04,797 Row 28: Updated account 10754 - Interest Receivable-SIC LIFE Fund
+INFO 2025-11-03 13:23:04,820 Row 29: Updated account 10800 - Furniture
+INFO 2025-11-03 13:23:04,845 Row 30: Updated account 10840 - Accumm. Depreciation (Furniture)
+INFO 2025-11-03 13:23:04,867 Row 31: Updated account 10850 - Printers
+INFO 2025-11-03 13:23:04,892 Row 32: Updated account 10860 - Accumm. Depreciation (Printers)
+INFO 2025-11-03 13:23:04,921 Row 33: Updated account 10900 - Teaching Aids
+INFO 2025-11-03 13:23:04,952 Row 34: Updated account 10950 - Accumm. Depreciation (Teaching Aids)
+INFO 2025-11-03 13:23:04,971 Row 35: Updated account 11000 - Future Dev/Buildings
+INFO 2025-11-03 13:23:04,993 Row 36: Updated account 11100 - Endowment Fund
+INFO 2025-11-03 13:23:05,013 Row 37: Updated account 11500 - Accumm. Depreciation (Future Dev of Buildings)
+INFO 2025-11-03 13:23:05,032 Row 38: Updated account 11550 - Capital Work - In - Progress
+INFO 2025-11-03 13:23:05,066 Row 39: Updated account 11551 - Renovation Work - Hse No. B644/4 - Mataheko
+INFO 2025-11-03 13:23:05,087 Row 40: Updated account 11552 - Capital Work-In-Progress - Medical School
+INFO 2025-11-03 13:23:05,106 Row 41: Updated account 11900 - Current Assets
+INFO 2025-11-03 13:23:05,127 Row 42: Updated account 12000 - Stock
+INFO 2025-11-03 13:23:05,151 Row 43: Updated account 12001 - Student Debtors
+INFO 2025-11-03 13:23:05,170 Row 44: Updated account 12002 - Staff Debtors
+INFO 2025-11-03 13:23:05,192 Row 45: Updated account 12003 - Other Debtors
+INFO 2025-11-03 13:23:05,390 Row 46: Updated account 12004 - Accountable Imprest
+INFO 2025-11-03 13:23:05,410 Row 47: Updated account 12005 - Other Prepayment
+INFO 2025-11-03 13:23:05,429 Row 48: Updated account 12006 - Rent Prepaid
+INFO 2025-11-03 13:23:05,452 Row 49: Updated account 12007 - Insurance Prepaid
+INFO 2025-11-03 13:23:05,471 Row 50: Updated account 12008 - Petty Cash - Admission Drive
+INFO 2025-11-03 13:23:05,491 Row 51: Updated account 12009 - Petty Cash - Hostel
+INFO 2025-11-03 13:23:05,511 Row 52: Updated account 12010 - Petty Cash - CT Maintenance Works
+INFO 2025-11-03 13:23:05,533 Row 53: Updated account 12011 - Petty Cash - CIRP
+INFO 2025-11-03 13:23:05,571 Row 54: Updated account 12012 - Petty Cash - FOL
+INFO 2025-11-03 13:23:05,601 Row 55: Updated account 12013 - Petty Cash - Academic Dir.
+INFO 2025-11-03 13:23:05,627 Row 56: Updated account 12014 - Petty Cash - HR Dir.
+INFO 2025-11-03 13:23:05,647 Row 57: Updated account 12015 - Stock - Fixed Asset
+INFO 2025-11-03 13:23:05,680 Row 58: Updated account 12016 - Petty Cash - Mataheko Library
+INFO 2025-11-03 13:23:05,742 Row 59: Updated account 12017 - Petty -Cash-Procurement
+INFO 2025-11-03 13:23:05,786 Row 60: Updated account 12018 - Petty Cash - Planning and Sustainability Directorate
+INFO 2025-11-03 13:23:05,827 Row 61: Updated account 12100 - Cash
+INFO 2025-11-03 13:23:05,877 Row 62: Updated account 12200 - Cash - Local
+INFO 2025-11-03 13:23:05,929 Row 63: Updated account 12300 - Petty Cash - Vice President- F & A
+INFO 2025-11-03 13:23:05,968 Row 64: Updated account 12301 - Petty Cash - Mataheko Campus
+INFO 2025-11-03 13:23:05,989 Row 65: Updated account 12302 - Petty Cash - Vice Chancellor's Office
+INFO 2025-11-03 13:23:06,008 Row 66: Updated account 12303 - Petty Cash - Pro Vice Chancellor- Academic
+INFO 2025-11-03 13:23:06,031 Row 67: Updated account 12304 - Petty Cash - Registrar's Office
+INFO 2025-11-03 13:23:06,054 Row 68: Updated account 12305 - Petty Cash - FASS
+INFO 2025-11-03 13:23:06,081 Row 69: Updated account 12306 - Petty Cash -  SAS
+INFO 2025-11-03 13:23:06,107 Row 70: Updated account 12307 - Petty Cash - CBS
+INFO 2025-11-03 13:23:06,129 Row 71: Updated account 12308 - Petty Cash - STM
+INFO 2025-11-03 13:23:06,190 Row 72: Updated account 12309 - Petty Cash - CU-CEPA
+INFO 2025-11-03 13:23:06,303 Row 73: Updated account 12310 - Petty Cash - Estate Unit
+INFO 2025-11-03 13:23:06,329 Row 74: Updated account 12311 - Petty Cash - Miotso Campus
+INFO 2025-11-03 13:23:06,355 Row 75: Updated account 12312 - Petty Cash - Planning & Sustainability
+INFO 2025-11-03 13:23:06,383 Row 76: Updated account 12313 - Petty Cash - DOS
+INFO 2025-11-03 13:23:06,405 Row 77: Updated account 12314 - Petty Cash - Chancellor's office
+INFO 2025-11-03 13:23:06,427 Row 78: Updated account 12315 - Petty Cash - Hostel
+INFO 2025-11-03 13:23:06,451 Row 79: Updated account 12316 - Petty Cash - Estate Unit - Miotso
+INFO 2025-11-03 13:23:06,470 Row 80: Updated account 12317 - Petty Cash - BDC
+INFO 2025-11-03 13:23:06,493 Row 81: Updated account 12318 - Petty Cash -SGS
+INFO 2025-11-03 13:23:06,515 Row 82: Updated account 12319 - Petty Cash - Security Unit
+INFO 2025-11-03 13:23:06,541 Row 83: Updated account 12280 - Cash in Banks
+INFO 2025-11-03 13:23:06,566 Row 84: Updated account 12320 - SG Cedi A/C
+INFO 2025-11-03 13:23:06,598 Row 85: Updated account 12321 - Access Cedi
+INFO 2025-11-03 13:23:06,625 Row 86: Updated account 12322 - Access Dollar
+INFO 2025-11-03 13:23:06,643 Row 87: Updated account 12323 - Access operational A/C
+INFO 2025-11-03 13:23:06,662 Row 88: Updated account 12324 - Cash on hand - Finance MOMO
+INFO 2025-11-03 13:23:06,689 Row 89: Updated account 12325 - Ecobank Cedi A/C
+INFO 2025-11-03 13:23:06,717 Row 90: Updated account 12326 - SG $  A/C
+INFO 2025-11-03 13:23:06,739 Row 91: Updated account 12327 - SG Pound Sterling A/C
+INFO 2025-11-03 13:23:06,761 Row 92: Updated account 12328 - Standard Trust A/C
+INFO 2025-11-03 13:23:06,787 Row 93: Updated account 12329 - Ecobank Facility Current A/C
+INFO 2025-11-03 13:23:06,820 Row 94: Updated account 12330 - Stanbic Cedi A/C
+INFO 2025-11-03 13:23:06,878 Row 95: Updated account 12331 - Stanbic $  A/C
+INFO 2025-11-03 13:23:06,972 Row 96: Updated account 12332 - Stanbic Pound Sterling  A/C
+INFO 2025-11-03 13:23:07,002 Row 97: Updated account 12333 - Ecobank Fees Cedi A/C
+INFO 2025-11-03 13:23:07,026 Row 98: Updated account 12334 - Ecobank Fees $  A/C
+INFO 2025-11-03 13:23:07,048 Row 99: Updated account 12335 - GCB Bank
+INFO 2025-11-03 13:23:07,073 Row 100: Updated account 12336 - SG - Research Project - IAST
+INFO 2025-11-03 13:23:07,097 Row 101: Updated account 12337 - Ecobank $ Collection Bank A/C
+INFO 2025-11-03 13:23:07,120 Row 102: Updated account 12338 - Ecobank Pound Sterling A/C
+INFO 2025-11-03 13:23:07,144 Row 103: Updated account 12339 - Ecobank Endowment Fund Bank A/C
+INFO 2025-11-03 13:23:07,169 Row 104: Updated account 12340 - Petty Cash - General Admin
+INFO 2025-11-03 13:23:07,203 Row 105: Updated account 12341 - Collection - Ecobank School Fees Bank A/C
+INFO 2025-11-03 13:23:07,229 Row 106: Updated account 12342 - Petty Cash - Sch. Nursing & Midwifrey
+INFO 2025-11-03 13:23:07,255 Row 107: Updated account 12343 - SG-Euro A/C - T-Project
+INFO 2025-11-03 13:23:07,280 Row 108: Updated account 12344 - GCB $ A/C
+INFO 2025-11-03 13:23:07,308 Row 109: Updated account 12345 - GCB Cedi A/C - Income
+INFO 2025-11-03 13:23:07,333 Row 110: Updated account 12346 - GCB Fees Collection A/C
+INFO 2025-11-03 13:23:07,359 Row 111: Updated account 12347 - Zenith Bank (Ghana) Ltd. - Collection
+INFO 2025-11-03 13:23:07,391 Row 112: Updated account 12348 - Zenith Bank (Ghana) Ltd. - Income
+INFO 2025-11-03 13:23:07,417 Row 113: Updated account 12349 - Petty Cash - R & D
+INFO 2025-11-03 13:23:07,442 Row 114: Updated account 12350 - Petty Cash - Int. Audit Dir.
+INFO 2025-11-03 13:23:07,467 Row 115: Updated account 12351 - Petty Cash - Finance Dir.
+INFO 2025-11-03 13:23:07,494 Row 116: Updated account 12352 - Petty Cash - ICT Dir.
+INFO 2025-11-03 13:23:07,539 Row 117: Updated account 12353 - Acc imprest - Ksi lectures
+INFO 2025-11-03 13:23:07,569 Row 118: Updated account 12354 - Ecobank FX Collection - $ A/C
+INFO 2025-11-03 13:23:07,599 Row 119: Updated account 12355 - Petty Cash - Quality Assurance
+INFO 2025-11-03 13:23:07,625 Row 120: Updated account 12356 - Petty Cash - School of Pharmacy
+INFO 2025-11-03 13:23:07,652 Row 121: Updated account 12357 - GT BANK CEDI A/C
+INFO 2025-11-03 13:23:07,678 Row 122: Updated account 12358 - GT BANK $ A/C
+INFO 2025-11-03 13:23:07,700 Row 123: Updated account 12359 - Petty Cash - CA & PR Directorate
+INFO 2025-11-03 13:23:07,720 Row 124: Updated account 12360 - UBA Cedi A/C
+INFO 2025-11-03 13:23:07,740 Row 125: Updated account 12361 - UBA $ A/C
+INFO 2025-11-03 13:23:07,763 Row 126: Updated account 12362 - Petty Cash - Sch. of Eng. & Technology
+INFO 2025-11-03 13:23:07,786 Row 127: Updated account 12363 - Petty Cash - CDPE Directorate
+INFO 2025-11-03 13:23:07,816 Row 128: Updated account 12364 - Petty Cash - Sch. of Med. & HS
+INFO 2025-11-03 13:23:07,843 Row 129: Updated account 12365 - Central University College FX Collection
+INFO 2025-11-03 13:23:07,869 Row 130: Updated account 12366 - Petty Cash - Kumasi Campus
+INFO 2025-11-03 13:23:07,897 Row 131: Updated account 12367 - Petty Cash - CIRP
+INFO 2025-11-03 13:23:07,929 Row 132: Updated account 12368 - Petty Cash - Estate Unit - GENERAL
+INFO 2025-11-03 13:23:07,957 Row 133: Updated account 12369 - STANBIC FEES CEDI COLL ACCOUNT
+INFO 2025-11-03 13:23:07,984 Row 134: Updated account 12370 - GCB BANK CALL A/C
+INFO 2025-11-03 13:23:08,016 Row 135: Updated account 12371 - ACCESS OPERATIONAL CEDI A/C
+INFO 2025-11-03 13:23:08,038 Row 136: Updated account 12372 - Stanbic PF A/C
+INFO 2025-11-03 13:23:08,062 Row 137: Updated account 12373 - ADB A/C
+INFO 2025-11-03 13:23:08,082 Row 138: Updated account 12374 - GCB CU ENDOWMENT FUND A/C
+INFO 2025-11-03 13:23:08,099 Row 139: Updated account 19000 - Liability
+INFO 2025-11-03 13:23:08,132 Row 140: Updated account 19500 - Current Liabilities
+INFO 2025-11-03 13:23:08,153 Row 141: Updated account 20000 - Loan A/C
+INFO 2025-11-03 13:23:08,176 Row 142: Updated account 20001 - Trade Creditors
+INFO 2025-11-03 13:23:08,199 Row 143: Updated account 20003 - Sundry Creditors
+INFO 2025-11-03 13:23:08,227 Row 144: Updated account 20004 - Staff Creditors/Loans
+INFO 2025-11-03 13:23:08,253 Row 145: Updated account 20005 - SSF 18.5% Payable
+INFO 2025-11-03 13:23:08,279 Row 146: Updated account 20006 - Provident Fund Payable (25%)
+INFO 2025-11-03 13:23:08,303 Row 147: Updated account 20007 - TOPAZ SUNDRY PAYABLE
+INFO 2025-11-03 13:23:08,330 Row 148: Updated account 20008 - Withholding Tax
+INFO 2025-11-03 13:23:08,353 Row 149: Updated account 20009 - P.A.Y .E
+INFO 2025-11-03 13:23:08,376 Row 150: Updated account 20010 - CUTA Payable
+INFO 2025-11-03 13:23:08,403 Row 151: Updated account 20011 - Net Salary Payable
+INFO 2025-11-03 13:23:08,433 Row 152: Updated account 20015 - School Fees Creditors
+INFO 2025-11-03 13:23:08,457 Row 153: Updated account 20016 - CULEA DUES
+INFO 2025-11-03 13:23:08,479 Row 154: Updated account 20017 - Provident Fund Refundable  A/C
+INFO 2025-11-03 13:23:08,506 Row 155: Updated account 20018 - Rent Payable
+INFO 2025-11-03 13:23:08,531 Row 156: Updated account 20019 - Staff Welfare Dues Payable
+INFO 2025-11-03 13:23:08,551 Row 157: Updated account 20020 - CU Care
+INFO 2025-11-03 13:23:08,570 Row 158: Updated account 20021 - Student Project
+INFO 2025-11-03 13:23:08,591 Row 159: Updated account 20022 - SSB Loan payable
+INFO 2025-11-03 13:23:08,612 Row 160: Updated account 20023 - Creditor - C.U.S.W.A.
+INFO 2025-11-03 13:23:08,634 Row 161: Updated account 20024 - Asset Finance Payable
+INFO 2025-11-03 13:23:08,655 Row 162: Updated account 20025 - Ecobank Loan payable
+INFO 2025-11-03 13:23:08,678 Row 163: Updated account 20026 - Sundry Payables
+INFO 2025-11-03 13:23:08,702 Row 164: Updated account 20027 - Deferred Tax Liability
+INFO 2025-11-03 13:23:08,782 Row 165: Updated account 20028 - CUSCU LOAN PAYABLE
+INFO 2025-11-03 13:23:08,819 Row 166: Updated account 20029 - CUSCU CONTRIBUTION PAYABLE
+INFO 2025-11-03 13:23:08,856 Row 167: Updated account 20030 - GLICO CONTRIBUTION PAYABLE
+INFO 2025-11-03 13:23:08,899 Row 168: Updated account 20031 - SRC Payable
+INFO 2025-11-03 13:23:08,938 Row 169: Updated account 25000 - Audit & Consultancy Fees Payable
+INFO 2025-11-03 13:23:08,957 Row 170: Updated account 25001 - I.O.U. Payable
+INFO 2025-11-03 13:23:08,982 Row 171: Updated account 25002 - S. L.T. Recovery Payable
+INFO 2025-11-03 13:23:09,006 Row 172: Updated account 25003 - Republic Bank Loan payable
+INFO 2025-11-03 13:23:09,077 Row 173: Updated account 26000 - Suspense
+INFO 2025-11-03 13:23:09,112 Row 174: Updated account 26001 - SG Research Project - IAST
+INFO 2025-11-03 13:23:09,139 Row 175: Updated account 26002 - SG-EuroA/C -T-Project
+INFO 2025-11-03 13:23:09,163 Row 176: Updated account 26003 - COVID 19 LEVY
+INFO 2025-11-03 13:23:09,185 Row 177: Updated account 26004 - COMM SERVICE TAX
+INFO 2025-11-03 13:23:09,210 Row 178: Updated account 26005 - GRASAG -CU BRANCH
+INFO 2025-11-03 13:23:09,266 Row 179: Updated account 26006 - VAT Levy
+INFO 2025-11-03 13:23:09,296 Row 180: Updated account 26007 - Getfund Levy
+INFO 2025-11-03 13:23:09,325 Row 181: Updated account 26008 - NHIS Levy
+INFO 2025-11-03 13:23:09,353 Row 182: Updated account 29000 - Equity
+INFO 2025-11-03 13:23:09,436 Row 183: Updated account 29500 - Shareholders' Interest
+INFO 2025-11-03 13:23:09,460 Row 184: Updated account 30000 - Equity Share Capital
+INFO 2025-11-03 13:23:09,482 Row 185: Updated account 30001 - Reserves
+INFO 2025-11-03 13:23:09,508 Row 186: Updated account 30002 - Accumulated Fund
+INFO 2025-11-03 13:23:09,526 Row 187: Updated account 30003 - Current Earnings
+INFO 2025-11-03 13:23:09,552 Row 188: Updated account 30004 - P & L Reserves
+INFO 2025-11-03 13:23:09,574 Row 189: Updated account 30005 - Contribution From ICGC
+INFO 2025-11-03 13:23:09,599 Row 190: Updated account 30006 - Endowment Fund
+INFO 2025-11-03 13:23:09,619 Row 191: Updated account 30007 - Fixed Assets Fund
+INFO 2025-11-03 13:23:09,639 Row 192: Updated account 39000 - Income
+INFO 2025-11-03 13:23:09,680 Row 193: Updated account 39500 - Internally Generated Funds
+INFO 2025-11-03 13:23:09,698 Row 194: Updated account 40000 - School Fees
+INFO 2025-11-03 13:23:09,718 Row 195: Updated account 40001 - Interviewee Fees
+INFO 2025-11-03 13:23:09,738 Row 196: Updated account 40002 - Photocopies/Printing
+INFO 2025-11-03 13:23:09,760 Row 197: Updated account 40003 - Postgraduate Fees
+INFO 2025-11-03 13:23:09,778 Row 198: Updated account 40004 - Investment Income
+INFO 2025-11-03 13:23:09,798 Row 199: Updated account 40005 - Endowment fund
+INFO 2025-11-03 13:23:09,817 Row 200: Updated account 40006 - Access Course
+INFO 2025-11-03 13:23:09,837 Row 201: Updated account 40007 - Admission Forms
+INFO 2025-11-03 13:23:09,855 Row 202: Updated account 40008 - Resit/Complementary/intersem.
+INFO 2025-11-03 13:23:09,876 Row 203: Updated account 40009 - Graduation/Certificate
+INFO 2025-11-03 13:23:09,894 Row 204: Updated account 40010 - Letter of consent/transcript
+INFO 2025-11-03 13:23:09,915 Row 205: Updated account 40011 - Late Registration
+INFO 2025-11-03 13:23:09,934 Row 206: Updated account 40012 - Card / I D Replacement/Deferment
+INFO 2025-11-03 13:23:09,967 Row 207: Updated account 40013 - Donation
+INFO 2025-11-03 13:23:09,995 Row 208: Updated account 40014 - Short Courses
+INFO 2025-11-03 13:23:10,014 Row 209: Updated account 40015 - Other Incomes
+INFO 2025-11-03 13:23:10,035 Row 210: Updated account 40016 - Professional Courses Fees - BDC
+INFO 2025-11-03 13:23:10,061 Row 211: Updated account 40017 - School Fees (MBA)
+INFO 2025-11-03 13:23:10,085 Row 212: Updated account 40018 - Admission Forms (MBA)
+INFO 2025-11-03 13:23:10,106 Row 213: Updated account 40019 - Other Income (MBA)
+INFO 2025-11-03 13:23:10,126 Row 214: Updated account 40020 - Hostel Fees
+INFO 2025-11-03 13:23:10,152 Row 215: Updated account 40021 - Students Graduation Sponsorship
+INFO 2025-11-03 13:23:10,192 Row 216: Updated account 40022 - Income - Ofori Attah Leadership Institute
+INFO 2025-11-03 13:23:10,220 Row 217: Updated account 40023 - Income - Centre for Distance Education (CODE)
+INFO 2025-11-03 13:23:10,247 Row 218: Updated account 40024 - Income - Grand Challenge Canada
+INFO 2025-11-03 13:23:10,281 Row 219: Updated account 40025 - Income - GFK Fund
+INFO 2025-11-03 13:23:10,303 Row 220: Updated account 40026 - Research Project - IAST
+INFO 2025-11-03 13:23:10,324 Row 221: Updated account 40027 - Release from Reserve
+INFO 2025-11-03 13:23:10,344 Row 222: Updated account 40028 - T/Group Project
+INFO 2025-11-03 13:23:10,364 Row 223: Updated account 40029 - STM Certificate Prog.
+INFO 2025-11-03 13:23:10,388 Row 224: Updated account 40030 - ATHE Fees
+INFO 2025-11-03 13:23:10,406 Row 225: Updated account 49000 - Cost of Goods Sold
+INFO 2025-11-03 13:23:10,429 Row 226: Updated account 49500 - General Administration Expenses
+INFO 2025-11-03 13:23:10,454 Row 227: Updated account 50000 - SSNIT 13.5%
+INFO 2025-11-03 13:23:10,477 Row 228: Updated account 50001 - SSNIT 5%
+INFO 2025-11-03 13:23:10,497 Row 229: Updated account 50002 - PF - Employer 12.5%
+INFO 2025-11-03 13:23:10,519 Row 230: Updated account 50003 - PF - Employees 12.5%
+INFO 2025-11-03 13:23:10,541 Row 231: Updated account 50004 - Salaries
+INFO 2025-11-03 13:23:10,561 Row 232: Created account 50006 - Fuel, Transport & Car Maintenance Allowance
+INFO 2025-11-03 13:23:10,585 Row 233: Updated account 50007 - Utility Allowance
+INFO 2025-11-03 13:23:10,605 Row 234: Updated account 50008 - Entertainment Allowance
+INFO 2025-11-03 13:23:10,625 Row 235: Updated account 50009 - Mgt Inconvenience Allowance
+INFO 2025-11-03 13:23:10,647 Row 236: Updated account 50010 - Adjuct Faculty Allowance
+INFO 2025-11-03 13:23:10,675 Row 237: Updated account 50011 - PAYE Tax
+INFO 2025-11-03 13:23:10,699 Row 238: Updated account 50013 - Sitting Allowance
+INFO 2025-11-03 13:23:10,721 Row 239: Updated account 50014 - Printing & Stationery
+INFO 2025-11-03 13:23:10,776 Row 240: Updated account 50015 - Fuel & Lubrication
+INFO 2025-11-03 13:23:10,848 Row 241: Updated account 50016 - Transport & Travels
+INFO 2025-11-03 13:23:10,887 Row 242: Updated account 50017 - Medical Expenses
+INFO 2025-11-03 13:23:11,039 Row 243: Updated account 50018 - Food & Entertainment
+INFO 2025-11-03 13:23:11,071 Row 244: Updated account 50019 - Vehicle maintenence & repair
+INFO 2025-11-03 13:23:11,103 Row 245: Updated account 50020 - Gen Repairs & Maintenance
+INFO 2025-11-03 13:23:11,131 Row 246: Updated account 50021 - Security Expenses
+INFO 2025-11-03 13:23:11,153 Row 247: Updated account 50022 - Cleaning & Sanitation
+INFO 2025-11-03 13:23:11,174 Row 248: Updated account 50023 - PC Hardware Software Maint
+INFO 2025-11-03 13:23:11,204 Row 249: Updated account 50024 - Electricity & Water
+INFO 2025-11-03 13:23:11,226 Row 250: Updated account 50025 - Matriculation
+INFO 2025-11-03 13:23:11,247 Row 251: Updated account 50026 - Staff Welfare/Donation
+INFO 2025-11-03 13:23:11,267 Row 252: Updated account 50027 - Audit/Legal Expenses
+INFO 2025-11-03 13:23:11,289 Row 253: Updated account 50028 - Bank Charges/comm
+INFO 2025-11-03 13:23:11,312 Row 254: Updated account 50029 - Postal Expenses
+INFO 2025-11-03 13:23:11,332 Row 255: Updated account 50030 - Consultancy Expenses
+INFO 2025-11-03 13:23:11,353 Row 256: Updated account 50031 - Insurance
+INFO 2025-11-03 13:23:11,376 Row 257: Updated account 50032 - Subscription/Licence
+INFO 2025-11-03 13:23:11,402 Row 258: Updated account 50033 - Staff Training/Development
+INFO 2025-11-03 13:23:11,424 Row 259: Updated account 50034 - Research allowance
+INFO 2025-11-03 13:23:11,445 Row 260: Updated account 50035 - Book & Equipment
+INFO 2025-11-03 13:23:11,467 Row 261: Updated account 50036 - Rent & Rates
+INFO 2025-11-03 13:23:11,526 Row 262: Updated account 50037 - Publicity & Promotion
+INFO 2025-11-03 13:23:11,581 Row 263: Updated account 50038 - Council Expenses
+INFO 2025-11-03 13:23:11,612 Row 264: Updated account 50039 - Honorarium/Incentive Package
+INFO 2025-11-03 13:23:11,633 Row 265: Updated account 50040 - Accreditation Expenses
+INFO 2025-11-03 13:23:11,653 Row 266: Updated account 50041 - Hire of generator
+INFO 2025-11-03 13:23:11,671 Row 267: Updated account 50042 - Science Practicals / Field Trips
+INFO 2025-11-03 13:23:11,701 Row 268: Updated account 50043 - Responsibility Allowance
+INFO 2025-11-03 13:23:11,727 Row 269: Updated account 50044 - Rent Allowance
+INFO 2025-11-03 13:23:11,750 Row 270: Updated account 50045 - Other Allowance
+INFO 2025-11-03 13:23:11,778 Row 271: Updated account 50046 - Overtime Cost
+INFO 2025-11-03 13:23:11,810 Row 272: Updated account 50047 - Miscellenous Expenses
+INFO 2025-11-03 13:23:11,839 Row 273: Updated account 50048 - Invigilation Expenses
+INFO 2025-11-03 13:23:11,862 Row 274: Updated account 50049 - Academic Adv/Project Supervision
+INFO 2025-11-03 13:23:11,884 Row 275: Updated account 50050 - Telephone & Communication  expenses
+INFO 2025-11-03 13:23:11,911 Row 276: Updated account 50051 - Processing Fee Expense
+INFO 2025-11-03 13:23:11,931 Row 277: Updated account 50053 - Casual Labour Expenses
+INFO 2025-11-03 13:23:11,954 Row 278: Updated account 50054 - Marking of scripts/Setting of questions
+INFO 2025-11-03 13:23:11,977 Row 279: Updated account 50055 - Overseas Expenses
+INFO 2025-11-03 13:23:12,002 Row 280: Updated account 50056 - Hotel & Guest House Expenses
+INFO 2025-11-03 13:23:12,029 Row 281: Updated account 50057 - Hire of Banquet & Conference Facility
+INFO 2025-11-03 13:23:12,055 Row 282: Updated account 50058 - Graduation Expenses
+INFO 2025-11-03 13:23:12,079 Row 283: Updated account 50059 - Taxation
+INFO 2025-11-03 13:23:12,103 Row 284: Updated account 50060 - Admission Expenses
+INFO 2025-11-03 13:23:12,133 Row 285: Updated account 50061 - Professional Allowance
+INFO 2025-11-03 13:23:12,167 Row 286: Updated account 50062 - School Fees Refund
+INFO 2025-11-03 13:23:12,211 Row 287: Updated account 50063 - Staff Welfare Dues
+INFO 2025-11-03 13:23:12,250 Row 288: Updated account 50064 - Bad Debt
+INFO 2025-11-03 13:23:12,276 Row 289: Updated account 50065 - Loan Interest Charges
+INFO 2025-11-03 13:23:12,304 Row 290: Updated account 50066 - Chemical Expenses
+INFO 2025-11-03 13:23:12,333 Row 291: Updated account 50067 - Medical Consumables (Clinic)
+INFO 2025-11-03 13:23:12,359 Row 292: Updated account 50068 - Hostel Repairs & Maintenance
+INFO 2025-11-03 13:23:12,387 Row 293: Updated account 50069 - Hostel Water & Electricity Expenses
+INFO 2025-11-03 13:23:12,412 Row 294: Updated account 50070 - Food Court Expenses
+INFO 2025-11-03 13:23:12,445 Row 295: Updated account 50071 - Appointment & Promotion Expenses
+INFO 2025-11-03 13:23:12,470 Row 296: Updated account 50072 - Consumables
+INFO 2025-11-03 13:23:12,494 Row 297: Updated account 50073 - Adjunct Claim - Ofori Attah Leadership Institute
+INFO 2025-11-03 13:23:12,518 Row 298: Updated account 50074 - Adjunct/Professional Claims - BDC
+INFO 2025-11-03 13:23:12,542 Row 299: Updated account 50075 - Electricity & Water - BDC
+INFO 2025-11-03 13:23:12,565 Row 300: Updated account 50076 - Repairs & Maintenance - BDC
+INFO 2025-11-03 13:23:12,589 Row 301: Updated account 50077 - Electricity & Water - CDE
+INFO 2025-11-03 13:23:12,615 Row 302: Updated account 50078 - Repairs & Maintenance - CDE
+INFO 2025-11-03 13:23:12,642 Row 303: Updated account 50079 - Adjunct Claim - CDE
+INFO 2025-11-03 13:23:12,666 Row 304: Updated account 50080 - Gratuity Expenses
+INFO 2025-11-03 13:23:12,690 Row 305: Updated account 50081 - Advertisement Expenses - BDC
+INFO 2025-11-03 13:23:12,712 Row 306: Updated account 50082 - Course writing & Review Expenses - CDE
+INFO 2025-11-03 13:23:12,744 Row 307: Updated account 50083 - Deferred Expenditure
+INFO 2025-11-03 13:23:12,769 Row 308: Updated account 50084 - Research Expenses
+INFO 2025-11-03 13:23:12,796 Row 309: Updated account 50085 - Students' Scholarship Expenses
+INFO 2025-11-03 13:23:12,815 Row 310: Updated account 69000 - Other Income
+INFO 2025-11-03 13:23:12,844 Row 311: Updated account 69500 - Non-Recurrent Income
+INFO 2025-11-03 13:23:12,867 Row 312: Updated account 70001 - Realised Foreign Exchange Gains
+INFO 2025-11-03 13:23:12,891 Row 313: Updated account 70002 - Unrealised Foreign Exchange Gains
+INFO 2025-11-03 13:23:12,917 Row 314: Updated account 70003 - Staff Loan Interest
+INFO 2025-11-03 13:23:12,944 Row 315: Updated account 70008 - Miscellaneous Income
+INFO 2025-11-03 13:23:12,962 Row 316: Updated account 79000 - Other Expense
+INFO 2025-11-03 13:23:12,986 Row 317: Updated account 79500 - Non-Recurrent  Expense
+INFO 2025-11-03 13:23:13,009 Row 318: Updated account 80001 - Realised Foreign Exchange Loss
+INFO 2025-11-03 13:23:13,045 Row 319: Updated account 80002 - Unrealised Foreign Exchange Loss
+INFO 2025-11-03 13:23:13,069 Row 320: Updated account 80003 - Bonus Payments to Staff
+INFO 2025-11-03 13:23:13,092 Row 321: Updated account 80005 - Depreciation - Land & Building
+INFO 2025-11-03 13:23:13,116 Row 322: Updated account 80007 - Depr. - Office Equipment
+INFO 2025-11-03 13:23:13,144 Row 323: Updated account 80009 - Depr. - Motor Vehicle
+INFO 2025-11-03 13:23:13,169 Row 324: Updated account 80011 - Depr. - Fixtures & Fittings
+INFO 2025-11-03 13:23:13,196 Row 325: Updated account 80013 - Depr. - Plant & Machinery
+INFO 2025-11-03 13:23:13,220 Row 326: Updated account 80015 - Depr. - Library Books / Academic Gowns
+INFO 2025-11-03 13:23:13,246 Row 327: Updated account 80017 - Depr. - Computer Software
+INFO 2025-11-03 13:23:13,269 Row 328: Updated account 80019 - Depr. - Computer Hardware & Accessories
+INFO 2025-11-03 13:23:13,293 Row 329: Updated account 80021 - Depr. - Furniture
+INFO 2025-11-03 13:23:13,319 Row 330: Updated account 80023 - Depr. - Printers
+INFO 2025-11-03 13:23:13,350 Row 331: Updated account 80025 - Depr. - Teaching Aids
+INFO 2025-11-03 13:23:13,376 Row 332: Updated account 80026 - Depr. - Lab. Equipment
+INFO 2025-11-03 13:23:13,399 Row 333: Updated account 80027 - Winding Up Expenses - CPI
+INFO 2025-11-03 13:23:13,423 Row 334: Updated account 80028 - General Write-off
+INFO 2025-11-03 13:23:13,448 Row 335: Updated account 80029 - REALISED FOREIGN EXCHANGE GAIN/LOSS
+INFO 2025-11-03 13:23:13,472 Row 336: Updated account 80030 - UNREALISED FOREIGN EXCHANGE GAIN/LOSS
+INFO 2025-11-03 13:23:13,503 Row 337: Updated account 80031 - Depr. - Studio Equipment
+INFO 2025-11-03 13:23:13,503 CSV Upload completed: Created=1, Updated=335, Errors=0
+INFO 2025-11-03 13:23:13,504 Successfully created 1 account(s)
+INFO 2025-11-03 13:23:13,504 Updated 335 existing account(s)
+INFO 2025-11-03 13:23:13,504 Redirecting to chart of accounts page
+INFO 2025-11-03 13:56:29,001 Login Successful: Softlife
+INFO 2025-11-03 16:36:20,748 Login Successful: Softlife
+INFO 2025-11-03 21:14:28,385 Login Successful: Softlife
+INFO 2025-11-03 21:26:07,826 Login Successful: Softlife
+INFO 2025-11-04 08:08:14,086 Login Successful: Softlife
+INFO 2025-11-05 09:50:27,455 Login Successful: Softlife
+INFO 2025-11-05 12:36:12,630 Login Successful: Softlife
+INFO 2025-11-05 12:37:33,081 User Softlife (58337) created payroll account mapping: Basic Salary
+INFO 2025-11-05 12:43:20,406 User Softlife (58337) created payroll account mapping: SSF Employee Contribution
+INFO 2025-11-05 12:44:13,623 User Softlife (58337) created payroll account mapping: SSF Employer Contribution
+INFO 2025-11-05 13:16:27,206 Login Successful: Softlife
+INFO 2025-11-05 13:22:33,417 User Softlife (58337) created payroll account mapping: PF Employee Contribution
+INFO 2025-11-05 13:24:21,238 User Softlife (58337) created payroll account mapping: PF Employer Contribution
+INFO 2025-11-05 13:26:44,201 User Softlife (58337) created payroll account mapping: PAYE (Income Tax)
+INFO 2025-11-05 13:35:58,594 User Softlife (58337) created payroll account mapping: Net Salary Payable
+INFO 2025-11-05 19:05:30,075 Login Successful: Softlife
+INFO 2025-11-05 19:14:28,088 User Softlife (58337) created payroll account mapping: Allowance - Fuel
+INFO 2025-11-05 19:20:21,524 User Softlife (58337) created payroll account mapping: Allowance - Responsibility 20%
+INFO 2025-11-05 19:29:10,217 User Softlife (58337) created payroll account mapping: Other Deductions - CULEA
+INFO 2025-11-06 11:11:50,856 Login Successful: Softlife
+INFO 2025-11-06 11:16:04,873 User Softlife (58337) created payroll account mapping: Other Deductions - Glico Contribution
+INFO 2025-11-06 11:18:08,240 User Softlife (58337) created payroll account mapping: Allowance - Rent
+INFO 2025-11-06 11:28:48,751 User Softlife (58337) created payroll account mapping: Allowance - Call Credit
+INFO 2025-11-06 11:38:45,471 User Softlife (58337) created payroll account mapping: Allowance - General Prof. Allowance
+INFO 2025-11-06 11:42:00,037 User Softlife (58337) created payroll account mapping: Allowance - Drivers Allowance
+INFO 2025-11-06 11:43:00,783 User Softlife (58337) created payroll account mapping: Allowance - Gift
+INFO 2025-11-06 11:44:01,304 User Softlife (58337) created payroll account mapping: Allowance - Miscellaneous
+INFO 2025-11-06 13:38:06,377 Login Successful: Softlife
+INFO 2025-11-06 15:55:11,498 Login Successful: Softlife
+INFO 2025-11-07 00:19:14,012 Login Successful: Softlife
+INFO 2025-11-07 00:23:53,042 User Softlife (58337) created payroll account mapping: Allowance - Official Car Use
+INFO 2025-11-07 00:25:19,032 User Softlife (58337) created payroll account mapping: Allowance - Responsibility 15%
+INFO 2025-11-07 00:26:21,560 User Softlife (58337) created payroll account mapping: Other Deductions - CUSWA
+INFO 2025-11-07 00:27:42,609 User Softlife (58337) created payroll account mapping: Other Deductions - CUTA
+INFO 2025-11-07 00:29:19,614 User Softlife (58337) created payroll account mapping: Other Deductions - CUSSCU Monthly Contributions
+INFO 2025-11-07 00:31:27,956 User Softlife (58337) created payroll account mapping: Other Deductions - Staff Welfare Dues
+INFO 2025-11-07 00:31:28,865 User Softlife (58337) updated payroll account mapping: Other Deductions - Staff Welfare Dues
+INFO 2025-11-07 00:31:37,669 User Softlife (58337) updated payroll account mapping: Other Deductions - Staff Welfare Dues
+INFO 2025-11-07 00:31:49,639 User Softlife (58337) updated payroll account mapping: Other Deductions - Staff Welfare Dues
+INFO 2025-11-07 00:31:54,755 User Softlife (58337) updated payroll account mapping: Other Deductions - Staff Welfare Dues
+INFO 2025-11-07 00:34:22,019 User Softlife (58337) created payroll account mapping: Other Deductions - Medical Surcharge Glasses
+INFO 2025-11-07 00:35:42,150 User Softlife (58337) created payroll account mapping: Other Deductions - Medical Surcharge Admission
+INFO 2025-11-07 00:36:38,124 User Softlife (58337) created payroll account mapping: Other Deductions - Medical Surcharge Surgery
+INFO 2025-11-07 00:37:31,192 User Softlife (58337) created payroll account mapping: Other Deductions - Medical Surcharge OPD
+INFO 2025-11-07 00:43:48,214 User Softlife (58337) created payroll account mapping: Allowance - Responsibility 35%
+INFO 2025-11-07 00:45:07,935 User Softlife (58337) created payroll account mapping: Allowance - Transportation
+INFO 2025-11-07 00:46:18,633 User Softlife (58337) created payroll account mapping: Other Deductions - CUSSCU Loan
+INFO 2025-11-07 00:49:27,754 User Softlife (58337) created payroll account mapping: Other Deductions - Official Car Use
+INFO 2025-11-07 11:40:15,998 Login Successful: Softlife
+INFO 2025-11-07 23:29:30,520 Login Successful: Softlife
+INFO 2025-11-07 23:44:13,635 User Softlife (58337) created payroll account mapping: Withholding Tax
+INFO 2025-11-07 23:45:47,146 User Softlife (58337) created payroll account mapping: WHT - Rent
+INFO 2025-11-07 23:56:52,317 User Softlife (58337) created payroll account mapping: Other Deductions - VAT
+INFO 2025-11-08 00:18:30,853 User Softlife (58337) updated payroll account mapping: Allowance - Responsibility 15%
+INFO 2025-11-08 01:30:22,450 Login Successful: Softlife
+INFO 2025-11-08 01:47:27,209 Journal MAN-000002 submitted for approval by Softlife
+INFO 2025-11-08 01:49:19,481 Journal MAN-000002 rejected by Softlife
+INFO 2025-11-08 01:51:38,952 Journal MAN-000002 comment added by Softlife
+INFO 2025-11-08 03:37:01,433 Login Successful: Softlife
+INFO 2025-11-08 09:44:48,174 Login Successful: Softlife
+INFO 2025-11-08 09:49:24,768 Journal MAN-000002 submitted for approval by Softlife
+INFO 2025-11-08 09:55:31,980 Journal MAN-000002 approved by Softlife
+INFO 2025-11-08 10:31:52,432 Journal MAN-000001 submitted for approval by Softlife
+INFO 2025-11-08 10:33:36,214 Journal MAN-000001 comment added by Softlife
+INFO 2025-11-08 10:34:27,420 Journal MAN-000001 approved by Softlife
+INFO 2025-11-08 10:35:34,236 Journal -000001 submitted for approval by Softlife
+INFO 2025-11-08 10:36:42,342 Journal -000001 approved by Softlife
+INFO 2025-11-08 11:00:52,059 Journal MAN-000002 posted by Softlife
+INFO 2025-11-08 11:14:15,614 Journal PET-000001 comment added by Softlife
+INFO 2025-11-08 11:28:39,582 Journal PET-000001 submitted for approval by Softlife
+INFO 2025-11-08 11:53:44,372 Login Successful: Softlife
+INFO 2025-11-08 11:56:49,466 Journal PET-000001 approved by Softlife
+INFO 2025-11-08 11:58:01,738 Journal PET-000001 posted by Softlife
+INFO 2025-11-08 18:43:43,294 Login Successful: Softlife
+INFO 2025-11-08 21:18:31,368 Login Successful: Softlife
+INFO 2025-11-09 00:10:48,180 Login Successful: Softlife
+INFO 2025-11-09 02:13:07,798 Login Successful: Softlife
+INFO 2025-11-10 11:44:49,176 Login Successful: Softlife
+INFO 2025-11-10 11:59:11,052 User Softlife (58337) created payroll account mapping: Allowance - Special Allowance
+INFO 2025-11-10 13:14:48,854 User Softlife (58337) updated payroll account mapping: Basic Salary
+INFO 2025-11-10 13:26:16,115 Journal -000002 submitted for approval by Softlife
+INFO 2025-11-10 13:27:15,164 Journal -000002 rejected by Softlife
+INFO 2025-11-10 13:29:56,165 Journal -000002 comment added by Softlife
+INFO 2025-11-10 13:30:29,730 Journal -000002 submitted for approval by Softlife
+INFO 2025-11-10 13:31:03,098 Journal -000002 approved by Softlife
+INFO 2025-11-10 13:31:21,116 Journal -000002 posted by Softlife
+INFO 2025-11-10 14:05:05,363 Login Successful: Softlife

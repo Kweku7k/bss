@@ -3,15 +3,15 @@ from django.utils import timezone
 from decimal import Decimal
 from datetime import datetime, date
 
-from .models import Account, Journal, JournalLine, LedgerBalance
+from .models import Account, Journal, JournalLine, JournalApproval, LedgerBalance
 
 
 def post_journal_entry(journal, posted_by):
     """
     Post a journal entry by updating ledger balances
     """
-    if journal.status != 'DRAFT':
-        raise ValueError("Only draft journals can be posted")
+    if journal.status not in ['DRAFT', 'APPROVED']:
+        raise ValueError("Only draft or approved journals can be posted")
     
     if not journal.is_balanced():
         raise ValueError("Journal must be balanced before posting")
@@ -22,6 +22,12 @@ def post_journal_entry(journal, posted_by):
         journal.posted_by = posted_by
         journal.posted_at = timezone.now()
         journal.save()
+        JournalApproval.objects.create(
+            journal=journal,
+            action='POSTED',
+            actor=posted_by,
+            comment='Journal posted to ledger.'
+        )
         
         # Update ledger balances for each line
         for line in journal.lines.all():
@@ -32,7 +38,12 @@ def post_journal_entry(journal, posted_by):
             )
             
             # Update the balance
-            balance.update_balance(line.debit, line.credit)
+            balance.update_balance(
+                debit_amount=line.debit,
+                credit_amount=line.credit,
+                base_debit_amount=line.base_debit,
+                base_credit_amount=line.base_credit
+            )
 
 
 def generate_trial_balance(as_of_date, include_zero_balances=False):

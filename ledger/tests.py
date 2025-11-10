@@ -4,10 +4,7 @@ from django.core.exceptions import ValidationError
 from decimal import Decimal
 from datetime import date
 
-from .models import (
-    Account, Journal, JournalLine, LedgerBalance,
-    PettyCashFund, PettyCashVoucher
-)
+from .models import *
 from .utils import post_journal_entry, generate_trial_balance
 
 User = get_user_model()
@@ -119,6 +116,110 @@ class JournalModelTest(TestCase):
         self.assertTrue(journal.is_balanced())
         self.assertEqual(journal.get_total_debit(), Decimal('1000.00'))
         self.assertEqual(journal.get_total_credit(), Decimal('1000.00'))
+
+
+class JournalApprovalWorkflowTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='originator',
+            email='originator@example.com',
+            password='testpass123'
+        )
+        self.approver = User.objects.create_user(
+            username='approver',
+            email='approver@example.com',
+            password='testpass123'
+        )
+
+        self.base_currency = Currency.objects.create(
+            code='GHS',
+            name='Ghana Cedi',
+            symbol='GHS',
+            decimal_places=2,
+            is_active=True,
+            is_base_currency=True
+        )
+        self.foreign_currency = Currency.objects.create(
+            code='USD',
+            name='US Dollar',
+            symbol='$',
+            decimal_places=2,
+            is_active=True,
+            is_base_currency=False
+        )
+
+        self.cash_account = Account.objects.create(
+            code='1000',
+            name='Cash Account',
+            type='ASSET',
+            created_by=self.user
+        )
+        self.income_account = Account.objects.create(
+            code='3000',
+            name='Service Income',
+            type='INCOME',
+            created_by=self.user
+        )
+
+    def _create_balanced_journal(self):
+        journal = Journal.objects.create(
+            date=date.today(),
+            description='Multi-currency test journal',
+            source_module='MANUAL',
+            created_by=self.user
+        )
+        JournalLine.objects.create(
+            journal=journal,
+            account=self.cash_account,
+            debit=Decimal('100.00'),
+            currency=self.foreign_currency,
+            exchange_rate=Decimal('10.00')
+        )
+        JournalLine.objects.create(
+            journal=journal,
+            account=self.income_account,
+            credit=Decimal('1000.00'),
+            currency=self.base_currency,
+            exchange_rate=Decimal('1.00')
+        )
+        return journal
+
+    def test_submit_for_approval_logs_action(self):
+        journal = self._create_balanced_journal()
+        journal.submit_for_approval(self.user)
+        journal.refresh_from_db()
+
+        self.assertEqual(journal.status, 'PENDING_APPROVAL')
+        self.assertEqual(journal.approvals.filter(action='SUBMITTED').count(), 1)
+
+    def test_reject_creates_system_comment(self):
+        journal = self._create_balanced_journal()
+        journal.submit_for_approval(self.user)
+        journal.reject(self.approver, reason="Please adjust supporting documents.")
+
+        self.assertEqual(journal.status, 'REJECTED')
+        self.assertTrue(
+            journal.comments.filter(
+                is_system=True,
+                comment__icontains="adjust"
+            ).exists()
+        )
+
+    def test_post_journal_updates_base_balances(self):
+        journal = self._create_balanced_journal()
+        journal.submit_for_approval(self.user)
+        journal.approve(self.approver)
+        post_journal_entry(journal, self.approver)
+
+        journal.refresh_from_db()
+        self.assertEqual(journal.status, 'POSTED')
+        self.assertEqual(journal.approvals.filter(action='POSTED').count(), 1)
+
+        cash_balance = LedgerBalance.objects.get(account=self.cash_account)
+        income_balance = LedgerBalance.objects.get(account=self.income_account)
+
+        self.assertEqual(cash_balance.base_total_debit, Decimal('1000.00'))
+        self.assertEqual(income_balance.base_total_credit, Decimal('1000.00'))
 
 
 class LedgerBalanceModelTest(TestCase):

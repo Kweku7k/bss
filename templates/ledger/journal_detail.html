@@ -10,21 +10,8 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fas fa-journal-whills"></i> Journal Entry - {{ journal.reference_no }}
+                        <i class="bi bi-journal-text"></i> Journal Entry - {{ journal.reference_no }}
                     </h3>
-                    <div class="card-tools">
-                        <div class="btn-group" role="group">
-                            {% if journal.status == 'DRAFT' %}
-                            <a href="{% url 'ledger:journal_post' journal.id %}" class="btn btn-success btn-sm"
-                               onclick="return confirm('Are you sure you want to post this journal entry?')">
-                                <i class="fas fa-check"></i> Post Entry
-                            </a>
-                            {% endif %}
-                            <a href="{% url 'ledger:journal_list' %}" class="btn btn-secondary btn-sm">
-                                <i class="fas fa-arrow-left"></i> Back to List
-                            </a>
-                        </div>
-                    </div>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -43,7 +30,13 @@
                                     <td><strong>Status:</strong></td>
                                     <td>
                                         {% if journal.status == 'DRAFT' %}
-                                            <span class="badge bg-warning">Draft</span>
+                                            <span class="badge bg-warning text-dark">Draft</span>
+                                        {% elif journal.status == 'PENDING_APPROVAL' %}
+                                            <span class="badge bg-info text-dark">Pending Approval</span>
+                                        {% elif journal.status == 'APPROVED' %}
+                                            <span class="badge bg-primary">Approved</span>
+                                        {% elif journal.status == 'REJECTED' %}
+                                            <span class="badge bg-danger">Rejected</span>
                                         {% elif journal.status == 'POSTED' %}
                                             <span class="badge bg-success">Posted</span>
                                         {% else %}
@@ -55,6 +48,28 @@
                                     <td><strong>Source Module:</strong></td>
                                     <td><span class="badge bg-info">{{ journal.source_module }}</span></td>
                                 </tr>
+                                <tr>
+                                    <td><strong>Created By:</strong></td>
+                                    <td>{{ journal.created_by.get_full_name|default:journal.created_by.username }}</td>
+                                </tr>
+                                {% if journal.submitted_by %}
+                                <tr>
+                                    <td><strong>Submitted By:</strong></td>
+                                    <td>
+                                        {{ journal.submitted_by.get_full_name|default:journal.submitted_by.username }}
+                                        <br><small class="text-muted">{{ journal.submitted_at|date:"M d, Y H:i" }}</small>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% if journal.approved_by %}
+                                <tr>
+                                    <td><strong>Approved By:</strong></td>
+                                    <td>
+                                        {{ journal.approved_by.get_full_name|default:journal.approved_by.username }}
+                                        <br><small class="text-muted">{{ journal.approved_at|date:"M d, Y H:i" }}</small>
+                                    </td>
+                                </tr>
+                                {% endif %}
                                 {% if journal.posted_by %}
                                 <tr>
                                     <td><strong>Posted By:</strong></td>
@@ -69,24 +84,45 @@
                         </div>
                         <div class="col-md-6">
                             <h5>Journal Summary</h5>
-                            <div class="card bg-light">
+                            <div class="card p-3">
                                 <div class="card-body">
                                     <div class="row text-center">
-                                        <div class="col-6">
+                                        <div class="col-4">
                                             <h6 class="text-primary">{{ journal.total_debit|floatformat:2 }}</h6>
                                             <small>Total Debits</small>
                                         </div>
-                                        <div class="col-6">
+                                        <div class="col-4">
                                             <h6 class="text-success">{{ journal.total_credit|floatformat:2 }}</h6>
                                             <small>Total Credits</small>
+                                        </div>
+                                        <div class="col-4">
+                                            <h6 class="text-primary">{{ journal.lines.count }}</h6>
+                                            <small>Journal Lines</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <hr>
+                                    <div class="row text-center">
+                                        <div class="col-6">
+                                            <h6 class="text-success">{{ journal.created_at|date:"M d, Y" }}</h6>
+                                            <small>Created</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <h6 class="text-warning">{{ journal.updated_at|date:"M d, Y" }}</h6>
+                                            <small>Last Updated</small>
                                         </div>
                                     </div>
                                     <hr>
                                     <div class="text-center">
                                         <h6 class="{% if journal.is_balanced %}text-success{% else %}text-danger{% endif %}">
-                                            {{ journal.balance_difference|floatformat:2 }}
+                                            {{ balance_difference|floatformat:2 }}
                                         </h6>
-                                        <small>Balance Difference</small>
+                                        <small>Base Balance Difference{% if base_currency %} ({{ base_currency.code }}){% endif %}</small>
+                                        {% if entered_difference %}
+                                        <div class="text-muted small">
+                                            Entered Difference: {{ entered_difference|floatformat:2 }}
+                                        </div>
+                                        {% endif %}
                                     </div>
                                     {% if journal.is_balanced %}
                                     <div class="text-center mt-2">
@@ -119,27 +155,30 @@
             <div class="card mt-3">
                 <div class="card-header">
                     <h5 class="card-title">
-                        <i class="fas fa-list"></i> Journal Lines
+                        <i class="bi bi-list"></i> Journal Lines
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
-                            <thead class="table-dark">
+                            <thead class="table-secondary">
                                 <tr>
+                                    <th>Date</th>
                                     <th>Account</th>
                                     <th>Description</th>
                                     <th>Debit</th>
                                     <th>Credit</th>
                                     <th>Currency</th>
-                                    <th>Exchange Rate</th>
+                                    <th>Rate</th>
                                     <th>Base Debit</th>
                                     <th>Base Credit</th>
+                                    <th>Cost Center</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for line in journal.lines.all %}
                                 <tr>
+                                    <td>{{ line.date|date:"M d, Y"|default:"-" }}</td>
                                     <td>
                                         <strong>{{ line.account.code }}</strong><br>
                                         <small>{{ line.account.name }}</small>
@@ -147,14 +186,14 @@
                                     <td>{{ line.description|default:"-" }}</td>
                                     <td class="text-right">
                                         {% if line.debit > 0 %}
-                                            {{ line.debit|floatformat:2 }}
+                                            <span class="text-danger fw-bold">{{ line.debit|floatformat:2 }}</span>
                                         {% else %}
                                             -
                                         {% endif %}
                                     </td>
                                     <td class="text-right">
                                         {% if line.credit > 0 %}
-                                            {{ line.credit|floatformat:2 }}
+                                            <span class="text-success fw-bold">{{ line.credit|floatformat:2 }}</span>
                                         {% else %}
                                             -
                                         {% endif %}
@@ -166,7 +205,13 @@
                                             <span class="badge bg-light text-dark">N/A</span>
                                         {% endif %}
                                     </td>
-                                    <td class="text-right">{{ line.exchange_rate|floatformat:2 }}</td>
+                                    <td class="text-right">
+                                        {% if line.exchange_rate != 1.0 %}
+                                            <span class="text-warning">{{ line.exchange_rate|floatformat:2 }}</span>
+                                        {% else %}
+                                            {{ line.exchange_rate|floatformat:2 }}
+                                        {% endif %}
+                                    </td>
                                     <td class="text-right">
                                         {% if line.base_debit > 0 %}
                                             {{ line.base_debit|floatformat:2 }}
@@ -181,25 +226,33 @@
                                             -
                                         {% endif %}
                                     </td>
+                                    <td>
+                                        {% if line.cost_center %}
+                                            <span class="badge bg-warning text-dark">{{ line.cost_center }}</span>
+                                        {% else %}
+                                            <small class="text-muted">-</small>
+                                        {% endif %}
+                                    </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="8" class="text-center">
+                                    <td colspan="10" class="text-center">
                                         <div class="alert alert-info">
-                                            <i class="fas fa-info-circle"></i> No journal lines found.
+                                            <i class="bi bi-info-circle"></i> No journal lines found.
                                         </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
-                            <tfoot class="table-dark">
+                            <tfoot class="table-secondary">
                                 <tr>
-                                    <th colspan="2">Total</th>
+                                    <th colspan="3">Total</th>
                                     <th class="text-right">{{ journal.total_debit|floatformat:2 }}</th>
                                     <th class="text-right">{{ journal.total_credit|floatformat:2 }}</th>
                                     <th colspan="2"></th>
                                     <th class="text-right">{{ journal.total_base_debit|floatformat:2 }}</th>
                                     <th class="text-right">{{ journal.total_base_credit|floatformat:2 }}</th>
+                                    <th></th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -209,79 +262,172 @@
         </div>
         
         <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="fas fa-info-circle"></i> Journal Statistics
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <h6 class="text-primary">{{ journal.lines.count }}</h6>
-                            <small>Journal Lines</small>
-                        </div>
-                        <div class="col-6">
-                            <h6 class="text-info">{{ journal.unique_currencies.count }}</h6>
-                            <small>Currencies</small>
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row text-center">
-                        <div class="col-6">
-                            <h6 class="text-success">{{ journal.created_at|date:"M d, Y" }}</h6>
-                            <small>Created</small>
-                        </div>
-                        <div class="col-6">
-                            <h6 class="text-warning">{{ journal.updated_at|date:"M d, Y" }}</h6>
-                            <small>Last Updated</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
             <div class="card mt-3">
                 <div class="card-header">
                     <h5 class="card-title">
-                        <i class="fas fa-cogs"></i> Quick Actions
+                        <i class="bi bi-gear"></i> Quick Actions
                     </h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        {% if journal.status == 'DRAFT' %}
-                        <a href="{% url 'ledger:journal_post' journal.id %}" class="btn btn-success"
-                           onclick="return confirm('Are you sure you want to post this journal entry?')">
-                            <i class="fas fa-check"></i> Post Entry
+                        <a href="{% url 'ledger:journal_edit' journal.id %}" class="btn btn-primary">
+                            <i class="bi bi-pencil-square"></i> Edit Entry
                         </a>
+                        {% if journal.status == 'DRAFT' or journal.status == 'REJECTED' %}
+                        <form action="{% url 'ledger:journal_submit_for_approval' journal.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-warning w-100"
+                                    onclick="return confirm('Submit this journal for approval?');">
+                                <i class="bi bi-send-fill"></i> Submit for Approval
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if journal.status == 'DRAFT' %}
+                        <form action="{% url 'ledger:journal_post' journal.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success w-100"
+                                    onclick="return confirm('Are you sure you want to post this journal entry?');">
+                                        <i class="bi bi-check-lg"></i> Post Entry
+                            </button>
+                        </form>
+                        {% elif journal.status == 'APPROVED' %}
+                        <form action="{% url 'ledger:journal_post' journal.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success w-100"
+                                    onclick="return confirm('Post this approved journal entry?');">
+                                <i class="bi bi-check-lg"></i> Post Entry
+                            </button>
+                        </form>
                         {% endif %}
                         <a href="{% url 'ledger:journal_list' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to List
+                            <i class="bi bi-arrow-left"></i> Back to List
                         </a>
-                        <a href="{% url 'ledger:journal_create' %}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> New Journal Entry
+                        <a href="{% url 'ledger:journal_create' %}" class="btn btn-info">
+                            <i class="bi bi-plus-circle-fill"></i> New Journal Entry
                         </a>
                     </div>
                 </div>
             </div>
-            
-            {% if journal.unique_currencies.exists %}
-            <div class="card mt-3">
+            {% if can_review and journal.status == 'PENDING_APPROVAL' %}
+            <div class="card mt-3 border-primary">
                 <div class="card-header">
-                    <h5 class="card-title">
-                        <i class="fas fa-coins"></i> Currencies Used
-                    </h5>
+                    <h5 class="card-title mb-0"><i class="bi bi-person-check me-2"></i>Reviewer Decision</h5>
                 </div>
                 <div class="card-body">
-                    {% for currency in journal.unique_currencies %}
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge bg-secondary">{{ currency.code }}</span>
-                        <small>{{ currency.name }}</small>
-                    </div>
-                    {% endfor %}
+                    <form method="post" action="{% url 'ledger:journal_review' journal.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="id_decision" class="form-label fw-bold">Decision</label>
+                            {{ approval_form.decision }}
+                        </div>
+                        <div class="mb-3">
+                            <label for="id_comment" class="form-label fw-bold">Reviewer Notes</label>
+                            {{ approval_form.comment }}
+                            <small class="text-muted d-block mt-1">Required when rejecting.</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-share-fill me-1"></i> Submit Decision
+                        </button>
+                    </form>
                 </div>
             </div>
             {% endif %}
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-currency-exchange"></i> Currencies & Approvals
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Currencies</h6>
+                    {% if journal.unique_currencies.exists %}
+                        {% for currency in journal.unique_currencies %}
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-secondary">{{ currency.code }}</span>
+                            <small>{{ currency.name }}</small>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No currencies recorded.</p>
+                    {% endif %}
+                    <hr>
+                    <h6 class="text-muted mb-2">Approval Timeline</h6>
+                    {% if approvals %}
+                        <ul class="list-group list-group-flush">
+                            {% for approval in approvals %}
+                            <li class="list-group-item px-0">
+                                <div class="d-flex justify-content-between">
+                                    <span class="fw-bold">{{ approval.get_action_display }}</span>
+                                    <small>{{ approval.created_at|date:"M d, Y H:i" }}</small>
+                                </div>
+                                <div class="text-muted small">
+                                    {% if approval.actor %}
+                                        By {{ approval.actor.get_full_name|default:approval.actor.username }}
+                                    {% else %}
+                                        System
+                                    {% endif %}
+                                </div>
+                                {% if approval.comment %}
+                                <div class="mt-1">
+                                    <small>{{ approval.comment }}</small>
+                                </div>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No approval activity yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">
+                        <i class="bi bi-chat"></i> Comments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if comments %}
+                    <div class="list-group mb-3">
+                        {% for comment in comments %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong>
+                                    {% if comment.is_system %}
+                                        System Message
+                                    {% elif comment.author %}
+                                        {{ comment.author.get_full_name|default:comment.author.username }}
+                                    {% else %}
+                                        Deleted User
+                                    {% endif %}
+                                </strong>
+                                <small class="text-muted">{{ comment.created_at|date:"M d, Y H:i" }}</small>
+                            </div>
+                            <p class="mb-0 small">{{ comment.comment }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No comments yet.</p>
+                    {% endif %}
+                    <form action="{% url 'ledger:journal_add_comment' journal.id %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            {{ comment_form.comment }}
+                            {% if comment_form.comment.errors %}
+                            <small class="text-danger">{{ comment_form.comment.errors }}</small>
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary w-100">
+                            <i class="bi bi-chat-dots"></i> Add Comment
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+
+    
 </div>
 {% endblock %}

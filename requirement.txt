@@ -7,3 +7,11 @@ email_validator
 psycopg2-binary
 uwsgi
 phonenumbers
+pandas
+openpyxl
+python-dateutil
+markdown
+weasyprint
+qrcode
+Pillow
+firebase-admin

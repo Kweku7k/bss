@@ -2,10 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import inlineformset_factory
 from decimal import Decimal
-from .models import (
-    Currency, ExchangeRate, Account, Journal, JournalLine, PettyCashFund, 
-    PettyCashVoucher, PettyCashReconciliation, Budget, BudgetLine
-)
+from .models import *
 
 
 class AccountForm(forms.ModelForm):
@@ -157,6 +154,31 @@ class BulkAccountForm(forms.Form):
         return accounts
 
 
+class CSVAccountUploadForm(forms.Form):
+    """Form for uploading accounts via CSV file"""
+    csv_file = forms.FileField(
+        label='CSV File',
+        help_text='Upload a CSV file with chart of accounts data',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.csv'
+        })
+    )
+    
+    def clean_csv_file(self):
+        csv_file = self.cleaned_data['csv_file']
+        
+        # Check file size (5MB limit)
+        if csv_file.size > 5 * 1024 * 1024:
+            raise ValidationError("File size must not exceed 5MB.")
+        
+        # Check file extension
+        if not csv_file.name.endswith('.csv'):
+            raise ValidationError("Only CSV files are allowed.")
+        
+        return csv_file
+
+
 class CurrencyForm(forms.ModelForm):
     class Meta:
         model = Currency
@@ -255,10 +277,15 @@ class ExchangeRateForm(forms.ModelForm):
 class JournalForm(forms.ModelForm):
     class Meta:
         model = Journal
-        fields = ['date', 'description', 'source_module']
+        fields = ['date', 'source_module']
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'description': forms.Textarea(attrs={'rows': 3}),
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+            'source_module': forms.Select(attrs={
+                'class': 'form-control'
+            }),
         }
 
     def __init__(self, *args, **kwargs):
@@ -266,40 +293,123 @@ class JournalForm(forms.ModelForm):
         # Set default source module
         if not self.instance.pk:
             self.fields['source_module'].initial = 'MANUAL'
+        
+        # Make source_module optional
+        self.fields['source_module'].required = False
 
 
 class JournalLineForm(forms.ModelForm):
+    exchange_rate = forms.DecimalField(
+        required=False,
+        max_digits=12,
+        decimal_places=2,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control exchange-rate',
+            'step': '0.01',
+            'readonly': 'readonly'
+        })
+    )
+    
     class Meta:
         model = JournalLine
-        fields = ['account', 'debit', 'credit', 'currency', 'description']
+        fields = ['date', 'account', 'description', 'debit', 'credit', 'currency', 'exchange_rate', 'cost_center']
         widgets = {
-            'description': forms.TextInput(attrs={'placeholder': 'Optional line description'}),
-            'currency': forms.Select(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control line-date',
+            }),
+            'account': forms.Select(attrs={
+                'class': 'form-control select2 account-select',
+                'data-placeholder': 'Select Account'
+            }),
+            'debit': forms.NumberInput(attrs={
+                'class': 'form-control debit-input',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00'
+            }),
+            'credit': forms.NumberInput(attrs={
+                'class': 'form-control credit-input',
+                'step': '0.01',
+                'min': '0',
+                'placeholder': '0.00'
+            }),
+            'currency': forms.Select(attrs={
+                'class': 'form-control currency-select'
+            }),
+            'cost_center': forms.Select(attrs={
+                'class': 'form-control select2',
+                'data-placeholder': 'Select Cost Center'
+            }),
+            'description': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Line description (optional)'
+            }),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['currency'].queryset = Currency.objects.filter(is_active=True)
+        
+        # Filter active accounts (exclude HEADER type)
+        self.fields['account'].queryset = Account.objects.filter(
+            is_active=True
+        ).exclude(type='HEADER').select_related('currency').order_by('code')
+        
+        # Set up currency choices
+        self.fields['currency'].queryset = Currency.objects.filter(is_active=True).order_by('code')
+        
         # Set default currency to base currency if available
         base_currency = Currency.objects.filter(is_base_currency=True).first()
         if base_currency and not self.instance.pk:
             self.fields['currency'].initial = base_currency
+            self.fields['exchange_rate'].initial = Decimal('1.0')
+        
+        # Get cost centers from departments and directorates
+        from setup.models import Department, Directorate
+        departments = Department.objects.values_list('dept_long_name', 'dept_long_name')
+        directorates = Directorate.objects.values_list('direct_name', 'direct_name')
+        cost_center_choices = [('', '-- Select Cost Center --')]
+        cost_center_choices.extend(sorted(set(list(departments) + list(directorates)), key=lambda x: x[0]))
+        self.fields['cost_center'].widget.choices = cost_center_choices
+        
+        # Make cost_center required
+        self.fields['cost_center'].required = True
+        
+        # Set default date to today for new lines
+        from datetime import date
+        if not self.instance.pk:
+            self.fields['date'].initial = date.today()
 
     def clean(self):
         cleaned_data = super().clean()
-        debit = cleaned_data.get('debit', 0)
-        credit = cleaned_data.get('credit', 0)
+        debit = cleaned_data.get('debit', 0) or 0
+        credit = cleaned_data.get('credit', 0) or 0
         account = cleaned_data.get('account')
+        currency = cleaned_data.get('currency')
+        cost_center = cleaned_data.get('cost_center')
         
         # If no account is selected, this is an empty form - skip validation
-        if not account:
+        if not account and debit == 0 and credit == 0:
+            # This is a completely empty form - skip all validation
             return cleaned_data
         
-        # Validate that line has either debit or credit, not both
-        if debit > 0 and credit > 0:
-            raise ValidationError("A journal line cannot have both debit and credit amounts.")
-        if debit == 0 and credit == 0:
-            raise ValidationError("A journal line must have either debit or credit amount.")
+        # If account is selected, validate the line
+        if account:
+            # Validate that line has either debit or credit, not both
+            if debit > 0 and credit > 0:
+                raise ValidationError("A journal line cannot have both debit and credit amounts.")
+            if debit == 0 and credit == 0:
+                raise ValidationError("A journal line must have either debit or credit amount.")
+            
+            # Validate currency is set
+            if not currency:
+                base_currency = Currency.objects.filter(is_base_currency=True).first()
+                if base_currency:
+                    cleaned_data['currency'] = base_currency
+
+            exchange_rate = cleaned_data.get('exchange_rate') or Decimal('1')
+            if Decimal(exchange_rate) <= 0:
+                raise ValidationError("Exchange rate must be greater than zero.")
         
         return cleaned_data
 
@@ -310,7 +420,7 @@ class JournalLineFormSetBase(inlineformset_factory(
     form=JournalLineForm,
     extra=2,  # Start with 2 forms
     can_delete=True,
-    min_num=2,  # At least 2 lines required for double-entry
+    min_num=0,  # Don't auto-add minimum forms
     validate_min=False,  # Allow validation to pass even with fewer forms
 )):
     
@@ -335,13 +445,82 @@ class JournalLineFormSetBase(inlineformset_factory(
             raise ValidationError("At least 2 journal lines are required for double-entry bookkeeping.")
         
         # Check that total debits equal total credits
-        total_debit = sum(form.cleaned_data.get('debit', 0) for form in valid_forms)
-        total_credit = sum(form.cleaned_data.get('credit', 0) for form in valid_forms)
+        total_debit = Decimal('0')
+        total_credit = Decimal('0')
+        total_base_debit = Decimal('0')
+        total_base_credit = Decimal('0')
+
+        for form in valid_forms:
+            debit = Decimal(form.cleaned_data.get('debit', 0) or 0)
+            credit = Decimal(form.cleaned_data.get('credit', 0) or 0)
+            exchange_rate = form.cleaned_data.get('exchange_rate') or Decimal('1')
+            if not isinstance(exchange_rate, Decimal):
+                exchange_rate = Decimal(str(exchange_rate))
+
+            total_debit += debit
+            total_credit += credit
+            total_base_debit += debit * exchange_rate
+            total_base_credit += credit * exchange_rate
         
         if abs(total_debit - total_credit) > Decimal('0.01'):
-            raise ValidationError(f"Journal entries must balance. Total debits: {total_debit}, Total credits: {total_credit}")
+            raise ValidationError(f"Journal entries must balance in entered amounts. Total debits: {total_debit}, Total credits: {total_credit}")
+
+        if abs(total_base_debit - total_base_credit) > Decimal('0.01'):
+            raise ValidationError(
+                f"Journal entries must balance in base currency. "
+                f"Base debits: {total_base_debit}, Base credits: {total_base_credit}"
+            )
 
 JournalLineFormSet = JournalLineFormSetBase
+
+
+class JournalCommentForm(forms.ModelForm):
+    class Meta:
+        model = JournalComment
+        fields = ['comment']
+        widgets = {
+            'comment': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Leave a comment for this journal entry.'
+            })
+        }
+
+    def clean_comment(self):
+        comment = (self.cleaned_data.get('comment') or '').strip()
+        if not comment:
+            raise ValidationError("Comment cannot be empty.")
+        return comment
+
+
+class JournalApprovalForm(forms.Form):
+    decision = forms.ChoiceField(
+        choices=[
+            ('approve', 'Approve'),
+            ('reject', 'Reject')
+        ],
+        initial='approve',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    comment = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'Optional: provide context for your decision.'
+        })
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        decision = cleaned_data.get('decision')
+        comment = (cleaned_data.get('comment') or '').strip()
+
+        if decision == 'reject' and not comment:
+            raise ValidationError("A comment is required when rejecting a journal.")
+
+        cleaned_data['comment'] = comment
+        return cleaned_data
 
 
 class PettyCashFundForm(forms.ModelForm):
@@ -465,7 +644,7 @@ class JournalReportForm(forms.Form):
     )
     source_module = forms.ChoiceField(
         choices=[('', 'All Modules')] + Journal._meta.get_field('source_module').choices,
-        required=False,
+        required=True,
         help_text="Filter by source module"
     )
     status = forms.ChoiceField(

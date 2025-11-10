@@ -20,6 +20,9 @@
                             <a href="{% url 'ledger:bulk_account_create' %}" class="btn btn-success btn-sm">
                                 <i class="fas fa-upload"></i> Bulk Create
                             </a>
+                            <a href="{% url 'ledger:csv_account_upload' %}" class="btn btn-info btn-sm">
+                                <i class="fas fa-file-csv"></i> CSV Upload
+                            </a>
                         </div>
                         <span class="badge badge-primary ml-2">{{ total_accounts }} Accounts</span>
                     </div>

@@ -2,10 +2,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import (
-    Currency, ExchangeRate, Account, Journal, JournalLine, LedgerBalance,
-    PettyCashFund, PettyCashVoucher, PettyCashReconciliation, Budget, BudgetLine
-)
+from .models import *
 
 
 @admin.register(Currency)
@@ -222,6 +219,22 @@ class JournalLineAdmin(admin.ModelAdmin):
     )
     
     readonly_fields = ['base_debit', 'base_credit']
+
+
+@admin.register(JournalApproval)
+class JournalApprovalAdmin(admin.ModelAdmin):
+    list_display = ['journal', 'action', 'actor', 'created_at']
+    list_filter = ['action', 'created_at']
+    search_fields = ['journal__reference_no', 'actor__username', 'actor__first_name', 'actor__last_name']
+    ordering = ['-created_at']
+
+
+@admin.register(JournalComment)
+class JournalCommentAdmin(admin.ModelAdmin):
+    list_display = ['journal', 'author', 'is_system', 'created_at']
+    list_filter = ['is_system', 'created_at']
+    search_fields = ['journal__reference_no', 'author__username', 'author__first_name', 'author__last_name', 'comment']
+    ordering = ['-created_at']
 
 
 @admin.register(LedgerBalance)

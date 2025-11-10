@@ -192,5 +192,16 @@ urlpatterns = [
     path('new_dash/', views.new_landing, name='new-dash'),
     
     path("reports/departments/", views.generate_department_report, name="department_report"),
+    
+    # Payroll Journal URLs
+    path('payroll/summary/', views.payroll_summary, name='payroll-summary'),
+    path('payroll/account-mapping/', views.payroll_account_mapping, name='payroll-account-mapping'),
+    path('payroll/account-mapping/delete/<int:mapping_id>/', views.delete_payroll_mapping, name='delete-payroll-mapping'),
+    path('payroll/journal/preview/', views.preview_payroll_journal, name='preview-payroll-journal'),
+    path('payroll/journal/generate/', views.generate_payroll_journal, name='generate-payroll-journal'),
+    path('payroll/journal/history/', views.payroll_journal_history, name='payroll-journal-history'),
+    
+    # Help & Documentation
+    path('help/manual/', views.user_manual, name='user-manual'),
 
 ]
