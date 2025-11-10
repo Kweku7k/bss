@@ -4,260 +4,314 @@
  <!-- ======= Sidebar ======= -->
  <aside id="sidebar" class="sidebar">
 
-   <ul class="sidebar-nav" id="sidebar-nav">
+  <ul class="sidebar-nav" id="sidebar-nav">
+    {% nav_is_active 'landing' as dashboard_active %}
+    {% nav_is_active 'choices-gender' 'choices-suffix' 'choices-marital-status' 'choices-ethnic-group' 'choices-region' 'choices-religion' 'choices-denomination' 'choices-id-type' 'choices-hpq' 'choices-leave-type' 'choices-exit-type' 'choices-staff-status' 'choices-dependants' 'choices-relation-status' 'choices-medical-treatment' 'choices-medical-payment-type' 'choices-contribution' as choices_section_active %}
+    {% nav_is_active 'add-title' 'add-school' 'add-qualification' 'add-staffcategory' 'add-contract' 'add-bank' 'add-bankbranch' 'add-rank' 'add-jobtitle' 'academic-year' 'salary-scale' 'add-profbody' 'add-directorate' 'add-unit' 'add-dept' 'add-campus' 'add-hosp' 'add-contribution-rate' 'add-income-type' 'add-deduction-type' 'relief-type' 'choices-loan-type' 'add-tax-band' as setup_section_active %}
+    {% nav_is_active 'allstaff' 'newstaff' 'bulk_upload' 'dormant-staff' as staff_section_active %}
+    {% nav_is_active 'leave-entitlement' 'leave-report' 'leave-form' as leave_section_active %}
+    {% nav_is_active 'medical-entitlement' 'medical-report' as medical_section_active %}
+    {% nav_is_active 'payroll-processing' 'payroll-register' 'payroll-bank-sheet' 'payroll-salary-increment' 'payroll-post-payroll' 'payroll-report' 'payroll-variation' 'payroll-account-mapping' as payroll_section_active %}
+    {% nav_is_active 'ledger:chart_of_accounts' 'ledger:account_create' 'ledger:bulk_account_create' 'ledger:currency_list' 'ledger:journal_list' 'ledger:reports_trial_balance' as ledger_section_active %}
+    {% nav_is_active 'report' as search_active %}
+    {% nav_is_active 'profile' 'manage-users' 'logs' 'user-manual' 'logout' as settings_section_active %}
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" href="{% url 'landing' %}">
+    <li class="nav-item">
+      <a class="nav-link{% if dashboard_active %} active{% else %} collapsed{% endif %}" href="{% url 'landing' %}">
          <i class="bi bi-grid"></i>
          <span>Dashboard</span>
        </a>
      </li><!-- End Dashboard Nav -->
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" data-bs-target="#choices-nav" data-bs-toggle="collapse" href="#">
+    <li class="nav-item">
+      <a class="nav-link{% if choices_section_active %} active{% else %} collapsed{% endif %}" data-bs-target="#choices-nav" data-bs-toggle="collapse" href="#">
          <i class="bi bi-link"></i><span>Choices</span><i class="bi bi-chevron-down ms-auto"></i>
        </a>
-       <ul id="choices-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-         <li>
-           <a href="{% url 'choices-gender' %}">
+      <ul id="choices-nav" class="nav-content collapse{% if choices_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
+        <li>
+          {% nav_is_active 'choices-gender' as choices_gender_active %}
+          <a href="{% url 'choices-gender' %}" class="{% if choices_gender_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Gender</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-suffix' %}">
+        <li>
+          {% nav_is_active 'choices-suffix' as choices_suffix_active %}
+          <a href="{% url 'choices-suffix' %}" class="{% if choices_suffix_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Suffix</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-marital-status' %}">
+        <li>
+          {% nav_is_active 'choices-marital-status' as choices_marital_status_active %}
+          <a href="{% url 'choices-marital-status' %}" class="{% if choices_marital_status_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Marital Status</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-ethnic-group' %}">
+        <li>
+          {% nav_is_active 'choices-ethnic-group' as choices_ethnic_group_active %}
+          <a href="{% url 'choices-ethnic-group' %}" class="{% if choices_ethnic_group_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Ethnic Group</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-region' %}">
+        <li>
+          {% nav_is_active 'choices-region' as choices_region_active %}
+          <a href="{% url 'choices-region' %}" class="{% if choices_region_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Region</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-religion' %}">
+        <li>
+          {% nav_is_active 'choices-religion' as choices_religion_active %}
+          <a href="{% url 'choices-religion' %}" class="{% if choices_religion_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Religion</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-denomination' %}">
+        <li>
+          {% nav_is_active 'choices-denomination' as choices_denomination_active %}
+          <a href="{% url 'choices-denomination' %}" class="{% if choices_denomination_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Denomination</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-id-type' %}">
+        <li>
+          {% nav_is_active 'choices-id-type' as choices_id_type_active %}
+          <a href="{% url 'choices-id-type' %}" class="{% if choices_id_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>ID Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-hpq' %}">
+        <li>
+          {% nav_is_active 'choices-hpq' as choices_hpq_active %}
+          <a href="{% url 'choices-hpq' %}" class="{% if choices_hpq_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Professional Qualifications</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-leave-type' %}">
+        <li>
+          {% nav_is_active 'choices-leave-type' as choices_leave_type_active %}
+          <a href="{% url 'choices-leave-type' %}" class="{% if choices_leave_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Leave Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-exit-type' %}">
+        <li>
+          {% nav_is_active 'choices-exit-type' as choices_exit_type_active %}
+          <a href="{% url 'choices-exit-type' %}" class="{% if choices_exit_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Exit Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-staff-status' %}">
+        <li>
+          {% nav_is_active 'choices-staff-status' as choices_staff_status_active %}
+          <a href="{% url 'choices-staff-status' %}" class="{% if choices_staff_status_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Staff Status</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-dependants' %}">
+        <li>
+          {% nav_is_active 'choices-dependants' as choices_dependants_active %}
+          <a href="{% url 'choices-dependants' %}" class="{% if choices_dependants_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Dependants</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-relation-status' %}">
+        <li>
+          {% nav_is_active 'choices-relation-status' as choices_relation_status_active %}
+          <a href="{% url 'choices-relation-status' %}" class="{% if choices_relation_status_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Relation Status</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-medical-treatment' %}">
+        <li>
+          {% nav_is_active 'choices-medical-treatment' as choices_medical_treatment_active %}
+          <a href="{% url 'choices-medical-treatment' %}" class="{% if choices_medical_treatment_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Medical Treatment Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-medical-payment-type' %}">
+        <li>
+          {% nav_is_active 'choices-medical-payment-type' as choices_medical_payment_type_active %}
+          <a href="{% url 'choices-medical-payment-type' %}" class="{% if choices_medical_payment_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Medical Payment Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-contribution' %}">
+        <li>
+          {% nav_is_active 'choices-contribution' as choices_contribution_active %}
+          <a href="{% url 'choices-contribution' %}" class="{% if choices_contribution_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Contribution Type</span>
            </a>
          </li>
        </ul>
      </li>
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" data-bs-target="#setup-nav" data-bs-toggle="collapse" href="#">
+    <li class="nav-item">
+      <a class="nav-link{% if setup_section_active %} active{% else %} collapsed{% endif %}" data-bs-target="#setup-nav" data-bs-toggle="collapse" href="#">
          <i class="bi bi-gear"></i><span>Setup</span><i class="bi bi-chevron-down ms-auto"></i>
        </a>
-       <ul id="setup-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-         <li>
-           <a href="{% url 'add-title' %}">
+      <ul id="setup-nav" class="nav-content collapse{% if setup_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
+        <li>
+          {% nav_is_active 'add-title' as add_title_active %}
+          <a href="{% url 'add-title' %}" class="{% if add_title_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Titles</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-school' %}">
+        <li>
+          {% nav_is_active 'add-school' as add_school_active %}
+          <a href="{% url 'add-school' %}" class="{% if add_school_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Schools</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-qualification' %}">
+        <li>
+          {% nav_is_active 'add-qualification' as add_qualification_active %}
+          <a href="{% url 'add-qualification' %}" class="{% if add_qualification_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Qualifications</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-staffcategory' %}">
+        <li>
+          {% nav_is_active 'add-staffcategory' as add_staffcategory_active %}
+          <a href="{% url 'add-staffcategory' %}" class="{% if add_staffcategory_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Staff Categories</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-contract' %}">
+        <li>
+          {% nav_is_active 'add-contract' as add_contract_active %}
+          <a href="{% url 'add-contract' %}" class="{% if add_contract_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Contract Types</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-bank' %}">
+        <li>
+          {% nav_is_active 'add-bank' as add_bank_active %}
+          <a href="{% url 'add-bank' %}" class="{% if add_bank_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Banks</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-bankbranch' %}">
+        <li>
+          {% nav_is_active 'add-bankbranch' as add_bankbranch_active %}
+          <a href="{% url 'add-bankbranch' %}" class="{% if add_bankbranch_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Bank Branches</span>
            </a>
          </li>
         
-         <li>
-           <a href="{% url 'add-rank' %}">
+        <li>
+          {% nav_is_active 'add-rank' as add_rank_active %}
+          <a href="{% url 'add-rank' %}" class="{% if add_rank_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Job Title</span>
            </a>
          </li>
 
-         <li>
-           <a href="{% url 'add-jobtitle' %}">
+        <li>
+          {% nav_is_active 'add-jobtitle' as add_jobtitle_active %}
+          <a href="{% url 'add-jobtitle' %}" class="{% if add_jobtitle_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Staff Rank</span>
            </a>
          </li>
 
-         <li>
-           <a href="{% url 'academic-year' %}">
+        <li>
+          {% nav_is_active 'academic-year' as academic_year_active %}
+          <a href="{% url 'academic-year' %}" class="{% if academic_year_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Academic Year</span>
            </a>
          </li>
 
-         <li>
-           <a href="{% url 'salary-scale' %}">
+        <li>
+          {% nav_is_active 'salary-scale' as salary_scale_active %}
+          <a href="{% url 'salary-scale' %}" class="{% if salary_scale_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Salary Scale</span>
            </a>
          </li>
 
-         <li>
-           <a href="{% url 'add-profbody' %}">
+        <li>
+          {% nav_is_active 'add-profbody' as add_profbody_active %}
+          <a href="{% url 'add-profbody' %}" class="{% if add_profbody_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Professional Bodies</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-directorate' %}">
+        <li>
+          {% nav_is_active 'add-directorate' as add_directorate_active %}
+          <a href="{% url 'add-directorate' %}" class="{% if add_directorate_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Directorate</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-unit' %}">
+        <li>
+          {% nav_is_active 'add-unit' as add_unit_active %}
+          <a href="{% url 'add-unit' %}" class="{% if add_unit_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Unit</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-dept' %}">
+        <li>
+          {% nav_is_active 'add-dept' as add_dept_active %}
+          <a href="{% url 'add-dept' %}" class="{% if add_dept_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Departments</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-campus' %}">
+        <li>
+          {% nav_is_active 'add-campus' as add_campus_active %}
+          <a href="{% url 'add-campus' %}" class="{% if add_campus_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Campus</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-hosp' %}">
+        <li>
+          {% nav_is_active 'add-hosp' as add_hosp_active %}
+          <a href="{% url 'add-hosp' %}" class="{% if add_hosp_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Hospitals</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-contribution-rate' %}">
+        <li>
+          {% nav_is_active 'add-contribution-rate' as add_contribution_rate_active %}
+          <a href="{% url 'add-contribution-rate' %}" class="{% if add_contribution_rate_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Contribution Rate</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-income-type' %}">
+        <li>
+          {% nav_is_active 'add-income-type' as add_income_type_active %}
+          <a href="{% url 'add-income-type' %}" class="{% if add_income_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Income Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-deduction-type' %}">
+        <li>
+          {% nav_is_active 'add-deduction-type' as add_deduction_type_active %}
+          <a href="{% url 'add-deduction-type' %}" class="{% if add_deduction_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Deduction Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'relief-type' %}">
+        <li>
+          {% nav_is_active 'relief-type' as relief_type_active %}
+          <a href="{% url 'relief-type' %}" class="{% if relief_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Relief Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'choices-loan-type' %}">
+        <li>
+          {% nav_is_active 'choices-loan-type' as choices_loan_type_active %}
+          <a href="{% url 'choices-loan-type' %}" class="{% if choices_loan_type_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Loan Type</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'add-tax-band' %}">
+        <li>
+          {% nav_is_active 'add-tax-band' as add_tax_band_active %}
+          <a href="{% url 'add-tax-band' %}" class="{% if add_tax_band_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Tax Band</span>
            </a>
          </li>
        </ul>
      </li><!-- End Components Nav -->
-     <li class="nav-item">
-       <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
+    <li class="nav-item">
+      <a class="nav-link{% if staff_section_active %} active{% else %} collapsed{% endif %}" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">
          <i class="bi bi-people-fill"></i><span>Staff Affairs</span><i class="bi bi-chevron-down ms-auto"></i>
        </a>
-       <ul id="components-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+      <ul id="components-nav" class="nav-content collapse{% if staff_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
          
-         <li>
-           <a href="{% url 'allstaff' %}">
+        <li>
+          {% nav_is_active 'allstaff' as allstaff_active %}
+          <a href="{% url 'allstaff' %}" class="{% if allstaff_active %}active{% endif %}">
              <i class="bi bi-person-plus-fill"></i><span>All Employees</span>
            </a>
          </li>
-         <li>
-           <a href="{% url 'newstaff' %}">
+        <li>
+          {% nav_is_active 'newstaff' as newstaff_active %}
+          <a href="{% url 'newstaff' %}" class="{% if newstaff_active %}active{% endif %}">
              <i class="bi bi-person-plus-fill"></i><span>Add New Employees</span>
            </a>
          </li>
          {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
-           <li>
-             <a href="{% url 'bulk_upload' %}">
+          <li>
+            {% nav_is_active 'bulk_upload' as bulk_upload_active %}
+            <a href="{% url 'bulk_upload' %}" class="{% if bulk_upload_active %}active{% endif %}">
                <i class="bi bi-person-plus-fill"></i><span>Bulk Upload</span>
              </a>
            </li>
          {% endif %}
-         <li>
-           <a href="{% url 'dormant-staff' %}">
+        <li>
+          {% nav_is_active 'dormant-staff' as dormant_staff_active %}
+          <a href="{% url 'dormant-staff' %}" class="{% if dormant_staff_active %}active{% endif %}">
              <i class="bi bi-person-plus-fill"></i><span>Inactive Staff</span>
            </a>
          </li>
@@ -266,25 +320,28 @@
     
      
      {% comment %} {% if 'superadmin' in user_groups or 'leave' in user_groups %} {% endcomment %}
-       <li class="nav-item">
-           <a class="nav-link collapsed" data-bs-toggle="collapse" href="#leave-nav" aria-expanded="false">
+      <li class="nav-item">
+          <a class="nav-link{% if leave_section_active %} active{% else %} collapsed{% endif %}" data-bs-toggle="collapse" href="#leave-nav" aria-expanded="false">
                <i class="bi bi-menu-button-wide"></i>
                <span>Leave</span>
                <i class="bi bi-chevron-down ms-auto"></i>
            </a>
-           <ul id="leave-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-               <li>
-                   <a href="{% url 'leave-entitlement' %}">
+          <ul id="leave-nav" class="nav-content collapse{% if leave_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
+              <li>
+                  {% nav_is_active 'leave-entitlement' as leave_entitlement_active %}
+                  <a href="{% url 'leave-entitlement' %}" class="{% if leave_entitlement_active %}active{% endif %}">
                        <i class="bi bi-circle"></i><span>Leave Entitlements</span>
                    </a>
                </li>
-               <li>
-                   <a href="{% url 'leave-report' %}">
+              <li>
+                  {% nav_is_active 'leave-report' as leave_report_active %}
+                  <a href="{% url 'leave-report' %}" class="{% if leave_report_active %}active{% endif %}">
                        <i class="bi bi-circle"></i><span>Report</span>
                    </a>       
                </li>
-               <li>
-                   <a href="{% url 'leave-form' %}">
+              <li>
+                  {% nav_is_active 'leave-form' as leave_form_active %}
+                  <a href="{% url 'leave-form' %}" class="{% if leave_form_active %}active{% endif %}">
                        <i class="bi bi-circle"></i><span>Leave Form</span>
                    </a>
                </li>
@@ -292,21 +349,23 @@
        </li>
        {% comment %} {% endif %} {% endcomment %}
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#medical-nav" aria-expanded="false">
+    <li class="nav-item">
+      <a class="nav-link{% if medical_section_active %} active{% else %} collapsed{% endif %}" data-bs-toggle="collapse" href="#medical-nav" aria-expanded="false">
          <i class="bi bi-h-circle-fill"></i>
          <span>Medicals</span>
          <i class="bi bi-chevron-down ms-auto"></i>
        </a>
-       <ul id="medical-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+      <ul id="medical-nav" class="nav-content collapse{% if medical_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
          <li>
-           <a href="{% url 'medical-entitlement' %}">
+          {% nav_is_active 'medical-entitlement' as medical_entitlement_active %}
+          <a href="{% url 'medical-entitlement' %}" class="{% if medical_entitlement_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Medical Entitlements</span>
            </a>
          </li>
 
          <li>
-           <a href="{% url 'medical-report' %}">
+          {% nav_is_active 'medical-report' as medical_report_active %}
+          <a href="{% url 'medical-report' %}" class="{% if medical_report_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Medical Report</span>
            </a>       
          </li>
@@ -314,92 +373,105 @@
        </ul>
      </li>
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#payroll-nav" aria-expanded="false">
+    <li class="nav-item">
+      <a class="nav-link{% if payroll_section_active %} active{% else %} collapsed{% endif %}" data-bs-toggle="collapse" href="#payroll-nav" aria-expanded="false">
          <i class="bi bi-coin"></i>
          <span>Payroll</span>
          <i class="bi bi-chevron-down ms-auto"></i>
        </a>
-       <ul id="payroll-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+      <ul id="payroll-nav" class="nav-content collapse{% if payroll_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
          <li>
-           <a href="{% url 'payroll-processing' %}">
+          {% nav_is_active 'payroll-processing' as payroll_processing_active %}
+          <a href="{% url 'payroll-processing' %}" class="{% if payroll_processing_active %}active{% endif %}">
              <i class="bi bi-coin"></i>
              <span>Payroll Processing</span>
            </a>
          </li>
 
          <li>
-           <a href="{% url 'payroll-register' %}">
+          {% nav_is_active 'payroll-register' as payroll_register_active %}
+          <a href="{% url 'payroll-register' %}" class="{% if payroll_register_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Payroll Register</span>
            </a>       
          </li>
          <li>
-           <a href="{% url 'payroll-bank-sheet' %}">
+          {% nav_is_active 'payroll-bank-sheet' as payroll_bank_sheet_active %}
+          <a href="{% url 'payroll-bank-sheet' %}" class="{% if payroll_bank_sheet_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Bank Sheet</span>
            </a>       
          </li>
          <li>
-           <a href="{% url 'payroll-salary-increment' %}">
+          {% nav_is_active 'payroll-salary-increment' as payroll_salary_increment_active %}
+          <a href="{% url 'payroll-salary-increment' %}" class="{% if payroll_salary_increment_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Salary Increment</span>
            </a>       
          </li>
          <li>
-           <a href="{% url 'payroll-post-payroll' %}">
+          {% nav_is_active 'payroll-post-payroll' as payroll_post_payroll_active %}
+          <a href="{% url 'payroll-post-payroll' %}" class="{% if payroll_post_payroll_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Finalise Payroll</span>
            </a>       
          </li>
          <li>
-           <a href="{% url 'payroll-report' %}">
+          {% nav_is_active 'payroll-report' as payroll_report_active %}
+          <a href="{% url 'payroll-report' %}" class="{% if payroll_report_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Report</span>
            </a>       
          </li>
          <li>
-           <a href="{% url 'payroll-variation' %}">
+          {% nav_is_active 'payroll-variation' as payroll_variation_active %}
+          <a href="{% url 'payroll-variation' %}" class="{% if payroll_variation_active %}active{% endif %}">
              <i class="bi bi-circle"></i><span>Audit Variation</span>
            </a>       
          </li>
          <li>
-          <a href="{% url 'payroll-account-mapping' %}">
+          {% nav_is_active 'payroll-account-mapping' as payroll_account_mapping_active %}
+          <a href="{% url 'payroll-account-mapping' %}" class="{% if payroll_account_mapping_active %}active{% endif %}">
             <i class="bi bi-circle"></i><span>Account Mapping</span>
-          </a>       
+         </a>       
         </li>
 
        </ul>
      </li>
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#ledger-nav" aria-expanded="false">
+    <li class="nav-item">
+      <a class="nav-link{% if ledger_section_active %} active{% else %} collapsed{% endif %}" data-bs-toggle="collapse" href="#ledger-nav" aria-expanded="false">
          <i class="bi bi-journal-bookmark"></i>
          <span>General Ledger</span>
          <i class="bi bi-chevron-down ms-auto"></i>
        </a>
-       <ul id="ledger-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+      <ul id="ledger-nav" class="nav-content collapse{% if ledger_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
          <li>
-           <a href="{% url 'ledger:chart_of_accounts' %}">
+          {% nav_is_active 'ledger:chart_of_accounts' as ledger_chart_active %}
+          <a href="{% url 'ledger:chart_of_accounts' %}" class="{% if ledger_chart_active %}active{% endif %}">
              <i class="bi bi-diagram-3"></i>
              <span>Chart of Accounts</span>
            </a>
          </li>
          <li>
-           <a href="{% url 'ledger:account_create' %}">
+          {% nav_is_active 'ledger:account_create' as ledger_account_create_active %}
+          <a href="{% url 'ledger:account_create' %}" class="{% if ledger_account_create_active %}active{% endif %}">
              <i class="bi bi-plus-circle"></i>
              <span>Add Account</span>
            </a>
          </li>
          <li>
-           <a href="{% url 'ledger:bulk_account_create' %}">
+          {% nav_is_active 'ledger:bulk_account_create' as ledger_bulk_account_active %}
+          <a href="{% url 'ledger:bulk_account_create' %}" class="{% if ledger_bulk_account_active %}active{% endif %}">
              <i class="bi bi-upload"></i>
              <span>Bulk Create Accounts</span>
            </a>
          </li>
          <li>
-           <a href="{% url 'ledger:currency_list' %}">
+          {% nav_is_active 'ledger:currency_list' as ledger_currency_list_active %}
+          <a href="{% url 'ledger:currency_list' %}" class="{% if ledger_currency_list_active %}active{% endif %}">
              <i class="bi bi-coin"></i>
              <span>Currency Management</span>
            </a>
          </li>
          <li>
-           <a href="{% url 'ledger:journal_list' %}">
+          {% nav_is_active 'ledger:journal_list' as ledger_journal_list_active %}
+          <a href="{% url 'ledger:journal_list' %}" class="{% if ledger_journal_list_active %}active{% endif %}">
              <i class="bi bi-journal-text"></i>
              <span>Journal Entries</span>
            </a>
@@ -411,7 +483,8 @@
            </a>
          </li> -->
          <li>
-           <a href="{% url 'ledger:reports_trial_balance' %}">
+          {% nav_is_active 'ledger:reports_trial_balance' as ledger_trial_balance_active %}
+          <a href="{% url 'ledger:reports_trial_balance' %}" class="{% if ledger_trial_balance_active %}active{% endif %}">
              <i class="bi bi-graph-up"></i>
              <span>Trial Balance</span>
            </a>
@@ -459,44 +532,49 @@
       </ul>
     </li> -->
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" href="{% url 'report' %}">
+    <li class="nav-item">
+      <a class="nav-link{% if search_active %} active{% else %} collapsed{% endif %}" href="{% url 'report' %}">
          <i class="bi bi-search"></i>
          <span>Advanced Search</span>
        </a>
      </li>
 
-     <li class="nav-item">
-       <a class="nav-link collapsed" data-bs-toggle="collapse" href="#settings" aria-expanded="false">
+    <li class="nav-item">
+      <a class="nav-link{% if settings_section_active %} active{% else %} collapsed{% endif %}" data-bs-toggle="collapse" href="#settings" aria-expanded="false">
            <i class="bi bi-menu-button-wide"></i>
            <span>Settings</span>
            <i class="bi bi-chevron-down ms-auto"></i>
        </a>
-       <ul id="settings" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-           <li class="nav-item">
-               <a class="nav-link collapsed" href="{% url 'profile' %}">
+      <ul id="settings" class="nav-content collapse{% if settings_section_active %} show{% endif %}" data-bs-parent="#sidebar-nav">
+          <li class="nav-item">
+              {% nav_is_active 'profile' as profile_active %}
+              <a class="nav-link{% if profile_active %} active{% else %} collapsed{% endif %}" href="{% url 'profile' %}">
                  <i class="bi bi-person"></i><span>Profile</span>
                </a>
            </li>
            {% if request.user|has_group:"superadmin" or request.user.is_superuser %}
              <li class="nav-item">
-               <a class="nav-link collapsed" href="{% url 'manage-users' %}">
+              {% nav_is_active 'manage-users' as manage_users_active %}
+              <a class="nav-link{% if manage_users_active %} active{% else %} collapsed{% endif %}" href="{% url 'manage-users' %}">
                  <i class="bi bi-person"></i><span>Manage Users</span>
                </a>
              </li>
              <li>
-                 <a href="{% url 'logs' %}">
+                {% nav_is_active 'logs' as logs_active %}
+                <a href="{% url 'logs' %}" class="{% if logs_active %}active{% endif %}">
                      <i class="bi bi-circle"></i><span>Logs</span>
                  </a>       
              </li>
           {% endif %}
           <li class="nav-item">
-              <a class="nav-link collapsed" href="{% url 'user-manual' %}">
+              {% nav_is_active 'user-manual' as user_manual_active %}
+              <a class="nav-link{% if user_manual_active %} active{% else %} collapsed{% endif %}" href="{% url 'user-manual' %}">
                 <i class="bi bi-book"></i><span>User Manual</span>
               </a>
           </li>
           <li class="nav-item">
-              <a class="nav-link collapsed" href="{% url 'logout' %}">
+              {% nav_is_active 'logout' as logout_active %}
+              <a class="nav-link{% if logout_active %} active{% else %} collapsed{% endif %}" href="{% url 'logout' %}">
                 <i class="bi bi-box-arrow-in-right"></i><span>Logout</span>
               </a>
           </li>

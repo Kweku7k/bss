@@ -1,3 +1,4 @@
+{% load group_tags %}
 <div class=" sidebar bg-info-light pt-4" style="width: 300px;">
         <div class="card-header text-center mb-2">
           {% if staff.staff_pix %}
@@ -12,35 +13,40 @@
         </div>
         <ul class="sidebar-nav">
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'edit-staff' staff.staffno %}">
+            {% nav_is_active 'edit-staff' as edit_staff_active %}
+            <a class="nav-link{% if edit_staff_active %} active{% else %} collapsed{% endif %}" href="{% url 'edit-staff' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Personal Information</span>
             </a>
           </li> 
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'edit-company-info' staff.staffno %}">
+            {% nav_is_active 'edit-company-info' as edit_company_info_active %}
+            <a class="nav-link{% if edit_company_info_active %} active{% else %} collapsed{% endif %}" href="{% url 'edit-company-info' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Company Information</span>
             </a>
           </li> 
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'emp-relation' staff.staffno %}">
+            {% nav_is_active 'emp-relation' as emp_relation_active %}
+            <a class="nav-link{% if emp_relation_active %} active{% else %} collapsed{% endif %}" href="{% url 'emp-relation' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Employee Beneficiaries</span>
             </a>
           </li> 
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'education' staff.staffno %}">
+            {% nav_is_active 'education' as education_active %}
+            <a class="nav-link{% if education_active %} active{% else %} collapsed{% endif %}" href="{% url 'education' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Educational Background</span>
             </a>
           </li> 
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'leave-transaction' staff.staffno %}">
+            {% nav_is_active 'leave-transaction' as leave_transaction_active %}
+            <a class="nav-link{% if leave_transaction_active %} active{% else %} collapsed{% endif %}" href="{% url 'leave-transaction' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Leave History</span>
             </a>
@@ -48,77 +54,88 @@
 
           
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'medical-transaction' staff.staffno %}">
+            {% nav_is_active 'medical-transaction' as medical_transaction_active %}
+            <a class="nav-link{% if medical_transaction_active %} active{% else %} collapsed{% endif %}" href="{% url 'medical-transaction' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Medical History</span>
             </a>
           </li> 
           
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'renewal-history' staff.staffno %}">
+            {% nav_is_active 'renewal-history' as renewal_history_active %}
+            <a class="nav-link{% if renewal_history_active %} active{% else %} collapsed{% endif %}" href="{% url 'renewal-history' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Renewal History</span>
             </a>
           </li> 
           
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'promotion-history' staff.staffno %}">
+            {% nav_is_active 'promotion-history' as promotion_history_active %}
+            <a class="nav-link{% if promotion_history_active %} active{% else %} collapsed{% endif %}" href="{% url 'promotion-history' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Promotion History</span>
             </a>
           </li> 
           
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'exit-history' staff.staffno %}">
+            {% nav_is_active 'exit-history' as exit_history_active %}
+            <a class="nav-link{% if exit_history_active %} active{% else %} collapsed{% endif %}" href="{% url 'exit-history' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Exit History</span>
             </a>
           </li> 
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'upload-document' staff.staffno %}">
+            {% nav_is_active 'upload-document' as upload_document_active %}
+            <a class="nav-link{% if upload_document_active %} active{% else %} collapsed{% endif %}" href="{% url 'upload-document' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Staff Document Center</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'create-staff-income' staff.staffno %}">
+            {% nav_is_active 'create-staff-income' as create_staff_income_active %}
+            <a class="nav-link{% if create_staff_income_active %} active{% else %} collapsed{% endif %}" href="{% url 'create-staff-income' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Staff Income</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'create-staff-deduction' staff.staffno %}">
+            {% nav_is_active 'create-staff-deduction' as create_staff_deduction_active %}
+            <a class="nav-link{% if create_staff_deduction_active %} active{% else %} collapsed{% endif %}" href="{% url 'create-staff-deduction' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Staff Deduction</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'create-staff-relief' staff.staffno %}">
+            {% nav_is_active 'create-staff-relief' as create_staff_relief_active %}
+            <a class="nav-link{% if create_staff_relief_active %} active{% else %} collapsed{% endif %}" href="{% url 'create-staff-relief' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Staff Relief</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'create-staff-loan' staff.staffno %}">
+            {% nav_is_active 'create-staff-loan' as create_staff_loan_active %}
+            <a class="nav-link{% if create_staff_loan_active %} active{% else %} collapsed{% endif %}" href="{% url 'create-staff-loan' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Staff Loan</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'payroll-details' staff.staffno %}">
+            {% nav_is_active 'payroll-details' as payroll_details_active %}
+            <a class="nav-link{% if payroll_details_active %} active{% else %} collapsed{% endif %}" href="{% url 'payroll-details' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Payroll Information</span>
             </a>
           </li>
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'staff-settings' staff.staffno %}">
+            {% nav_is_active 'staff-settings' as staff_settings_active %}
+            <a class="nav-link{% if staff_settings_active %} active{% else %} collapsed{% endif %}" href="{% url 'staff-settings' staff.staffno %}">
               <i class="bi bi-circle"></i>
               <span>Advance Settings</span>
             </a>
