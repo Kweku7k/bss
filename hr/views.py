@@ -6274,6 +6274,20 @@ def payroll_account_mapping(request):
         for account in accounts
     ]
     
+    account_requirements = {
+        'basic_salary': {'requires_debit': True, 'requires_credit': False},
+        'allowance': {'requires_debit': True, 'requires_credit': False},
+        'ssf_employee': {'requires_debit': False, 'requires_credit': True},
+        'ssf_employer': {'requires_debit': True, 'requires_credit': False},
+        'pf_employee': {'requires_debit': False, 'requires_credit': True},
+        'pf_employer': {'requires_debit': True, 'requires_credit': True},
+        'paye': {'requires_debit': False, 'requires_credit': True},
+        'wht_general': {'requires_debit': False, 'requires_credit': True},
+        'wht_rent': {'requires_debit': False, 'requires_credit': True},
+        'other_deduction': {'requires_debit': False, 'requires_credit': True},
+        'net_salary': {'requires_debit': False, 'requires_credit': True},
+    }
+    
     context = {
         'accounts': accounts,
         'accounts_for_js': accounts_for_js,
@@ -6283,6 +6297,7 @@ def payroll_account_mapping(request):
         'available_deductions': available_deductions,
         'loan_types': loan_types,
         'medical_surcharge_types': medical_surcharge_types,
+        'account_requirements': account_requirements,
     }
     
     return render(request, "hr/payroll_account_mapping.html", context)

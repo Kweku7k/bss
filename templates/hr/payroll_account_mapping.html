@@ -148,20 +148,32 @@
                                 <small class="text-muted" id="sub_type_hint">For allowances/deductions</small>
                             </div>
 
-                            <div class="col-md-3 mb-3 position-relative">
+                            <div class="col-md-3 mb-3 position-relative" id="debit_account_field">
                                 <label for="debit_account" class="form-label">Debit Account *</label>
                                 <input type="text" id="debit_account_search" class="form-control" 
-                                       placeholder="Type to search..." autocomplete="off" required>
-                                <input type="hidden" name="debit_account" id="debit_account_value" required>
+                                       placeholder="Type to search..." autocomplete="off">
+                                <input type="hidden" name="debit_account" id="debit_account_value">
                                 <div id="debit_account_dropdown" class="dropdown-menu w-100" style="max-height: 200px; overflow-y: auto;"></div>
+                                <div class="form-check mt-2 d-none" id="debit_na_wrapper">
+                                    <input class="form-check-input" type="checkbox" value="1" id="debit_na_checkbox">
+                                    <label class="form-check-label small text-muted" for="debit_na_checkbox">
+                                        Mark debit side as N/A (system will ignore)
+                                    </label>
+                                </div>
                             </div>
 
-                            <div class="col-md-3 mb-3 position-relative">
+                            <div class="col-md-3 mb-3 position-relative" id="credit_account_field">
                                 <label for="credit_account" class="form-label">Credit Account *</label>
                                 <input type="text" id="credit_account_search" class="form-control" 
-                                       placeholder="Type to search..." autocomplete="off" required>
-                                <input type="hidden" name="credit_account" id="credit_account_value" required>
+                                       placeholder="Type to search..." autocomplete="off">
+                                <input type="hidden" name="credit_account" id="credit_account_value">
                                 <div id="credit_account_dropdown" class="dropdown-menu w-100" style="max-height: 200px; overflow-y: auto;"></div>
+                                <div class="form-check mt-2 d-none" id="credit_na_wrapper">
+                                    <input class="form-check-input" type="checkbox" value="1" id="credit_na_checkbox">
+                                    <label class="form-check-label small text-muted" for="credit_na_checkbox">
+                                        Mark credit side as N/A (system will ignore)
+                                    </label>
+                                </div>
                             </div>
                         </div>
 
@@ -263,60 +275,153 @@
 {{ available_allowances|json_script:"allowance-options-data" }}
 {{ available_deductions|json_script:"deduction-options-data" }}
 {{ accounts_for_js|json_script:"accounts-data" }}
+{{ account_requirements|json_script:"account-requirements-data" }}
 
 <script>
 const mappingForm = document.getElementById('payroll_mapping_form');
-if (mappingForm) {
-    mappingForm.addEventListener('submit', function () {
-        const submitButton = document.getElementById('submit_button');
-        if (submitButton && !submitButton.disabled) {
-            submitButton.disabled = true;
-            submitButton.classList.add('disabled');
-            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
-        }
-    });
-}
 
 // Update sub_type field based on account_type selection
 const allowanceOptions = JSON.parse(document.getElementById('allowance-options-data').textContent);
 const deductionOptions = JSON.parse(document.getElementById('deduction-options-data').textContent);
 const accounts = JSON.parse(document.getElementById('accounts-data').textContent);
+const accountRequirements = JSON.parse(document.getElementById('account-requirements-data').textContent);
 
-document.getElementById('account_type').addEventListener('change', function() {
-    const accountType = this.value;
-    const subTypeInput = document.getElementById('sub_type_input');
-    const subTypeHint = document.getElementById('sub_type_hint');
-    const datalist = document.getElementById('sub_type_datalist');
-    
-    // Clear the datalist
-    datalist.innerHTML = '';
-    
+const accountTypeSelect = document.getElementById('account_type');
+const subTypeInput = document.getElementById('sub_type_input');
+const subTypeHint = document.getElementById('sub_type_hint');
+const subTypeDatalist = document.getElementById('sub_type_datalist');
+
+const debitAccountSearch = document.getElementById('debit_account_search');
+const debitAccountValue = document.getElementById('debit_account_value');
+const debitNAWrapper = document.getElementById('debit_na_wrapper');
+const debitNACheckbox = document.getElementById('debit_na_checkbox');
+
+const creditAccountSearch = document.getElementById('credit_account_search');
+const creditAccountValue = document.getElementById('credit_account_value');
+const creditNAWrapper = document.getElementById('credit_na_wrapper');
+const creditNACheckbox = document.getElementById('credit_na_checkbox');
+
+function resetAccountSelection(searchInput, hiddenInput) {
+    hiddenInput.value = '';
+    hiddenInput.removeAttribute('data-na');
+    searchInput.value = '';
+    searchInput.dataset.selected = '';
+    searchInput.classList.remove('is-valid');
+    searchInput.removeAttribute('readonly');
+}
+
+function setFieldRequired(searchInput, hiddenInput, isRequired) {
+    if (isRequired) {
+        searchInput.setAttribute('required', 'required');
+        hiddenInput.setAttribute('data-required', 'true');
+    } else {
+        searchInput.removeAttribute('required');
+        hiddenInput.removeAttribute('data-required');
+    }
+}
+
+function toggleNAOption(wrapper, checkbox, isVisible, searchInput, hiddenInput) {
+    if (isVisible) {
+        wrapper.classList.remove('d-none');
+    } else {
+        if (checkbox.checked) {
+            checkbox.checked = false;
+        }
+        wrapper.classList.add('d-none');
+        searchInput.placeholder = 'Type to search...';
+        resetAccountSelection(searchInput, hiddenInput);
+    }
+}
+
+function applyNAState(checkbox, searchInput, hiddenInput) {
+    if (checkbox.checked) {
+        hiddenInput.value = '';
+        hiddenInput.setAttribute('data-na', 'true');
+        searchInput.value = 'N/A';
+        searchInput.dataset.selected = '';
+        searchInput.classList.add('is-valid');
+        searchInput.setAttribute('readonly', 'readonly');
+    } else {
+        hiddenInput.removeAttribute('data-na');
+        if (searchInput.value === 'N/A') {
+            searchInput.value = '';
+        }
+        searchInput.removeAttribute('readonly');
+        searchInput.classList.remove('is-valid');
+    }
+}
+
+function updateSubTypeOptions(accountType) {
+    subTypeDatalist.innerHTML = '';
     if (accountType === 'allowance') {
         subTypeHint.textContent = 'Select or type an allowance name';
         subTypeInput.placeholder = 'e.g., Housing Allowance';
         subTypeInput.required = true;
-        
         allowanceOptions.forEach(value => {
             const optionEl = document.createElement('option');
             optionEl.value = value;
-            datalist.appendChild(optionEl);
+            subTypeDatalist.appendChild(optionEl);
         });
     } else if (accountType === 'other_deduction') {
         subTypeHint.textContent = 'Select or type a deduction name';
         subTypeInput.placeholder = 'e.g., Staff Welfare Dues';
         subTypeInput.required = true;
-        
         deductionOptions.forEach(value => {
             const optionEl = document.createElement('option');
             optionEl.value = value;
-            datalist.appendChild(optionEl);
+            subTypeDatalist.appendChild(optionEl);
         });
     } else {
         subTypeHint.textContent = 'Leave blank for main category mapping';
         subTypeInput.placeholder = 'Leave blank';
         subTypeInput.required = false;
     }
+}
+
+function updateAccountFieldRequirements() {
+    const selectedType = accountTypeSelect.value;
+    const requirement = accountRequirements[selectedType] || {requires_debit: true, requires_credit: true};
+    const debitRequired = requirement.requires_debit !== false;
+    const creditRequired = requirement.requires_credit !== false;
+
+    setFieldRequired(debitAccountSearch, debitAccountValue, debitRequired);
+    setFieldRequired(creditAccountSearch, creditAccountValue, creditRequired);
+
+    if (debitRequired) {
+        toggleNAOption(debitNAWrapper, debitNACheckbox, false, debitAccountSearch, debitAccountValue);
+    } else {
+        debitAccountSearch.placeholder = 'Optional – choose account or mark N/A';
+        toggleNAOption(debitNAWrapper, debitNACheckbox, true, debitAccountSearch, debitAccountValue);
+    }
+
+    if (creditRequired) {
+        toggleNAOption(creditNAWrapper, creditNACheckbox, false, creditAccountSearch, creditAccountValue);
+    } else {
+        creditAccountSearch.placeholder = 'Optional – choose account or mark N/A';
+        toggleNAOption(creditNAWrapper, creditNACheckbox, true, creditAccountSearch, creditAccountValue);
+    }
+}
+
+accountTypeSelect.addEventListener('change', function() {
+    resetAccountSelection(debitAccountSearch, debitAccountValue);
+    resetAccountSelection(creditAccountSearch, creditAccountValue);
+    debitNACheckbox.checked = false;
+    creditNACheckbox.checked = false;
+    updateSubTypeOptions(this.value);
+    updateAccountFieldRequirements();
 });
+
+debitNACheckbox.addEventListener('change', function() {
+    applyNAState(this, debitAccountSearch, debitAccountValue);
+});
+
+creditNACheckbox.addEventListener('change', function() {
+    applyNAState(this, creditAccountSearch, creditAccountValue);
+});
+
+// Initialise on page load
+updateSubTypeOptions(accountTypeSelect.value);
+updateAccountFieldRequirements();
 
 function createSearchableDropdown(searchInputId, dropdownId, hiddenInputId) {
     const searchInput = document.getElementById(searchInputId);
@@ -332,6 +437,9 @@ function createSearchableDropdown(searchInputId, dropdownId, hiddenInputId) {
     
     // Filter as user types
     searchInput.addEventListener('input', function() {
+        if (searchInput.hasAttribute('readonly')) {
+            return;
+        }
         currentFocus = -1;
         filterAccounts(this.value, dropdown, searchInput, hiddenInput);
         dropdown.classList.add('show');
@@ -429,29 +537,32 @@ createSearchableDropdown('debit_account_search', 'debit_account_dropdown', 'debi
 createSearchableDropdown('credit_account_search', 'credit_account_dropdown', 'credit_account_value');
 
 // Form validation before submit
-document.querySelector('form').addEventListener('submit', function(e) {
-    const debitValue = document.getElementById('debit_account_value').value;
-    const creditValue = document.getElementById('credit_account_value').value;
-    
-    if (!debitValue || !creditValue) {
+mappingForm.addEventListener('submit', function(e) {
+    const accountType = accountTypeSelect.value;
+    const requirement = accountRequirements[accountType] || {requires_debit: true, requires_credit: true};
+    const debitRequired = requirement.requires_debit !== false;
+    const creditRequired = requirement.requires_credit !== false;
+    const debitHasValue = !!debitAccountValue.value || debitAccountValue.getAttribute('data-na') === 'true';
+    const creditHasValue = !!creditAccountValue.value || creditAccountValue.getAttribute('data-na') === 'true';
+
+    if (debitRequired && !debitHasValue) {
         e.preventDefault();
-        alert('Please select both Debit and Credit accounts from the dropdown');
+        alert('Please select a Debit account from the dropdown.');
         return false;
     }
-});
 
-// Disable submit button while form is submitting
-document.getElementById('payroll_mapping_form').addEventListener('submit', function() {
+    if (creditRequired && !creditHasValue) {
+        e.preventDefault();
+        alert('Please select a Credit account from the dropdown.');
+        return false;
+    }
+    
     const submitButton = document.getElementById('submit_button');
-    const originalButtonText = submitButton.textContent;
-    submitButton.textContent = 'Saving...';
-    submitButton.disabled = true;
-
-    // Re-enable button after successful submission
-    this.addEventListener('animationend', function() {
-        submitButton.textContent = originalButtonText;
-        submitButton.disabled = false;
-    }, { once: true });
+    if (submitButton && !submitButton.disabled) {
+        submitButton.disabled = true;
+        submitButton.classList.add('disabled');
+        submitButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Saving...';
+    }
 });
 </script>
 
