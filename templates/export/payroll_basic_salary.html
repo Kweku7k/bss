@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>{{ title }}{% if period_label %} - {{ period_label }}{% endif %}</title>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+        body {
+            font-family: Poppins, Arial, sans-serif;
+            font-size: 10px;
+            color: #222;
+        }
+        h2 {
+            margin: 0 0 8px 0;
+            text-align: center;
+            font-size: 16px;
+        }
+        .meta {
+            text-align: center;
+            color: #555;
+            margin: 0 0 12px 0;
+            font-size: 9px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        th, td {
+            /* border: 0.4px solid #777; */
+            padding: 4px 6px;
+            text-align: left;
+        }
+        th {
+            background: #f2f6fb;
+            font-weight: bold;
+        }
+        td.text-end {
+            text-align: right;
+        }
+        tfoot td {
+            font-weight: bold;
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h2>{{ title }}</h2>
+    {% if period_label %}
+    <p class="meta">Period: {{ period_label }}</p>
+    {% endif %}
+    <p class="meta">Generated on: {{ generated_on|date:"d M Y, H:i" }}</p>
+
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 8%;">#</th>
+                <th style="width: 20%;">Staff No</th>
+                <th>Name</th>
+                <th style="width: 20%;" class="text-end">Basic Salary</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ record.staffno }}</td>
+                <td>{{ record.name }}</td>
+                <td class="text-end">{{ record.amount|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align:center;">No records available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3" class="text-end">Total</td>
+                <td class="text-end">{{ total|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>
+

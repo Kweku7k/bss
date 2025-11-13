@@ -58,6 +58,21 @@ def to_bool(val):
     return str(val).strip().lower() in ['true', '1', 'yes']
 
 
+def safe_decimal(value, default=Decimal('0.00')):
+    if value is None:
+        return default
+    if isinstance(value, Decimal):
+        return value
+    cleaned = str(value).strip()
+    if not cleaned:
+        return default
+    cleaned = cleaned.replace(',', '')
+    try:
+        return Decimal(cleaned)
+    except (InvalidOperation, TypeError):
+        return default
+
+
 def handler404(request, exception):
     return render(request, '404.html', status=404)
 
@@ -6190,6 +6205,63 @@ def payroll_summary(request):
         return response
     
     return render(request, "hr/payroll_summary.html", context)
+
+
+@login_required
+@role_required(['superadmin', 'finance officer', 'finance admin', 'hr officer', 'hr admin'])
+def basic_salary_report(request):
+    records = []
+    total_basic = Decimal('0.00')
+
+    company_infos = CompanyInformation.objects.filter(active_status__iexact='Active').select_related('staffno').order_by('staffno__staffno')
+
+    for info in company_infos:
+        staff = info.staffno
+        salary_amount = safe_decimal(info.salary)
+        name_parts = [staff.fname, staff.lname, staff.middlenames]
+        display_name = " ".join(part for part in name_parts if part).strip() or staff.staffno
+
+        records.append({
+            'staffno': staff.staffno,
+            'name': display_name,
+            'amount': salary_amount,
+        })
+        total_basic += salary_amount
+
+    export_format = request.GET.get("format")
+    if export_format == "pdf" and records:
+        filename_parts = "Basic Salary Report"
+        filename = filename_parts + ".pdf"
+
+        export_context = {
+            'title': "Basic Salary Report",
+            'records': records,
+            'total': total_basic,
+            'generated_on': timezone.now(),
+        }
+        return render_to_pdf("export/payroll_basic_salary.html", export_context, filename=filename)
+
+    if export_format == "excel" and records:
+        filename = "Basic Salary Report.xlsx"
+
+        rows = []
+        for record in records:
+            rows.append({
+                'Employee ID': record['staffno'],
+                'Employee Name': record['name'],
+                'Basic Salary': float(record['amount']),
+            })
+
+        return render_to_excel({"Basic Salary Report": rows}, filename=filename)
+
+    context = {
+        'records': records,
+        'total_basic': total_basic,
+        'record_count': len(records),
+    }
+
+    return render(request, "hr/basic_salary_report.html", context)
+
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 def payroll_account_mapping(request):

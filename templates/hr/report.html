@@ -69,9 +69,9 @@
                                                 </span>
                                             </td>
                                             <td>
-                                                <button type="button" class="btn btn-link btn-sm btn-rounded" onclick="window.location='{% url 'staff-details' staff.staffno %}'">
+                                                <a class="btn btn-link btn-sm btn-rounded" href="{% url 'staff-details' staff.staffno %}">
                                                     View
-                                                </button>
+                                                </a>
                                             </td>
                                         {% endif %}
                                     {% endfor %}

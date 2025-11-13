@@ -1,0 +1,79 @@
+    {% extends "base.html" %}
+    {% load static %}
+
+    {% block content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                <div>
+                    <h4 class="fw-bold mb-0">Fetch All Basic Salary</h4>
+                </div>
+                {% if records %}
+                <form method="get" class="d-flex align-items-center gap-2">
+                    <label for="export-format" class="form-label mb-0">Export</label>
+                    <select name="format" id="export-format" class="form-select form-select-sm" style="width: auto;" required>
+                        <option value="">Select format</option>
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                    </select>
+                    <button type="submit" class="btn btn-success btn-sm">Download</button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if not records %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle"></i>
+                No active staff records found.
+            </div>
+            {% else %}
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <h5 class="mb-0 fw-semibold">Basic Salary Report</h5>
+                            <small class="text-muted">Showing {{ record_count }} staff</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success text-white fw-semibold py-2 px-3">
+                                Total Basic Salary: GH₵ {{ total_basic|floatformat:2 }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th style="width: 15%;">Employee ID</th>
+                                    <th>Employee Name</th>
+                                    <th class="text-end" style="width: 20%;">Basic Salary</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for record in records %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ record.staffno }}</td>
+                                    <td>{{ record.name }}</td>
+                                    <td class="text-end">{{ record.amount|floatformat:2 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light fw-semibold">
+                                    <td colspan="3" class="text-end">Total</td>
+                                    <td class="text-end">GH₵ {{ total_basic|floatformat:2 }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endblock %}
+

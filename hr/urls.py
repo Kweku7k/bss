@@ -176,6 +176,8 @@ urlpatterns = [
     path('payroll_allowances/', views.payroll_allowances, name='payroll-allowances'),
     path('payroll_deductions/', views.payroll_deductions, name='payroll-deductions'),
     path('payroll/variation/', views.payroll_variation, name='payroll-variation'),
+    path("basic-salary/", views.basic_salary_report, name="basic-salary-report"),
+
  
     
     path('payroll/register/', views.payroll_register, name='payroll-register'),
