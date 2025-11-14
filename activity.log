@@ -732,3 +732,57 @@ INFO 2025-11-10 18:11:31,627 User Softlife (58337) updated payroll account mappi
 INFO 2025-11-10 19:12:05,183 User Softlife (58337) updated payroll account mapping: Other Deductions - CULEA
 INFO 2025-11-10 19:13:23,494 User Softlife (58337) updated payroll account mapping: Other Deductions - CUSSCU Monthly Contributions
 INFO 2025-11-13 11:07:10,976 Login Successful: Softlife
+INFO 2025-11-14 02:02:14,843 OTP verified successfully for user Softlife
+INFO 2025-11-14 02:03:04,270 Logout Successful: Softlife
+INFO 2025-11-14 02:05:03,148 OTP verified successfully for user Softlife
+INFO 2025-11-14 02:25:32,520 Account Creation for Ade has been successful
+WARNING 2025-11-14 02:26:08,490 Login attempt by unapproved user: Ade
+ERROR 2025-11-14 02:30:02,785 Failed to send OTP for user Softlife: Connection unexpectedly closed
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 169, in index
+    generate_and_send_otp(user)
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/service.py", line 76, in generate_and_send_otp
+    send_otp_email(user, otp)
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/service.py", line 64, in send_otp_email
+    send_mail(
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/__init__.py", line 87, in send_mail
+    return mail.send()
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/message.py", line 299, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/backends/smtp.py", line 127, in send_messages
+    new_conn_created = self.open()
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/backends/smtp.py", line 85, in open
+    self.connection = self.connection_class(
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/smtplib.py", line 343, in connect
+    (code, msg) = self.getreply()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/smtplib.py", line 400, in getreply
+    raise SMTPServerDisconnected("Connection unexpectedly closed")
+smtplib.SMTPServerDisconnected: Connection unexpectedly closed
+ERROR 2025-11-14 02:33:02,880 Failed to send OTP for user Softlife: Connection unexpectedly closed
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 169, in index
+    generate_and_send_otp(user)
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/service.py", line 76, in generate_and_send_otp
+    send_otp_email(user, otp)
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/service.py", line 64, in send_otp_email
+    send_mail(
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/__init__.py", line 87, in send_mail
+    return mail.send()
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/message.py", line 299, in send
+    return self.get_connection(fail_silently).send_messages([self])
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/backends/smtp.py", line 127, in send_messages
+    new_conn_created = self.open()
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/core/mail/backends/smtp.py", line 85, in open
+    self.connection = self.connection_class(
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/smtplib.py", line 255, in __init__
+    (code, msg) = self.connect(host, port)
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/smtplib.py", line 343, in connect
+    (code, msg) = self.getreply()
+  File "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/smtplib.py", line 400, in getreply
+    raise SMTPServerDisconnected("Connection unexpectedly closed")
+smtplib.SMTPServerDisconnected: Connection unexpectedly closed
+INFO 2025-11-14 02:42:15,721 Logout Successful: Softlife
+INFO 2025-11-14 02:43:13,350 OTP verified successfully for user Softlife
+INFO 2025-11-14 07:42:01,590 OTP verified successfully for user Softlife

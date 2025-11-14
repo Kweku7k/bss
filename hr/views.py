@@ -17,7 +17,7 @@ from .forms import *
 from collections import defaultdict, OrderedDict
 from django.db import connection # type: ignore
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 import csv
 from django.db import transaction
@@ -30,6 +30,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from django.core.paginator import Paginator
 from hr.decorators import role_required, tag_required
+from .service import generate_and_send_otp, send_welcome_email, verify_otp
 from django.db.models.functions import Concat, TruncMonth
 from django.db.models import F, Value, CharField, Sum, Max, Count
 from datetime import date
@@ -44,6 +45,12 @@ import pandas as pd
 
 
 logger = logging.getLogger('activity')
+
+
+def _clear_pending_otp_state(request):
+    for key in ('pending_otp_user_id', 'pending_otp_backend', 'pending_otp_email'):
+        if key in request.session:
+            request.session.pop(key, None)
 
 def parse_date(date_str):
     if not date_str:
@@ -109,8 +116,12 @@ def register(request):
             email = form.cleaned_data.get('email')
             if User.objects.filter(email=email).exists():
                 messages.error(request, "Oops, Email address already exists. Please use another email.")
-                return redirect('register')
-            form.save()
+                return redirect('admin-create-account')
+            new_user = form.save()
+            try:
+                send_welcome_email(new_user)
+            except Exception as exc:  # pylint: disable=broad-except
+                logger.error("Failed to send welcome email to %s: %s", new_user.username, exc, exc_info=True)
             messages.success(request, f"Account Creation for {username} has been successful")  
             logger.info(f"Account Creation for {username} has been successful")
             return redirect('login')
@@ -119,7 +130,7 @@ def register(request):
                 for error in field.errors:
                     messages.error(request, f"{error}")
             print(form.errors)
-            return redirect('register')
+            return redirect('admin-create-account')
     
     context = {'form': form}
     print(context)
@@ -135,28 +146,86 @@ def index(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
 
+        user_model = get_user_model()
         try:
-            user_username = User.objects.get(email=email)
-            user = authenticate(request, username=user_username.username, password=password)
-            print("Trying to Login", user)
-            if user is not None:
-                # Check if the user is not approve and redirect
-                if not user.approval and not user.is_superuser:
-                    logger.warning(f"Login attempt by unapproved user: {user.username}")
-                    messages.error(request, "Your account requires administrator approval before you can log in. Please contact the system administrator for assistance.")                    
-                    return redirect('waiting-approval')
-                login(request, user)
-                messages.success(request, f"Login Successful. Welcome Back {user.username}")
-                logger.info(f"Login Successful: {user.username}")
-                return redirect('landing')
-            else:
-                messages.error(request, "Invalid login credentials.")
-                return redirect('login')
-        except User.DoesNotExist:
+            user_lookup = user_model.objects.get(email=email)
+        except user_model.DoesNotExist:
             messages.error(request, "Email not found.")
             return redirect('login')
 
+        user = authenticate(request, username=user_lookup.username, password=password)
+        logger.debug("Login attempt for %s returned %s", email, "success" if user else "failure")
+
+        if user is None:
+            messages.error(request, "Invalid login credentials.")
+            return redirect('login')
+
+        if not user.approval and not user.is_superuser:
+            logger.warning("Login attempt by unapproved user: %s", user.username)
+            messages.error(request, "Your account requires administrator approval before you can log in. Please contact the system administrator for assistance.")                    
+            return redirect('waiting-approval')
+
+        try:
+            generate_and_send_otp(user)
+        except Exception as exc:  # pylint: disable=broad-except
+            logger.error("Failed to send OTP for user %s: %s", user.username, exc, exc_info=True)
+            messages.error(request, "We could not send your verification code. Please contact the system administrator.")
+            return redirect('login')
+
+        auth_backend = getattr(user, 'backend', 'django.contrib.auth.backends.ModelBackend')
+        request.session['pending_otp_user_id'] = user.id
+        request.session['pending_otp_backend'] = auth_backend
+        request.session['pending_otp_email'] = user.email
+
+        messages.info(request, "A verification code has been sent to your email address.")
+        return redirect('otp-verify')
+
     return render(request, 'authentication/login.html', {})
+
+
+def otp_verify(request):
+    user_id = request.session.get('pending_otp_user_id')
+    if not user_id:
+        messages.error(request, "Your session has expired. Please sign in again.")
+        return redirect('login')
+
+    user_model = get_user_model()
+    try:
+        user = user_model.objects.get(pk=user_id)
+    except user_model.DoesNotExist:
+        _clear_pending_otp_state(request)
+        messages.error(request, "We could not find your account information. Please sign in again.")
+        return redirect('login')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'resend':
+            try:
+                generate_and_send_otp(user)
+                messages.info(request, "A new verification code has been sent to your email.")
+            except Exception as exc:  # pylint: disable=broad-except
+                logger.error("Failed to resend OTP for user %s: %s", user.username, exc, exc_info=True)
+                messages.error(request, "We could not resend the verification code. Please contact the system administrator.")
+            return redirect('otp-verify')
+
+        otp_code = (request.POST.get('otp') or '').strip()
+        if not otp_code:
+            messages.error(request, "Please enter the verification code.")
+        else:
+            is_valid, feedback = verify_otp(user, otp_code)
+            if is_valid:
+                auth_backend = request.session.get('pending_otp_backend', 'django.contrib.auth.backends.ModelBackend')
+                login(request, user, backend=auth_backend)
+                logger.info("OTP verified successfully for user %s", user.username)
+                messages.success(request, f"Login successful. Welcome back {user.username}.")
+                _clear_pending_otp_state(request)
+                return redirect('landing')
+            messages.error(request, feedback)
+
+    context = {
+        'email': request.session.get('pending_otp_email'),
+    }
+    return render(request, 'authentication/otp_verify.html', context)
 
 def user_profile(request):
     if request.method == 'POST':
@@ -191,6 +260,7 @@ def user_password(request):
 def logoutUser(request):
     username = request.user.username
     logger.info(f"Logout Successful: {username}")
+    _clear_pending_otp_state(request)
     logout(request)
     return redirect('login')
     

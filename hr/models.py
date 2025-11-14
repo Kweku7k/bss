@@ -1,7 +1,8 @@
 from decimal import Decimal
-from venv import logger
 from django.db import models # type: ignore
 from datetime import datetime, timezone
+from django.conf import settings
+from django.utils import timezone as django_timezone
 from hr.choices import *
 from setup.models import *
 from django.contrib.auth.models import AbstractUser
@@ -25,6 +26,28 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.staffno})"
+    
+    
+class OneTimePassword(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='one_time_passwords')
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+        get_latest_by = 'created_at'
+        indexes = [
+            models.Index(fields=['user', 'code']),
+            models.Index(fields=['expires_at']),
+        ]
+
+    def __str__(self):
+        return f"OTP for {self.user_id} - {self.code}"
+
+    def is_expired(self) -> bool:
+        return django_timezone.now() >= self.expires_at
     
     
     
