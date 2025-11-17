@@ -786,3 +786,10 @@ smtplib.SMTPServerDisconnected: Connection unexpectedly closed
 INFO 2025-11-14 02:42:15,721 Logout Successful: Softlife
 INFO 2025-11-14 02:43:13,350 OTP verified successfully for user Softlife
 INFO 2025-11-14 07:42:01,590 OTP verified successfully for user Softlife
+INFO 2025-11-17 10:56:42,394 OTP verified successfully for user Softlife
+INFO 2025-11-17 11:44:47,647 OTP verified successfully for user Softlife
+INFO 2025-11-17 11:46:18,644 Salary increment of 60% applied to staff ['20034'] by Softlife.
+INFO 2025-11-17 12:04:31,545 15% allowance increment applied to 1 for allowance Rent by Softlife.
+INFO 2025-11-17 12:21:29,703 Salary increment (46) applied to staff ['20034'] by Softlife.
+INFO 2025-11-17 12:22:19,763 Salary increment (90) applied to staff ['20034'] by Softlife.
+INFO 2025-11-17 12:26:33,333 Salary increment (700) applied to staff ['20034'] by Softlife.

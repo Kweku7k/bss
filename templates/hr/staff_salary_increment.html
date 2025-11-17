@@ -24,18 +24,19 @@
         <div class="col-md-10">
             <div class="card shadow-lg border-0 rounded-3 mb-4">
                 <div class="card-header bg-outline-secondary text-dark py-4">
-                    <h4 class="mb-3 fw-bold">📈 Staff Salary Increment</h4>
+                    <h4 class="mb-3 fw-bold">📈 Basic Salary</h4>
                 </div>
                 <div class="card-body">
                     <form method="POST">
                         {% csrf_token %}
+                        <input type="hidden" name="form_type" value="salary">
 
                         <div class="my-3">
                             <label for="staff_cat" class="form-label">Select Staff Category</label>
                             <select id="staff_cat" name="staff_cat" class="form-select" onchange="this.form.submit()">
                                 <option value="">-- Choose Staff Category --</option>
                                 {% for cat in staff_categories %}
-                                <option value="{{ cat.category_name }}" {% if cat.category_name|stringformat:'s' == request.POST.staff_cat %}selected{% endif %}>
+                                <option value="{{ cat.category_name }}" {% if cat.category_name|stringformat:'s' == selected_staff_cat %}selected{% endif %}>
                                     {{ cat.category_name }}
                                 </option>
                                 {% endfor %}
@@ -46,6 +47,14 @@
                         <div class="mb-3">
                             <label class="form-label">Select Staff</label>
                             <div class="border rounded-3 p-4 bg-light shadow-sm" style="max-height: 300px; overflow-y: auto;">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="select_all_staff">
+                                        <label class="form-check-label fw-semibold" for="select_all_staff">
+                                            Select All Staff
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="row g-3">
                                     {% for staff in staff_list %}
                                     <div class="col-md-6">
@@ -64,10 +73,17 @@
                         
                         <div class="mb-3">
                             <label for="increment_percentage" class="form-label">Increment Percentage (%)</label>
-                            <input type="number" step="0.1" min="0" class="form-control" id="increment_percentage" name="increment_percentage" value="{{ increment_percentage }}" required>
+                            <input type="number" step="0.1" min="0" class="form-control" id="increment_percentage" name="increment_percentage" value="{{ increment_percentage }}">
+                            <small class="text-muted">Leave this empty if you are applying a fixed amount.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="increment_amount" class="form-label">Increment Amount</label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="increment_amount" name="increment_amount" value="{{ increment_amount }}">
+                            <small class="text-muted">Leave this empty if you are applying a percentage.</small>
                         </div>
                         
-                        <button type="submit" class="btn btn-success" onclick="return validateForm()">Apply Increment</button>                    
+                        <button type="submit" class="btn btn-success" name="apply_salary_increment" value="1" onclick="return validateForm()">Apply Increment</button>                    
                         
                         {% else %}
                         <div class="alert alert-warning" role="alert">
@@ -77,6 +93,75 @@
                     </form>
                 </div>
             </div>  
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0 rounded-3">
+                <div class="card-header bg-outline-secondary text-dark py-4">
+                    <h4 class="mb-3 fw-bold">💼 Allowances</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="allowance">
+                        <div class="my-3">
+                            <label for="allowance_type" class="form-label">Select Allowance</label>
+                            <select id="allowance_type" name="allowance_type" class="form-select" {% if allowance_types %}onchange="this.form.submit()"{% endif %}>
+                                <option value="">{% if allowance_types %}-- Choose Allowance --{% else %}No allowances configured{% endif %}</option>
+                                {% for allowance in allowance_types %}
+                                <option value="{{ allowance }}" {% if allowance == selected_allowance %}selected{% endif %}>{{ allowance }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {% if selected_allowance %}
+                            {% if allowance_staff_list %}
+                            <div class="mb-3">
+                                <label class="form-label">Staff with {{ selected_allowance }}</label>
+                                <div class="border rounded-3 p-4 bg-light shadow-sm" style="max-height: 300px; overflow-y: auto;">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="select_all_allowance_staff">
+                                            <label class="form-check-label fw-semibold" for="select_all_allowance_staff">
+                                                Select All Staff
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row g-3">
+                                        {% for allowance in allowance_staff_list %}
+                                        <div class="col-md-6">
+                                            <div class="form-check p-0">
+                                                <input class="form-check-input allowance-check" type="checkbox" name="selected_allowance_staff" value="{{ allowance.id }}" id="allowance_{{ allowance.id }}" {% if allowance.id|stringformat:'s' in selected_allowance_staff_ids %}checked{% endif %}>
+                                                <label class="form-check-label w-100" for="allowance_{{ allowance.id }}">
+                                                    <div class="p-3 border rounded-3 bg-white h-100">
+                                                        <span class="fw-medium d-block">{{ allowance.staffno.lname }} {{ allowance.staffno.fname }}</span>
+                                                        <small class="text-muted d-block">Current Amount: {{ allowance.amount|default:"0.00" }}</small>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="allowance_percentage" class="form-label">Increment Percentage (%)</label>
+                                <input type="number" step="0.1" min="0" class="form-control" id="allowance_percentage" name="allowance_percentage" value="{{ allowance_increment_percentage }}" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" name="apply_allowance_increment" value="1" onclick="return validateAllowanceForm()">Apply Allowance Increment</button>
+                            {% else %}
+                            <div class="alert alert-warning" role="alert">
+                                No staff currently have an active {{ selected_allowance }} allowance.
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -97,12 +182,62 @@
             alert('Please select at least one staff member to apply the increment.');
             return false;
         }
+
+        var percentageInput = document.getElementById('increment_percentage');
+        var amountInput = document.getElementById('increment_amount');
+        var hasPercentage = percentageInput && percentageInput.value !== '';
+        var hasAmount = amountInput && amountInput.value !== '';
+
+        if (hasPercentage && hasAmount) {
+            alert('Please enter either a percentage or an amount, not both.');
+            return false;
+        }
+
+        if (!hasPercentage && !hasAmount) {
+            alert('Please enter an increment percentage or amount.');
+            return false;
+        }
+
         return confirm('Are you sure you want to apply increment for the selected staff?');
     }
 
 
+    function validateAllowanceForm() {
+        var allowanceSelect = document.getElementById('allowance_type');
+        var percentageInput = document.getElementById('allowance_percentage');
+        var allowanceCheckboxes = document.getElementsByName('selected_allowance_staff');
+        var allowanceChecked = false;
+        for (var i = 0; i < allowanceCheckboxes.length; i++) {
+            if (allowanceCheckboxes[i].checked) {
+                allowanceChecked = true;
+                break;
+            }
+        }
+
+        if (!allowanceSelect || !allowanceSelect.value) {
+            alert('Please select an allowance before applying an increment.');
+            return false;
+        }
+
+        if (!percentageInput || !percentageInput.value) {
+            alert('Please enter a percentage for the allowance increment.');
+            return false;
+        }
+
+        if (!allowanceChecked) {
+            alert('Please select at least one staff member to apply the allowance increment.');
+            return false;
+        }
+
+        return confirm('Are you sure you want to apply this allowance increment?');
+    }
+
     function clampInput(selector) {
-        document.querySelector(selector).addEventListener('input', function () {
+        var input = document.querySelector(selector);
+        if (!input) {
+            return;
+        }
+        input.addEventListener('input', function () {
             let val = parseFloat(this.value);
             if (val > 100) {
                 alert("Value cannot exceed 100.");
@@ -112,8 +247,75 @@
             }
         });
     }
-    
-    clampInput('input[name="increment_percentage"]');
+
+    function initSelectAll(masterSelector, checkboxSelector) {
+        var masterCheckbox = document.querySelector(masterSelector);
+        var checkboxes = document.querySelectorAll(checkboxSelector);
+
+        if (!masterCheckbox || !checkboxes.length) {
+            return;
+        }
+
+        function syncMasterState() {
+            var total = checkboxes.length;
+            var checked = Array.from(checkboxes).filter(function(cb) { return cb.checked; }).length;
+            masterCheckbox.checked = total > 0 && checked === total;
+            masterCheckbox.indeterminate = checked > 0 && checked < total;
+        }
+
+        masterCheckbox.addEventListener('change', function () {
+            checkboxes.forEach(function (checkbox) {
+                checkbox.checked = masterCheckbox.checked;
+            });
+        });
+
+        checkboxes.forEach(function (checkbox) {
+            checkbox.addEventListener('change', syncMasterState);
+        });
+
+        syncMasterState();
+    }
+
+    function setupSalaryInputRules() {
+        var percentageInput = document.getElementById('increment_percentage');
+        var amountInput = document.getElementById('increment_amount');
+
+        if (!percentageInput || !amountInput) {
+            return;
+        }
+
+        function syncInputs() {
+            var percentFilled = percentageInput.value !== '';
+            var amountFilled = amountInput.value !== '';
+
+            if (percentFilled) {
+                amountInput.value = '';
+                amountInput.disabled = true;
+            } else {
+                amountInput.disabled = false;
+            }
+
+            if (amountFilled) {
+                percentageInput.value = '';
+                percentageInput.disabled = true;
+            } else {
+                percentageInput.disabled = false;
+            }
+        }
+
+        percentageInput.addEventListener('input', syncInputs);
+        amountInput.addEventListener('input', syncInputs);
+
+        syncInputs();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        clampInput('input[name="increment_percentage"]');
+        clampInput('input[name="allowance_percentage"]');
+        initSelectAll('#select_all_staff', 'input[name="selected_staff"]');
+        initSelectAll('#select_all_allowance_staff', 'input[name="selected_allowance_staff"]');
+        setupSalaryInputRules();
+    });
 </script>
 
 

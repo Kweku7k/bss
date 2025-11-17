@@ -111,7 +111,7 @@ def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            print("Someone is creating an account", form.cleaned_data)
+            # print("Someone is creating an account", form.cleaned_data)
             username = form.cleaned_data.get('username')
             email = form.cleaned_data.get('email')
             if User.objects.filter(email=email).exists():
@@ -4395,39 +4395,172 @@ def staff_salary_increment(request):
     staff_categories = StaffCategory.objects.all()
     staff_list = []
     increment_percentage = None
-    
-    if request.method == 'POST':
-        staff_cat = request.POST.get('staff_cat')
-        increment_percentage = request.POST.get('increment_percentage')
-        selected_staff = request.POST.getlist('selected_staff')
-        
-        if staff_cat:
-            company_infos = CompanyInformation.objects.filter(staff_cat=staff_cat).exclude(active_status='Inactive').select_related('staffno')
-            staff_list = [info.staffno for info in company_infos]
-            
-            
-        if increment_percentage and selected_staff:
-            increment_percentage = Decimal(increment_percentage)
-            print("Selected Staff IDs:", selected_staff)
+    increment_amount = None
+    selected_staff_cat = None
 
-            for staff_id in selected_staff:
-                staff = get_object_or_404(Employee, pk=staff_id) 
-                company_info = get_object_or_404(CompanyInformation, staffno=staff) 
-                current_salary = Decimal(company_info.salary)
-                increment_amount = current_salary * (increment_percentage / 100)
-                new_salary = round(current_salary + increment_amount, 2)
-                
-                company_info.salary = new_salary
-                company_info.save()
-                
-            messages.success(request, f"Salary increment of {increment_percentage}% for staff {selected_staff} applied successfully")
-            logger.info(f"Salary increment of {increment_percentage}% applied to selected staff {selected_staff} by {request.user.username}.")
-            return redirect('payroll-salary-increment')
-            
+    allowance_types = (
+        StaffIncome.objects.filter(is_active=True)
+        .exclude(income_type__isnull=True)
+        .exclude(income_type__exact='')
+        .values_list('income_type', flat=True)
+        .distinct()
+        .order_by('income_type')
+    )
+    selected_allowance = None
+    allowance_staff_list = []
+    allowance_increment_percentage = None
+    selected_allowance_staff_ids = []
+
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type', 'salary')
+
+        if form_type == 'salary':
+            selected_staff_cat = request.POST.get('staff_cat')
+            increment_percentage = request.POST.get('increment_percentage')
+            increment_amount = request.POST.get('increment_amount')
+            selected_staff = request.POST.getlist('selected_staff')
+
+            if selected_staff_cat:
+                company_infos = (
+                    CompanyInformation.objects.filter(staff_cat=selected_staff_cat)
+                    .exclude(active_status__in=['Inactive', 'Dormant'])
+                    .select_related('staffno')
+                )
+                staff_list = [info.staffno for info in company_infos]
+
+            if request.POST.get('apply_salary_increment') == '1':
+                if not selected_staff:
+                    messages.error(request, "Please select staff before applying an increment.")
+                elif increment_percentage and increment_amount:
+                    messages.error(request, "Enter either a percentage or an amount, not both.")
+                elif not increment_percentage and not increment_amount:
+                    messages.error(request, "Please enter a percentage or an amount to apply.")
+                else:
+                    salary_increment_decimal = None
+                    salary_increment_amount = None
+                    use_percentage = bool(increment_percentage)
+
+                    if use_percentage:
+                        try:
+                            salary_increment_decimal = Decimal(increment_percentage)
+                        except InvalidOperation:
+                            messages.error(request, "Please enter a valid increment percentage for salary.")
+                    else:
+                        try:
+                            salary_increment_amount = Decimal(increment_amount)
+                        except InvalidOperation:
+                            messages.error(request, "Please enter a valid increment amount for salary.")
+
+                    if (use_percentage and salary_increment_decimal is not None) or (
+                        not use_percentage and salary_increment_amount is not None
+                    ):
+                        for staff_id in selected_staff:
+                            staff = get_object_or_404(Employee, pk=staff_id)
+                            company_info = get_object_or_404(CompanyInformation, staffno=staff)
+                            current_salary = safe_decimal(company_info.salary)
+
+                            if use_percentage:
+                                increment_delta = current_salary * (salary_increment_decimal / Decimal('100'))
+                                action_summary = f"{salary_increment_decimal}%"
+                            else:
+                                increment_delta = salary_increment_amount
+                                action_summary = f"{salary_increment_amount}"
+
+                            new_salary = (current_salary + increment_delta).quantize(Decimal('0.01'))
+
+                            company_info.salary = new_salary
+                            company_info.save(update_fields=['salary'])
+
+                        messages.success(
+                            request,
+                            f"Salary increment ({action_summary}) applied to {len(selected_staff)} staff."
+                        )
+                        logger.info(
+                            "Salary increment (%s) applied to staff %s by %s.",
+                            action_summary,
+                            selected_staff,
+                            request.user.username,
+                        )
+                        return redirect('payroll-salary-increment')
+
+        elif form_type == 'allowance':
+            selected_allowance = request.POST.get('allowance_type')
+            allowance_increment_percentage = request.POST.get('allowance_percentage')
+            selected_allowance_staff_ids = request.POST.getlist('selected_allowance_staff')
+
+            if selected_allowance:
+                allowance_staff_queryset = (
+                    StaffIncome.objects.filter(
+                        income_type__iexact=selected_allowance,
+                        is_active=True
+                    )
+                    .exclude(staffno__companyinformation__active_status__in=['Inactive', 'Dormant'])
+                    .select_related('staffno')
+                    .order_by('staffno__lname', 'staffno__fname')
+                )
+                allowance_staff_list = list(allowance_staff_queryset)
+
+            if request.POST.get('apply_allowance_increment') == '1':
+                if not selected_allowance:
+                    messages.error(request, "Please choose an allowance before applying an increment.")
+                elif not allowance_increment_percentage:
+                    messages.error(request, "Please enter an increment percentage for the allowance.")
+                elif not selected_allowance_staff_ids:
+                    messages.error(request, "Please select at least one staff member for the allowance increment.")
+                elif not allowance_staff_list:
+                    messages.warning(
+                        request,
+                        f"No active staff allowances found for {selected_allowance}."
+                    )
+                else:
+                    try:
+                        allowance_increment_decimal = Decimal(allowance_increment_percentage)
+                    except InvalidOperation:
+                        messages.error(request, "Please enter a valid increment percentage for the allowance.")
+                    else:
+                        incomes_to_update = [
+                            income for income in allowance_staff_list
+                            if str(income.id) in selected_allowance_staff_ids
+                        ]
+
+                        if not incomes_to_update:
+                            messages.error(request, "Selected staff could not be matched. Please try again.")
+                            return redirect('payroll-salary-increment')
+
+                        updated_records = 0
+                        for income in incomes_to_update:
+                            current_amount = safe_decimal(income.amount)
+                            increment_amount = current_amount * (allowance_increment_decimal / Decimal('100'))
+                            new_amount = (current_amount + increment_amount).quantize(Decimal('0.01'))
+
+                            income.amount = new_amount
+                            income.save(update_fields=['amount'])
+                            updated_records += 1
+
+                        messages.success(
+                            request,
+                            f"{allowance_increment_decimal}% increment applied to {updated_records} staff for {selected_allowance}."
+                        )
+                        logger.info(
+                            "%s%% allowance increment applied to %s for allowance %s by %s.",
+                            allowance_increment_decimal,
+                            updated_records,
+                            selected_allowance,
+                            request.user.username,
+                        )
+                        return redirect('payroll-salary-increment')
+
     context = {
         'staff_categories': staff_categories,
         'staff_list': staff_list,
-        'increment_percentage': increment_percentage
+        'increment_percentage': increment_percentage,
+        'increment_amount': increment_amount,
+        'selected_staff_cat': selected_staff_cat,
+        'allowance_types': allowance_types,
+        'selected_allowance': selected_allowance,
+        'allowance_staff_list': allowance_staff_list,
+        'allowance_increment_percentage': allowance_increment_percentage,
+        'selected_allowance_staff_ids': selected_allowance_staff_ids,
     }
     return render(request, 'hr/staff_salary_increment.html', context)
 
