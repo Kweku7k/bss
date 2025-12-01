@@ -650,11 +650,12 @@ class StaffLoan(models.Model):
     
     def save(self, *args, **kwargs):
         if self.start_date and self.end_date:
-            self.duration_months = (self.end_date.year - self.start_date.year) * 12 + (self.end_date.month - self.start_date.month) + 1
-            
-        if self.amount and self.total_interest and self.duration_months:
+            self.duration_months = ((self.end_date.year - self.start_date.year) * 12 + (self.end_date.month - self.start_date.month) + 1)
+                        
+        # allow 0 interest loans
+        if self.amount is not None and self.total_interest is not None and self.duration_months:
             self.monthly_installment = (self.amount + self.total_interest) / self.duration_months
-            
+
         if self.duration_months and self.months_left is None:
             self.months_left = self.duration_months
             

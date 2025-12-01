@@ -134,3 +134,40 @@ def verify_otp(user: User, submitted_code: str) -> Tuple[bool, str]:
     otp.save(update_fields=['is_used'])
     return True, "Verification successful."
 
+
+def send_password_reset_otp_email(user: User, otp: OneTimePassword) -> None:
+    """
+    Send password reset OTP code to the user's email.
+    """
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
+    subject = "Password Reset Verification Code"
+
+    greeting = user.first_name or user.username or user.email
+    message = (
+        f"Hello {greeting},\n\n"
+        f"You requested to reset your password. Your verification code is {otp.code}. "
+        f"The code expires at {otp.expires_at.strftime('%Y-%m-%d %H:%M:%S %Z')}.\n\n"
+        "If you did not request a password reset, please ignore this email and your password will remain unchanged.\n\n"
+        "Best regards,\n"
+        "Central University ERP Team"
+    )
+
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=from_email,
+        recipient_list=[user.email],
+        fail_silently=False,
+    )
+    logger.info("Sent password reset OTP email to user %s at %s", user.pk, user.email)
+
+
+def generate_and_send_password_reset_otp(user: User) -> OneTimePassword:
+    """
+    Generate and send a password reset OTP to the user.
+    Uses a longer TTL (10 minutes) for password reset.
+    """
+    otp = create_otp(user, ttl_minutes=10)
+    send_password_reset_otp_email(user, otp)
+    return otp
+

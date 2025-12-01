@@ -227,6 +227,153 @@ def otp_verify(request):
     }
     return render(request, 'authentication/otp_verify.html', context)
 
+
+def password_reset_request(request):
+    """
+    Step 1: User enters email to request password reset.
+    """
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        
+        if not email:
+            messages.error(request, "Please enter your email address.")
+            return redirect('password-reset-request')
+        
+        user_model = get_user_model()
+        try:
+            user = user_model.objects.get(email=email)
+        except user_model.DoesNotExist:
+            # Don't reveal if email exists for security
+            messages.info(request, "If an account exists with that email, a password reset code has been sent.")
+            return redirect('password-reset-request')
+        
+        if not user.email:
+            messages.error(request, "This account does not have an email address. Please contact the administrator.")
+            return redirect('password-reset-request')
+        
+        try:
+            from .service import generate_and_send_password_reset_otp
+            generate_and_send_password_reset_otp(user)
+            request.session['password_reset_user_id'] = user.id
+            request.session['password_reset_email'] = user.email
+            messages.success(request, "A password reset code has been sent to your email address.")
+            logger.info(f"Password reset OTP requested for user {user.username} ({user.email})")
+            return redirect('password-reset-verify')
+        except Exception as exc:
+            logger.error("Failed to send password reset OTP for user %s: %s", user.username, exc, exc_info=True)
+            messages.error(request, "We could not send the password reset code. Please contact the system administrator.")
+            return redirect('password-reset-request')
+    
+    return render(request, 'authentication/password_reset_request.html')
+
+
+def password_reset_verify(request):
+    """
+    Step 2: User enters OTP code to verify identity.
+    """
+    user_id = request.session.get('password_reset_user_id')
+    if not user_id:
+        messages.error(request, "Your session has expired. Please request a new password reset.")
+        return redirect('password-reset-request')
+    
+    user_model = get_user_model()
+    try:
+        user = user_model.objects.get(pk=user_id)
+    except user_model.DoesNotExist:
+        _clear_password_reset_state(request)
+        messages.error(request, "We could not find your account information. Please request a new password reset.")
+        return redirect('password-reset-request')
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'resend':
+            try:
+                from .service import generate_and_send_password_reset_otp
+                generate_and_send_password_reset_otp(user)
+                messages.info(request, "A new password reset code has been sent to your email.")
+            except Exception as exc:
+                logger.error("Failed to resend password reset OTP for user %s: %s", user.username, exc, exc_info=True)
+                messages.error(request, "We could not resend the password reset code. Please contact the system administrator.")
+            return redirect('password-reset-verify')
+        
+        otp_code = (request.POST.get('otp') or '').strip()
+        if not otp_code:
+            messages.error(request, "Please enter the verification code.")
+        else:
+            from .service import verify_otp
+            is_valid, feedback = verify_otp(user, otp_code)
+            if is_valid:
+                request.session['password_reset_verified'] = True
+                messages.success(request, "Verification successful. Please set your new password.")
+                logger.info(f"Password reset OTP verified for user {user.username}")
+                return redirect('password-reset-confirm')
+            messages.error(request, feedback)
+    
+    context = {
+        'email': request.session.get('password_reset_email'),
+    }
+    return render(request, 'authentication/password_reset_verify.html', context)
+
+
+def password_reset_confirm(request):
+    """
+    Step 3: User sets new password after OTP verification.
+    """
+    user_id = request.session.get('password_reset_user_id')
+    verified = request.session.get('password_reset_verified', False)
+    
+    if not user_id or not verified:
+        messages.error(request, "Your session has expired or verification is required. Please start over.")
+        _clear_password_reset_state(request)
+        return redirect('password-reset-request')
+    
+    user_model = get_user_model()
+    try:
+        user = user_model.objects.get(pk=user_id)
+    except user_model.DoesNotExist:
+        _clear_password_reset_state(request)
+        messages.error(request, "We could not find your account information. Please request a new password reset.")
+        return redirect('password-reset-request')
+    
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password', '').strip()
+        confirm_password = request.POST.get('confirm_password', '').strip()
+        
+        if not new_password or not confirm_password:
+            messages.error(request, "Please fill in all fields.")
+        elif new_password != confirm_password:
+            messages.error(request, "Passwords do not match.")
+        elif len(new_password) < 8:
+            messages.error(request, "Password must be at least 8 characters long.")
+        else:
+            try:
+                from django.contrib.auth.password_validation import validate_password
+                validate_password(new_password, user)
+                user.set_password(new_password)
+                user.save()
+                logger.info(f"Password reset completed successfully for user {user.username}")
+                messages.success(request, "Your password has been reset successfully. You can now log in with your new password.")
+                _clear_password_reset_state(request)
+                return redirect('login')
+            except Exception as e:
+                error_messages = []
+                if hasattr(e, 'messages'):
+                    error_messages = e.messages
+                else:
+                    error_messages = [str(e)]
+                for msg in error_messages:
+                    messages.error(request, msg)
+    
+    return render(request, 'authentication/password_reset_confirm.html')
+
+
+def _clear_password_reset_state(request):
+    """Clear password reset session variables."""
+    for key in ('password_reset_user_id', 'password_reset_email', 'password_reset_verified'):
+        if key in request.session:
+            request.session.pop(key, None)
+
+
 def user_profile(request):
     if request.method == 'POST':
         form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
@@ -3866,6 +4013,20 @@ def payroll_details(request, staffno):
         payroll = PayrollCalculator(staffno=staff, month=selected_date)
         
 
+        loan_details = payroll.get_active_loan_deductions()
+        # Calculate loan totals for payslip
+        loan_totals = {
+            "principal_amount": Decimal('0.00'),
+            "opening_balance": Decimal('0.00'),
+            "monthly_installment": Decimal('0.00'),
+            "outstanding_balance": Decimal('0.00'),
+        }
+        for loan in loan_details:
+            loan_totals["principal_amount"] += Decimal(str(loan["meta"]["principal_amount"]))
+            loan_totals["opening_balance"] += Decimal(str(loan["meta"]["opening_balance"]))
+            loan_totals["monthly_installment"] += Decimal(str(loan["monthly_installment"]))
+            loan_totals["outstanding_balance"] += Decimal(str(loan["meta"]["outstanding_balance"]))
+        
         payroll_data = {
             "month": selected_date.strftime("%B %Y"),
             "basic_salary": payroll.get_entitled_basic_salary(),
@@ -3884,7 +4045,8 @@ def payroll_details(request, staffno):
             "withholding_tax": payroll.get_tax_for_taxable_income()["total_tax"],
             "withholding_rent_tax": payroll.get_tax_for_taxable_income()["rent_tax"],
             "benefits_in_kind": payroll.get_benefits_in_kind()["benefit_in_kind"],
-            "loan_details": payroll.get_active_loan_deductions(),
+            "loan_details": loan_details,
+            "loan_totals": loan_totals,
         }
         messages.success(request, f"Payslip for {staff.fname} has been generated")        
 
@@ -3913,6 +4075,7 @@ def payroll_details(request, staffno):
         "selected_year": selected_year,
     }
     return render(request, 'hr/payrol.html', context)
+
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('process_all_payroll')

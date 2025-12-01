@@ -793,3 +793,11 @@ INFO 2025-11-17 12:04:31,545 15% allowance increment applied to 1 for allowance 
 INFO 2025-11-17 12:21:29,703 Salary increment (46) applied to staff ['20034'] by Softlife.
 INFO 2025-11-17 12:22:19,763 Salary increment (90) applied to staff ['20034'] by Softlife.
 INFO 2025-11-17 12:26:33,333 Salary increment (700) applied to staff ['20034'] by Softlife.
+INFO 2025-11-29 03:26:09,639 OTP verified successfully for user Softlife
+INFO 2025-11-29 03:27:53,672 Company information updated for Priscilla Chrison by Softlife
+INFO 2025-11-29 03:48:02,409 Company information updated for Priscilla Chrison by Softlife
+INFO 2025-11-29 07:18:01,276 OTP verified successfully for user Softlife
+INFO 2025-12-01 14:05:50,651 Password reset OTP requested for user Softlife (oadewale@central.edu.gh)
+INFO 2025-12-01 14:06:39,385 Password reset OTP verified for user Softlife
+INFO 2025-12-01 14:07:24,255 Password reset completed successfully for user Softlife
+INFO 2025-12-01 14:08:13,547 OTP verified successfully for user Softlife

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payslip</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            color: #333;
+        }
+        .payslip-container {
+            width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #0056b3;
+        }
+        .company-info, .employee-info, .pay-details, .deductions, .net-pay {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .company-info p, .employee-info p {
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .total-row td {
+            font-weight: bold;
+            background-color: #e6f7ff;
+        }
+        .net-pay-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: right;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="payslip-container">
+        <h1>Payslip</h1>
+        <div class="company-info">
+            <h2>[Company Name]</h2>
+            <p>[Company Address Line 1]</p>
+            <p>[Company Address Line 2]</p>
+            <p>[Company Phone Number]</p>
+        </div>
+
+        <div class="employee-info">
+            <h3>Employee Details</h3>
+            <p><strong>Employee Name:</strong> [Employee Full Name]</p>
+            <p><strong>Employee ID:</strong> [Employee ID]</p>
+            <p><strong>Designation:</strong> [Employee Designation]</p>
+            <p><strong>Pay Period:</strong> [Start Date] - [End Date]</p>
+        </div>
+
+        <div class="pay-details">
+            <h3>Earnings</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Basic Salary</td>
+                        <td>[Basic Salary Amount]</td>
+                    </tr>
+                    <tr>
+                        <td>House Rent Allowance (HRA)</td>
+                        <td>[HRA Amount]</td>
+                    </tr>
+                    <tr>
+                        <td>Conveyance Allowance</td>
+                        <td>[Conveyance Amount]</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>Gross Earnings</td>
+                        <td>[Total Gross Earnings]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="deductions">
+            <h3>Deductions</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Provident Fund (PF)</td>
+                        <td>[PF Amount]</td>
+                    </tr>
+                    <tr>
+                        <td>Professional Tax</td>
+                        <td>[Professional Tax Amount]</td>
+                    </tr>
+                    <tr>
+                        <td>Income Tax (TDS)</td>
+                        <td>[Income Tax Amount]</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>Total Deductions</td>
+                        <td>[Total Deductions Amount]</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="net-pay">
+            <h3>Net Pay</h3>
+            <p class="net-pay-amount">Net Payable: [Net Pay Amount]</p>
+        </div>
+    </div>
+</body>
+</html>

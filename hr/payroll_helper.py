@@ -94,13 +94,15 @@ class PayrollCalculator:
 
         for loan in active_loans:
             total_loan = loan.amount + loan.total_interest
-            monthly_installment = loan.monthly_installment
+            monthly_installment = loan.monthly_installment or Decimal('0.00')
             
             # Get actual amount paid so far
             total_paid = loan.payments.filter(payment_date__year__lte=selected_month.year, payment_date__month__lte=selected_month.month).aggregate(total=Sum('amount_paid'))['total'] or Decimal('0.00')            
             outstanding_balance = total_loan - total_paid
             months_left = int(outstanding_balance / monthly_installment) if monthly_installment > 0 else 0
 
+            opening_balance = outstanding_balance + monthly_installment
+            
             loan_deductions.append({
                 "id": loan.id,
                 "type": f"{loan.loan_type}",
@@ -113,6 +115,7 @@ class PayrollCalculator:
                     "principal_amount": round(total_loan, 2),
                     "amount_paid": round(total_paid, 2),
                     "outstanding_balance": round(outstanding_balance, 2),
+                    "opening_balance": round(opening_balance, 2),
                 }
             })
 
