@@ -4561,14 +4561,17 @@ def staff_salary_increment(request):
     increment_amount = None
     selected_staff_cat = None
 
-    allowance_types = (
-        StaffIncome.objects.filter(is_active=True)
-        .exclude(income_type__isnull=True)
-        .exclude(income_type__exact='')
-        .values_list('income_type', flat=True)
-        .distinct()
-        .order_by('income_type')
-    )
+    # allowance_types = (
+    #     StaffIncome.objects.filter(is_active=True)
+    #     .exclude(income_type__isnull=True)
+    #     .exclude(income_type__exact='')
+    #     .values_list('income_type', flat=True)
+    #     .distinct()
+    #     .order_by('income_type')
+    # )
+    
+    allowance_types = IncomeType.objects.all().order_by('name')
+    
     selected_allowance = None
     allowance_staff_list = []
     allowance_increment_percentage = None

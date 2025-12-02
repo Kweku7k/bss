@@ -801,3 +801,8 @@ INFO 2025-12-01 14:05:50,651 Password reset OTP requested for user Softlife (oad
 INFO 2025-12-01 14:06:39,385 Password reset OTP verified for user Softlife
 INFO 2025-12-01 14:07:24,255 Password reset completed successfully for user Softlife
 INFO 2025-12-01 14:08:13,547 OTP verified successfully for user Softlife
+INFO 2025-12-01 15:03:27,230 Company information updated for Yaw Ansah by Softlife
+INFO 2025-12-01 15:17:30,371 Salary increment (12%) applied to staff ['30211'] by Softlife.
+INFO 2025-12-01 15:17:48,925 10% allowance increment applied to 1 for allowance Rent by Softlife.
+INFO 2025-12-01 15:18:00,970 10% allowance increment applied to 1 for allowance Fuel by Softlife.
+INFO 2025-12-01 17:13:41,867 OTP verified successfully for user Softlife
