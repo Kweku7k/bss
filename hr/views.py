@@ -40,6 +40,10 @@ from hr.utils.export import render_to_excel, render_to_pdf
 from bss.firebase import upload_file_to_firebase, delete_file_from_firebase
 import tempfile
 import pandas as pd
+from ledger.models import Account, Journal, JournalLine, Currency
+from django.core.exceptions import ValidationError
+from calendar import month_name, monthrange
+
 
 
 
@@ -3559,7 +3563,7 @@ def create_staff_relief(request, staffno):
 
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
-@tag_required('modify_staff_deduction')
+@tag_required('modify_staff_relief')
 def edit_staff_relief(request, staffno, relief_id):
     submitted = False
     staff = Employee.objects.get(pk=staffno)
@@ -3665,6 +3669,7 @@ def edit_staff_loan(request, staffno, loan_id):
 
 @login_required
 @role_required(["superadmin", "audit"])
+@tag_required('approve_payroll')
 def toggle_approval(request, payroll_id):
     payroll = get_object_or_404(Payroll, id=payroll_id)
 
@@ -4551,9 +4556,8 @@ def payroll_bank_sheet(request):
 
 
 @login_required
-@role_required(['superadmin'])
-@role_required(['superadmin', 'finance officer', 'finance admin'])
-@tag_required('modify_salary')
+@role_required(['superadmin', 'finance admin'])
+@tag_required('apply_salary_increment')
 def staff_salary_increment(request):
     staff_categories = StaffCategory.objects.all()
     staff_list = []
@@ -6416,7 +6420,8 @@ def generate_department_report(request):
 # PAYROLL JOURNAL VIEWS
 # =====================================================
 @login_required
-@role_required(['superadmin', 'finance officer', 'finance admin'])
+@role_required(['superadmin', 'finance admin'])
+@tag_required('view_payroll_summary')
 def payroll_summary(request):
     """
     Display overall payroll summary for a selected month
@@ -6578,6 +6583,7 @@ def payroll_summary(request):
 
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin', 'hr officer', 'hr admin'])
+@tag_required('view_basic_salary_report')
 def basic_salary_report(request):
     records = []
     total_basic = Decimal('0.00')
@@ -6633,6 +6639,7 @@ def basic_salary_report(request):
 
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('setup_payroll_account_mapping')
 def payroll_account_mapping(request):
     """
     Setup page for mapping payroll items to GL accounts
@@ -6757,13 +6764,11 @@ def delete_payroll_mapping(request, mapping_id):
 
 @login_required
 @role_required(['superadmin', 'finance officer', 'finance admin'])
+@tag_required('preview_payroll_journal')
 def preview_payroll_journal(request):
     """
     Preview the journal entries that will be created for a specific payroll month
     """
-    from ledger.models import Account, Journal, JournalLine, Currency
-    from django.core.exceptions import ValidationError
-    from calendar import month_name
     
     selected_month = request.GET.get("month")
     selected_year = request.GET.get("year")
@@ -7076,16 +7081,16 @@ def preview_payroll_journal(request):
         }
     
     return render(request, "hr/preview_payroll_journal.html", context)
+
+
 @login_required
-@role_required(['superadmin', 'finance officer', 'finance admin'])
+@role_required(['superadmin', 'finance admin'])
+@tag_required('generate_payroll_journal')
 @transaction.atomic
 def generate_payroll_journal(request):
     """
     Generate and post the journal entry for a specific payroll month
     """
-    from ledger.models import Account, Journal, JournalLine, Currency
-    from django.core.exceptions import ValidationError
-    from calendar import month_name, monthrange
     
     if request.method != "POST":
         return redirect('preview-payroll-journal')
@@ -7469,7 +7474,8 @@ def generate_payroll_journal(request):
 
 
 @login_required
-@role_required(['superadmin', 'finance officer', 'finance admin'])
+@role_required(['superadmin', 'finance admin'])
+@tag_required('view_payroll_journal_history')
 def payroll_journal_history(request):
     """
     View all generated payroll journals
