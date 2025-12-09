@@ -1384,3 +1384,22 @@ Account Mappings:    /hr/payroll/account-mapping/
 
 *This is a living document. Update it whenever you make system changes!*
 
+
+
+
+
+######## This is for Permission Tags ########
+from hr.models import PermissionTag  # adjust if needed
+
+TAGS = {
+    "Payroll": [
+        "staff_income_upload",
+    ],
+}
+
+for category, tag_list in TAGS.items():
+    for tag in tag_list:
+        PermissionTag.objects.get_or_create(
+            name=tag,
+            category=category,
+        )

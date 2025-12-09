@@ -1766,7 +1766,7 @@ def download_csv(request):
 
 
 @login_required
-@role_required(['superadmin', 'hr officer', 'hr admin'])
+@role_required(['superadmin', 'finance officer', 'finance admin'])
 @tag_required('staff_income_upload')
 def staff_income_upload(request):
     """
