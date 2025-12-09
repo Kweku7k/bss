@@ -693,7 +693,7 @@ def allstaff(request):
     staff_count = staffs.count()
     company_info = CompanyInformation.objects.all()
     
-    print("All Staff", staffs)
+    # print("All Staff", staffs)
 
     # Pagination
     paginator = Paginator(staffs, 30)
