@@ -1552,7 +1552,7 @@ def delete_emp_relation(request,emp_id,staffno):
     return redirect('emp-relation', staffno)
 
 # END OF EMPLOYEE RELATIONSHIP 
-# Write a function for bulk upload csv format
+# Write a function for bulk upload csv format fro staff information and income uplaod
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])
 @tag_required('bulk_upload')
@@ -1763,6 +1763,226 @@ def download_csv(request):
     response = FileResponse(open(file_path, 'rb'), content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="sample_format.csv"'
     return response
+
+
+@login_required
+@role_required(['superadmin', 'hr officer', 'hr admin'])
+@tag_required('staff_income_upload')
+def staff_income_upload(request):
+    """
+    Dynamic CSV upload for Income and Deduction data.
+    Flow: Select Upload Type (Income/Deduction) → Select Specific Type → Upload CSV
+    """
+    print(f"[STAFF_INCOME_UPLOAD] Request method: {request.method}, User: {request.user.username}")
+    upload_type = request.POST.get('upload_type') or request.GET.get('upload_type', '')
+    selected_type = request.POST.get('selected_type') or request.GET.get('selected_type', '')
+    print(f"[STAFF_INCOME_UPLOAD] Upload type: {upload_type}, Selected type: {selected_type}")
+    
+    # Get available types
+    income_types = IncomeType.objects.all().order_by('name')
+    deduction_types = DeductionType.objects.all().order_by('name')
+    
+    # Handle CSV upload
+    if request.method == 'POST' and 'csv_file' in request.FILES:
+        csv_file = request.FILES['csv_file']
+        upload_type = request.POST.get('upload_type')
+        selected_type = request.POST.get('selected_type')
+        
+        if not upload_type or not selected_type:
+            print(f"[STAFF_INCOME_UPLOAD] ERROR: Missing upload_type or selected_type")
+            messages.error(request, 'Please select both upload type and specific type before uploading.')
+            context = {
+                'upload_type': upload_type,
+                'selected_type': selected_type,
+                'income_types': income_types,
+                'deduction_types': deduction_types,
+            }
+            return render(request, 'hr/staff_income_upload.html', context)
+        
+        if not csv_file.name.endswith('.csv'):
+            print(f"[STAFF_INCOME_UPLOAD] ERROR: Invalid file type - {csv_file.name}")
+            messages.error(request, 'This is not a CSV file.')
+            context = {
+                'upload_type': upload_type,
+                'selected_type': selected_type,
+                'income_types': income_types,
+                'deduction_types': deduction_types,
+            }
+            return render(request, 'hr/staff_income_upload.html', context)
+        
+        try:
+            decoded_file = csv_file.read().decode('utf-8')
+            reader = csv.DictReader(decoded_file.splitlines())
+            
+            # Expected CSV columns (case-insensitive)
+            required_columns = ['staffno', 'amount']
+            optional_columns = ['activate_now', 'one_time_payment']
+            
+            # Normalize column names (case-insensitive)
+            if not reader.fieldnames:
+                print(f"[STAFF_INCOME_UPLOAD] ERROR: CSV file has no headers")
+                messages.error(request, 'CSV file appears to be empty or has no headers.')
+                context = {
+                    'upload_type': upload_type,
+                    'selected_type': selected_type,
+                    'income_types': income_types,
+                    'deduction_types': deduction_types,
+                }
+                return render(request, 'hr/staff_income_upload.html', context)
+            
+            header_map = {col.strip().lower(): col.strip() for col in reader.fieldnames}
+            
+            # Check required columns
+            missing_columns = []
+            for req_col in required_columns:
+                if req_col.lower() not in header_map:
+                    missing_columns.append(req_col)
+            
+            if missing_columns:
+                print(f"[STAFF_INCOME_UPLOAD] ERROR: Missing required columns: {missing_columns}")
+                messages.error(request, f'Missing required columns in CSV: {", ".join(missing_columns)}')
+                context = {
+                    'upload_type': upload_type,
+                    'selected_type': selected_type,
+                    'income_types': income_types,
+                    'deduction_types': deduction_types,
+                }
+                return render(request, 'hr/staff_income_upload.html', context)
+            
+            errors = []
+            success_count = 0
+            total_rows = 0
+            
+            print(f"[STAFF_INCOME_UPLOAD] Starting to process CSV rows...")
+            with transaction.atomic():
+                for row_num, row in enumerate(reader, start=2):  # Start at 2 (row 1 is header)
+                    total_rows += 1
+                    try:
+                        # Get values using case-insensitive lookup
+                        staffno = row.get(header_map.get('staffno', ''), '').strip()
+                        amount_str = row.get(header_map.get('amount', ''), '').strip()
+                        activate_now_str = row.get(header_map.get('activate_now', 'true'), '').strip().lower()
+                        one_time_str = row.get(header_map.get('one_time_payment', 'false'), '').strip().lower()
+                        print(f"[STAFF_INCOME_UPLOAD] Processing row {row_num}: staffno={staffno}, amount={amount_str}, activate_now={activate_now_str}, one_time={one_time_str}")
+                        
+                        if not staffno:
+                            errors.append(f"Row {row_num}: Staff number is required")
+                            continue
+                        
+                        if not amount_str:
+                            errors.append(f"Row {row_num}: Amount is required")
+                            continue
+                        
+                        try:
+                            amount = Decimal(amount_str.replace(',', ''))
+                            print(f"[STAFF_INCOME_UPLOAD] Row {row_num}: Amount parsed successfully: {amount}")
+                        except (InvalidOperation, ValueError):
+                            errors.append(f"Row {row_num}: Invalid amount format: {amount_str}")
+                            continue
+                        
+                        # Parse boolean values
+                        is_active = activate_now_str in ('true', '1', 'yes', 'y', 'on') if activate_now_str else True
+                        is_one_time = one_time_str in ('true', '1', 'yes', 'y', 'on') if one_time_str else False
+                        
+                        # Get employee
+                        try:
+                            employee = Employee.objects.get(staffno=staffno)
+                        except Employee.DoesNotExist:
+                            errors.append(f"Row {row_num}: Employee with staff number '{staffno}' not found")
+                            continue
+                        
+                        # Process based on upload type
+                        if upload_type == 'income':
+                            if selected_type.lower() == 'basic salary':
+                                # Update CompanyInformation salary
+                                print(f"[STAFF_INCOME_UPLOAD] Row {row_num}: Processing Basic Salary update for {staffno}")
+                                try:
+                                    company_info = CompanyInformation.objects.get(staffno=employee)
+                                    old_salary = company_info.salary
+                                    company_info.salary = str(amount)
+                                    company_info.save(update_fields=['salary'])
+                                    success_count += 1
+                                    print(f"[STAFF_INCOME_UPLOAD] Row {row_num}: SUCCESS - Updated basic salary from {old_salary} to {amount} for {employee.fname} {employee.lname}")
+                                    logger.info(f"Updated basic salary from {old_salary} to {amount} for {employee.fname} {employee.lname} ({staffno}) by {request.user.username}")
+                                except CompanyInformation.DoesNotExist:
+                                    errors.append(f"Row {row_num}: Company information not found for staff {staffno}")
+                                except Exception as e:
+                                    errors.append(f"Row {row_num}: Error updating basic salary: {str(e)}")
+                            else:
+                                # Create/update StaffIncome
+                                print(f"[STAFF_INCOME_UPLOAD] Row {row_num}: Processing Income '{selected_type}' for {staffno}")
+                                staff_income, created = StaffIncome.objects.update_or_create(
+                                    staffno=employee,
+                                    income_type=selected_type,
+                                    defaults={
+                                        'amount': amount,
+                                        'is_active': is_active,
+                                        'is_one_time': is_one_time,
+                                        'income_entitlement': Decimal('100.00'),
+                                    }
+                                )
+                                success_count += 1
+                                action = 'created' if created else 'updated'
+                                print(f"[STAFF_INCOME_UPLOAD] Row {row_num}: SUCCESS - {action.capitalize()} income '{selected_type}' for {employee.fname} {employee.lname}: {amount}")
+                                logger.info(f"{action.capitalize()} income '{selected_type}' for {employee.fname} {employee.lname} ({staffno}): {amount} by {request.user.username}")
+                        
+                        elif upload_type == 'deduction':
+                            # Create/update StaffDeduction
+                            print(f"[STAFF_INCOME_UPLOAD] Row {row_num}: Processing Deduction '{selected_type}' for {staffno}")
+                            staff_deduction, created = StaffDeduction.objects.update_or_create(
+                                staffno=employee,
+                                deduction_type=selected_type,
+                                defaults={
+                                    'amount': amount,
+                                    'is_active': is_active,
+                                    'is_one_time': is_one_time,
+                                }
+                            )
+                            success_count += 1
+                            action = 'created' if created else 'updated'
+                            print(f"[STAFF_INCOME_UPLOAD] Row {row_num}: SUCCESS - {action.capitalize()} deduction '{selected_type}' for {employee.fname} {employee.lname}: {amount}")
+                            logger.info(f"{action.capitalize()} deduction '{selected_type}' for {employee.fname} {employee.lname} ({staffno}): {amount} by {request.user.username}")
+                    
+                    except Exception as e:
+                        errors.append(f"Row {row_num}: Unexpected error: {str(e)}")
+                        logger.error(f"Error processing row {row_num} in CSV upload: {e}", exc_info=True)
+            
+            # Report results
+            if success_count > 0:
+                messages.success(request, f'Successfully processed {success_count} record(s).')
+            if errors:
+                error_message = f"Errors occurred during upload:\n" + "\n".join(errors[:20])  # Show first 20 errors
+                if len(errors) > 20:
+                    error_message += f"\n... and {len(errors) - 20} more errors."
+                messages.error(request, error_message)
+            
+            # Redirect with state preserved if there were errors, otherwise clear state
+            if errors:
+                url = reverse('staff-income-upload')
+                return redirect(url)
+        
+        except Exception as e:
+            messages.error(request, f'Error processing CSV file: {str(e)}')
+            context = {
+                'upload_type': upload_type,
+                'selected_type': selected_type,
+                'income_types': income_types,
+                'deduction_types': deduction_types,
+            }
+            return render(request, 'hr/staff_income_upload.html', context)
+    
+    # GET request or initial load
+    context = {
+        'upload_type': upload_type,
+        'selected_type': selected_type,
+        'income_types': income_types,
+        'deduction_types': deduction_types,
+    }
+    return render(request, 'hr/staff_income_upload.html', context)
+        
+
+
+
 ####### EDUCATIONAL BACKGROUND #################
 @login_required
 @role_required(['superadmin', 'hr officer', 'hr admin'])

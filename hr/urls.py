@@ -40,6 +40,7 @@ urlpatterns = [
     path('get_units_by_directorate/<str:directorate_name>/', views.get_units_by_directorate, name='get_units_by_directorate'),
 
     path('upload/', views.bulk_upload, name='bulk_upload'),
+    path('staff-income-upload/', views.staff_income_upload, name='staff-income-upload'),
     path('download-sample-csv/', views.download_csv, name='download_sample_csv'),
     
     path('report', views.report,name="report"),

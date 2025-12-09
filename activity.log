@@ -810,3 +810,57 @@ INFO 2025-12-08 15:32:49,973 Password reset OTP requested for user Softlife (oad
 INFO 2025-12-08 15:33:17,362 Password reset OTP verified for user Softlife
 INFO 2025-12-08 15:33:49,913 Password reset completed successfully for user Softlife
 INFO 2025-12-08 15:36:36,164 OTP verified successfully for user Softlife
+INFO 2025-12-09 09:28:18,491 OTP verified successfully for user Softlife
+INFO 2025-12-09 10:41:40,438 Updated basic salary for 20034 to 7567 by Softlife
+INFO 2025-12-09 10:41:40,467 Updated basic salary for 40013 to 6474 by Softlife
+INFO 2025-12-09 12:08:58,460 OTP verified successfully for user Softlife
+ERROR 2025-12-09 12:13:26,744 Error processing row 2 in CSV upload: 'str' object has no attribute 'fname'
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 1911, in staff_income_upload
+    logger.info(f"{action.capitalize()} income '{selected_type}' for {staffno.fname} {staffno.lname}: {amount} by {request.user.username}")
+AttributeError: 'str' object has no attribute 'fname'
+ERROR 2025-12-09 12:13:26,892 Error processing row 3 in CSV upload: 'str' object has no attribute 'fname'
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 1911, in staff_income_upload
+    logger.info(f"{action.capitalize()} income '{selected_type}' for {staffno.fname} {staffno.lname}: {amount} by {request.user.username}")
+AttributeError: 'str' object has no attribute 'fname'
+ERROR 2025-12-09 12:13:26,901 Error processing CSV upload: Reverse for 'staff-income-upload?upload_type=income&selected_type=Rent' not found. 'staff-income-upload?upload_type=income&selected_type=Rent' is not a valid view function or pattern name.
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 1943, in staff_income_upload
+    return redirect(f'staff-income-upload?upload_type={upload_type}&selected_type={selected_type}')
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 48, in redirect
+    return redirect_class(resolve_url(to, *args, **kwargs))
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 145, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'staff-income-upload?upload_type=income&selected_type=Rent' not found. 'staff-income-upload?upload_type=income&selected_type=Rent' is not a valid view function or pattern name.
+ERROR 2025-12-09 12:14:48,309 Error processing row 2 in CSV upload: 'str' object has no attribute 'fname'
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 1911, in staff_income_upload
+    logger.info(f"{action.capitalize()} income '{selected_type}' for {staffno.fname} {staffno.lname}: {amount} by {request.user.username}")
+AttributeError: 'str' object has no attribute 'fname'
+ERROR 2025-12-09 12:14:48,368 Error processing row 3 in CSV upload: 'str' object has no attribute 'fname'
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 1911, in staff_income_upload
+    logger.info(f"{action.capitalize()} income '{selected_type}' for {staffno.fname} {staffno.lname}: {amount} by {request.user.username}")
+AttributeError: 'str' object has no attribute 'fname'
+ERROR 2025-12-09 12:14:48,383 Error processing CSV upload: Reverse for 'staff-income-upload?upload_type=income&selected_type=Rent' not found. 'staff-income-upload?upload_type=income&selected_type=Rent' is not a valid view function or pattern name.
+Traceback (most recent call last):
+  File "/Users/mrsoftlife/Documents/Projects/bss/hr/views.py", line 1943, in staff_income_upload
+    return redirect(f'staff-income-upload?upload_type={upload_type}&selected_type={selected_type}')
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 48, in redirect
+    return redirect_class(resolve_url(to, *args, **kwargs))
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/shortcuts.py", line 145, in resolve_url
+    return reverse(to, args=args, kwargs=kwargs)
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/urls/base.py", line 88, in reverse
+    return resolver._reverse_with_prefix(view, prefix, *args, **kwargs)
+  File "/Users/mrsoftlife/Library/Python/3.9/lib/python/site-packages/django/urls/resolvers.py", line 828, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'staff-income-upload?upload_type=income&selected_type=Rent' not found. 'staff-income-upload?upload_type=income&selected_type=Rent' is not a valid view function or pattern name.
+INFO 2025-12-09 12:22:00,079 Updated income 'Fuel' for Adewale Onikosi (20034): 89333 by Softlife
+INFO 2025-12-09 12:22:00,179 Created income 'Fuel' for Derick Adu (40013): 7893 by Softlife
+INFO 2025-12-09 12:32:38,864 Updated income 'Fuel' for Adewale Onikosi (20034): 1004 by Softlife
+INFO 2025-12-09 12:32:38,911 Updated income 'Fuel' for Derick Adu (40013): 789 by Softlife

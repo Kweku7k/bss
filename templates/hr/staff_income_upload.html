@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <div>
+        <h4 class="mb-3 fw-bold">📊 Bulk Upload - Income & Deduction</h4>
+
+        <div class="card-body mt-3">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message|linebreaks }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" id="uploadForm" class="col-md-6">
+                {% csrf_token %}
+                
+                <!-- Step 1: Select Upload Type -->
+                <div class="my-4">
+                    <label for="upload_type" class="form-label fw-bold">Step 1: Select Upload Type</label>
+                    <select name="upload_type" id="upload_type" class="form-select" required onchange="handleUploadTypeChange()">
+                        <option value="">-- Choose Upload Type --</option>
+                        <option value="income" {% if upload_type == 'income' %}selected{% endif %}>Income</option>
+                        <option value="deduction" {% if upload_type == 'deduction' %}selected{% endif %}>Deduction</option>
+                    </select>
+                    <small class="text-muted">Choose whether you want to upload Income or Deduction data.</small>
+                </div>
+
+                <!-- Step 2: Select Specific Type (shown after upload type is selected) -->
+                <div class="mb-4" id="type_selection" style="display: {% if upload_type %}block{% else %}none{% endif %};">
+                    <label for="selected_type" class="form-label fw-bold">Step 2: Select Specific Type</label>
+                    
+                    <!-- Income Types -->
+                    <div id="income_types_div" style="display: {% if upload_type == 'income' %}block{% else %}none{% endif %};">
+                        <select name="{% if upload_type == 'income' %}selected_type{% endif %}" id="selected_type_income" class="form-select" {% if upload_type != 'income' %}disabled{% endif %} onchange="handleTypeSelection()">
+                            <option value="">-- Choose Income Type --</option>
+                            <option value="Basic Salary" {% if upload_type == 'income' and selected_type == 'Basic Salary' %}selected{% endif %}>Basic Salary</option>
+                            {% for income_type in income_types %}
+                                <option value="{{ income_type.name }}" {% if upload_type == 'income' and selected_type == income_type.name %}selected{% endif %}>{{ income_type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Deduction Types -->
+                    <div id="deduction_types_div" style="display: {% if upload_type == 'deduction' %}block{% else %}none{% endif %};">
+                        <select name="{% if upload_type == 'deduction' %}selected_type{% endif %}" id="selected_type_deduction" class="form-select" {% if upload_type != 'deduction' %}disabled{% endif %} onchange="handleTypeSelection()">
+                            <option value="">-- Choose Deduction Type --</option>
+                            {% for deduction_type in deduction_types %}
+                                <option value="{{ deduction_type.name }}" {% if upload_type == 'deduction' and selected_type == deduction_type.name %}selected{% endif %}>{{ deduction_type.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <small class="text-muted">Select the specific income or deduction type you want to upload.</small>
+                </div>
+
+                <!-- Step 3: CSV Upload (shown after type is selected) -->
+                <div class="mb-4" id="csv_upload" style="display: {% if upload_type and selected_type %}block{% else %}none{% endif %};">
+                    <label for="csv_file" class="form-label fw-bold">Step 3: Upload CSV File</label>
+                    <input type="file" name="csv_file" id="csv_file" class="form-control" accept=".csv" required {% if not upload_type or not selected_type %}disabled{% endif %}>
+                    <small class="text-muted">Upload a CSV file with the required columns.</small>
+                    
+                    <!-- CSV Format Instructions -->
+                    <div class="mt-3 p-3 bg-light rounded">
+                        <h6 class="fw-bold">CSV Format Requirements:</h6>
+                        <p class="mb-2"><strong>Required Columns:</strong></p>
+                        <ul class="mb-2">
+                            <li><code>staffno</code> - Staff number (required)</li>
+                            <li><code>amount</code> - Amount value (required)</li>
+                        </ul>
+                        <p class="mb-2"><strong>Optional Columns:</strong></p>
+                        <ul class="mb-2">
+                            <li><code>activate_now</code> - Set to "true" or "false" (default: true)</li>
+                            <li><code>one_time_payment</code> - Set to "true" or "false" (default: false)</li>
+                        </ul>
+                        <p class="mb-0"><strong>Note:</strong> Column names are case-insensitive. For "Basic Salary" uploads, the amount will update the CompanyInformation salary field. For other types, records will be created/updated in StaffIncome or StaffDeduction models.</p>
+                    </div>
+                    
+                    <!-- Sample CSV Format -->
+                    <div class="mt-3">
+                        <h6 class="fw-bold">Sample CSV Format:</h6>
+                        <pre class="bg-dark text-white p-3 rounded"><code>staffno,amount,activate_now,one_time_payment
+50402,5000.00,true,false
+50403,4500.00,true,false
+50404,5500.00,false,true</code></pre>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success btn-md" id="submitBtn" {% if not upload_type or not selected_type %}disabled{% endif %}>
+                        <i class="bi bi-upload me-2"></i>Upload CSV
+                    </button>
+                    <a href="{% url 'staff-income-upload' %}" class="btn btn-secondary btn-md ms-2">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Reset
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleUploadTypeChange() {
+        const uploadType = document.getElementById('upload_type').value;
+        const typeSelection = document.getElementById('type_selection');
+        const incomeTypesDiv = document.getElementById('income_types_div');
+        const deductionTypesDiv = document.getElementById('deduction_types_div');
+        const csvUpload = document.getElementById('csv_upload');
+        const submitBtn = document.getElementById('submitBtn');
+        const incomeSelect = document.getElementById('selected_type_income');
+        const deductionSelect = document.getElementById('selected_type_deduction');
+        
+        if (uploadType) {
+            typeSelection.style.display = 'block';
+            
+            if (uploadType === 'income') {
+                incomeTypesDiv.style.display = 'block';
+                deductionTypesDiv.style.display = 'none';
+                incomeSelect.disabled = false;
+                incomeSelect.name = 'selected_type';
+                deductionSelect.disabled = true;
+                deductionSelect.name = '';
+                deductionSelect.value = '';
+            } else if (uploadType === 'deduction') {
+                incomeTypesDiv.style.display = 'none';
+                deductionTypesDiv.style.display = 'block';
+                incomeSelect.disabled = true;
+                incomeSelect.name = '';
+                incomeSelect.value = '';
+                deductionSelect.disabled = false;
+                deductionSelect.name = 'selected_type';
+            }
+        } else {
+            typeSelection.style.display = 'none';
+            incomeTypesDiv.style.display = 'none';
+            deductionTypesDiv.style.display = 'none';
+            incomeSelect.disabled = true;
+            incomeSelect.name = '';
+            deductionSelect.disabled = true;
+            deductionSelect.name = '';
+        }
+        
+        // Reset CSV upload section
+        csvUpload.style.display = 'none';
+        document.getElementById('csv_file').disabled = true;
+        document.getElementById('csv_file').value = '';
+        submitBtn.disabled = true;
+        
+        // Reset type selection
+        handleTypeSelection();
+    }
+    
+    function handleTypeSelection() {
+        const uploadType = document.getElementById('upload_type').value;
+        const csvUpload = document.getElementById('csv_upload');
+        const submitBtn = document.getElementById('submitBtn');
+        const csvFile = document.getElementById('csv_file');
+        
+        let selectedType = '';
+        const incomeSelect = document.getElementById('selected_type_income');
+        const deductionSelect = document.getElementById('selected_type_deduction');
+        
+        if (uploadType === 'income') {
+            selectedType = incomeSelect.value;
+            // Ensure only income select has the name attribute
+            incomeSelect.name = 'selected_type';
+            deductionSelect.name = '';
+        } else if (uploadType === 'deduction') {
+            selectedType = deductionSelect.value;
+            // Ensure only deduction select has the name attribute
+            deductionSelect.name = 'selected_type';
+            incomeSelect.name = '';
+        }
+        
+        if (selectedType) {
+            csvUpload.style.display = 'block';
+            csvFile.disabled = false;
+            submitBtn.disabled = false;
+        } else {
+            csvUpload.style.display = 'none';
+            csvFile.disabled = true;
+            csvFile.value = '';
+            submitBtn.disabled = true;
+        }
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        handleUploadTypeChange();
+        handleTypeSelection();
+    });
+</script>
+{% endblock %}
+
